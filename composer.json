@@ -22,11 +22,12 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0"
+        "craftcms/cms": "^3.0.0",
+        "lilt/lilt-connector-sdk-php": "dev-main"
     },
     "require-dev": {
       "craftcms/cms": "^3.2.0",
-      "codeception/codeception": "^3.0",
+      "codeception/codeception": "^3.0 | ^4.0",
       "vlucas/phpdotenv": "^3.0"
     },
     "autoload": {
@@ -35,12 +36,24 @@
         }
     },
     "extra": {
-        "name": "craft-lilt-plugin",
+        "name": "Lilt",
         "handle": "craft-lilt-plugin",
         "developer": "Lilt Devs",
         "developerUrl": "https://github.com/lilt",
         "documentationUrl": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/blob/master/README.md",
         "changelogUrl": "https://raw.githubusercontent.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/master/CHANGELOG.md",
         "class": "lilthq\\craftliltplugin\\Craftliltplugin"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git@github.com:lilt/lilt-connector-sdk-php.git"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
     }
 }
