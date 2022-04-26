@@ -14,9 +14,16 @@ use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
 use craft\web\UrlManager;
+use GuzzleHttp\Client;
+use LiltConnectorSDK\Api\JobsApi;
+use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
 use lilthq\craftliltplugin\services\order\CreateOrderHandler;
+use lilthq\craftliltplugin\services\provider\LiltConfigurationProvider;
+use lilthq\craftliltplugin\services\repository\external\LiltJobRepository;
+use lilthq\craftliltplugin\services\repository\external\LiltFileRepository;
 use yii\base\Event;
+use yii\base\InvalidConfigException;
 
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
@@ -32,6 +39,11 @@ use yii\base\Event;
  * @package   Craftliltplugin
  * @since     1.0.0
  *
+ * @property LiltJobRepository $liltJobRepository
+ * @property LiltConfigurationProvider $liltConfigurationProvider
+ * @property LiltFileRepository $liltJobsFileRepository
+ * @property Configuration $liltApiConfig
+ * @property JobsApi $liltJobsApi
  */
 class Craftliltplugin extends Plugin
 {
@@ -68,7 +80,12 @@ class Craftliltplugin extends Plugin
      *
      * @var bool
      */
-    public $hasCpSection = false;
+    public $hasCpSection = true;
+
+    /**
+     * @var string|null
+     */
+    private $connectorKey = null;
 
     // Public Methods
     // =========================================================================
@@ -83,17 +100,17 @@ class Craftliltplugin extends Plugin
      * If you have a '/vendor/autoload.php' file, it will be loaded for you automatically;
      * you do not need to load it in your init() method.
      *
+     * @throws InvalidConfigException
      */
     public function init()
     {
         parent::init();
         self::$plugin = $this;
 
-        Craft::$app->getView()->registerAssetBundle(CraftLiltPluginAsset::class);
+        $this->connectorKey = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
 
-        $this->setComponents([
-            'createOrderHandler' => CreateOrderHandler::class,
-        ]);
+        Craft::$app->getView()->registerAssetBundle(CraftLiltPluginAsset::class);
+        $this->loadComponents();
 
         Event::on(
             UrlManager::class,
@@ -111,15 +128,6 @@ class Craftliltplugin extends Plugin
             ),
             __METHOD__
         );
-
-        /*
-        Craft::$app->view->hook('cp.entries.edit.settings', function(&$context) {
-            $entry = $context['entry'];
-            if ($entry->sectionId == 1) {
-                $url = UrlHelper::url('some/path/'.$entry->id);
-                return '<a href="'.$url.'" class="btn">My Button!</a>';
-            }
-        }); */
     }
 
     /**
@@ -154,6 +162,51 @@ class Craftliltplugin extends Plugin
         return $navItem;
     }
 
-    // Protected Methods
-    // =========================================================================
+    /**
+     * @return string|null
+     */
+    public function getConnectorKey(): ?string
+    {
+        return $this->connectorKey;
+    }
+
+    /**
+     * @throws InvalidConfigException
+     */
+    private function loadComponents(): void
+    {
+        $this->setComponents([
+            'createOrderHandler' => CreateOrderHandler::class,
+            'liltConfigurationProvider' => LiltConfigurationProvider::class,
+        ]);
+
+        $this->set(
+            'liltApiConfig',
+            $this->liltConfigurationProvider->provide()
+        );
+
+        $this->set(
+            'liltJobsApi',
+            function() {
+                return new JobsApi(
+                    new Client(),
+                    $this->liltApiConfig
+                );
+            }
+        );
+
+        $this->set(
+            'liltJobRepository', [
+                'class' => LiltJobRepository::class,
+                'apiInstance' => $this->liltJobsApi,
+            ]
+        );
+
+        $this->set(
+            'liltJobsFileRepository', [
+                'class' => LiltFileRepository::class,
+                'apiInstance' => $this->liltJobsApi,
+            ]
+        );
+    }
 }
