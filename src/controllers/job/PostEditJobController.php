@@ -11,11 +11,12 @@ namespace lilthq\craftliltplugin\controllers\job;
 use Craft;
 use craft\errors\MissingComponentException;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\services\job\CreateJobCommand;
+use lilthq\craftliltplugin\services\job\EditJobCommand;
+use RuntimeException;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
-class PostCreateJobController extends AbstractJobController
+class PostEditJobController extends AbstractJobController
 {
     protected $allowAnonymous = false;
 
@@ -34,12 +35,17 @@ class PostCreateJobController extends AbstractJobController
         $job = $this->getJobModel();
         $job->validate();
 
+        if (!$job->id) {
+            throw new RuntimeException('Job id cant be empty');
+        }
+
         if($job->hasErrors())
         {
             return $this->renderJobForm($job);
         }
 
-        $command = new CreateJobCommand(
+        $command = new EditJobCommand(
+            $job->id,
             $job->title,
             $job->elementIds,
             $job->targetSiteIds,
@@ -47,7 +53,7 @@ class PostCreateJobController extends AbstractJobController
             $job->dueDate
         );
 
-        Craftliltplugin::getInstance()->createJobHandler->__invoke(
+        Craftliltplugin::getInstance()->editJobHandler->__invoke(
             $command
         );
 
@@ -55,7 +61,7 @@ class PostCreateJobController extends AbstractJobController
 
         Craft::$app->getSession()->setFlash(
             'cp-notice',
-            'Translate job created successfully.'
+            'Translate job saved successfully.'
         );
 
         return $this->redirect('admin/craft-lilt-plugin/jobs');

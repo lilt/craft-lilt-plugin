@@ -1,22 +1,27 @@
 <?php
+/**
+ * craft-lilt-plugin plugin for Craft CMS 3.x
+ *
+ * The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.
+ *
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
 
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
-use craft\elements\Entry;
-use craft\web\Controller;
-use lilthq\craftliltplugin\assets\JobCreateAsset;
+use yii\base\InvalidConfigException;
 use yii\web\Response;
 
-class GetJobCreateFormController extends Controller
+class GetJobCreateFormController extends AbstractJobController
 {
     protected $allowAnonymous = false;
 
     /**
-     * @throws \yii\base\InvalidConfigException
-     * @throws \craft\errors\MissingComponentException
+     * @throws InvalidConfigException
      */
     public function actionInvoke(): Response
     {
@@ -26,29 +31,6 @@ class GetJobCreateFormController extends Controller
             return (new Response())->setStatusCode(405);
         }
 
-        Craft::$app->getView()->registerAssetBundle(JobCreateAsset::class);
-
-        $availableSites = Craft::$app->getSites()->getAllSites();
-        $targetLanguages = [];
-        foreach ($availableSites as $availableSite) {
-            $targetLanguages[$availableSite->language] = $availableSite->language;
-        }
-
-        $availableSites = [];
-        foreach (Craft::$app->getSites()->getAllSites() as $site) {
-            $availableSites[] = [
-                'value' => $site->id,
-                'label' => $site->name . '(' . $site->language . ')'
-            ];
-        }
-
-        return $this->renderTemplate(
-            'craft-lilt-plugin/job/create.twig',
-            [
-                'availableSites' => $availableSites,
-                'targetSites' => $targetLanguages,
-                'element' => Entry::findOne(['id' => 68])
-            ]
-        );
+        return $this->renderJobForm();
     }
 }

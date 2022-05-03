@@ -1,59 +1,61 @@
 {
-    "name": "lilthq/craft-lilt-plugin",
-    "description": "The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.",
-    "type": "craft-plugin",
-    "version": "1.0.0",
-    "keywords": [
-        "craft",
-        "cms",
-        "craftcms",
-        "craft-plugin",
-        "craft-lilt-plugin"
-    ],
-    "support": {
-        "docs": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/blob/master/README.md",
-        "issues": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/issues"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Lilt Devs",
-            "homepage": "https://github.com/lilt"
-        }
-    ],
-    "require": {
-        "craftcms/cms": "^3.0.0",
-        "lilt/lilt-connector-sdk-php": "dev-main"
-    },
-    "require-dev": {
-      "craftcms/cms": "^3.2.0",
-      "codeception/codeception": "^3.0 | ^4.0",
-      "vlucas/phpdotenv": "^3.0"
-    },
-    "autoload": {
-        "psr-4": {
-          "lilthq\\craftliltplugin\\": "src/"
-        }
-    },
-    "extra": {
-        "name": "Lilt",
-        "handle": "craft-lilt-plugin",
-        "developer": "Lilt Devs",
-        "developerUrl": "https://github.com/lilt",
-        "documentationUrl": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/blob/master/README.md",
-        "changelogUrl": "https://raw.githubusercontent.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/master/CHANGELOG.md",
-        "class": "lilthq\\craftliltplugin\\Craftliltplugin"
-    },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "git@github.com:lilt/lilt-connector-sdk-php.git"
-        }
-    ],
-    "config": {
-        "allow-plugins": {
-            "yiisoft/yii2-composer": true,
-            "craftcms/plugin-installer": true
-        }
+  "name": "lilthq/craft-lilt-plugin",
+  "description": "The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.",
+  "type": "craft-plugin",
+  "version": "1.0.0",
+  "keywords": [
+    "craft",
+    "cms",
+    "craftcms",
+    "craft-plugin",
+    "craft-lilt-plugin"
+  ],
+  "support": {
+    "docs": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/blob/master/README.md",
+    "issues": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/issues"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Lilt Devs",
+      "homepage": "https://github.com/lilt"
     }
+  ],
+  "require": {
+    "craftcms/cms": "^3.0.0",
+    "lilt/lilt-connector-sdk-php": "dev-main",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "craftcms/cms": "^3.2.0",
+    "codeception/codeception": "^3.0 | ^4.0",
+    "vlucas/phpdotenv": "^3.0",
+    "squizlabs/php_codesniffer": "^3.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "lilthq\\craftliltplugin\\": "src/"
+    }
+  },
+  "extra": {
+    "name": "Lilt",
+    "handle": "craft-lilt-plugin",
+    "developer": "Lilt Devs",
+    "developerUrl": "https://github.com/lilt",
+    "documentationUrl": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/blob/master/README.md",
+    "changelogUrl": "https://raw.githubusercontent.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/master/CHANGELOG.md",
+    "class": "lilthq\\craftliltplugin\\Craftliltplugin"
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "git@github.com:lilt/lilt-connector-sdk-php.git"
+    }
+  ],
+  "config": {
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  }
 }

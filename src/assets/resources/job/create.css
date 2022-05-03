@@ -1,0 +1,19 @@
+#entries-to-translate-field #entries-to-translate
+{
+    box-shadow: none;
+}
+
+#targetSiteIds-field input.checkbox.disabled+label:before
+{
+    content: "";
+}
+
+#status-value > span.status.blue {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0.25;
+    }
+}

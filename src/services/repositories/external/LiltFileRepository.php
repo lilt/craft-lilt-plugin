@@ -1,15 +1,16 @@
 <?php
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\repository\external;
+namespace lilthq\craftliltplugin\services\repositories\external;
 
 use Craft;
 use DateTimeInterface;
 use Exception;
-use GuzzleHttp\Client;
-use LiltConnectorSDK\Api\JobsApi;
-use lilthq\craftliltplugin\Craftliltplugin;
 
 class LiltFileRepository extends AbstractRepository
 {
@@ -17,15 +18,15 @@ class LiltFileRepository extends AbstractRepository
         int $jobId,
         string $fileName,
         string $filePath,
+        string $sourceLanguage,
         array $targetLanguages,
         DateTimeInterface $dueDate
     ): bool {
-        $configuration = Craftliltplugin::getInstance()->liltConfigurationProvider->provide();
-
         try {
             $this->apiInstance->servicesApiJobsAddFile(
                 $jobId,
                 $fileName,
+                $sourceLanguage,
                 $targetLanguages,
                 $dueDate,
                 $filePath

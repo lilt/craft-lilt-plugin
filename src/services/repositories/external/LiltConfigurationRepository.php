@@ -1,15 +1,19 @@
 <?php
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\provider;
+namespace lilthq\craftliltplugin\services\repositories\external;
 
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\Craftliltplugin;
 
-class LiltConfigurationProvider
+class LiltConfigurationRepository
 {
-    public function provide(): Configuration
+    public function get(): Configuration
     {
         $config = Configuration::getDefaultConfiguration();
 

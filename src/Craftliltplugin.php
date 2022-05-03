@@ -16,14 +16,27 @@ use craft\events\RegisterUrlRulesEvent;
 use craft\web\UrlManager;
 use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
+use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
-use lilthq\craftliltplugin\services\order\CreateOrderHandler;
-use lilthq\craftliltplugin\services\provider\LiltConfigurationProvider;
-use lilthq\craftliltplugin\services\repository\external\LiltJobRepository;
-use lilthq\craftliltplugin\services\repository\external\LiltFileRepository;
+use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\services\job\CreateJobHandler;
+use lilthq\craftliltplugin\services\job\EditJobHandler;
+use lilthq\craftliltplugin\services\job\lilt\SendJobToLiltConnectorHandler;
+use lilthq\craftliltplugin\services\job\lilt\SyncJobFromLiltConnectorHandler;
+use lilthq\craftliltplugin\services\mappers\LanguageMapper;
+use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
+use lilthq\craftliltplugin\services\providers\ExpandedContentProvider;
+use lilthq\craftliltplugin\services\providers\LiltConfigurationProvider;
+use lilthq\craftliltplugin\services\repositories\external\LiltFileRepository;
+use lilthq\craftliltplugin\services\repositories\external\LiltJobRepository;
+use lilthq\craftliltplugin\services\repositories\external\LiltTranslationRepository;
+use lilthq\craftliltplugin\services\repositories\JobRepository;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
+use craft\events\RegisterComponentTypesEvent;
+use craft\services\Elements;
 
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
@@ -40,10 +53,20 @@ use yii\base\InvalidConfigException;
  * @since     1.0.0
  *
  * @property LiltJobRepository $liltJobRepository
+ * @property LiltTranslationRepository $liltTranslationRepository
+ * @property JobRepository $jobRepository
  * @property LiltConfigurationProvider $liltConfigurationProvider
  * @property LiltFileRepository $liltJobsFileRepository
+ * @property CreateJobHandler $createJobHandler
+ * @property EditJobHandler $editJobHandler
+ * @property SendJobToLiltConnectorHandler $sendJobToLiltConnectorHandler
+ * @property SyncJobFromLiltConnectorHandler $syncJobFromLiltConnectorHandler
  * @property Configuration $liltApiConfig
  * @property JobsApi $liltJobsApi
+ * @property TranslationsApi $liltTranslationsApi
+ * @property LanguageMapper $languageMapper
+ * @property ElementTranslatableContentProvider $elementTranslatableContentProvider
+ * @property ExpandedContentProvider $expandedContentProvider
  */
 class Craftliltplugin extends Plugin
 {
@@ -116,7 +139,21 @@ class Craftliltplugin extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['lilt/orders/invoke'] = 'craft-lilt-plugin/order/invoke';
+                $event->rules['POST ' . CraftliltpluginParameters::JOB_CREATE_PATH] = 'craft-lilt-plugin/job/post-create-job/invoke';
+                $event->rules['GET craft-lilt-plugin/job/create'] = 'craft-lilt-plugin/job/get-job-create-form/invoke';
+                $event->rules['GET ' . CraftliltpluginParameters::JOB_EDIT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-job-edit-form/invoke';
+                $event->rules['POST ' . CraftliltpluginParameters::JOB_EDIT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/post-edit-job/invoke';
+                $event->rules['GET ' . CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-send-to-lilt/invoke';
+                $event->rules['GET ' . CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-sync-from-lilt/invoke';
+                $event->rules['GET craft-lilt-plugin'] = 'craft-lilt-plugin/index/index';
+            }
+        );
+
+        Event::on(
+            Elements::class,
+            Elements::EVENT_REGISTER_ELEMENT_TYPES,
+            function (RegisterComponentTypesEvent $event) {
+                $event->types[] = Job::class;
             }
         );
 
@@ -138,20 +175,8 @@ class Craftliltplugin extends Plugin
         $navItem = parent::getCpNavItem();
         $navItem['subnav'] = [
             [
-                'label' => 'Dashboard',
-                'url' => 'craft-lilt-plugin',
-            ],
-            [
-                'label' => 'Orders',
-                'url' => 'craft-lilt-plugin/orders',
-            ],
-            [
-                'label' => 'Translators',
-                'url' => 'craft-lilt-plugin/translators',
-            ],
-            [
-                'label' => 'Static Translations',
-                'url' => 'craft-lilt-plugin/static-translations',
+                'label' => 'Jobs',
+                'url' => 'craft-lilt-plugin/jobs',
             ],
             [
                 'label' => 'Settings',
@@ -176,8 +201,14 @@ class Craftliltplugin extends Plugin
     private function loadComponents(): void
     {
         $this->setComponents([
-            'createOrderHandler' => CreateOrderHandler::class,
+            'createJobHandler' => CreateJobHandler::class,
+            'sendJobToLiltConnectorHandler' => SendJobToLiltConnectorHandler::class,
+            'syncJobFromLiltConnectorHandler' => SyncJobFromLiltConnectorHandler::class,
             'liltConfigurationProvider' => LiltConfigurationProvider::class,
+            'elementTranslatableContentProvider' => ElementTranslatableContentProvider::class,
+            'expandedContentProvider' => ExpandedContentProvider::class,
+            'languageMapper' => LanguageMapper::class,
+            'jobRepository' => JobRepository::class,
         ]);
 
         $this->set(
@@ -187,7 +218,7 @@ class Craftliltplugin extends Plugin
 
         $this->set(
             'liltJobsApi',
-            function() {
+            function () {
                 return new JobsApi(
                     new Client(),
                     $this->liltApiConfig
@@ -196,6 +227,17 @@ class Craftliltplugin extends Plugin
         );
 
         $this->set(
+            'liltTranslationsApi',
+            function () {
+                return new TranslationsApi(
+                    new Client(),
+                    $this->liltApiConfig
+                );
+            }
+        );
+
+        //TODO: proper naming
+        $this->set(
             'liltJobRepository', [
                 'class' => LiltJobRepository::class,
                 'apiInstance' => $this->liltJobsApi,
@@ -203,9 +245,23 @@ class Craftliltplugin extends Plugin
         );
 
         $this->set(
+            'liltTranslationRepository', [
+                'class' => LiltTranslationRepository::class,
+                'apiInstance' => $this->liltTranslationsApi,
+            ]
+        );
+
+        $this->set(
             'liltJobsFileRepository', [
                 'class' => LiltFileRepository::class,
                 'apiInstance' => $this->liltJobsApi,
+            ]
+        );
+
+        $this->set(
+            'editJobHandler', [
+                'class' => EditJobHandler::class,
+                'jobRepository' => $this->jobRepository,
             ]
         );
     }

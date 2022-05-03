@@ -1,0 +1,15 @@
+{% import '_includes/forms' as forms %}
+
+{% block settings %}
+    {{ forms.elementSelectField({
+        status: element.getAttributeStatus('authorId'),
+        label: "Author"|t('app'),
+        id: 'author',
+        name: 'author',
+        elementType: userElementType,
+        selectionLabel: "Choose"|t('app'),
+        criteria: authorOptionCriteria,
+        limit: 1,
+        elements: (author is defined and author ? [author]),
+    }) }}
+{% endblock %}
