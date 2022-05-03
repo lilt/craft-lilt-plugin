@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -48,7 +49,7 @@ class ExpandedTranslatable extends ElementExporter
                 foreach ($fieldLayout->getFields() as $field) {
                     $isTranslatable = $field->getIsTranslatable($element);
 
-                    if($isTranslatable) {
+                    if ($isTranslatable) {
                         $value = $element->getFieldValue($field->handle);
                         $elementArr[$field->handle] = $field->serializeValue($value, $element);
                     }
@@ -64,8 +65,7 @@ class ExpandedTranslatable extends ElementExporter
     {
         $fields = [];
         if ($element instanceof Entry) {
-            if($element->getIsTitleTranslatable())
-            {
+            if ($element->getIsTitleTranslatable()) {
                 $fields[] = 'title';
             }
             $fields[] = 'slug';

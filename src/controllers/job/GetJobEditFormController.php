@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -49,7 +50,7 @@ class GetJobEditFormController extends AbstractJobController
             );
             $jobRecord = JobRecord::findOne(['id' => $job->getId()]);
 
-            if($jobRecord === null) {
+            if ($jobRecord === null) {
                 return (new Response())->setStatusCode(404);
             }
 

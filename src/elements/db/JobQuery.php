@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -48,7 +49,7 @@ class JobQuery extends ElementQuery
         if ($this->status) {
             if (is_array($this->status)) {
                 $this->subQuery->andWhere(['in', 'lilt_jobs.status', $this->status]);
-            } else if ($this->status !== '*') {
+            } elseif ($this->status !== '*') {
                 $this->subQuery->andWhere('lilt_jobs.status = :status', [':status' => $this->status]);
             }
         }

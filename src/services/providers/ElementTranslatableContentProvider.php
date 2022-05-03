@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -50,7 +51,7 @@ class ElementTranslatableContentProvider
         foreach ($fields as $field) {
             $fieldData = Craft::$app->fields->getFieldById((int)$field->id);
 
-            if($fieldData === null) {
+            if ($fieldData === null) {
                 //TODO: log issue
                 continue;
             }

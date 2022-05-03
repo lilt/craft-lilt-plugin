@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -12,5 +13,4 @@ use RuntimeException;
 
 class JobNotFoundException extends RuntimeException
 {
-
 }

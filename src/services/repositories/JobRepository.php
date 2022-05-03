@@ -19,7 +19,7 @@ class JobRepository
         $jobRecord = new JobRecord();
         $jobRecord->setAttributes($job->getAttributes(), false);
         $jobRecord->save();
-        
+
         return true;
     }
 }

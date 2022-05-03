@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -45,7 +46,7 @@ class SendJobToLiltConnectorHandler
         foreach ($elementIdsToTranslate as $entry) {
             $element = Craft::$app->elements->getElementById($entry, null, $job->sourceSiteId);
 
-            if(!$element) {
+            if (!$element) {
                 //TODO: handle
                 continue;
             }

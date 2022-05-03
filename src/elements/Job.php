@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -84,11 +85,11 @@ class Job extends Element
 
     public function getElementIds(): array
     {
-        if(empty($this->elementIds)) {
+        if (empty($this->elementIds)) {
             return [];
         }
 
-        if(is_array($this->elementIds)) {
+        if (is_array($this->elementIds)) {
             return $this->elementIds;
         }
 
@@ -268,11 +269,11 @@ class Job extends Element
 
     public function getTargetSiteIds(): array
     {
-        if($this->targetSiteIds === null) {
+        if ($this->targetSiteIds === null) {
             return [];
         }
 
-        if(is_array($this->targetSiteIds)) {
+        if (is_array($this->targetSiteIds)) {
             return $this->targetSiteIds;
         }
 

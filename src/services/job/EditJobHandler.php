@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -29,7 +30,7 @@ class EditJobHandler
         );
         $jobRecord = JobRecord::findOne(['id' => $command->getJobId()]);
 
-        if(!$job || !$jobRecord) {
+        if (!$job || !$jobRecord) {
             Craft::error(
                 sprintf('Job with id %d not found', $command->getJobId())
             );
@@ -61,7 +62,7 @@ class EditJobHandler
 
         $status = $jobRecord->save();
 
-        if(!$status || !$statusElement) {
+        if (!$status || !$statusElement) {
             throw new RuntimeException("Cant edit the job");
         }
     }

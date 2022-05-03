@@ -1,4 +1,5 @@
 <?php
+
 /**
  * craft-lilt-plugin plugin for Craft CMS 3.x
  *
@@ -238,28 +239,32 @@ class Craftliltplugin extends Plugin
 
         //TODO: proper naming
         $this->set(
-            'liltJobRepository', [
+            'liltJobRepository',
+            [
                 'class' => LiltJobRepository::class,
                 'apiInstance' => $this->liltJobsApi,
             ]
         );
 
         $this->set(
-            'liltTranslationRepository', [
+            'liltTranslationRepository',
+            [
                 'class' => LiltTranslationRepository::class,
                 'apiInstance' => $this->liltTranslationsApi,
             ]
         );
 
         $this->set(
-            'liltJobsFileRepository', [
+            'liltJobsFileRepository',
+            [
                 'class' => LiltFileRepository::class,
                 'apiInstance' => $this->liltJobsApi,
             ]
         );
 
         $this->set(
-            'editJobHandler', [
+            'editJobHandler',
+            [
                 'class' => EditJobHandler::class,
                 'jobRepository' => $this->jobRepository,
             ]

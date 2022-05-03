@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -52,7 +53,7 @@ class CreateJobHandler
         $status = $jobRecord->save();
 
 
-        if(!$status || !$statusElement) {
+        if (!$status || !$statusElement) {
             throw new RuntimeException("Cant create the job");
         }
     }

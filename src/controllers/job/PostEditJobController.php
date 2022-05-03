@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link      https://github.com/lilt
  * @copyright Copyright (c) 2022 Lilt Devs
@@ -39,8 +40,7 @@ class PostEditJobController extends AbstractJobController
             throw new RuntimeException('Job id cant be empty');
         }
 
-        if($job->hasErrors())
-        {
+        if ($job->hasErrors()) {
             return $this->renderJobForm($job);
         }
 
