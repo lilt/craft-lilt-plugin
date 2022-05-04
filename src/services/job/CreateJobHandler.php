@@ -22,7 +22,7 @@ class CreateJobHandler
         $element = new Job();
         $element->title = $command->getTitle();
         $element->liltJobId = null;
-        $element->status = 'new';
+        $element->status = Job::STATUS_NEW;
         $element->sourceSiteId = $command->getSourceSiteId();
 
         $element->sourceSiteLanguage = Craftliltplugin::getInstance()
@@ -47,7 +47,7 @@ class CreateJobHandler
             true
         );
 
-        #TODO: rethink this, what if we use separate id for elemnts table and separate for job record
+        #TODO: rethink this, what if we use separate id for elements table and separate for job record
         $jobRecord->id = $element->id;
 
         $status = $jobRecord->save();

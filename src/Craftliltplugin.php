@@ -22,6 +22,7 @@ use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\job\CreateJobHandler;
 use lilthq\craftliltplugin\services\job\EditJobHandler;
 use lilthq\craftliltplugin\services\job\lilt\SendJobToLiltConnectorHandler;
@@ -29,10 +30,10 @@ use lilthq\craftliltplugin\services\job\lilt\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\ExpandedContentProvider;
-use lilthq\craftliltplugin\services\providers\LiltConfigurationProvider;
-use lilthq\craftliltplugin\services\repositories\external\LiltFileRepository;
-use lilthq\craftliltplugin\services\repositories\external\LiltJobRepository;
-use lilthq\craftliltplugin\services\repositories\external\LiltTranslationRepository;
+use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
+use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
+use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
+use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
@@ -53,21 +54,22 @@ use craft\services\Elements;
  * @package   Craftliltplugin
  * @since     1.0.0
  *
- * @property LiltJobRepository $liltJobRepository
- * @property LiltTranslationRepository $liltTranslationRepository
+ * @property ConnectorJobRepository $connectorJobRepository
+ * @property ConnectorTranslationRepository $connectorTranslationRepository
  * @property JobRepository $jobRepository
- * @property LiltConfigurationProvider $liltConfigurationProvider
- * @property LiltFileRepository $liltJobsFileRepository
+ * @property ConnectorConfigurationProvider $connectorConfigurationProvider
+ * @property ConnectorJobFileRepository $connectorJobsFileRepository
  * @property CreateJobHandler $createJobHandler
  * @property EditJobHandler $editJobHandler
  * @property SendJobToLiltConnectorHandler $sendJobToLiltConnectorHandler
  * @property SyncJobFromLiltConnectorHandler $syncJobFromLiltConnectorHandler
- * @property Configuration $liltApiConfig
- * @property JobsApi $liltJobsApi
- * @property TranslationsApi $liltTranslationsApi
+ * @property Configuration $connectorConfiguration
+ * @property JobsApi $connectorJobsApi
+ * @property TranslationsApi $connectorTranslationsApi
  * @property LanguageMapper $languageMapper
  * @property ElementTranslatableContentProvider $elementTranslatableContentProvider
  * @property ExpandedContentProvider $expandedContentProvider
+ * @property ElementTranslatableContentApplier $elementTranslatableContentApplier
  */
 class Craftliltplugin extends Plugin
 {
@@ -126,7 +128,7 @@ class Craftliltplugin extends Plugin
      *
      * @throws InvalidConfigException
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
         self::$plugin = $this;
@@ -171,7 +173,7 @@ class Craftliltplugin extends Plugin
     /**
      * @inheritdoc
      */
-    public function getCpNavItem()
+    public function getCpNavItem(): array
     {
         $navItem = parent::getCpNavItem();
         $navItem['subnav'] = [
@@ -205,7 +207,7 @@ class Craftliltplugin extends Plugin
             'createJobHandler' => CreateJobHandler::class,
             'sendJobToLiltConnectorHandler' => SendJobToLiltConnectorHandler::class,
             'syncJobFromLiltConnectorHandler' => SyncJobFromLiltConnectorHandler::class,
-            'liltConfigurationProvider' => LiltConfigurationProvider::class,
+            'connectorConfigurationProvider' => ConnectorConfigurationProvider::class,
             'elementTranslatableContentProvider' => ElementTranslatableContentProvider::class,
             'expandedContentProvider' => ExpandedContentProvider::class,
             'languageMapper' => LanguageMapper::class,
@@ -213,52 +215,59 @@ class Craftliltplugin extends Plugin
         ]);
 
         $this->set(
-            'liltApiConfig',
-            $this->liltConfigurationProvider->provide()
+            'connectorConfiguration',
+            $this->connectorConfigurationProvider->provide()
         );
 
         $this->set(
-            'liltJobsApi',
+            'connectorJobsApi',
             function () {
                 return new JobsApi(
                     new Client(),
-                    $this->liltApiConfig
+                    $this->connectorConfiguration
                 );
             }
         );
 
         $this->set(
-            'liltTranslationsApi',
+            'connectorTranslationsApi',
             function () {
                 return new TranslationsApi(
                     new Client(),
-                    $this->liltApiConfig
+                    $this->connectorConfiguration
                 );
             }
         );
 
-        //TODO: proper naming
         $this->set(
-            'liltJobRepository',
+            'connectorJobRepository',
             [
-                'class' => LiltJobRepository::class,
-                'apiInstance' => $this->liltJobsApi,
+                'class' => ConnectorJobRepository::class,
+                'apiInstance' => $this->connectorJobsApi,
             ]
         );
 
         $this->set(
-            'liltTranslationRepository',
+            'elementTranslatableContentApplier',
             [
-                'class' => LiltTranslationRepository::class,
-                'apiInstance' => $this->liltTranslationsApi,
+                'class' => ElementTranslatableContentApplier::class,
+                'draftRepository' => Craft::$app->getDrafts(),
             ]
         );
 
         $this->set(
-            'liltJobsFileRepository',
+            'connectorTranslationRepository',
             [
-                'class' => LiltFileRepository::class,
-                'apiInstance' => $this->liltJobsApi,
+                'class' => ConnectorTranslationRepository::class,
+                'apiInstance' => $this->connectorTranslationsApi,
+            ]
+        );
+
+        $this->set(
+            'connectorJobsFileRepository',
+            [
+                'class' => ConnectorJobFileRepository::class,
+                'apiInstance' => $this->connectorJobsApi,
             ]
         );
 

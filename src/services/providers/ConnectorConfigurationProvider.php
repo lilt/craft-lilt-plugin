@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\repositories\external;
+namespace lilthq\craftliltplugin\services\providers;
 
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\Craftliltplugin;
 
-class LiltConfigurationRepository
+class ConnectorConfigurationProvider
 {
-    public function get(): Configuration
+    public function provide(): Configuration
     {
         $config = Configuration::getDefaultConfiguration();
 

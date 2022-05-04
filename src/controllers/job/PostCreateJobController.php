@@ -36,6 +36,11 @@ class PostCreateJobController extends AbstractJobController
         $job->validate();
 
         if ($job->hasErrors()) {
+            Craft::$app->getSession()->setFlash(
+                'cp-error',
+                'Couldn’t create job.'
+            );
+
             return $this->renderJobForm($job);
         }
 

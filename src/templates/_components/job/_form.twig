@@ -76,7 +76,7 @@
                 } %}
             </div>
             <div class="main">
-                <div class="elements"></div>
+                <div class="elements {{isJobInProgress ? 'disabled' : ''}}"></div>
             </div>
 
             <div id="toolbar-element-index" class="flex flex-nowrap"></div>
@@ -91,7 +91,7 @@
                     <button type="button" class="btn add icon dashed addAnEntry">{{ 'Add an entry'|t }}</button>
                 {% endif %}
             </div>
-            <div id="entries-remove-action" class="btn" style="visibility: hidden;float:right">
+            <div id="entries-remove-action" class="btn submit" style="visibility: hidden;float:right">
                 Remove
             </div>
         </div>

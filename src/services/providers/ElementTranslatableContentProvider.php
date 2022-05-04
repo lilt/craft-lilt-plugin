@@ -28,9 +28,7 @@ class ElementTranslatableContentProvider
     {
         $content = [];
 
-        $elementKey = get_class($element)
-            . '.' . $element->getId()
-            . (!empty($element->handle) ? '.' . $element->handle : '');
+        $elementKey = $element->getId();
 
         if (!empty($element->title) && $element->getIsTitleTranslatable()) {
             $content['title'] = $element->title;
@@ -56,12 +54,12 @@ class ElementTranslatableContentProvider
                 continue;
             }
 
-            $fieldDataKey = get_class($fieldData) . '.' . $fieldData->id . '.' . $fieldData->handle;
+            $fieldDataKey = $fieldData->handle;
 
-            $content[$fieldDataKey]['content'] = null;
+            $content[$fieldDataKey] = null;
 
             if ($fieldData instanceof PlainText && $fieldData->getIsTranslatable($element)) {
-                $content[$fieldDataKey]['content'] = $element->getFieldValue($fieldData->handle);
+                $content[$fieldDataKey] = $element->getFieldValue($fieldData->handle);
 
                 continue;
             }
@@ -71,7 +69,9 @@ class ElementTranslatableContentProvider
                  * @var RedactorPluginFieldData $redactorFieldData
                  */
                 $redactorFieldData = $element->getFieldValue($fieldData->handle);
-                $content[$fieldDataKey]['content'] = $redactorFieldData->getRawContent();
+                $content[$fieldDataKey] = $redactorFieldData->getRawContent();
+
+                continue;
             }
 
             if ($fieldData instanceof Matrix) {
@@ -85,13 +85,18 @@ class ElementTranslatableContentProvider
                  */
                 $blockElements = $matrixBlockQuery->all();
                 $blocksContent = [];
+
                 foreach ($blockElements as $blockElement) {
-                    $blocksContent[] = $this->provide($blockElement);
+                    $blockId = $blockElement->getId();
+                    $blocksContent[$blockId]['fields'] = $this->provide($blockElement)[$blockId];
                 }
-                $content[$fieldDataKey]['content'] = ['blocks' => $blocksContent];
+
+                $content[$fieldDataKey] = $blocksContent;
+
+                continue;
             }
 
-            if ($content[$fieldDataKey]['content'] === null) {
+            if ($content[$fieldDataKey] === null) {
                 unset($content[$fieldDataKey]);
             }
         }

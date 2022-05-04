@@ -10,14 +10,14 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\SettingsResponse;
 
-class LiltJobRepository extends AbstractRepository
+class ConnectorJobRepository extends AbstractConnectorExternalRepository
 {
     /**
      * @throws ApiException
      */
     public function create(
         string $projectNameTemplate = 'CraftCMS | {today}',
-        string $liltTranslationWorkflow = SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED,
+        string $liltTranslationWorkflow = SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
         string $projectPrefix = ''
     ): JobResponse {
         $settings_response = new SettingsResponse();

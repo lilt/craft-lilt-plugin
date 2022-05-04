@@ -45,7 +45,7 @@ class GetJobEditFormController extends AbstractJobController
 
         //TODO: move to separate class, maybe post request from FE
         if ($job->liltJobId !== null) {
-            $liltJob = Craftliltplugin::getInstance()->liltJobRepository->findOneById(
+            $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
                 (int)$job->liltJobId
             );
             $jobRecord = JobRecord::findOne(['id' => $job->getId()]);

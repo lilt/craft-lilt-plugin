@@ -12,7 +12,7 @@ namespace lilthq\craftliltplugin\services\repositories\external;
 use LiltConnectorSDK\Api\JobsApi;
 use LiltConnectorSDK\Api\TranslationsApi;
 
-class AbstractRepository
+class AbstractConnectorExternalRepository
 {
     /**
      * @var JobsApi|TranslationsApi

@@ -12,6 +12,7 @@ namespace lilthq\craftliltplugin\controllers\job;
 use Craft;
 use craft\helpers\DateTimeHelper;
 use craft\web\Controller;
+use Exception;
 use lilthq\craftliltplugin\assets\JobFormAsset;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
@@ -20,6 +21,10 @@ use yii\web\Response;
 
 class AbstractJobController extends Controller
 {
+    /**
+     * @throws InvalidConfigException
+     * @throws Exception
+     */
     protected function getJobModel(): Job
     {
         $bodyParams = $this->request->getBodyParams();

@@ -5,27 +5,35 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services\job\lilt;
 
 use Craft;
+use craft\errors\InvalidFieldException;
+use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use Throwable;
 
 class SyncJobFromLiltConnectorHandler
 {
+    /**
+     * @throws InvalidFieldException
+     * @throws ApiException
+     * @throws Throwable
+     */
     public function __invoke(Job $job): void
     {
-        $jobLilt = Craftliltplugin::getInstance()->liltJobRepository->findOneById(
-            (int)$job->liltJobId
+        $jobLilt = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
+            (int) $job->liltJobId
         );
 
         $result = [];
 
         if ($jobLilt->getStatus() === JobResponse::STATUS_COMPLETE) {
-            $translations = Craftliltplugin::getInstance()->liltTranslationRepository->findByJobId(
+            $translations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
                 (int)$job->liltJobId
             );
 
             foreach ($translations->getResults() as $translationDto) {
-                $content = Craftliltplugin::getInstance()->liltTranslationRepository->findTranslationContentById(
+                $content = Craftliltplugin::getInstance()->connectorTranslationRepository->findTranslationContentById(
                     $translationDto->getId()
                 );
 
@@ -41,12 +49,11 @@ class SyncJobFromLiltConnectorHandler
             foreach ($result as $fileName => $translatedItem) {
                 $targetLanguage = $translatedItem['targetLanguage'];
 
-                foreach ($translatedItem['content'] as $keyString => $elementDto) {
-                    [$elementType, $elementId] = explode('.', $keyString);
+                foreach ($translatedItem['content'] as $elementId => $contentDto) {
 
                     $element = Craft::$app->elements->getElementById(
                         (int)$elementId,
-                        $elementType,
+                        null,
                         Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage)
                     );
 
@@ -55,7 +62,12 @@ class SyncJobFromLiltConnectorHandler
                         continue;
                     }
 
-                    //TODO: apply changes somehow?
+                    Craftliltplugin::getInstance()->elementTranslatableContentApplier->apply(
+                        $element,
+                        $job,
+                        $contentDto,
+                        $targetLanguage
+                    );
                 }
             }
             return;

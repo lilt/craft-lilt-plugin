@@ -31,7 +31,7 @@ class SendJobToLiltConnectorHandler
      */
     public function __invoke(Job $job): void
     {
-        $jobLilt = Craftliltplugin::getInstance()->liltJobRepository->create(
+        $jobLilt = Craftliltplugin::getInstance()->connectorJobRepository->create(
             $job->title . ' | {today}'
         );
 
@@ -54,6 +54,10 @@ class SendJobToLiltConnectorHandler
             $content = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
                 $element
             );
+
+            #$content = Craftliltplugin::getInstance()->expandedContentProvider->provide(
+            #    $element
+            #);
 
             $files[] = $this->createJobFile(
                 $content,
@@ -79,7 +83,7 @@ class SendJobToLiltConnectorHandler
 
         $jobRecord->update();
         Craft::$app->getCache()->flush();
-        Craftliltplugin::getInstance()->liltJobRepository->start($jobLilt->getId());
+        Craftliltplugin::getInstance()->connectorJobRepository->start($jobLilt->getId());
     }
 
     private function createJobFile(
@@ -98,9 +102,9 @@ class SendJobToLiltConnectorHandler
             throw new \RuntimeException("File {$file} not exist!");
         }
 
-        Craftliltplugin::getInstance()->liltJobsFileRepository->addFileToJob(
+        Craftliltplugin::getInstance()->connectorJobsFileRepository->addFileToJob(
             $jobId,
-            'entry_' . $entryId . '.json+html',
+            'element_' . $entryId . '.json+html',
             file_get_contents($file),
             $sourceLanguage,
             $targetSiteLanguages,
