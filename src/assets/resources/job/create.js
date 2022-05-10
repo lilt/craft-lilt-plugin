@@ -159,7 +159,7 @@ $('#sourceSite').on('change', function(e) {
 $(document).ready(function() {
   $('#sourceSite').on('change', function(e) {
 
-    if (parseInt(Craft.elementIndex.siteId) !== parseInt($(this).val())) {
+    if (Craft.elementIndex !== undefined && parseInt(Craft.elementIndex.siteId) !== parseInt($(this).val())) {
       Craft.elementIndex.siteId = $(this).val();
       Craft.elementIndex.updateElements();
     }

@@ -11,10 +11,12 @@ namespace lilthq\craftliltplugin\services\job\lilt;
 
 use Craft;
 use craft\errors\ElementNotFoundException;
+use craft\helpers\Queue;
 use DateTimeInterface;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use Throwable;
@@ -109,6 +111,13 @@ class SendJobToLiltConnectorHandler
         $jobRecord->update();
         Craft::$app->getCache()->flush();
         Craftliltplugin::getInstance()->connectorJobRepository->start($jobLilt->getId());
+
+        Queue::push(
+            (new FetchJobStatusFromConnector([
+                'jobId' => $job->id,
+                'liltJobId' => $jobRecord->liltJobId,
+            ]))
+        );
     }
 
     private function createJobFile(

@@ -22,6 +22,7 @@ use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\JobQuery;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\JobRecord;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -121,6 +122,13 @@ class Job extends Element
     public static function hasStatuses(): bool
     {
         return false;
+    }
+
+    public function afterDelete(): bool
+    {
+        JobRecord::deleteAll(['id' => $this->id]);
+        parent::afterDelete();
+        return true;
     }
 
     /**

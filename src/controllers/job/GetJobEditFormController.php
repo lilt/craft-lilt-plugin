@@ -44,7 +44,8 @@ class GetJobEditFormController extends AbstractJobController
         $job = Job::findOne(['id' => $jobId]);
 
         //TODO: move to separate class, maybe post request from FE
-        if ($job->liltJobId !== null) {
+        //TODO: now it is processing by queue
+        /** if ($job->liltJobId !== null) {
             $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
                 (int)$job->liltJobId
             );
@@ -72,7 +73,7 @@ class GetJobEditFormController extends AbstractJobController
             );
 
             $jobRecord->save();
-        }
+        } **/
 
         if (!$job) {
             return (new Response())->setStatusCode(404);

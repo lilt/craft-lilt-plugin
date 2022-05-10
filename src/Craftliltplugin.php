@@ -14,6 +14,7 @@ namespace lilthq\craftliltplugin;
 use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\Queue;
 use craft\web\UrlManager;
 use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
@@ -21,6 +22,7 @@ use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
@@ -135,6 +137,9 @@ class Craftliltplugin extends Plugin
     public function init(): void
     {
         parent::init();
+
+        //Queue::push(new FetchTranslationJob(['jobId' => 102]));
+
         self::$plugin = $this;
 
         $this->connectorKey = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');

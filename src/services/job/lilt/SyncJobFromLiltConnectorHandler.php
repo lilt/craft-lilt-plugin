@@ -8,6 +8,7 @@ use Craft;
 use craft\errors\InvalidFieldException;
 use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
+use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -35,6 +36,16 @@ class SyncJobFromLiltConnectorHandler
             $translations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
                 (int)$job->liltJobId
             );
+
+            $values = array_map(static function (TranslationResponse $translationResponse) {
+                /* return [
+                    'translationStatus' => $translationResponse->getStatus(),
+                    'translationId' => $translationResponse->getId(),
+                    'trgLang' => $translationResponse->getTrgLang(),
+                    'trgLocale' => $translationResponse->getTrgLocale(),
+                    'updatedAt' => $translationResponse->getUpdatedAt(),
+                ]; */
+            }, $translations->getResults());
 
             foreach ($translations->getResults() as $translationDto) {
                 $content = Craftliltplugin::getInstance()->connectorTranslationRepository->findTranslationContentById(
