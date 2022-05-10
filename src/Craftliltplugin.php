@@ -23,6 +23,7 @@ use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
+use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\job\CreateJobHandler;
 use lilthq\craftliltplugin\services\job\EditJobHandler;
 use lilthq\craftliltplugin\services\job\lilt\SendJobToLiltConnectorHandler;
@@ -35,6 +36,7 @@ use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileReposi
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
+use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 use craft\events\RegisterComponentTypesEvent;
@@ -56,13 +58,15 @@ use craft\services\Elements;
  *
  * @property ConnectorJobRepository $connectorJobRepository
  * @property ConnectorTranslationRepository $connectorTranslationRepository
- * @property JobRepository $jobRepository
- * @property ConnectorConfigurationProvider $connectorConfigurationProvider
  * @property ConnectorJobFileRepository $connectorJobsFileRepository
+ * @property JobRepository $jobRepository
+ * @property TranslationRepository $translationRepository
+ * @property ConnectorConfigurationProvider $connectorConfigurationProvider
  * @property CreateJobHandler $createJobHandler
  * @property EditJobHandler $editJobHandler
  * @property SendJobToLiltConnectorHandler $sendJobToLiltConnectorHandler
  * @property SyncJobFromLiltConnectorHandler $syncJobFromLiltConnectorHandler
+ * @property PublishDraftHandler $publishDraftsHandler
  * @property Configuration $connectorConfiguration
  * @property JobsApi $connectorJobsApi
  * @property TranslationsApi $connectorTranslationsApi
@@ -149,6 +153,7 @@ class Craftliltplugin extends Plugin
                 $event->rules['GET ' . CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-send-to-lilt/invoke';
                 $event->rules['GET ' . CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-sync-from-lilt/invoke';
                 $event->rules['GET craft-lilt-plugin'] = 'craft-lilt-plugin/index/index';
+                $event->rules['craft-lilt-plugin'] = 'craft-lilt-plugin/job/get-translation-review/invoke';
             }
         );
 
@@ -212,6 +217,7 @@ class Craftliltplugin extends Plugin
             'expandedContentProvider' => ExpandedContentProvider::class,
             'languageMapper' => LanguageMapper::class,
             'jobRepository' => JobRepository::class,
+            'translationRepository' => TranslationRepository::class,
         ]);
 
         $this->set(
@@ -251,6 +257,14 @@ class Craftliltplugin extends Plugin
             'elementTranslatableContentApplier',
             [
                 'class' => ElementTranslatableContentApplier::class,
+                'draftRepository' => Craft::$app->getDrafts(),
+            ]
+        );
+
+        $this->set(
+            'publishDraftsHandler',
+            [
+                'class' => PublishDraftHandler::class,
                 'draftRepository' => Craft::$app->getDrafts(),
             ]
         );

@@ -1,0 +1,72 @@
+<div id="lilt-modal-preview-tabs">
+    <div id="content" class="content-pane">
+        <header id="content-header" class="pane-header">
+            <nav id="tabs" class="pane-tabs">
+                <ul class="">
+                    <li data-id="preview">
+                        <a id="tab-preview" class="sel" data-id="preview"> Preview
+                        </a></li>
+                    <li data-id="translation">
+                        <a id="tab-translation" data-id="translation">
+                            Translation
+                        </a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div id="translation" class="flex-fields hidden">
+            <!-- <div class="flex-container">
+
+                <div class="flex-child magenta">
+                    {% for key,value in translation.sourceContentValues %}
+                        <div>
+                            <span>{{ value }}</span><span data-icon="copy"></span>
+                        </div>
+                        <hr />
+                    {% endfor %}
+                </div>
+
+                <div class="flex-child green">
+                    {% for key,value in translation.targetContentValues %}
+                        <div>
+                            <span>{{ value }}</span><span data-icon="copy"></span>
+                        </div>
+                        <hr />
+                    {% endfor %}
+                </div>
+            </div>-->
+            <table style="height: 100%;width: 100%; margin-top: -24px">
+                <tr style="text-align: center;padding: 0">
+                    <td style="text-align: center;padding: 0;padding-top: 10px"><span data-icon="world"
+                                                         style="margin-right: 5px"></span>{{ translation.sourceLocale }}</td>
+                    <td style="text-align: center;padding: 0;padding-top: 10px"><span data-icon="world"
+                                                         style="margin-right: 5px"></span>{{ translation.targetLocale }}</td>
+                </tr>
+                {% for key,value in translation.sourceContentValues %}
+                    <tr style="font-size: 10px;padding: 0px">
+                        <td style="color: grey"><div><div class="translation-text" style="float: left;">{{ key }}</div><span data-icon="clipboard" style="float:right"></span></div></td>
+                        <td style="color: grey"><div><div class="translation-text" style="float: left;">{{ key }}</div><span data-icon="clipboard" style="float:right"></span></div></td>
+                    </tr>
+                    <tr>
+                        <td>{{ value }}</td>
+                        <td>{{ translation.targetContentValues[key] }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div id="preview" class="flex-fields">
+            <div class="iframe-box">
+                <div class="locale"><span data-icon="world"
+                                          style="margin-right: 5px"></span>{{ translation.sourceLocale }}</div>
+                <iframe src="{{ originalUrl }}"></iframe>
+            </div>
+
+            <div class="iframe-box">
+                <div class="locale"><span data-icon="world"
+                                          style="margin-right: 5px"></span>{{ translation.targetLocale }}</div>
+                <iframe src="{{ previewUrl }}"></iframe>
+            </div>
+        </div>
+    </div>
+</div>

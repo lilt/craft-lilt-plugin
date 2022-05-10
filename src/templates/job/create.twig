@@ -4,7 +4,7 @@
 {% set title = title ?? "Job create" %}
 
 {% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
-{% set isJobComplete = constant('STATUS_COMPLETE', element) is same as element.getStatus() %}
+{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() %}
 
 {% set formActionUrl = formActionUrl ?? cpUrl('craft-lilt-plugin/job/create') %}
 

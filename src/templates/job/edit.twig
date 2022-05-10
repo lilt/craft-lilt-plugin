@@ -2,7 +2,7 @@
 {% import '_includes/forms' as forms %}
 
 {% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
-{% set isJobComplete = constant('STATUS_COMPLETE', element) is same as element.getStatus() %}
+{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() %}
 
 {% set title = isJobInProgress ? "Job edit" : "Job overview" %}
 
@@ -15,7 +15,7 @@
 {% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
 
     {% block actionButton %}
-        {% if (not isJobInProgress and not isJobComplete) %}
+        {% if (not isJobInProgress and not isJobReadyForReview) %}
             <div id="save-btn-container" class="submit">
                 <button id="create-order-submit-form" type="submit" class="btn submit">
                     Save job
@@ -25,25 +25,17 @@
     {% endblock %}
 
 {% block content %}
-    {% if not isJobComplete %}
-    {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
+    {% if not isJobReadyForReview %}
+        {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
+    {% else %}
+        {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
     {% endif %}
 {% endblock %}
 
 {% set isRevision = false %}
 
 {% block settings %}
-    {{ forms.elementSelectField({
-        status: element.getAttributeStatus('authorId'),
-        label: "Author"|t('app'),
-        id: 'author',
-        name: 'author',
-        elementType: userElementType,
-        selectionLabel: "Choose"|t('app'),
-        criteria: authorOptionCriteria,
-        limit: 1,
-        elements: (author is defined and author ? [author]),
-    }) }}
+    {% include 'craft-lilt-plugin/_components/job/_settings.twig' %}
 {% endblock %}
 
 {% set settingsHtml = (block('settings') ?? '')|trim %}
@@ -53,7 +45,7 @@
 {% set isRevision = false %}
 {% set isProvisionalDraft = false %}
 {% set isLikeCurrent = false %}
-{% set showNotes = false %}
+{% set showNotes = true %}
 {% set isDraft = true %}
 {% set isCurrent = true %}
 

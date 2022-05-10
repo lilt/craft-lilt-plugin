@@ -10,7 +10,9 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\elements\db;
 
 use craft\elements\db\ElementQuery;
+use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class JobQuery extends ElementQuery
 {
@@ -21,11 +23,27 @@ class JobQuery extends ElementQuery
     public $dateCreated;
     public $dateUpdated;
 
-    public function status($value)
+    public function status($value): self
     {
         $this->status = $value;
 
         return $this;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function afterPopulate(array $elements): array
+    {
+        return array_map(
+            static function (Job $element) {
+                if (!empty($element->dueDate)) {
+                    $element->dueDate = new DateTime($element->dueDate);
+                }
+                return $element;
+            },
+            $elements
+        );
     }
 
     protected function beforePrepare(): bool
@@ -34,7 +52,6 @@ class JobQuery extends ElementQuery
 
         $this->query->select([
             'lilt_jobs.title',
-            'lilt_jobs.files',
             'lilt_jobs.liltJobId',
             'lilt_jobs.status',
             'lilt_jobs.sourceSiteId',

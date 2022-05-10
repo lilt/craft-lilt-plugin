@@ -16,7 +16,6 @@ use craft\errors\InvalidFieldException;
 use craft\fields\Matrix;
 use craft\fields\PlainText;
 use craft\redactor\Field as RedactorPluginField;
-use craft\redactor\FieldData as RedactorPluginFieldData;
 use \craft\services\Drafts as DraftRepository;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
@@ -34,7 +33,7 @@ class ElementTranslatableContentApplier
      * @throws Throwable
      * @throws InvalidFieldException
      */
-    public function apply(ElementInterface $element, Job $job, array $content, string $targetLanguage): bool
+    public function apply(ElementInterface $element, Job $job, array $content, string $targetLanguage): ElementInterface
     {
         $newAttributes = [];
 
@@ -119,6 +118,6 @@ class ElementTranslatableContentApplier
             $draftElement
         );
 
-        return true;
+        return $draftElement;
     }
 }

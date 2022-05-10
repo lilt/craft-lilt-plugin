@@ -11,10 +11,11 @@ namespace lilthq\craftliltplugin\services\job\lilt;
 
 use Craft;
 use craft\errors\ElementNotFoundException;
+use DateTimeInterface;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use Throwable;
 use yii\base\Exception;
@@ -41,10 +42,10 @@ class SendJobToLiltConnectorHandler
             $job->getTargetSiteIds()
         );
 
-        $files = [];
+        $translationRecords = [];
 
-        foreach ($elementIdsToTranslate as $entry) {
-            $element = Craft::$app->elements->getElementById($entry, null, $job->sourceSiteId);
+        foreach ($elementIdsToTranslate as $elementId) {
+            $element = Craft::$app->elements->getElementById($elementId, null, $job->sourceSiteId);
 
             if (!$element) {
                 //TODO: handle
@@ -59,16 +60,41 @@ class SendJobToLiltConnectorHandler
             #    $element
             #);
 
-            $files[] = $this->createJobFile(
+            $this->createJobFile(
                 $content,
-                $entry,
+                $elementId,
                 $jobLilt->getId(),
-                Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int) $job->sourceSiteId),
-                $targetLanguages
+                Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
+                $targetLanguages,
+                $job->dueDate
+            );
+
+            $translationRecords[] = array_values(
+                array_map(
+                    static function (int $targetSiteId) use ($job, $content, $elementId) {
+                        return new TranslationRecord([
+                            'jobId' => $job->id,
+                            'elementId' => $elementId,
+                            'sourceSiteId' => $job->sourceSiteId,
+                            'targetSiteId' => $targetSiteId,
+                            'sourceContent' => $content,
+                            'status' => TranslationRecord::STATUS_NEW,
+                        ]);
+                    },
+                    $job->getTargetSiteIds()
+                )
             );
         }
 
-        $job->files = json_encode($files);
+        $translationRecords = array_merge(...$translationRecords);
+
+        foreach ($translationRecords as $jobElementRecord) {
+            /**
+             * @var TranslationRecord $jobElementRecord
+             */
+            $jobElementRecord->save();
+        }
+
         $job->liltJobId = $jobLilt->getId();
         $job->status = Job::STATUS_IN_PROGRESS;
 
@@ -77,7 +103,6 @@ class SendJobToLiltConnectorHandler
 
         $jobRecord = JobRecord::findOne(['id' => $job->id]);
 
-        $jobRecord->files = $job->files;
         $jobRecord->status = Job::STATUS_IN_PROGRESS;
         $jobRecord->liltJobId = $jobLilt->getId();
 
@@ -91,42 +116,33 @@ class SendJobToLiltConnectorHandler
         int $entryId,
         int $jobId,
         string $sourceLanguage,
-        array $targetSiteLanguages
-    ): string {
-        $file = $this->createTranslateFile(
-            $jobId,
-            $content
-        );
-
-        if (!file_exists($file)) {
-            throw new \RuntimeException("File {$file} not exist!");
-        }
-
+        array $targetSiteLanguages,
+        DateTimeInterface $dueDate
+    ): void {
+        $contentString = json_encode($content);
         Craftliltplugin::getInstance()->connectorJobsFileRepository->addFileToJob(
             $jobId,
             'element_' . $entryId . '.json+html',
-            file_get_contents($file),
+            $contentString,
             $sourceLanguage,
             $targetSiteLanguages,
-            (new DateTime())->setTimestamp(strtotime('+2 weeks'))
+            $dueDate
         );
-
-        return $file;
     }
 
-    private function createTranslateFile(int $id, array $content): string
-    {
-        $tempPath = Craft::$app->path->getTempPath();
-        $fileName = sprintf(
-            'lilt-translate-file-%d-%s.json',
-            $id,
-            date('Y-m-d')
-        );
+    #private function createTranslateFile(int $id, array $content): string
+    #{
+    #    $tempPath = Craft::$app->path->getTempPath();
+    #    $fileName = sprintf(
+    #        'lilt-translate-file-%d-%s.json',
+    #        $id,
+    #        date('Y-m-d')
+    #    );
 
-        $contentString = json_encode($content);
+    #    $contentString = json_encode($content);
 
-        file_put_contents($tempPath . '/' . $fileName, $contentString);
+    #    file_put_contents($tempPath . '/' . $fileName, $contentString);
 
-        return $tempPath . '/' . $fileName;
-    }
+    #    return $tempPath . '/' . $fileName;
+    #}
 }

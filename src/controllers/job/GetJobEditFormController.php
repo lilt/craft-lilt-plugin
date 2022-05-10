@@ -59,7 +59,7 @@ class GetJobEditFormController extends AbstractJobController
             }
 
             if ($liltJob->getStatus() === JobResponse::STATUS_COMPLETE) {
-                $job->status = Job::STATUS_COMPLETE;
+                $job->status = Job::STATUS_READY_FOR_REVIEW;
             }
 
             $jobRecord->setAttributes($job->getAttributes(), false);
@@ -82,7 +82,7 @@ class GetJobEditFormController extends AbstractJobController
             $job,
             [
                 'showLiltTranslateButton' => $job->getStatus() === Job::STATUS_NEW,
-                'showLiltSyncButton' =>  $job->getStatus() === Job::STATUS_COMPLETE,
+                'showLiltSyncButton' =>  $job->getStatus() === Job::STATUS_READY_FOR_REVIEW,
                 'isUnpublishedDraft' => false,
                 'sendToLiltActionLink' => 'craft-lilt-plugin/job/send-to-lilt/' . $jobId,
                 'syncFromLiltActionLink' => 'craft-lilt-plugin/job/sync-from-lilt/' . $jobId,

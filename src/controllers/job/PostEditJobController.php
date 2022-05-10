@@ -64,6 +64,6 @@ class PostEditJobController extends AbstractJobController
             'Translate job saved successfully.'
         );
 
-        return $this->redirect('admin/craft-lilt-plugin/jobs');
+        return $this->redirect($job->getCpEditUrl());
     }
 }

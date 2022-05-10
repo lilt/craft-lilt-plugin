@@ -18,7 +18,7 @@
             <div id="settings-lilt" class="meta">
                 <div id="translate-field" class="field" style="padding-top: 5px; padding-bottom: 5px">
                     <div class="heading"><label for="author">Lilt Tranlsation</label></div>
-                    <a class="btn icon btn-create-new-order" href="{{ url(sendToLiltActionLink) }}"
+                    <a id="lilt-btn-create-new-order" class="btn icon btn-create-new-order" href="{{ url(sendToLiltActionLink) }}"
                        style="margin-right: 5px;">
                         <span class="icon icon-mask"
                               style="margin-right: 5px;margin-top: 5px">{{ svg('/app/vendor/lilthq/craft-lilt-plugin/src/icon-mask.svg') }}</span>
@@ -30,11 +30,11 @@
         {% endif %}
 
         {% set showLiltSyncButton = showLiltSyncButton ?? false %}
-        {% if showLiltSyncButton %}
+        {% if showLiltSyncButton and not isJobReadyForReview %}
             <div id="settings-lilt" class="meta">
                 <div id="translate-field" class="field" style="padding-top: 5px; padding-bottom: 5px">
                     <div class="heading"><label for="author">Lilt Tranlsation</label></div>
-                    <a class="btn icon btn-create-new-order" href="{{ url(syncFromLiltActionLink) }}"
+                    <a id="lilt-btn-create-new-order" class="btn icon btn-create-new-order" href="{{ url(syncFromLiltActionLink) }}"
                        style="margin-right: 5px;">
                         <span class="icon icon-mask"
                               style="margin-right: 5px;margin-top: 5px">{{ svg('/app/vendor/lilthq/craft-lilt-plugin/src/icon-mask.svg') }}</span>

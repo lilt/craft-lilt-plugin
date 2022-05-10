@@ -153,8 +153,7 @@ $('#sourceSite').on('change', function(e) {
     $(this).removeClass('disabled');
   });
 
-  $('#targetSiteIds-field input.checkbox[value=' + $(this).val() + ']').
-      prop('disabled', true).prop('checked', false);
+  $('#targetSiteIds-field input.checkbox[value=' + $(this).val() + ']').prop('disabled', true).prop('checked', false);
 });
 
 $(document).ready(function() {

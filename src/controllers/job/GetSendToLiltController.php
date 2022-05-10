@@ -55,6 +55,6 @@ class GetSendToLiltController extends Controller
             'Job uploaded to Lilt platform successfully'
         );
 
-        return $this->redirect('admin/craft-lilt-plugin/jobs');
+        return $this->redirect($job->getCpEditUrl());
     }
 }

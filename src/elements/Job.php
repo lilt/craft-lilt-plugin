@@ -12,11 +12,15 @@ namespace lilthq\craftliltplugin\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\actions\Delete;
+use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
+use craft\elements\db\EntryQuery;
 use craft\helpers\UrlHelper;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\JobQuery;
+use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -35,6 +39,8 @@ class Job extends Element
     public const STATUS_NEW = 'new';
     public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_IN_PROGRESS = 'in-progress';
+    public const STATUS_READY_FOR_REVIEW = 'ready-for-review';
+    public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
     public const STATUS_COMPLETE = 'complete';
     public const STATUS_FAILED = 'failed';
 
@@ -49,7 +55,6 @@ class Job extends Element
     public $sourceSiteLanguage;
     public $targetSiteIds;
     public $elementIds;
-    public $files;
     public $dueDate;
     public $dateCreated;
     public $dateUpdated;
@@ -62,6 +67,7 @@ class Job extends Element
         //TODO: add status here
         return $html;
     }
+
     /**
      * @throws SyntaxError
      * @throws RuntimeError
@@ -76,9 +82,9 @@ class Job extends Element
                 'element' => $this,
                 'formActionUrl' => UrlHelper::cpUrl('craft-lilt-plugin/job/edit/' . $this->getId()),
                 'availableSites' => Craftliltplugin::getInstance()->languageMapper->getAvailableSitesForFormField(),
-                'targetSites' =>  Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
-                'isRevision' =>  false,
-                'elementType' =>  self::class,
+                'targetSites' => Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
+                'isRevision' => false,
+                'elementType' => self::class,
             ]
         );
     }
@@ -123,11 +129,13 @@ class Job extends Element
     public static function statuses(): array
     {
         return [
-            self::STATUS_NEW            => ['label' => 'New', 'color' => ''],
-            self::STATUS_IN_PROGRESS    => ['label' => 'In Progress', 'color' => 'blue'],
-            self::STATUS_SUBMITTED      => ['label' => 'Submitted', 'color' => 'purple'],
-            self::STATUS_COMPLETE       => ['label' => 'Complete', 'color' => 'green'],
-            self::STATUS_FAILED         => ['label' => 'Failed', 'color' => 'red'],
+            self::STATUS_NEW => ['label' => 'New', 'color' => ''],
+            self::STATUS_SUBMITTED => ['label' => 'Submitted', 'color' => 'purple'],
+            self::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
+            self::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
+            self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'lightseagreen'],
+            self::STATUS_COMPLETE => ['label' => 'Complete', 'color' => 'green'],
+            self::STATUS_FAILED => ['label' => 'Failed', 'color' => 'red'],
         ];
     }
 
@@ -172,6 +180,16 @@ class Job extends Element
                 'defaultSort' => ['dateCreated', 'desc']
             ],
             [
+                'key' => 'submitted',
+                'label' => 'Submitted',
+                'criteria' => [
+                    'status' => [
+                        self::STATUS_SUBMITTED
+                    ]
+                ],
+                'defaultSort' => ['dateCreated', 'desc']
+            ],
+            [
                 'key' => 'in-progress',
                 'label' => 'In progress',
                 'criteria' => [
@@ -182,11 +200,21 @@ class Job extends Element
                 'defaultSort' => ['dateCreated', 'desc']
             ],
             [
-                'key' => 'submitted',
-                'label' => 'Submitted',
+                'key' => 'ready-for-review',
+                'label' => 'Ready for review',
                 'criteria' => [
                     'status' => [
-                        self::STATUS_SUBMITTED
+                        self::STATUS_READY_FOR_REVIEW
+                    ]
+                ],
+                'defaultSort' => ['dateCreated', 'desc']
+            ],
+            [
+                'key' => 'ready-to-publish',
+                'label' => 'Ready to publish',
+                'criteria' => [
+                    'status' => [
+                        self::STATUS_READY_TO_PUBLISH
                     ]
                 ],
                 'defaultSort' => ['dateCreated', 'desc']
@@ -217,12 +245,12 @@ class Job extends Element
     protected static function defineSortOptions(): array
     {
         return [
-            'title'         => 'Title',
-            'status'        => 'Status',
-            'sourceSiteId'  => 'Site source',
-            'dueDate'       => 'Due Date',
-            'dateCreated'   => 'Created',
-            'dateUpdated'   => 'Updated',
+            'title' => 'Title',
+            'status' => 'Status',
+            'sourceSiteId' => 'Site source',
+            'dueDate' => 'Due Date',
+            'dateCreated' => 'Created',
+            'dateUpdated' => 'Updated',
         ];
     }
 
@@ -238,13 +266,13 @@ class Job extends Element
     protected static function defineTableAttributes(): array
     {
         return [
-            'title'         => 'Title',
-            'status'        => 'Status',
-            'sourceSiteId'  => 'Site source',
+            'title' => 'Title',
+            'status' => 'Status',
+            'sourceSiteId' => 'Site source',
             'targetSiteIds' => 'Target source',
-            'dueDate'       => 'Due Date',
-            'dateCreated'   => 'Created',
-            'dateUpdated'   => 'Updated',
+            'dueDate' => 'Due Date',
+            'dateCreated' => 'Created',
+            'dateUpdated' => 'Updated',
         ];
     }
 
@@ -292,7 +320,10 @@ class Job extends Element
             case 'status':
                 return $this->getStatusHtml();
             case 'dueDate':
-                return (new \DateTime($this->dueDate))->format(
+                #return (new \DateTime($this->dueDate))->format(
+                #    Craft::$app->locale->getDateFormat('short', 'php')
+                #);
+                return $this->dueDate->format(
                     Craft::$app->locale->getDateFormat('short', 'php')
                 );
             case 'targetSiteIds':
@@ -333,6 +364,43 @@ class Job extends Element
     public function getUrl(): string
     {
         return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
+    }
+
+    private $_elements;
+    private $_translations;
+
+    /**
+     * @return TranslationModel[]
+     */
+    public function getTranslations(): array
+    {
+        if(!empty($this->_elements)) {
+            return $this->_elements;
+        }
+
+        $this->_translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($this->id);
+
+        return $this->_translations;
+    }
+
+    public function getElementsMappedById(): array
+    {
+        if(!empty($this->_elements)) {
+            return $this->_elements;
+        }
+
+        $this->_elements = [];
+
+        //TODO: maybe other way to select, not one by one?
+        $elements = array_map(function (int $id) {
+            return Craft::$app->elements->getElementById($id);
+        }, $this->getElementIds());
+
+        foreach ($elements as $element) {
+            $this->_elements[$element->id] = $element;
+        }
+
+        return $this->_elements;
     }
 
     public function getCpEditUrl()
@@ -387,7 +455,7 @@ class Job extends Element
     public function rules(): array
     {
         return [
-            [['title','sourceSiteId','elementIds','dueDate','targetSiteIds'], 'required'],
+            [['title', 'sourceSiteId', 'elementIds', 'dueDate', 'targetSiteIds'], 'required'],
         ];
     }
 }

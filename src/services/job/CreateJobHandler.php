@@ -17,7 +17,7 @@ use RuntimeException;
 
 class CreateJobHandler
 {
-    public function __invoke(CreateJobCommand $command): void
+    public function __invoke(CreateJobCommand $command): Job
     {
         $element = new Job();
         $element->title = $command->getTitle();
@@ -33,7 +33,6 @@ class CreateJobHandler
 
         $element->targetSiteIds = $command->getTargetSitesIds();
         $element->elementIds = $command->getEntries();
-        $element->files = [];
         $element->dueDate = $command->getDueDate();
         $element->draftId = null;
         $element->revisionId = null;
@@ -56,5 +55,7 @@ class CreateJobHandler
         if (!$status || !$statusElement) {
             throw new RuntimeException("Cant create the job");
         }
+
+        return $element;
     }
 }

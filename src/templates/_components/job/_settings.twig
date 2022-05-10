@@ -1,6 +1,21 @@
 {% import '_includes/forms' as forms %}
 
 {% block settings %}
+
+    <div id="slug-field" class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug">Job ID</label>
+        </div>
+        <div class="ltr">{{element.id}}</div>
+    </div>
+
+    <div id="slug-field" class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug">Lilt ID</label>
+        </div>
+        <div class="ltr">{{element.liltJobId}}</div>
+    </div>
+
     {{ forms.elementSelectField({
         status: element.getAttributeStatus('authorId'),
         label: "Author"|t('app'),

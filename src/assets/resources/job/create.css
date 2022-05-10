@@ -1,10 +1,8 @@
-#entries-to-translate-field #entries-to-translate
-{
+#entries-to-translate-field #entries-to-translate {
     box-shadow: none;
 }
 
-#targetSiteIds-field input.checkbox.disabled+label:before
-{
+#targetSiteIds-field input.checkbox.disabled + label:before {
     content: "";
 }
 
@@ -18,8 +16,12 @@
     }
 }
 
-#create-job-form .disabled {
+#create-job-form div.disabled {
     opacity: .60;
+}
+
+#lilt-btn-create-new-order .icon .h-8 {
+    height: 16px !important;
 }
 
 /* TODO: this is for spiner
@@ -35,3 +37,70 @@
     background: rgba(255,255,255,.75) url(../images/spinner.gif) no-repeat 50% 50%;
     border-radius: 5px;
 } */
+
+/**
+OVERVIEW
+ */
+
+#lilt-translations-table tr {
+    cursor: pointer;
+}
+
+#lilt-preview-modal .body .spinner.big {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -24px 0 0 -24px;
+}
+
+#lilt-preview-modal .body {
+    position: relative;
+    height: calc(100% - 62px);
+    width: 100%;
+
+    overflow-y: scroll;
+
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+#lilt-preview-modal #preview .locale{
+    width: 100%;
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#lilt-preview-modal #preview {
+    margin-left: -24px;
+    margin-right: -24px;
+    margin-top: -24px;
+    min-height: 800px;
+}
+#lilt-preview-modal .iframe-box {
+    display: inline-block;
+    width: calc(50% - 2px);
+    height: 100%;
+    min-height: 800px;
+    overflow-y: scroll;
+
+}
+#lilt-preview-modal iframe {
+    height: 100%;
+    width: 100%;
+    min-height: 800px;
+    overflow-y: scroll;
+}
+
+#lilt-preview-modal .flex-container {
+    display: flex;
+}
+
+#lilt-preview-modal .flex-child {
+    flex: 1;
+    border: 2px solid yellow;
+}
+
+#lilt-preview-modal .flex-child:first-child {
+    margin-right: 20px;
+}

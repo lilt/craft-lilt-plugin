@@ -52,7 +52,7 @@ class PostCreateJobController extends AbstractJobController
             $job->dueDate
         );
 
-        Craftliltplugin::getInstance()->createJobHandler->__invoke(
+        $job = Craftliltplugin::getInstance()->createJobHandler->__invoke(
             $command
         );
 
@@ -63,6 +63,6 @@ class PostCreateJobController extends AbstractJobController
             'Translate job created successfully.'
         );
 
-        return $this->redirect('admin/craft-lilt-plugin/jobs');
+        return $this->redirect($job->getCpEditUrl());
     }
 }

@@ -17,6 +17,7 @@ class LanguageMapper
 
     public $languageToSiteId = [];
     public $siteIdToLanguage = [];
+    public $siteIdToHandle = [];
 
     public function init(): void
     {
@@ -29,6 +30,7 @@ class LanguageMapper
         foreach ($this->availableSites as $availableSite) {
             $this->languageToSiteId[$availableSite->language] = $availableSite->id;
             $this->siteIdToLanguage[$availableSite->id] = $availableSite->language;
+            $this->siteIdToHandle[$availableSite->id] = $availableSite->handle;
         }
     }
 
@@ -86,6 +88,15 @@ class LanguageMapper
         }
 
         return $this->siteIdToLanguage[$siteId] ?? null;
+    }
+
+    public function getHandleBySiteId(int $siteId): ?string
+    {
+        if (empty($this->availableSites)) {
+            $this->init();
+        }
+
+        return $this->siteIdToHandle[$siteId] ?? null;
     }
 
     public function getSiteIdByLanguage(string $language): ?int
