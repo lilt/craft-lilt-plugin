@@ -18,6 +18,7 @@ use craft\fields\Matrix;
 use craft\fields\PlainText;
 use craft\redactor\Field as RedactorPluginField;
 use craft\redactor\FieldData as RedactorPluginFieldData;
+use lilthq\craftliltplugin\Craftliltplugin;
 
 class ElementTranslatableContentProvider
 {
@@ -25,6 +26,55 @@ class ElementTranslatableContentProvider
      * @throws InvalidFieldException
      */
     public function provide(ElementInterface $element): array
+    {
+        $content = [];
+
+        $elementKey = $element->getId();
+
+        if (!empty($element->title) && $element->getIsTitleTranslatable()) {
+            $content['title'] = $element->title;
+        }
+
+        if (!empty($element->slug)) {
+            $content['slug'] = $element->slug;
+        }
+
+        $fieldLayout = $element->getFieldLayout();
+
+        if ($fieldLayout === null) {
+            //TODO: log issue
+        }
+
+        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+
+        foreach ($fields as $field) {
+            $fieldData = Craft::$app->fields->getFieldById((int)$field->id);
+
+            if ($fieldData === null) {
+                //TODO: log issue
+                continue;
+            }
+
+            $fieldDataKey = $fieldData->handle;
+
+            $content[$fieldDataKey] = Craftliltplugin::getInstance()->fieldContentProvider->provide(
+                $element, $fieldData
+            );
+
+            if ($content[$fieldDataKey] === null) {
+                unset($content[$fieldDataKey]);
+            }
+        }
+
+        return [
+            $elementKey => $content
+        ];
+    }
+
+    /**
+     * @throws InvalidFieldException
+     */
+    public function provideOld(ElementInterface $element): array
     {
         $content = [];
 
