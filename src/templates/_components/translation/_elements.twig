@@ -36,7 +36,7 @@
             <th data-title="Title" data-titlecell="">
                 <div class="element small"
                      data-id="{{ translation.id }}"
-                     data-draft-id="{{ translation.draftId }}"
+                     data-draft-id="{{ translation.translatedDraftId }}"
                      data-element-id="{{ translation.elementId }}"
                 >
                     <div class="label">
@@ -54,7 +54,7 @@
                 <span class="source-language" data-icon="world"></span>{{ translation.targetLocale }}
             </td>
 
-            <td data-title="Due Date" data-attr="dueDate">5/31/2022</td>
+            <td data-title="Due Date" data-attr="dueDate">{{ translation.lastDelivery }}</td>
 
             <td data-title="Status" data-attr="status"><span
                         class="status {{ translation.statusColor }}"></span>{{ translation.statusLabel }}</td>

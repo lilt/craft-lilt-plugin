@@ -24,38 +24,6 @@
         disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
     }) }}
 
-    {{ forms.selectField({
-        label: 'Source site <span class="required"/>',
-        options: availableSites,
-        name: 'sourceSite',
-        id: 'sourceSite',
-        value: element.sourceSiteId ?? '',
-        errors: element.getErrors('sourceSiteId'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
-    }) }}
-
-    {{ forms.dateField({
-        status: element.getAttributeStatus('dueDate'),
-        label: "Due Date"|t('app'),
-        id: 'dueDate',
-        name: 'dueDate',
-        value: (element.dueDate ? element.dueDate : null),
-        errors: element.getErrors('dueDate'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
-    }) }}
-
-    {{ forms.checkboxSelectField({
-        label: 'Target site(s) <span class="required"/>',
-        options: targetSites,
-        values: element.getTargetSiteIds,
-        showAllOption: true,
-        name: 'targetSiteIds',
-        id: 'targetSiteIds',
-        errors: element.getErrors('targetSiteIds'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
-    }) }}
-
-
     <div id="entries-to-translate-field" class="field">
         <div class="heading">
             {{ forms.textField({
@@ -63,10 +31,16 @@
                 name: 'entries',
                 id: 'create-job-selected-entries',
                 class: 'create-job-selected-entries hidden',
-                value: element.getElementIdsAsString ?? '',
+                value: element.getElementIdsAsString ?? '[]',
                 errors: model is defined and model ? model.getErrors('title'),
                 maxlength: 255,
                 errors: element.getErrors('elementIds'),
+            }) }}
+            {{ forms.textField({
+                name: 'versions',
+                id: 'create-job-selected-versions',
+                class: 'create-job-selected-versions hidden',
+                value: element.getVersionsAsString ?? '[]',
             }) }}
         </div>
         <div class="content-pane" id="entries-to-translate" style="display: none; margin-top: 20px">
@@ -96,5 +70,38 @@
             </div>
         </div>
     </div>
+
+    {{ forms.selectField({
+        label: 'Source site <span class="required"/>',
+        options: availableSites,
+        name: 'sourceSite',
+        id: 'sourceSite',
+        value: element.sourceSiteId ?? '',
+        errors: element.getErrors('sourceSiteId'),
+        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
+    }) }}
+
+    {{ forms.dateField({
+        status: element.getAttributeStatus('dueDate'),
+        label: "Due Date"|t('app'),
+        id: 'dueDate',
+        name: 'dueDate',
+        value: (element.dueDate ? element.dueDate : null),
+        errors: element.getErrors('dueDate'),
+        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
+    }) }}
+
+    {{ forms.checkboxSelectField({
+        label: 'Target site(s) <span class="required"/>',
+        options: targetSites,
+        values: element.getTargetSiteIds,
+        showAllOption: true,
+        name: 'targetSiteIds',
+        id: 'targetSiteIds',
+        errors: element.getErrors('targetSiteIds'),
+        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
+        class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
+    }) }}
+
 
 </form>
