@@ -44,7 +44,7 @@ class PostTranslationPublishController extends AbstractJobController
         $translation = Craftliltplugin::getInstance()->translationRepository->findOneById((int) $translationId);
 
         Craftliltplugin::getInstance()->publishDraftsHandler->__invoke(
-            $translation->draftId, $translation->targetSiteId
+            $translation->translatedDraftId, $translation->targetSiteId
         );
 
         $updated = TranslationRecord::updateAll(

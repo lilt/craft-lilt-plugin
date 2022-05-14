@@ -33,6 +33,7 @@ class AbstractJobController extends Controller
         $job->id = (int) ($bodyParams['jobId'] ?? null);
         $job->title = $bodyParams['title'];
         $job->sourceSiteId = (int)$bodyParams['sourceSite'];
+        $job->versions = $bodyParams['versions'] ?? [];
         $job->elementIds = json_decode($bodyParams['entries'], false) ?? [];
         $job->dueDate = DateTimeHelper::toDateTime($this->request->getBodyParam('dueDate')) ?: null;
         $job->targetSiteIds = $bodyParams['targetSiteIds'] === '*' ?
@@ -45,14 +46,14 @@ class AbstractJobController extends Controller
     /**
      * @throws InvalidConfigException
      */
-    protected function renderJobForm(?Job $job = null, array $variablesToAdd = [], string $template = 'craft-lilt-plugin/job/create.twig'): Response
+    protected function renderJobForm(Job $job, array $variablesToAdd = [], string $template = 'craft-lilt-plugin/job/create.twig'): Response
     {
         Craft::$app->getView()->registerAssetBundle(JobFormAsset::class);
 
         $variables = [
             'availableSites' => Craftliltplugin::getInstance()->languageMapper->getAvailableSitesForFormField(),
             'targetSites' =>  Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
-            'element' => $job ?? new Job(),
+            'element' => $job,
             'showLiltTranslateButton' => false,
             'isUnpublishedDraft' => true,
             'permissionSuffix' => ':edit-lilt-jobs',

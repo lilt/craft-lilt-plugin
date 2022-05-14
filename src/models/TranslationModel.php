@@ -13,6 +13,7 @@ use Craft;
 use craft\base\Model;
 use craft\helpers\UrlHelper;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 class TranslationModel extends Model
@@ -21,7 +22,8 @@ class TranslationModel extends Model
     public $uid;
     public $jobId;
     public $elementId;
-    public $draftId;
+    public $versionId;
+    public $translatedDraftId;
     public $sourceSiteId;
     public $targetSiteId;
     public $sourceContent;
@@ -48,6 +50,7 @@ class TranslationModel extends Model
     {
         return $this->getContentValues($this->sourceContent);
     }
+
     public function getTargetContentValues(): array
     {
         return $this->getContentValues($this->targetContent);
@@ -68,21 +71,26 @@ class TranslationModel extends Model
 
     public function getElementUrl(): ?string
     {
-        $draft = Craft::$app->elements->getElementById($this->draftId, null, $this->targetSiteId);
+        $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
         return $draft->getUrl();
+    }
+
+    public function getLastDeliveryFormatted(): ?string
+    {
+        return (new DateTime($this->lastDelivery))->format(Craft::$app->locale->getDateFormat('short', 'php'));
     }
 
     public function getPreviewUrl(): ?string
     {
-        if ($this->draftId === null) {
+        if ($this->translatedDraftId === null) {
             //TODO: handle when draft is not exist yet
             return null;
         }
 
-        $element = Craft::$app->elements->getElementById($this->draftId, null, $this->targetSiteId);
+        $element = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->targetSiteId);
 
 
-        if(!$element) {
+        if (!$element) {
             $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
 
             return $element->getUrl();
@@ -112,14 +120,14 @@ class TranslationModel extends Model
 
     public function getDraftEditUrl(): ?string
     {
-        if ($this->draftId === null) {
+        if ($this->translatedDraftId === null) {
             //TODO: handle when draft is not exist yet
             return '';
         }
         //TODO: is it fine to do in foreach?
-        $element = Craft::$app->elements->getElementById($this->draftId);
+        $element = Craft::$app->elements->getElementById($this->translatedDraftId);
 
-        if(!$element) {
+        if (!$element) {
             $element = Craft::$app->elements->getElementById($this->elementId);
         }
 

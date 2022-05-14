@@ -20,6 +20,7 @@ use yii\db\ActiveQueryInterface;
  * @property int $liltJobId [int(11)]
  * @property string $status [varchar(50)]
  * @property string $elementIds [json]
+ * @property string $versions [json]
  * @property int $sourceSiteId [int(11) unsigned]
  * @property int $sourceSiteLanguage [int(11) unsigned]
  * @property string $targetSiteIds [json]

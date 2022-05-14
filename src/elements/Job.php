@@ -56,6 +56,7 @@ class Job extends Element
     public $sourceSiteLanguage;
     public $targetSiteIds;
     public $elementIds;
+    public $versions;
     public $dueDate;
     public $dateCreated;
     public $dateUpdated;
@@ -101,6 +102,25 @@ class Job extends Element
         }
 
         return json_decode($this->elementIds, true) ?? [];
+    }
+
+
+    public function getVersions(): array
+    {
+        if (empty($this->versions)) {
+            return [];
+        }
+
+        if (is_array($this->versions)) {
+            return $this->versions;
+        }
+
+        return json_decode($this->versions, true) ?? [];
+    }
+
+    public function getVersionsAsString(): string
+    {
+        return json_encode($this->getVersions() ?? []);
     }
 
     public function getElementIdsAsString(): string

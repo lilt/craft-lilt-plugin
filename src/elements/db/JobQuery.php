@@ -58,6 +58,7 @@ class JobQuery extends ElementQuery
             'lilt_jobs.sourceSiteLanguage',
             'lilt_jobs.targetSiteIds',
             'lilt_jobs.elementIds',
+            'lilt_jobs.versions',
             'lilt_jobs.dueDate',
             'lilt_jobs.dateCreated',
             'lilt_jobs.dateUpdated',

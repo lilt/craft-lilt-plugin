@@ -25,6 +25,7 @@ class Install extends Migration
             'liltJobId' => $this->integer()->null(),
             'status' => $this->string(50),
             'elementIds' => $this->json(),
+            'versions' => $this->json(), //contains which version of element should be translated, empty if current
             'sourceSiteId' => $this->integer()->unsigned()->notNull(),
             'sourceSiteLanguage' => $this->string(50),
             'targetSiteIds' => $this->json(),
@@ -39,7 +40,8 @@ class Install extends Migration
             'uid' => $this->uid(),
             'jobId' => $this->integer()->unsigned()->null(),
             'elementId' => $this->integer()->unsigned()->null(),
-            'draftId' => $this->integer()->unsigned()->null(),
+            'versionId' => $this->integer()->unsigned()->null(),
+            'translatedDraftId' => $this->integer()->unsigned()->null(),
             'sourceSiteId' => $this->integer()->null(),
             'targetSiteId' => $this->integer()->null(),
             'sourceContent' => $this->json(),

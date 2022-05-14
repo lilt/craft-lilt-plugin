@@ -50,7 +50,8 @@ class PostEditJobController extends AbstractJobController
             $job->elementIds,
             $job->targetSiteIds,
             $job->sourceSiteId,
-            $job->dueDate
+            $job->dueDate,
+            $job->versions
         );
 
         Craftliltplugin::getInstance()->editJobHandler->__invoke(
