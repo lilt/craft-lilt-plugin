@@ -31,6 +31,11 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\MatrixFieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\RadioButtonsContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\job\CreateJobHandler;
@@ -313,14 +318,6 @@ class Craftliltplugin extends Plugin
         );
 
         $this->set(
-            'elementTranslatableContentApplier',
-            [
-                'class' => ElementTranslatableContentApplier::class,
-                'draftRepository' => Craft::$app->getDrafts(),
-            ]
-        );
-
-        $this->set(
             'publishDraftsHandler',
             [
                 'class' => PublishDraftHandler::class,
@@ -370,13 +367,13 @@ class Craftliltplugin extends Plugin
             ]
         );
 
-        $getAppliersMap = function () {
+        $getAppliersMap = static function () {
             return [
-                Matrix::class => new MatrixFieldContentProvider($this->elementTranslatableContentProvider),
-                PlainText::class => new PlainTextContentProvider(),
-                RedactorPluginField::class => new RedactorPluginFieldContentProvider(),
-                Table::class => new TableContentProvider(),
-                RadioButtons::class => new RadioButtonsContentProvider(),
+                Matrix::class => new MatrixFieldContentApplier(),
+                PlainText::class => new PlainTextContentApplier(),
+                RedactorPluginField::class => new RedactorPluginFieldContentApplier(),
+                Table::class => new TableContentApplier(),
+                RadioButtons::class => new RadioButtonsContentApplier(),
             ];
         };
 
@@ -387,6 +384,16 @@ class Craftliltplugin extends Plugin
                 'appliersMap' => $getAppliersMap(),
             ]
         );
+
+        $this->set(
+            'elementTranslatableContentApplier',
+            [
+                'class' => ElementTranslatableContentApplier::class,
+                'draftRepository' => Craft::$app->getDrafts(),
+                'fieldContentApplier' => $this->fieldContentApplier,
+            ]
+        );
+
         $this->set(
             'loadI18NHandler',
             function () {

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
-class RadioButtonsContentApplier extends AbstractContentApplier implements ApplierInterface
+use craft\fields\PlainText;
+
+class PlainTextContentApplier extends AbstractContentApplier implements ApplierInterface
 {
     public function apply(ApplyContentCommand $command): ApplyContentResult
     {
@@ -15,14 +17,13 @@ class RadioButtonsContentApplier extends AbstractContentApplier implements Appli
             return ApplyContentResult::fail();
         }
 
-        //TODO: implement
-
+        $command->getElement()->setFieldValue($command->getField()->handle, $content[$fieldKey]);
         return ApplyContentResult::applied();
     }
 
     public function support(ApplyContentCommand $command): bool
     {
-        // TODO: Implement support() method.
-        return false;
+        return $command->getField() instanceof PlainText
+            && $command->getField()->getIsTranslatable($command->getElement());
     }
 }

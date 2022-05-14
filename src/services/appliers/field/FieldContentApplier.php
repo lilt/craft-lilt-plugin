@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
-use craft\base\ElementInterface;
-use craft\base\FieldInterface;
-
 class FieldContentApplier
 {
+    /**
+     * @var ApplierInterface[]
+     */
     public $appliersMap;
 
     /**
      * @return mixed
      */
-    public function apply(ElementInterface $element, FieldInterface $field)
+    public function apply(ApplyContentCommand $command): ApplyContentResult
     {
-        $fieldClass = get_class($field);
+        $fieldClass = get_class($command->getField());
 
         if(!isset($this->appliersMap[$fieldClass])) {
-            return null;
+            return ApplyContentResult::fail();
         }
 
-        return $this->appliersMap[$fieldClass]->provide($element, $field);
+        if(!$this->appliersMap[$fieldClass]->support($command)) {
+            return false;
+        }
+
+        return $this->appliersMap[$fieldClass]->apply($command);
     }
 }
