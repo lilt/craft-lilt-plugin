@@ -10,8 +10,10 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\appliers\TranslationApplyCommand;
 use Throwable;
 
 class SyncJobFromLiltConnectorHandler
@@ -72,7 +74,8 @@ class SyncJobFromLiltConnectorHandler
                     $element = Craft::$app->elements->getElementById(
                         (int)$elementId,
                         null,
-                        Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage)
+                        //Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage)
+                        $job->sourceSiteId
                     );
 
                     if (!$element) {
@@ -80,11 +83,15 @@ class SyncJobFromLiltConnectorHandler
                         continue;
                     }
 
-                    $draft = Craftliltplugin::getInstance()->elementTranslatableContentApplier->apply(
+                    $translationApplyCommand = new TranslationApplyCommand(
                         $element,
                         $job,
                         $contentDto,
                         $targetLanguage
+                    );
+
+                    $draft = Craftliltplugin::getInstance()->elementTranslatableContentApplier->apply(
+                        $translationApplyCommand
                     );
 
                     $translationRecord = TranslationRecord::findOne([
@@ -94,10 +101,11 @@ class SyncJobFromLiltConnectorHandler
                         'elementId' => $elementId,
                         'jobId' => $job->getId()
                     ]);
-                    $translationRecord->draftId = $draft->getId();
+                    $translationRecord->translatedDraftId = $draft->getId();
                     $translationRecord->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
                     $translationRecord->targetContent = [$elementId => $contentDto];
                     $translationRecord->connectorTranslationId = $translationId;
+                    $translationRecord->lastDelivery = new DateTime();
 
                     $translationRecord->save();
                 }
