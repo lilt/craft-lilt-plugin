@@ -13,7 +13,7 @@ use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use yii\web\Response;
 
-class IndexController extends Controller
+class JobsController extends Controller
 {
     public function actionIndex(): Response
     {

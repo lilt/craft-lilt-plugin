@@ -49,7 +49,8 @@ class PostCreateJobController extends AbstractJobController
             $job->elementIds,
             $job->targetSiteIds,
             $job->sourceSiteId,
-            $job->dueDate
+            $job->dueDate,
+            $job->versions
         );
 
         $job = Craftliltplugin::getInstance()->createJobHandler->__invoke(

@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
 use craft\errors\ElementNotFoundException;
+use craft\helpers\UrlHelper;
 use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
@@ -87,6 +88,16 @@ class GetJobEditFormController extends AbstractJobController
                 'isUnpublishedDraft' => false,
                 'sendToLiltActionLink' => 'craft-lilt-plugin/job/send-to-lilt/' . $jobId,
                 'syncFromLiltActionLink' => 'craft-lilt-plugin/job/sync-from-lilt/' . $jobId,
+                'crumbs' => [
+                    [
+                        'label' => 'Lilt Plugin',
+                        'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin')
+                    ],
+                    [
+                        'label' => 'Jobs',
+                        'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin/jobs')
+                    ],
+                ]
             ],
             'craft-lilt-plugin/job/edit.twig'
         );

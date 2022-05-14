@@ -14,6 +14,9 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
+use craft\helpers\UrlHelper;
+use lilthq\craftliltplugin\datetime\DateTime;
+use lilthq\craftliltplugin\elements\Job;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
@@ -32,6 +35,23 @@ class GetJobCreateFormController extends AbstractJobController
             return (new Response())->setStatusCode(405);
         }
 
-        return $this->renderJobForm();
+        $job = (new Job());
+        $job->dueDate = (new DateTime())->setTimestamp(strtotime('+1 week'));
+
+        return $this->renderJobForm(
+            $job,
+            [
+                'crumbs' => [
+                    [
+                        'label' => 'Lilt Plugin',
+                        'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin')
+                    ],
+                    [
+                        'label' => 'Jobs',
+                        'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin/jobs')
+                    ],
+                ]
+            ]
+        );
     }
 }
