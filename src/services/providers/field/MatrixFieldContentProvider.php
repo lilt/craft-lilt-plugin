@@ -16,15 +16,17 @@ class MatrixFieldContentProvider extends AbstractContentProvider
     /**
      * @var ElementTranslatableContentProvider
      */
-    public $elementTranslatableContentProvider;
+    private $elementTranslatableContentProvider;
+
+    public function __construct(ElementTranslatableContentProvider $elementTranslatableContentProvider) {
+        $this->elementTranslatableContentProvider = $elementTranslatableContentProvider;
+    }
 
     /**
      * @throws InvalidFieldException
      */
     public function provide(ElementInterface $element, FieldInterface $field): array
     {
-        $content = [];
-
         $matrixBlockQuery = $element->getFieldValue($field->handle);
         assert($matrixBlockQuery instanceof MatrixBlockQuery);
 
@@ -39,8 +41,6 @@ class MatrixFieldContentProvider extends AbstractContentProvider
             $blockId = $blockElement->getId();
             $blocksContent[$blockId]['fields'] = $this->elementTranslatableContentProvider->provide($blockElement)[$blockId];
         }
-
-        $content[$this->getFieldKey($field)] = $blocksContent;
 
         return $blocksContent;
     }

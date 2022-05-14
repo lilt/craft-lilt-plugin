@@ -11,7 +11,10 @@ class FieldContentProvider
 {
     public $providersMap;
 
-    public function provide(ElementInterface $element, FieldInterface $field): ?array
+    /**
+     * @return mixed
+     */
+    public function provide(ElementInterface $element, FieldInterface $field)
     {
         $fieldClass = get_class($field);
 

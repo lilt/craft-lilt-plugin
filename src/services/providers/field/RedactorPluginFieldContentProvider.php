@@ -14,13 +14,11 @@ class RedactorPluginFieldContentProvider extends AbstractContentProvider
     /**
      * @throws InvalidFieldException
      */
-    public function provide(ElementInterface $element, FieldInterface $field): array
+    public function provide(ElementInterface $element, FieldInterface $field): string
     {
         $redactorFieldData = $element->getFieldValue($field->handle);
         assert($redactorFieldData instanceof RedactorPluginFieldData);
 
-        $content[$this->getFieldKey($field)] = $redactorFieldData->getRawContent();
-
-        return $content;
+        return $redactorFieldData->getRawContent();
     }
 }

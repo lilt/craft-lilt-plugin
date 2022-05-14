@@ -13,12 +13,8 @@ class PlainTextContentProvider extends AbstractContentProvider
     /**
      * @throws InvalidFieldException
      */
-    public function provide(ElementInterface $element, FieldInterface $field): array
+    public function provide(ElementInterface $element, FieldInterface $field): string
     {
-        $content = [];
-
-        $content[$this->getFieldKey($field)] = $element->getFieldValue($field->handle);
-
-        return $content;
+        return $element->getFieldValue($field->handle);
     }
 }
