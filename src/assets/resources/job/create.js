@@ -17,10 +17,8 @@ $('.addAnEntry').on('click', function(e) {
           const currentValue = $('.create-job-selected-entries').val();
           let alreadySelected = [];
           try {
-            alreadySelected = currentValue !== undefined && currentValue !==
-            ''
-                ? JSON.parse(
-                    currentValue)
+            alreadySelected = currentValue !== undefined && currentValue !== ''
+                ? JSON.parse(currentValue)
                 : [];
           } catch (e) {
             console.log(e);
@@ -33,7 +31,7 @@ $('.addAnEntry').on('click', function(e) {
 
           $('#entries-to-translate').show();
           Craft.elementIndex = new Craft.LiltElementIndex(
-              'craft\\elements\\Entry',
+              'lilthq\\craftliltplugin\\elements\\TranslateEntry',
               $('#page-container'), {
                 elementTypeName: 'Entry',
                 elementTypePluralName: 'Entries',
@@ -41,8 +39,7 @@ $('.addAnEntry').on('click', function(e) {
                 storageKey: 'elementindex.craft\\elements\\Entry',
                 siteId: $('#sourceSite').val(),
                 criteria: {
-                  siteId: $('#sourceSite').val(),
-                  where: {
+                  siteId: $('#sourceSite').val(), where: {
                     'elements.id': newSelected,
                   },
                 },
@@ -56,6 +53,52 @@ $('.addAnEntry').on('click', function(e) {
                   if (Craft.elementIndex.getSelectedElementIds().length === 0) {
                     $('#entries-remove-action').css('visibility', 'hidden');
                   }
+                },
+                onUpdateElements: function() {
+
+                  // save state
+                  $('#entries-to-translate .select-element-version select').
+                      each(function() {
+                        const value = $(this).val();
+                        let {elementId, draftId} = JSON.parse(atob(value));
+                        let hiddenInput = $(`#hidden-input-element-draft-${elementId}`);
+                        if (hiddenInput.length > 0) {
+                          draftId = hiddenInput.val();
+
+                          console.log(draftId);
+
+                          const value = {
+                            elementId: parseInt(elementId),
+                            draftId: parseInt(draftId),
+                          };
+                          $(this).
+                              val(btoa(JSON.stringify(value)));
+
+                          return;
+                        }
+
+                        $('#create-job-form').
+                            append(
+                                `<input id="hidden-input-element-draft-${elementId}" type="hidden" name="versions[${elementId}]" value="${draftId}"/>`);
+                      });
+
+                  $('#entries-to-translate .select-element-version').
+                      on('change', function() {
+                        const value = $(this).find('select').val();
+                        const {elementId, draftId} = JSON.parse(atob(value));
+
+                        let hiddenInput = $(`#hidden-input-element-draft-${elementId}`);
+
+                        if (hiddenInput.length > 0) {
+                          hiddenInput.val(draftId);
+
+                          return;
+                        }
+
+                        $('#create-job-form').
+                            append(
+                                `<input id="hidden-input-element-draft-${elementId}" type="hidden" name="versions[${elementId}]" value="${draftId}"/>`);
+                      });
                 },
               });
         },
@@ -71,15 +114,14 @@ $(document).ready(function() {
       const entryIds = JSON.parse(selectedEntries);
       if (entryIds.length > 0) {
         Craft.elementIndex = new Craft.LiltElementIndex(
-            'craft\\elements\\Entry',
+            'lilthq\\craftliltplugin\\elements\\TranslateEntry',
             $('#page-container'), {
               elementTypeName: 'Entry',
               elementTypePluralName: 'Entries',
               context: 'index',
               storageKey: 'elementindex.craft\\elements\\Entry',
               criteria: {
-                siteId: $('#sourceSite').val(),
-                where: {
+                siteId: $('#sourceSite').val(), where: {
                   'elements.id': JSON.parse(selectedEntries),
                 },
               },
@@ -93,6 +135,60 @@ $(document).ready(function() {
                 if (Craft.elementIndex.getSelectedElementIds().length === 0) {
                   $('#entries-remove-action').css('visibility', 'hidden');
                 }
+              },
+              onUpdateElements: function() {
+                // PRE-SELECT VERSION
+                const version = JSON.parse(
+                    $('#create-job-selected-versions').val());
+                $('#entries-to-translate tbody tr').each(function() {
+                  const elementId = $(this).data('id');
+
+                  if (elementId === undefined) {
+                    return;
+                  }
+
+                  const draftId = version[elementId];
+
+                  if (draftId === undefined) {
+                    return;
+                  }
+                  const value = {
+                    elementId: parseInt(elementId), draftId: parseInt(draftId),
+                  };
+                  $(this).find('select').val(btoa(JSON.stringify(value)));
+
+                  let hiddenInput = $(`#hidden-input-element-draft-${elementId}`);
+
+                  if (hiddenInput.length > 0) {
+                    hiddenInput.val(draftId);
+
+                    return;
+                  }
+
+                  $('#create-job-form').
+                      append(
+                          `<input id="hidden-input-element-draft-${elementId}" type="hidden" name="versions[${elementId}]" value="${draftId}"/>`);
+
+                });
+
+                // UPDATE VERSIONS
+                $('#entries-to-translate .select-element-version').
+                    on('change', function() {
+                      const value = $(this).find('select').val();
+                      const {elementId, draftId} = JSON.parse(atob(value));
+
+                      let hiddenInput = $(`#hidden-input-element-draft-${elementId}`);
+
+                      if (hiddenInput.length > 0) {
+                        hiddenInput.val(draftId);
+
+                        return;
+                      }
+
+                      $('#create-job-form').
+                          append(
+                              `<input id="hidden-input-element-draft-${elementId}" type="hidden" name="versions[${elementId}]" value="${draftId}"/>`);
+                    });
               },
             });
 
@@ -110,10 +206,8 @@ $('#entries-remove-action').on('click', function() {
   const currentValue = $('.create-job-selected-entries').val();
   let alreadySelected = [];
   try {
-    alreadySelected = currentValue !== undefined && currentValue !==
-    ''
-        ? JSON.parse(
-            currentValue)
+    alreadySelected = currentValue !== undefined && currentValue !== ''
+        ? JSON.parse(currentValue)
         : [];
   } catch (e) {
     console.log(e);
@@ -128,6 +222,7 @@ $('#entries-remove-action').on('click', function() {
     $('#entries-to-translate-field div.elements').html('');
     $('#entries-to-translate').hide();
   }
+
   $('#entries-remove-action').css('visibility', 'hidden');
 
   $('.create-job-selected-entries').
@@ -135,8 +230,7 @@ $('#entries-remove-action').on('click', function() {
 
   if (alreadySelected.length > 0) {
     Craft.elementIndex.settings.criteria = {
-      siteId: $('#sourceSite').val(),
-      where: {
+      siteId: $('#sourceSite').val(), where: {
         'elements.id': alreadySelected,
       },
     };
@@ -153,13 +247,22 @@ $('#sourceSite').on('change', function(e) {
     $(this).removeClass('disabled');
   });
 
-  $('#targetSiteIds-field input.checkbox[value=' + $(this).val() + ']').prop('disabled', true).prop('checked', false);
+  $('#targetSiteIds-field input.checkbox[value=' + $(this).val() + ']').
+      prop('disabled', true).
+      prop('checked', false);
+});
+
+$(document).ready(function() {
+  $('#create-job-form .disabled').on('click', function() {
+    return false;
+  });
 });
 
 $(document).ready(function() {
   $('#sourceSite').on('change', function(e) {
 
-    if (Craft.elementIndex !== undefined && parseInt(Craft.elementIndex.siteId) !== parseInt($(this).val())) {
+    if (Craft.elementIndex !== undefined &&
+        parseInt(Craft.elementIndex.siteId) !== parseInt($(this).val())) {
       Craft.elementIndex.siteId = $(this).val();
       Craft.elementIndex.updateElements();
     }
@@ -197,8 +300,6 @@ $('#create-order-submit-form').on('click', function() {
   $('#create-job-form').submit();
 });
 
-$(document).ready(
-    function() {
-      $('#sourceSite').trigger('change');
-    },
-);
+$(document).ready(function() {
+  $('#sourceSite').trigger('change');
+});
