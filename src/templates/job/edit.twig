@@ -1,0 +1,55 @@
+{% extends "_layouts/cp" %}
+{% import '_includes/forms' as forms %}
+
+{% set title = "Job edit" %}
+
+{% set formActionUrl = cpUrl('craft-lilt-plugin/job/edit/' ~ element.id) %}
+
+{% set context = 'index' %}
+{% set elementType = 'craft\\elements\\Entry' %}
+{% set userElementType = 'craft\\elements\\User' %}
+{% set sources = craft.app.elementIndexes.getSources('craft\\elements\\Entry', 'index') %}
+{% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
+
+{% block actionButton %}
+    <div id="save-btn-container" class="submit">
+        <button id="create-order-submit-form" type="submit" class="btn submit">
+            Save job
+        </button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
+{% endblock %}
+
+{% set isRevision = false %}
+
+{% block settings %}
+    {{ forms.elementSelectField({
+        status: element.getAttributeStatus('authorId'),
+        label: "Author"|t('app'),
+        id: 'author',
+        name: 'author',
+        elementType: userElementType,
+        selectionLabel: "Choose"|t('app'),
+        criteria: authorOptionCriteria,
+        limit: 1,
+        elements: (author is defined and author ? [author]),
+    }) }}
+{% endblock %}
+
+{% set settingsHtml = (block('settings') ?? '')|trim %}
+{% set showStatusToggles = true %}
+{% set isMultiSiteElement = false %}
+{% set canEditMultipleSites = true %}
+{% set isRevision = false %}
+{% set isProvisionalDraft = false %}
+{% set isLikeCurrent = false %}
+{% set showNotes = false %}
+{% set isDraft = true %}
+{% set isCurrent = true %}
+
+{% block details %}
+    {% include 'craft-lilt-plugin/_components/job/_details.twig' %}
+{% endblock %}

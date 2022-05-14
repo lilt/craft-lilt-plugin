@@ -1,0 +1,20 @@
+{% extends "_layouts/cp" %}
+
+{% set title = "Settings" %}
+
+{% block actionButton %}
+    <a class="btn submit icon btn-create-new-order" style="margin-right: 5px;">{{ 'Save'|t }}</a>
+{% endblock %}
+
+{% block content %}
+    <div id="title-field" class="field width-100">
+        <div class="heading"><label id="title-label" for="title">API Token<span
+                        class="visually-hidden">Required</span><span class="required" aria-hidden="true"></span></label>
+        </div>
+        <div class="input ltr">
+            <input type="text" id="title" class="text fullwidth" name="title"
+                   value="{{ dotenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY') }}"
+                   maxlength="255" autofocus="" autocomplete="off" dir="ltr" disabled>
+        </div>
+    </div>
+{% endblock %}

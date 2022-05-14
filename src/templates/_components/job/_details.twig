@@ -1,0 +1,111 @@
+{% import '_includes/forms' as forms %}
+
+{% if notices ?? false %}
+    <div class="meta read-only warning">
+        {% for notice in notices %}
+            <p>{{ notice }}</p>
+            {% if not loop.last %}
+                <hr>{% endif %}
+        {% endfor %}
+    </div>
+{% endif %}
+
+    {% if settingsHtml %}
+        <div id="settings" class="meta">
+            {{ settingsHtml|raw }}
+        </div>
+        {% if showLiltTranslateButton %}
+            <div id="settings-lilt" class="meta">
+                <div id="translate-field" class="field" style="padding-top: 5px; padding-bottom: 5px">
+                    <div class="heading"><label for="author">Lilt Tranlsation</label></div>
+                    <a class="btn icon btn-create-new-order" href="{{ url(sendToLiltActionLink) }}"
+                       style="margin-right: 5px;">
+                        <span class="icon icon-mask"
+                              style="margin-right: 5px;margin-top: 5px">{{ svg('/app/vendor/lilthq/craft-lilt-plugin/src/icon-mask.svg') }}</span>
+                        {{ 'Translate'|t }}
+                    </a>
+
+                </div>
+            </div>
+        {% endif %}
+
+        {% set showLiltSyncButton = showLiltSyncButton ?? false %}
+        {% if showLiltSyncButton %}
+            <div id="settings-lilt" class="meta">
+                <div id="translate-field" class="field" style="padding-top: 5px; padding-bottom: 5px">
+                    <div class="heading"><label for="author">Lilt Tranlsation</label></div>
+                    <a class="btn icon btn-create-new-order" href="{{ url(syncFromLiltActionLink) }}"
+                       style="margin-right: 5px;">
+                        <span class="icon icon-mask"
+                              style="margin-right: 5px;margin-top: 5px">{{ svg('/app/vendor/lilthq/craft-lilt-plugin/src/icon-mask.svg') }}</span>
+                        {{ 'Fetch translate'|t }}
+                    </a>
+
+                </div>
+            </div>
+        {% endif %}
+
+    {% endif %}
+
+<div id="meta-details" class="meta read-only">
+    {% block meta %}
+        {% set metaElement = isProvisionalDraft ? element.getCanonical(true) : element %}
+        {% if isUnpublishedDraft %}
+            {% set statusColor = 'white' %}
+            {% set statusLabel = 'Draft'|t('app') %}
+        {% else %}
+            {% set status = element.getStatus() %}
+            {% set statusDef = element.statuses()[status] ?? null %}
+            {% set statusColor = statusDef.color ?? status %}
+            {% set statusLabel = statusDef.label ?? statusDef ?? status|ucfirst %}
+        {% endif %}
+        <div class="data">
+            <h5 class="heading">{{ 'Status'|t('app') }}</h5>
+            <div id="status-value" class="value">
+                {% if isUnpublishedDraft %}
+                    <span data-icon="draft"></span>
+                {% else %}
+                    <span class="status {{ statusColor }}"></span>
+                {% endif %}
+                <span>{{ statusLabel }}</span>
+            </div>
+        </div>
+        <div class="data">
+            <h5 class="heading">{{ "Created at"|t('app') }}</h5>
+            <div id="date-created-value" class="value">{{ metaElement.dateCreated|datetime('short') }}</div>
+        </div>
+        <div class="data">
+            <h5 class="heading">{{ "Updated at"|t('app') }}</h5>
+            <div id="date-updated-value" class="value">{{ metaElement.dateUpdated|datetime('short') }}</div>
+        </div>
+        {% if isRevision %}
+            {% set revisionNotes = element.revisionNotes %}
+        {% elseif isLikeCurrent and metaElement.currentRevision %}
+            {% set revisionNotes = metaElement.currentRevision.revisionNotes %}
+        {% else %}
+            {% set revisionNotes = null %}
+        {% endif %}
+
+        {% if (revisionNotes and showNotes) %}
+            <div class="data">
+                <h5 class="heading">{{ "Notes"|t('app') }}</h5>
+                <div class="value">{{ revisionNotes }}</div>
+            </div>
+        {% endif %}
+    {% endblock %}
+</div>
+
+{% if (showNotes and (isLikeCurrent and (hasRevisions ?? false) or isDraft)) %}
+    {{ forms.textarea({
+        id: 'notes',
+        class: ['nicetext'],
+        name: 'notes',
+        placeholder: 'Notes about your changes'|t('app'),
+        value: isCurrent ? (notes ?? null) : element.draftNotes,
+        inputAttributes: {
+            aria: {
+                label: 'Notes about your changes'|t('app'),
+            },
+        },
+    }) }}
+{% endif %}

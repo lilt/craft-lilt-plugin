@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
+
+declare(strict_types=1);
+
+namespace lilthq\craftliltplugin\services\job;
+
+use Craft;
+use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\exeptions\JobNotFoundException;
+use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\services\repositories\JobRepository;
+use RuntimeException;
+
+class EditJobHandler
+{
+    /**
+     * @var JobRepository
+     */
+    public $jobRepository;
+
+    public function __invoke(EditJobCommand $command): void
+    {
+        $job = $this->jobRepository->findOneById(
+            $command->getJobId()
+        );
+        $jobRecord = JobRecord::findOne(['id' => $command->getJobId()]);
+
+        if (!$job || !$jobRecord) {
+            Craft::error(
+                sprintf('Job with id %d not found', $command->getJobId())
+            );
+
+            throw new JobNotFoundException();
+        }
+
+        $job->title = $command->getTitle();
+        $job->sourceSiteId = $command->getSourceSiteId();
+
+        $job->sourceSiteLanguage = Craftliltplugin::getInstance()
+            ->languageMapper
+            ->getLanguageBySiteId(
+                $command->getSourceSiteId()
+            );
+
+        $job->targetSiteIds = $command->getTargetSitesIds();
+        $job->elementIds = $command->getEntries();
+        $job->dueDate = $command->getDueDate();
+
+        $jobRecord->setAttributes($job->getAttributes(), false);
+
+        $statusElement = Craft::$app->getElements()->saveElement(
+            $job,
+            true,
+            true,
+            true
+        );
+
+        $status = $jobRecord->save();
+
+        if (!$status || !$statusElement) {
+            throw new RuntimeException("Cant edit the job");
+        }
+    }
+}

@@ -1,0 +1,6 @@
+.target-languages-list [data-icon]:before {
+    padding: 5px;
+}
+.source-language[data-icon]:before {
+    padding: 5px;
+}

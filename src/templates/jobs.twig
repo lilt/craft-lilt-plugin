@@ -1,0 +1,21 @@
+{% set title = "Jobs" %}
+
+{% set elementType = 'lilthq\\craftliltplugin\\elements\\Job' %}
+
+{% extends '_layouts/elementindex.html' %}
+
+{% block actionButton %}
+    <a class="btn big submit icon btn-create-new-order" data-icon="language" href="{{ url('craft-lilt-plugin/job/create') }}">{{ 'New job'|t }}</a>
+{% endblock %}
+
+{% block initJs %}
+    Craft.elementIndex = Craft.createElementIndex('{{ elementType|e("js") }}', $('#page-container'), {
+    elementTypeName: '{{ elementInstance.displayName()|e("js") }}',
+    elementTypePluralName: '{{ elementInstance.pluralDisplayName()|e("js") }}',
+    context: '{{ context }}',
+    storageKey: 'elementindex.{{ elementType|e("js") }}',
+    criteria: Craft.defaultIndexCriteria,
+    toolbarSelector: '#toolbar',
+    canHaveDrafts: {{ (canHaveDrafts ?? false) ? 'true' : 'false' }},
+    });
+{% endblock %}
