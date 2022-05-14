@@ -40,6 +40,12 @@ class JobQuery extends ElementQuery
                 if (!empty($element->dueDate)) {
                     $element->dueDate = new DateTime($element->dueDate);
                 }
+                if (!empty($element->liltJobId)) {
+                    $element->liltJobId = (int)$element->liltJobId;
+                }
+                if (!empty($element->sourceSiteId)) {
+                    $element->sourceSiteId = (int)$element->sourceSiteId;
+                }
                 return $element;
             },
             $elements
