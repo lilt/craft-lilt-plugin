@@ -13,12 +13,14 @@ use DateTimeInterface;
 
 class EditJobCommand
 {
+    //TODO: refactor to use JobModel ._.
     private $jobId;
     private $title;
     private $entries;
     private $sourceSiteId;
     private $targetSitesIds;
     private $dueDate;
+    private $versions;
 
     public function __construct(
         int $jobId,
@@ -26,7 +28,8 @@ class EditJobCommand
         array $entries,
         array $targetSitesIds,
         int $sourceSiteId,
-        DateTimeInterface $dueDate
+        DateTimeInterface $dueDate,
+        array $versions
     ) {
         $this->jobId = $jobId;
         $this->title = $title;
@@ -34,6 +37,7 @@ class EditJobCommand
         $this->targetSitesIds = $targetSitesIds;
         $this->sourceSiteId = $sourceSiteId;
         $this->dueDate = $dueDate;
+        $this->versions = $versions;
 
         //Remove source site from target site if it is there
         if (in_array($this->sourceSiteId, $this->targetSitesIds, true)) {
@@ -69,5 +73,15 @@ class EditJobCommand
     public function getTargetSitesIds(): array
     {
         return $this->targetSitesIds;
+    }
+
+    public function getVersions(): array
+    {
+        return $this->versions;
+    }
+
+    public function setVersions(array $versions): void
+    {
+        $this->versions = $versions;
     }
 }

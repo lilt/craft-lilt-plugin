@@ -50,6 +50,7 @@ class EditJobHandler
         $job->targetSiteIds = $command->getTargetSitesIds();
         $job->elementIds = $command->getEntries();
         $job->dueDate = $command->getDueDate();
+        $job->versions = $command->getVersions();
 
         $jobRecord->setAttributes($job->getAttributes(), false);
 

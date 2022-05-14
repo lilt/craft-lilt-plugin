@@ -33,6 +33,7 @@ class CreateJobHandler
 
         $element->targetSiteIds = $command->getTargetSitesIds();
         $element->elementIds = $command->getEntries();
+        $element->versions = $command->getVersions();
         $element->dueDate = $command->getDueDate();
         $element->draftId = null;
         $element->revisionId = null;

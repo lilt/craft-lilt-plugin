@@ -45,9 +45,17 @@ class SendJobToLiltConnectorHandler
         );
 
         $translationRecords = [];
+        $versions = $job->getVersions();
 
         foreach ($elementIdsToTranslate as $elementId) {
-            $element = Craft::$app->elements->getElementById($elementId, null, $job->sourceSiteId);
+
+            if(isset($versions[$elementId]) && $versions[$elementId] === 'null') {
+                $versions[$elementId] = null;
+            }
+
+            $versionId = (int) ($versions[$elementId] ?? $elementId);
+
+            $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
 
             if (!$element) {
                 //TODO: handle
@@ -58,13 +66,9 @@ class SendJobToLiltConnectorHandler
                 $element
             );
 
-            #$content = Craftliltplugin::getInstance()->expandedContentProvider->provide(
-            #    $element
-            #);
-
             $this->createJobFile(
                 $content,
-                $elementId,
+                $versionId,
                 $jobLilt->getId(),
                 Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
                 $targetLanguages,
@@ -73,10 +77,11 @@ class SendJobToLiltConnectorHandler
 
             $translationRecords[] = array_values(
                 array_map(
-                    static function (int $targetSiteId) use ($job, $content, $elementId) {
+                    static function (int $targetSiteId) use ($job, $content, $elementId, $versionId) {
                         return new TranslationRecord([
                             'jobId' => $job->id,
                             'elementId' => $elementId,
+                            'versionId' => $versionId,
                             'sourceSiteId' => $job->sourceSiteId,
                             'targetSiteId' => $targetSiteId,
                             'sourceContent' => $content,
