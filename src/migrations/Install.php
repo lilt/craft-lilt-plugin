@@ -35,7 +35,7 @@ class Install extends Migration
             'uid' => $this->uid()
         ]);
 
-        $this->createTable('{{%lilt_translations}}', [
+        $this->createTable(CraftliltpluginParameters::TRANSLATION_TABLE_NAME, [
             'id' => $this->primaryKey()->unsigned(),
             'uid' => $this->uid(),
             'jobId' => $this->integer()->unsigned()->null(),
@@ -52,6 +52,25 @@ class Install extends Migration
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
         ]);
+
+        $this->createTable(CraftliltpluginParameters::I18N_TABLE_NAME, [
+            'id' => $this->primaryKey()->unsigned(),
+            'uid' => $this->uid(),
+            'sourceSiteId' => $this->integer()->unsigned()->null(),
+            'targetSiteId' => $this->integer()->unsigned()->null(),
+            'source' => $this->text(),
+            'target' => $this->text(),
+            'hash' => $this->string(32),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+        ]);
+
+        $this->createIndex(
+            null,
+            CraftliltpluginParameters::I18N_TABLE_NAME,
+            ['sourceSiteId', 'targetSiteId', 'hash'],
+            true
+        );
 
         $this->createIndex(
             null,
@@ -78,5 +97,6 @@ class Install extends Migration
     {
         $this->dropTableIfExists(CraftliltpluginParameters::TRANSLATION_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
+        $this->dropTableIfExists(CraftliltpluginParameters::I18N_TABLE_NAME);
     }
 }
