@@ -11,7 +11,6 @@ namespace lilthq\craftliltplugin\services\appliers;
 
 use Craft;
 use craft\base\ElementInterface;
-use craft\elements\db\ElementQueryInterface;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\MatrixBlock;
 use craft\errors\InvalidFieldException;
@@ -23,7 +22,8 @@ use craft\redactor\Field as RedactorPluginField;
 use \craft\services\Drafts as DraftRepository;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
-use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exeptions\DraftNotFoundException;
+use lilthq\craftliltplugin\records\I18NRecord;
 use Throwable;
 
 class ElementTranslatableContentApplier
@@ -37,18 +37,25 @@ class ElementTranslatableContentApplier
      * @throws Throwable
      * @throws InvalidFieldException
      */
-    public function apply(ElementInterface $element, Job $job, array $content, string $targetLanguage): ElementInterface
+    public function apply(TranslationApplyCommand $translationApplyCommand): ElementInterface
     {
         $newAttributes = [];
+        $i18NRecords = [];
+
+        $content = $translationApplyCommand->getContent();
 
         $draft = $this->draftRepository->createDraft(
-            $element->getIsDraft() ? Craft::$app->elements->getElementById($element->getCanonicalId()) : $element,
+            $translationApplyCommand->getElement()->getIsDraft() ? Craft::$app->elements->getElementById(
+                $translationApplyCommand->getElement()->getCanonicalId()
+            ) : $translationApplyCommand->getElement(),
             Craft::$app->getUser()->getId(),
             sprintf(
                 '%s [%s -> %s] ' . (new DateTime())->format('H:i:s'),
-                $job->title,
-                Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
-                $targetLanguage
+                $translationApplyCommand->getJob()->title,
+                Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                    (int)$translationApplyCommand->getJob()->sourceSiteId
+                ),
+                $translationApplyCommand->getTargetLanguage()
             ),
             $notes = null,
             $newAttributes,
@@ -58,8 +65,15 @@ class ElementTranslatableContentApplier
         $draftElement = Craft::$app->elements->getElementById(
             $draft->getId(),
             null,
-            Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage)
+            Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage(
+                $translationApplyCommand->getTargetLanguage()
+            )
         );
+
+        if (!$draftElement) {
+            //TODO: handle?
+            throw new DraftNotFoundException();
+        }
 
         if (!empty($draftElement->title) && $draftElement->getIsTitleTranslatable()) {
             $draftElement->title = $content['title'];
@@ -123,31 +137,74 @@ class ElementTranslatableContentApplier
                  */
                 foreach ($matrixBlockQuery->all() as $block) {
                     foreach ($block->getFieldLayout()->getFields() as $blockField) {
+                        $blockId = $block->getCanonicalId();
+
                         if ($blockField instanceof Table) {
-                            $tableSource = $content[$fieldData->handle][$block->getCanonicalId()]['fields'][$blockField->handle];
+                            $tableSource = $content[$fieldData->handle][$blockId]['fields'][$blockField->handle]['content'];
                             foreach ($blockField->columns as $column => $columnData) {
                                 foreach ($tableSource as $rowId => $rows) {
                                     $tableSource[$rowId][$column] = $tableSource[$rowId][$columnData['handle']];
                                 }
                             }
-                            $content[$fieldData->handle][$block->getCanonicalId()]['fields'][$blockField->handle] = $tableSource;
+                            $content[$fieldData->handle][$blockId]['fields'][$blockField->handle]['content'] = $tableSource;
+
+                            if(isset($content[$fieldData->handle][$blockId]['fields'][$blockField->handle]['columns'])) {
+                                $columns = $content[$fieldData->handle][$blockId]['fields'][$blockField->handle]['columns'];
+                                foreach ($blockField->columns as $column) {
+                                    $translation = [
+                                        'target' => $columns[$column['handle']],
+                                        'source' => $column['heading'],
+                                        'sourceSiteId' => $translationApplyCommand->getSourceSiteId(),
+                                        'targetSiteId' => $translationApplyCommand->getTargetSiteId(),
+                                    ];
+
+                                    $translation['hash'] = md5(json_encode($translation));
+
+
+                                    $record = new I18NRecord();
+                                    $record->target = $translation['target'];
+                                    $record->source = $translation['source'];
+                                    $record->sourceSiteId = $translation['sourceSiteId'];
+                                    $record->targetSiteId = $translation['targetSiteId'];
+                                    $record->hash = $translation['hash'];
+
+                                    $i18NRecords[$record->hash] = $record;
+                                }
+                            }
+
+                            $content[$fieldData->handle][$blockId]['fields'][$blockField->handle] = $content[$fieldData->handle][$blockId]['fields'][$blockField->handle]['content'];
                         }
 
                         if ($blockField instanceof RadioButtons) {
                             $options = $blockField->options;
 
-                            if(!isset($content[$fieldData->handle][$block->getCanonicalId()]['fields'][$blockField->handle])) {
+                            if (!isset(
+                                $content[$fieldData->handle][$blockId]['fields'][$blockField->handle]
+                            )) {
                                 continue;
                             }
 
-                            $optionsTranslated = $content[$fieldData->handle][$block->getCanonicalId()]['fields'][$blockField->handle];
+                            $optionsTranslated = $content[$fieldData->handle][$blockId]['fields'][$blockField->handle];
 
-                            $translations = [];
                             foreach ($options as $option) {
-                                $translations[] = [
+                                $translation = [
                                     'target' => $optionsTranslated[$option['value']],
                                     'source' => $option['label'],
+                                    'sourceSiteId' => $translationApplyCommand->getSourceSiteId(),
+                                    'targetSiteId' => $translationApplyCommand->getTargetSiteId(),
                                 ];
+
+                                $translation['hash'] = md5(json_encode($translation));
+
+
+                                $record = new I18NRecord();
+                                $record->target = $translation['target'];
+                                $record->source = $translation['source'];
+                                $record->sourceSiteId = $translation['sourceSiteId'];
+                                $record->targetSiteId = $translation['targetSiteId'];
+                                $record->hash = $translation['hash'];
+
+                                $i18NRecords[$record->hash] = $record;
                             }
 
                             continue;
@@ -166,11 +223,22 @@ class ElementTranslatableContentApplier
                     );
                 }
 
-                $normilized = $field->normalizeValue($serializedData);
-
                 $draftElement->setFieldValue($fieldData->handle, $serializedData);
+            }
+        }
 
-                continue;
+        if (!empty($i18NRecords)) {
+            //SAVE I18NRecords TODO: move to repository
+            $exists = I18NRecord::findAll([
+                'hash' => array_keys($i18NRecords),
+            ]);
+
+            foreach ($exists as $exist) {
+                unset($i18NRecords[$exist->hash]);
+            }
+
+            foreach ($i18NRecords as $i18NRecord) {
+                $i18NRecord->save();
             }
         }
 
@@ -194,7 +262,7 @@ class ElementTranslatableContentApplier
             }
 
             if (is_array($newItem)) {
-                if(isset($original[$key]) && !is_array($original[$key])) {
+                if (isset($original[$key]) && !is_array($original[$key])) {
                     continue;
                 }
 

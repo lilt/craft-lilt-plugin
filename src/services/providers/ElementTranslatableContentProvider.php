@@ -11,13 +11,10 @@ namespace lilthq\craftliltplugin\services\providers;
 
 use Craft;
 use craft\base\ElementInterface;
-use craft\elements\db\MatrixBlockQuery;
-use craft\elements\MatrixBlock;
+use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
-use craft\fields\Matrix;
-use craft\fields\PlainText;
-use craft\redactor\Field as RedactorPluginField;
-use craft\redactor\FieldData as RedactorPluginFieldData;
+use craft\fields\RadioButtons;
+use craft\fields\Table;
 use lilthq\craftliltplugin\Craftliltplugin;
 
 class ElementTranslatableContentProvider
@@ -58,7 +55,8 @@ class ElementTranslatableContentProvider
             $fieldDataKey = $fieldData->handle;
 
             $content[$fieldDataKey] = Craftliltplugin::getInstance()->fieldContentProvider->provide(
-                $element, $fieldData
+                $element,
+                $fieldData
             );
 
             if ($content[$fieldDataKey] === null) {
@@ -66,93 +64,52 @@ class ElementTranslatableContentProvider
             }
         }
 
-        return [
-            $elementKey => $content
-        ];
+        if ($element instanceof Entry) {
+            $content = $this->clearDuplicates($element->id, $content);
+        }
+        return [$elementKey => $content];
     }
 
-    /**
-     * @throws InvalidFieldException
-     */
-    public function provideOld(ElementInterface $element): array
+    private $staticContent = [];
+
+    private function clearDuplicates(int $elementId, array $content): array
     {
-        $content = [];
-
-        $elementKey = $element->getId();
-
-        if (!empty($element->title) && $element->getIsTitleTranslatable()) {
-            $content['title'] = $element->title;
-        }
-
-        if (!empty($element->slug)) {
-            $content['slug'] = $element->slug;
-        }
-
-        $fieldLayout = $element->getFieldLayout();
-
-        if ($fieldLayout === null) {
-            //TODO: log issue
-        }
-
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
-
-        foreach ($fields as $field) {
-            $fieldData = Craft::$app->fields->getFieldById((int)$field->id);
-
-            if ($fieldData === null) {
-                //TODO: log issue
+        foreach ($content as $key => $item) {
+            if (!is_array($item)) {
                 continue;
             }
 
-            $fieldDataKey = $fieldData->handle;
-
-            $content[$fieldDataKey] = null;
-
-            if ($fieldData instanceof PlainText && $fieldData->getIsTranslatable($element)) {
-                $content[$fieldDataKey] = $element->getFieldValue($fieldData->handle);
-
-                continue;
-            }
-
-            if ($fieldData instanceof RedactorPluginField && $fieldData->getIsTranslatable($element)) {
-                /**
-                 * @var RedactorPluginFieldData $redactorFieldData
-                 */
-                $redactorFieldData = $element->getFieldValue($fieldData->handle);
-                $content[$fieldDataKey] = $redactorFieldData->getRawContent();
-
-                continue;
-            }
-
-            if ($fieldData instanceof Matrix) {
-                /**
-                 * @var MatrixBlockQuery $fieldValue
-                 */
-                $matrixBlockQuery = $element->getFieldValue($fieldData->handle);
-
-                /**
-                 * @var MatrixBlock[] $blockElements
-                 */
-                $blockElements = $matrixBlockQuery->all();
-                $blocksContent = [];
-
-                foreach ($blockElements as $blockElement) {
-                    $blockId = $blockElement->getId();
-                    $blocksContent[$blockId]['fields'] = $this->provide($blockElement)[$blockId];
+            if (isset($item['class']) && $item['class'] === RadioButtons::class) {
+                if (isset($this->staticContent[$elementId][$item['class']][$item['fieldId']])) {
+                    unset($content[$key]);
+                    continue;
                 }
 
-                $content[$fieldDataKey] = $blocksContent;
+                $this->staticContent[$elementId][$item['class']][$item['fieldId']] = true;
 
+                unset($item['class'], $item['fieldId']);
+
+                $content[$key] = $item['content'];
                 continue;
             }
 
-            if ($content[$fieldDataKey] === null) {
-                unset($content[$fieldDataKey]);
+            if (isset($item['class']) && $item['class'] === Table::class) {
+                if (isset($this->staticContent[$elementId][$item['class']][$item['fieldId']])) {
+                    unset($content[$key]['columns'], $content[$key]['class'], $content[$key]['fieldId']);
+                    continue;
+                }
+
+                $this->staticContent[$elementId][$item['class']][$item['fieldId']] = true;
+
+                unset($item['class'], $item['fieldId']);
+
+                $content[$key] = $item;
+                continue;
             }
+
+            $content[$key] = $this->clearDuplicates($elementId, $item);
         }
 
-        return [
-            $elementKey => $content
-        ];
+        return $content;
     }
 }
