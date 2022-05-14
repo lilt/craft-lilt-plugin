@@ -12,9 +12,15 @@
 namespace lilthq\craftliltplugin;
 
 use Craft;
+use craft\base\Element;
 use craft\base\Plugin;
+use craft\events\RegisterElementDefaultTableAttributesEvent;
+use craft\events\RegisterElementTableAttributesEvent;
 use craft\events\RegisterUrlRulesEvent;
-use craft\helpers\Queue;
+use craft\fields\Matrix;
+use craft\fields\PlainText;
+use craft\fields\RadioButtons;
+use craft\fields\Table;
 use craft\web\UrlManager;
 use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
@@ -22,9 +28,10 @@ use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
+use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\job\CreateJobHandler;
 use lilthq\craftliltplugin\services\job\EditJobHandler;
@@ -34,15 +41,23 @@ use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\ExpandedContentProvider;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
+use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\MatrixFieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
+use lilthq\craftliltplugin\services\providers\field\RadioButtonsContentProvider;
+use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
+use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 use craft\events\RegisterComponentTypesEvent;
 use craft\services\Elements;
+use craft\redactor\Field as RedactorPluginField;
 
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
@@ -74,8 +89,12 @@ use craft\services\Elements;
  * @property TranslationsApi $connectorTranslationsApi
  * @property LanguageMapper $languageMapper
  * @property ElementTranslatableContentProvider $elementTranslatableContentProvider
+ * @property FieldContentProvider $fieldContentProvider
  * @property ExpandedContentProvider $expandedContentProvider
  * @property ElementTranslatableContentApplier $elementTranslatableContentApplier
+ * @property FieldContentApplier $fieldContentApplier
+ * @property I18NRepository $i18NRepository
+ * @property LoadI18NHandler $loadI18NHandler
  */
 class Craftliltplugin extends Plugin
 {
@@ -158,6 +177,7 @@ class Craftliltplugin extends Plugin
                 $event->rules['GET ' . CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-send-to-lilt/invoke';
                 $event->rules['GET ' . CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-sync-from-lilt/invoke';
                 $event->rules['GET craft-lilt-plugin'] = 'craft-lilt-plugin/index/index';
+                $event->rules['GET craft-lilt-plugin/jobs'] = 'craft-lilt-plugin/jobs/index';
                 $event->rules['craft-lilt-plugin'] = 'craft-lilt-plugin/job/get-translation-review/invoke';
             }
         );
@@ -169,6 +189,39 @@ class Craftliltplugin extends Plugin
                 $event->types[] = Job::class;
             }
         );
+
+
+        Event::on(
+            Element::class,
+            Element::EVENT_REGISTER_DEFAULT_TABLE_ATTRIBUTES,
+            function (RegisterElementDefaultTableAttributesEvent $event) {
+                $params = Craft::$app->getRequest()->getBodyParams();
+
+                if ($params['elementType'] === 'lilthq\craftliltplugin\elements\TranslateEntry') {
+                    $expiryDateKey = array_search('expiryDate', $event->tableAttributes);
+
+                    if ($expiryDateKey !== false) {
+                        unset($event->tableAttributes[$expiryDateKey]);
+                    }
+
+                    $event->tableAttributes = array_merge(['drafts'], $event->tableAttributes);
+                }
+            }
+        );
+
+        Event::on(
+            Element::class,
+            Element::EVENT_REGISTER_TABLE_ATTRIBUTES,
+            function (RegisterElementTableAttributesEvent $event) {
+                $params = Craft::$app->getRequest()->getBodyParams();
+
+                if (!empty($params['elementType']) && isset($event->tableAttributes['drafts']['label']) && $params['elementType'] === 'lilthq\craftliltplugin\elements\TranslateEntry') {
+                    $event->tableAttributes['drafts']['label'] = 'Version';
+                }
+            }
+        );
+
+        $this->loadI18NHandler->__invoke();
 
         Craft::info(
             Craft::t(
@@ -223,6 +276,7 @@ class Craftliltplugin extends Plugin
             'languageMapper' => LanguageMapper::class,
             'jobRepository' => JobRepository::class,
             'translationRepository' => TranslationRepository::class,
+            'i18NRepository' => I18NRepository::class,
         ]);
 
         $this->set(
@@ -296,6 +350,50 @@ class Craftliltplugin extends Plugin
                 'class' => EditJobHandler::class,
                 'jobRepository' => $this->jobRepository,
             ]
+        );
+
+        $getProvidersMap = function () {
+            return [
+                Matrix::class => new MatrixFieldContentProvider($this->elementTranslatableContentProvider),
+                PlainText::class => new PlainTextContentProvider(),
+                RedactorPluginField::class => new RedactorPluginFieldContentProvider(),
+                Table::class => new TableContentProvider(),
+                RadioButtons::class => new RadioButtonsContentProvider(),
+            ];
+        };
+
+        $this->set(
+            'fieldContentProvider',
+            [
+                'class' => FieldContentProvider::class,
+                'providersMap' => $getProvidersMap(),
+            ]
+        );
+
+        $getAppliersMap = function () {
+            return [
+                Matrix::class => new MatrixFieldContentProvider($this->elementTranslatableContentProvider),
+                PlainText::class => new PlainTextContentProvider(),
+                RedactorPluginField::class => new RedactorPluginFieldContentProvider(),
+                Table::class => new TableContentProvider(),
+                RadioButtons::class => new RadioButtonsContentProvider(),
+            ];
+        };
+
+        $this->set(
+            'fieldContentApplier',
+            [
+                'class' => FieldContentApplier::class,
+                'appliersMap' => $getAppliersMap(),
+            ]
+        );
+        $this->set(
+            'loadI18NHandler',
+            function () {
+                return new LoadI18NHandler(
+                    Craft::$app->i18n
+                );
+            }
         );
     }
 }
