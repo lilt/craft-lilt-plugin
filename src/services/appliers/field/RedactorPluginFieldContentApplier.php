@@ -24,6 +24,8 @@ class RedactorPluginFieldContentApplier extends AbstractContentApplier implement
                 $content[$this->getFieldKey($command->getField())]
             );
 
+        $this->forceSave($command);
+
         return ApplyContentResult::applied();
     }
 

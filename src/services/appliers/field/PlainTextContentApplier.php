@@ -18,6 +18,9 @@ class PlainTextContentApplier extends AbstractContentApplier implements ApplierI
         }
 
         $command->getElement()->setFieldValue($command->getField()->handle, $content[$fieldKey]);
+
+        $this->forceSave($command);
+
         return ApplyContentResult::applied();
     }
 

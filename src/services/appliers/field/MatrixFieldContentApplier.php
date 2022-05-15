@@ -59,42 +59,15 @@ class MatrixFieldContentApplier extends AbstractContentApplier implements Applie
             }
         }
 
+        $i18NRecords = !empty($i18NRecords) ? array_merge(...$i18NRecords) : [];
+
         return ApplyContentResult::applied(
-            array_merge(...$i18NRecords)
+            $i18NRecords
         );
     }
 
     public function support(ApplyContentCommand $command): bool
     {
         return $command->getField() instanceof Matrix;
-    }
-
-    private function merge(array $original, array $new): array
-    {
-        foreach ($new as $key => $newItem) {
-            if (!array_key_exists(
-                $key,
-                $original
-            )) { //TODO: looks like content can be empty? Is it change? || empty($original[$key])) {
-                //TODO: log issue? How we can't have key in original?
-                $original[$key] = $newItem;
-                continue;
-            }
-
-            if (is_array($newItem)) {
-                if (isset($original[$key]) && !is_array($original[$key])) {
-                    continue;
-                }
-
-                $original[$key] = $this->merge($original[$key] ?? [], $newItem);
-
-                continue;
-            }
-
-            $original[$key] = $newItem;
-        }
-
-        return $original;
-        #return array_merge_recursive($original, $new);
     }
 }

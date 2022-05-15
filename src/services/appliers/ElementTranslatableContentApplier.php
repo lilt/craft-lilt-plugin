@@ -94,7 +94,7 @@ class ElementTranslatableContentApplier
             $i18NRecords[] = $result->getI18nRecords();
         }
 
-        $i18NRecords = array_merge(...$i18NRecords);
+        $i18NRecords = !empty($i18NRecords) ? array_merge(...$i18NRecords) : [];
 
         if (!empty($i18NRecords)) {
             //SAVE I18NRecords TODO: move to repository

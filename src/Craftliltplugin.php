@@ -11,6 +11,7 @@
 
 namespace lilthq\craftliltplugin;
 
+use benf\neo\Field;
 use Craft;
 use craft\base\Element;
 use craft\base\Plugin;
@@ -36,6 +37,7 @@ use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\BaseOptionFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\MatrixFieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\NeoFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RadioButtonsContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
@@ -53,6 +55,7 @@ use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
 use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\MatrixFieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\NeoFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
 use lilthq\craftliltplugin\services\providers\field\RadioButtonsContentProvider;
 use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
@@ -134,7 +137,28 @@ class Craftliltplugin extends Plugin
      *
      * @var bool
      */
-    public $hasCpSettings = false;
+    public $hasCpSettings = true;
+
+    /*
+    public function getSettingsResponse()
+    {
+        return \Craft::$app
+            ->controller
+            ->renderTemplate('my-plugin-handle/settings/template');
+    }
+
+    protected function createSettingsModel()
+    {
+        return new \mynamespace\models\Settings();
+    }
+        */
+    /*protected function settingsHtml()
+    {
+        return \Craft::$app->getView()->renderTemplate(
+            'craft-lilt-plugin/settings',
+            [ 'settings' => $this->getSettings() ]
+        );
+    }*/
 
     /**
      * Set to `true` if the plugin should have its own section (main nav item) in the control panel.
@@ -366,6 +390,9 @@ class Craftliltplugin extends Plugin
                 Dropdown::class => new BaseOptionFieldContentProvider(),
                 MultiSelect::class => new BaseOptionFieldContentProvider(),
                 Checkboxes::class => new BaseOptionFieldContentProvider(),
+
+                #Neo Plugin
+                Field::class => new NeoFieldContentProvider(),
             ];
         };
 
@@ -389,6 +416,9 @@ class Craftliltplugin extends Plugin
                 Dropdown::class => new BaseOptionFieldContentApplier(),
                 MultiSelect::class => new BaseOptionFieldContentApplier(),
                 Checkboxes::class => new BaseOptionFieldContentApplier(),
+
+                #Neo Plugin
+                Field::class => new NeoFieldContentApplier(),
             ];
         };
 

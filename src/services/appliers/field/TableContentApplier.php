@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
+use benf\neo\elements\Block;
 use craft\elements\MatrixBlock;
 use craft\fields\Table;
 
@@ -56,16 +57,7 @@ class TableContentApplier extends AbstractContentApplier implements ApplierInter
 
         $command->getElement()->setFieldValue($field->handle, $serializedData);
 
-        if($command->getElement() instanceof MatrixBlock) {
-            $success = \Craft::$app->elements->saveElement(
-                $command->getElement()
-            );
-
-            if(!$success) {
-                //TODO interesting? Is it possible?
-                ApplyContentResult::fail();
-            }
-        }
+        $this->forceSave($command);
 
         return ApplyContentResult::applied($i18NRecords);
     }
