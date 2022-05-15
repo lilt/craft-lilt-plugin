@@ -17,7 +17,10 @@ use craft\base\Plugin;
 use craft\events\RegisterElementDefaultTableAttributesEvent;
 use craft\events\RegisterElementTableAttributesEvent;
 use craft\events\RegisterUrlRulesEvent;
+use craft\fields\Checkboxes;
+use craft\fields\Dropdown;
 use craft\fields\Matrix;
+use craft\fields\MultiSelect;
 use craft\fields\PlainText;
 use craft\fields\RadioButtons;
 use craft\fields\Table;
@@ -46,6 +49,7 @@ use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\ExpandedContentProvider;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
+use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\MatrixFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
@@ -355,7 +359,12 @@ class Craftliltplugin extends Plugin
                 PlainText::class => new PlainTextContentProvider(),
                 RedactorPluginField::class => new RedactorPluginFieldContentProvider(),
                 Table::class => new TableContentProvider(),
-                RadioButtons::class => new RadioButtonsContentProvider(),
+
+                # Options
+                RadioButtons::class => new BaseOptionFieldContentProvider(),
+                Dropdown::class => new BaseOptionFieldContentProvider(),
+                MultiSelect::class => new BaseOptionFieldContentProvider(),
+                Checkboxes::class => new BaseOptionFieldContentProvider(),
             ];
         };
 

@@ -7,20 +7,21 @@ namespace lilthq\craftliltplugin\services\providers\field;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\errors\InvalidFieldException;
+use craft\fields\BaseOptionsField;
+use craft\fields\data\MultiOptionsFieldData;
 use craft\fields\data\SingleOptionFieldData;
-use craft\fields\RadioButtons;
 
-class RadioButtonsContentProvider extends AbstractContentProvider
+class BaseOptionFieldContentProvider extends AbstractContentProvider
 {
     /**
      * @throws InvalidFieldException
      */
     public function provide(ElementInterface $element, FieldInterface $field): ?array
     {
-        assert($field instanceof RadioButtons);
+        assert($field instanceof BaseOptionsField);
 
         /**
-         * @var SingleOptionFieldData $value
+         * @var SingleOptionFieldData|MultiOptionsFieldData $value
          */
         $value = $element->getFieldValue($field->handle);
 

@@ -13,6 +13,9 @@ use Craft;
 use craft\base\ElementInterface;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
+use craft\fields\Checkboxes;
+use craft\fields\Dropdown;
+use craft\fields\MultiSelect;
 use craft\fields\RadioButtons;
 use craft\fields\Table;
 use lilthq\craftliltplugin\Craftliltplugin;
@@ -79,7 +82,12 @@ class ElementTranslatableContentProvider
                 continue;
             }
 
-            if (isset($item['class']) && $item['class'] === RadioButtons::class) {
+            if (isset($item['class'])
+                && ($item['class'] === RadioButtons::class
+                    || $item['class'] === Dropdown::class
+                    || $item['class'] === MultiSelect::class
+                    || $item['class'] === Checkboxes::class
+                )) {
                 if (isset($this->staticContent[$elementId][$item['class']][$item['fieldId']])) {
                     unset($content[$key]);
                     continue;
