@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
+use craft\fields\BaseOptionsField;
+use craft\fields\data\MultiOptionsFieldData;
+use craft\fields\data\SingleOptionFieldData;
 use craft\fields\RadioButtons;
 
-class RadioButtonsContentApplier extends AbstractContentApplier implements ApplierInterface
+class BaseOptionFieldContentApplier extends AbstractContentApplier implements ApplierInterface
 {
     public function apply(ApplyContentCommand $command): ApplyContentResult
     {
@@ -20,14 +23,18 @@ class RadioButtonsContentApplier extends AbstractContentApplier implements Appli
             return ApplyContentResult::fail();
         }
 
+        /**
+         * @var SingleOptionFieldData|MultiOptionsFieldData $value
+         */
+        $value = $command->getElement()->getFieldValue($field->handle);
+        $options = $value->getOptions();
 
-        $options = $command->getField()->options;
         $optionsTranslated = $content[$field->handle];
 
         foreach ($options as $option) {
             $translation = [
-                'target' => $optionsTranslated[$option['value']],
-                'source' => $option['label'],
+                'target' => $optionsTranslated[$option->value],
+                'source' => $option->label,
                 'sourceSiteId' => $command->getSourceSiteId(),
                 'targetSiteId' => $command->getTargetSiteId(),
             ];
@@ -41,7 +48,7 @@ class RadioButtonsContentApplier extends AbstractContentApplier implements Appli
 
     public function support(ApplyContentCommand $command): bool
     {
-        return $command->getField() instanceof RadioButtons
+        return $command->getField() instanceof BaseOptionsField
             && $command->getField()->getIsTranslatable($command->getElement());
     }
 }

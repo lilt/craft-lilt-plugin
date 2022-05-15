@@ -33,6 +33,7 @@ use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\BaseOptionFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\MatrixFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
@@ -382,7 +383,12 @@ class Craftliltplugin extends Plugin
                 PlainText::class => new PlainTextContentApplier(),
                 RedactorPluginField::class => new RedactorPluginFieldContentApplier(),
                 Table::class => new TableContentApplier(),
-                RadioButtons::class => new RadioButtonsContentApplier(),
+
+                # Options
+                RadioButtons::class => new BaseOptionFieldContentApplier(),
+                Dropdown::class => new BaseOptionFieldContentApplier(),
+                MultiSelect::class => new BaseOptionFieldContentApplier(),
+                Checkboxes::class => new BaseOptionFieldContentApplier(),
             ];
         };
 
