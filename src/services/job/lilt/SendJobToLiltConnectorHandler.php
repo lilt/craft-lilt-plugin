@@ -48,8 +48,7 @@ class SendJobToLiltConnectorHandler
         $versions = $job->getVersions();
 
         foreach ($elementIdsToTranslate as $elementId) {
-
-            if(isset($versions[$elementId]) && $versions[$elementId] === 'null') {
+            if (isset($versions[$elementId]) && $versions[$elementId] === 'null') {
                 $versions[$elementId] = null;
             }
 

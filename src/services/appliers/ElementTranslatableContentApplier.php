@@ -87,7 +87,7 @@ class ElementTranslatableContentApplier
                 $command
             );
 
-            if(!$result->isApplied()) {
+            if (!$result->isApplied()) {
                 //TODO: is it possible?
             }
 
@@ -154,7 +154,7 @@ class ElementTranslatableContentApplier
             )
         );
 
-        if(!$draftElement){
+        if (!$draftElement) {
             //TODO: freshly created not found? Is it possible?
             throw new DraftNotFoundException();
         }

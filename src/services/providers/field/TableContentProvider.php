@@ -19,7 +19,7 @@ class TableContentProvider extends AbstractContentProvider
 
         $value = $element->getFieldValue($field->handle);
 
-        if(empty($value)) {
+        if (empty($value)) {
             return [];
         }
 

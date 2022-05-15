@@ -109,8 +109,7 @@ class TranslationModel extends Model
                     'draftId' => $element->draftId,
                     'siteId' => $this->targetSiteId,
                 ]
-            ]
-        );
+            ]);
 
         return UrlHelper::urlWithParams(
             $element->getUrl(),

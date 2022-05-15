@@ -16,7 +16,8 @@ class MatrixFieldContentProvider extends AbstractContentProvider
      */
     private $elementTranslatableContentProvider;
 
-    public function __construct(ElementTranslatableContentProvider $elementTranslatableContentProvider) {
+    public function __construct(ElementTranslatableContentProvider $elementTranslatableContentProvider)
+    {
         $this->elementTranslatableContentProvider = $elementTranslatableContentProvider;
     }
 

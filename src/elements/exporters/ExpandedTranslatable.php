@@ -54,16 +54,18 @@ class ExpandedTranslatable extends ElementExporter
             $fieldLayout = $element->getFieldLayout();
             if ($fieldLayout !== null) {
                 foreach ($fieldLayout->getFields() as $field) {
-                    if (isset($translatableFieldsMap[$field->handle]) && !is_array(
+                    if (
+                        isset($translatableFieldsMap[$field->handle]) && !is_array(
                             $translatableFieldsMap[$field->handle]
-                        ) && !$translatableFieldsMap[$field->handle]) {
+                        ) && !$translatableFieldsMap[$field->handle]
+                    ) {
                         //field not translatable
                         continue;
                     }
 
                     $value = $element->getFieldValue($field->handle);
                     $serializedValue = $field->serializeValue($value, $element);
-                    if(empty($serializedValue)) {
+                    if (empty($serializedValue)) {
                         continue;
                     }
                     $elementArr[$field->handle] = $serializedValue;

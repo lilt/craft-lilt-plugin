@@ -18,11 +18,11 @@ class FieldContentApplier
     {
         $fieldClass = get_class($command->getField());
 
-        if(!isset($this->appliersMap[$fieldClass])) {
+        if (!isset($this->appliersMap[$fieldClass])) {
             return ApplyContentResult::fail();
         }
 
-        if(!$this->appliersMap[$fieldClass]->support($command)) {
+        if (!$this->appliersMap[$fieldClass]->support($command)) {
             return ApplyContentResult::fail();
         }
 

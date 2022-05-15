@@ -13,7 +13,7 @@ class NeoFieldContentApplier extends AbstractContentApplier implements ApplierIn
 {
     public function apply(ApplyContentCommand $command): ApplyContentResult
     {
-        if(!$this->support($command)) {
+        if (!$this->support($command)) {
             return ApplyContentResult::fail();
         }
 
@@ -43,9 +43,11 @@ class NeoFieldContentApplier extends AbstractContentApplier implements ApplierIn
             foreach ($block->getFieldLayout()->getFields() as $blockField) {
                 $blockId = $block->getCanonicalId();
 
-                if (!isset(
-                    $content[$field->handle][$blockId]['fields'][$blockField->handle]
-                )) {
+                if (
+                    !isset(
+                        $content[$field->handle][$blockId]['fields'][$blockField->handle]
+                    )
+                ) {
                     continue;
                 }
 

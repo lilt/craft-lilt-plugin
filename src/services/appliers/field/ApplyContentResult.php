@@ -11,27 +11,28 @@ class ApplyContentResult
     /**
      * @var I18NRecord[]
      */
-   private $i18nRecords;
+    private $i18nRecords;
 
     /**
      * @var bool
      */
-   private $applied;
+    private $applied;
 
-   public function __construct(bool $applied, array $i18nRecords = []) {
-       $this->applied = $applied;
-       $this->i18nRecords = $i18nRecords;
-   }
+    public function __construct(bool $applied, array $i18nRecords = [])
+    {
+        $this->applied = $applied;
+        $this->i18nRecords = $i18nRecords;
+    }
 
-   public static function applied(array $i18nRecords = []): self
-   {
-       return new self(true, $i18nRecords);
-   }
+    public static function applied(array $i18nRecords = []): self
+    {
+        return new self(true, $i18nRecords);
+    }
 
-   public static function fail(): self
-   {
-       return new self(false);
-   }
+    public static function fail(): self
+    {
+        return new self(false);
+    }
 
     /**
      * @return bool
@@ -48,6 +49,4 @@ class ApplyContentResult
     {
         return $this->i18nRecords;
     }
-
-
 }

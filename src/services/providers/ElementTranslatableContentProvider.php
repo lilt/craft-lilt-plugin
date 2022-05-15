@@ -87,12 +87,14 @@ class ElementTranslatableContentProvider
                 continue;
             }
 
-            if (isset($item['class'])
+            if (
+                isset($item['class'])
                 && ($item['class'] === RadioButtons::class
                     || $item['class'] === Dropdown::class
                     || $item['class'] === MultiSelect::class
                     || $item['class'] === Checkboxes::class
-                )) {
+                )
+            ) {
                 if (isset($this->staticContent[$elementId][$item['class']][$item['fieldId']])) {
                     unset($content[$key]);
                     continue;

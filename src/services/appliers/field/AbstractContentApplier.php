@@ -20,7 +20,7 @@ abstract class AbstractContentApplier
 
     protected function forceSave(ApplyContentCommand $command): ?bool
     {
-        if($this->isForceToSave($command)) {
+        if ($this->isForceToSave($command)) {
             return Craft::$app->elements->saveElement(
                 $command->getElement()
             );

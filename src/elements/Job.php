@@ -402,7 +402,7 @@ class Job extends Element
      */
     public function getTranslations(): array
     {
-        if(!empty($this->_elements)) {
+        if (!empty($this->_elements)) {
             return $this->_elements;
         }
 
@@ -413,7 +413,7 @@ class Job extends Element
 
     public function getElementsMappedById(): array
     {
-        if(!empty($this->_elements)) {
+        if (!empty($this->_elements)) {
             return $this->_elements;
         }
 

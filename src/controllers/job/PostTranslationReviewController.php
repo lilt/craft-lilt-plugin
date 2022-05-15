@@ -44,10 +44,11 @@ class PostTranslationReviewController extends AbstractJobController
         $translation = Craftliltplugin::getInstance()->translationRepository->findOneById((int) $translationId);
 
         $updated = TranslationRecord::updateAll(
-            ['status' => TranslationRecord::STATUS_READY_TO_PUBLISH], ['id' => $translation->id]
+            ['status' => TranslationRecord::STATUS_READY_TO_PUBLISH],
+            ['id' => $translation->id]
         );
 
-        if($updated !== 1) {
+        if ($updated !== 1) {
             //TODO: handle when we update more then one row
         }
 
