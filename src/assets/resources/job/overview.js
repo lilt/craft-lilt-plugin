@@ -1,6 +1,7 @@
 $('#lilt-translations-table tbody tr td .lilt-review-translation:not(.disabled)').on('click', function() {
 
   const translationId = $(this).data('id');
+  const translationTitle = $(this).data('title');
 
   let $modalElement = $('<div id="lilt-preview-modal" />').
       addClass('modal').
@@ -82,7 +83,7 @@ $('#lilt-translations-table tbody tr td .lilt-review-translation:not(.disabled)'
   $modalFooter.append($modalFooterSpinner);
   $modalFooter.append($modalFooterButtons);
 
-  const headerText = '<header><h1>Translation review <span class="close-modal" data-icon="remove" style="float: right;cursor: pointer"></span></h1></header>';
+  const headerText = '<header><h1>Review: ' + translationTitle + ' <span class="close-modal" data-icon="remove" style="float: right;cursor: pointer"></span></h1></header>';
   let $modalElementBodyHeader = $(headerText).addClass('header');
 
   $modalElementBody.append(
