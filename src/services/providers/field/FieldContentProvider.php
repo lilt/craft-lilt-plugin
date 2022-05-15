@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\providers\field;
 
-use craft\base\ElementInterface;
-use craft\base\FieldInterface;
-
 class FieldContentProvider
 {
+    /**
+     * @var ContentProviderInterface[]
+     */
     public $providersMap;
 
     /**
      * @return mixed
      */
-    public function provide(ElementInterface $element, FieldInterface $field)
+    public function provide(ProvideContentCommand $provideContentCommand)
     {
-        $fieldClass = get_class($field);
+        $fieldClass = get_class($provideContentCommand->getField());
 
         if(!isset($this->providersMap[$fieldClass])) {
             return null;
         }
 
-        return $this->providersMap[$fieldClass]->provide($element, $field);
+        if(!$this->providersMap[$fieldClass]->support($provideContentCommand)) {
+            return null;
+        }
+
+        return $this->providersMap[$fieldClass]->provide($provideContentCommand);
     }
 }

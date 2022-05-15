@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
-use craft\fields\BaseOptionsField;
 use craft\fields\data\MultiOptionsFieldData;
 use craft\fields\data\SingleOptionFieldData;
-use craft\fields\RadioButtons;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class BaseOptionFieldContentApplier extends AbstractContentApplier implements ApplierInterface
 {
@@ -48,7 +47,7 @@ class BaseOptionFieldContentApplier extends AbstractContentApplier implements Ap
 
     public function support(ApplyContentCommand $command): bool
     {
-        return $command->getField() instanceof BaseOptionsField
+        return get_parent_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_BASEOPTIONSFIELD
             && $command->getField()->getIsTranslatable($command->getElement());
     }
 }

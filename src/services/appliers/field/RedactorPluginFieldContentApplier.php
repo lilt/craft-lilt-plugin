@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
-use craft\redactor\Field as RedactorPluginField;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class RedactorPluginFieldContentApplier extends AbstractContentApplier implements ApplierInterface
 {
@@ -31,7 +31,7 @@ class RedactorPluginFieldContentApplier extends AbstractContentApplier implement
 
     public function support(ApplyContentCommand $command): bool
     {
-        return $command->getField() instanceof RedactorPluginField
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_REDACTOR_FIELD
             && $command->getField()->getIsTranslatable($command->getElement());
     }
 }

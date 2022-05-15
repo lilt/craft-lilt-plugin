@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
-use craft\fields\PlainText;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class PlainTextContentApplier extends AbstractContentApplier implements ApplierInterface
 {
@@ -26,7 +26,7 @@ class PlainTextContentApplier extends AbstractContentApplier implements ApplierI
 
     public function support(ApplyContentCommand $command): bool
     {
-        return $command->getField() instanceof PlainText
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT
             && $command->getField()->getIsTranslatable($command->getElement());
     }
 }

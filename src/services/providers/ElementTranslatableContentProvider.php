@@ -19,6 +19,7 @@ use craft\fields\MultiSelect;
 use craft\fields\RadioButtons;
 use craft\fields\Table;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\services\providers\field\ProvideContentCommand;
 
 class ElementTranslatableContentProvider
 {
@@ -57,9 +58,13 @@ class ElementTranslatableContentProvider
 
             $fieldDataKey = $fieldData->handle;
 
-            $content[$fieldDataKey] = Craftliltplugin::getInstance()->fieldContentProvider->provide(
+            $provideContentCommand = new ProvideContentCommand(
                 $element,
                 $fieldData
+            );
+
+            $content[$fieldDataKey] = Craftliltplugin::getInstance()->fieldContentProvider->provide(
+                $provideContentCommand
             );
 
             if ($content[$fieldDataKey] === null) {

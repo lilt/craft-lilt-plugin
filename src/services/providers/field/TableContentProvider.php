@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\providers\field;
 
-use craft\base\ElementInterface;
-use craft\base\FieldInterface;
 use craft\errors\InvalidFieldException;
-use craft\fields\Table;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class TableContentProvider extends AbstractContentProvider
 {
     /**
      * @throws InvalidFieldException
      */
-    public function provide(ElementInterface $element, FieldInterface $field): array
+    public function provide(ProvideContentCommand $provideContentCommand): array
     {
-        assert($field instanceof Table);
+        $element = $provideContentCommand->getElement();
+        $field = $provideContentCommand->getField();
 
         $value = $element->getFieldValue($field->handle);
 
@@ -40,5 +39,11 @@ class TableContentProvider extends AbstractContentProvider
             'columns' => $columns,
             'content' => $content,
         ];
+    }
+
+    public function support(ProvideContentCommand $command): bool
+    {
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_TABLE
+            && $command->getField()->getIsTranslatable($command->getElement());
     }
 }

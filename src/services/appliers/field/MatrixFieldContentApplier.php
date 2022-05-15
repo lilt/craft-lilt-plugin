@@ -8,6 +8,7 @@ use craft\elements\db\MatrixBlockQuery;
 use craft\elements\MatrixBlock;
 use craft\fields\Matrix;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class MatrixFieldContentApplier extends AbstractContentApplier implements ApplierInterface
 {
@@ -68,6 +69,6 @@ class MatrixFieldContentApplier extends AbstractContentApplier implements Applie
 
     public function support(ApplyContentCommand $command): bool
     {
-        return $command->getField() instanceof Matrix;
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX;
     }
 }

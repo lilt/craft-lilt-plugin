@@ -18,13 +18,6 @@ use craft\base\Plugin;
 use craft\events\RegisterElementDefaultTableAttributesEvent;
 use craft\events\RegisterElementTableAttributesEvent;
 use craft\events\RegisterUrlRulesEvent;
-use craft\fields\Checkboxes;
-use craft\fields\Dropdown;
-use craft\fields\Matrix;
-use craft\fields\MultiSelect;
-use craft\fields\PlainText;
-use craft\fields\RadioButtons;
-use craft\fields\Table;
 use craft\web\UrlManager;
 use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
@@ -39,7 +32,6 @@ use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\MatrixFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\NeoFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\RadioButtonsContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
@@ -57,7 +49,6 @@ use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\MatrixFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\NeoFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
-use lilthq\craftliltplugin\services\providers\field\RadioButtonsContentProvider;
 use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
@@ -380,19 +371,19 @@ class Craftliltplugin extends Plugin
 
         $getProvidersMap = function () {
             return [
-                Matrix::class => new MatrixFieldContentProvider($this->elementTranslatableContentProvider),
-                PlainText::class => new PlainTextContentProvider(),
-                RedactorPluginField::class => new RedactorPluginFieldContentProvider(),
-                Table::class => new TableContentProvider(),
+                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentProvider($this->elementTranslatableContentProvider),
+                CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentProvider(),
+                CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentProvider(),
+                CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
 
                 # Options
-                RadioButtons::class => new BaseOptionFieldContentProvider(),
-                Dropdown::class => new BaseOptionFieldContentProvider(),
-                MultiSelect::class => new BaseOptionFieldContentProvider(),
-                Checkboxes::class => new BaseOptionFieldContentProvider(),
+                CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentProvider(),
+                CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentProvider(),
+                CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentProvider(),
+                CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentProvider(),
 
                 #Neo Plugin
-                Field::class => new NeoFieldContentProvider(),
+                CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldContentProvider(),
             ];
         };
 
@@ -406,19 +397,19 @@ class Craftliltplugin extends Plugin
 
         $getAppliersMap = static function () {
             return [
-                Matrix::class => new MatrixFieldContentApplier(),
-                PlainText::class => new PlainTextContentApplier(),
-                RedactorPluginField::class => new RedactorPluginFieldContentApplier(),
-                Table::class => new TableContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentApplier(),
+                CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentApplier(),
 
                 # Options
-                RadioButtons::class => new BaseOptionFieldContentApplier(),
-                Dropdown::class => new BaseOptionFieldContentApplier(),
-                MultiSelect::class => new BaseOptionFieldContentApplier(),
-                Checkboxes::class => new BaseOptionFieldContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentApplier(),
 
                 #Neo Plugin
-                Field::class => new NeoFieldContentApplier(),
+                CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldContentApplier(),
             ];
         };
 

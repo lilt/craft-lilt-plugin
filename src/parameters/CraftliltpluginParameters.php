@@ -19,4 +19,15 @@ class CraftliltpluginParameters
     public const JOB_TABLE_NAME = '{{%lilt_jobs}}';
     public const TRANSLATION_TABLE_NAME = '{{%lilt_translations}}';
     public const I18N_TABLE_NAME = '{{%lilt_i18n}}';
+
+    public const CRAFT_FIELDS_MATRIX            = 'craft\fields\Matrix';
+    public const CRAFT_FIELDS_PLAINTEXT         = 'craft\fields\PlainText';
+    public const CRAFT_REDACTOR_FIELD           = 'craft\redactor\Field';
+    public const CRAFT_FIELDS_TABLE             = 'craft\fields\Table';
+    public const CRAFT_FIELDS_RADIOBUTTONS      = 'craft\fields\RadioButtons';
+    public const CRAFT_FIELDS_DROPDOWN          = 'craft\fields\Dropdown';
+    public const CRAFT_FIELDS_MULTISELECT       = 'craft\fields\MultiSelect';
+    public const CRAFT_FIELDS_CHECKBOXES        = 'craft\fields\Checkboxes';
+    public const CRAFT_FIELDS_BASEOPTIONSFIELD  = 'craft\fields\BaseOptionsField';
+    public const BENF_NEO_FIELD                 = 'benf\neo\Field';
 }

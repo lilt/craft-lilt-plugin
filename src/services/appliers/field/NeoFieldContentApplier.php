@@ -6,8 +6,8 @@ namespace lilthq\craftliltplugin\services\appliers\field;
 
 use benf\neo\elements\Block;
 use benf\neo\elements\db\BlockQuery;
-use benf\neo\Field as NeoField;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class NeoFieldContentApplier extends AbstractContentApplier implements ApplierInterface
 {
@@ -70,6 +70,6 @@ class NeoFieldContentApplier extends AbstractContentApplier implements ApplierIn
 
     public function support(ApplyContentCommand $command): bool
     {
-        return $command->getField() instanceof NeoField;
+        return get_class($command->getField()) === CraftliltpluginParameters::BENF_NEO_FIELD;
     }
 }

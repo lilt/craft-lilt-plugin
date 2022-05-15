@@ -6,18 +6,20 @@ namespace lilthq\craftliltplugin\services\providers\field;
 
 use benf\neo\elements\Block;
 use benf\neo\elements\db\BlockQuery;
-use craft\base\ElementInterface;
-use craft\base\FieldInterface;
 use craft\errors\InvalidFieldException;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class NeoFieldContentProvider extends AbstractContentProvider
 {
     /**
      * @throws InvalidFieldException
      */
-    public function provide(ElementInterface $element, FieldInterface $field): array
+    public function provide(ProvideContentCommand $provideContentCommand): array
     {
+        $element = $provideContentCommand->getElement();
+        $field = $provideContentCommand->getField();
+
         $content = [];
 
         /**
@@ -36,5 +38,10 @@ class NeoFieldContentProvider extends AbstractContentProvider
         }
 
         return $content;
+    }
+
+    public function support(ProvideContentCommand $command): bool
+    {
+        return get_class($command->getField()) === CraftliltpluginParameters::BENF_NEO_FIELD;
     }
 }

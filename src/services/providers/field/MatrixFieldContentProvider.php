@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\providers\field;
 
-use craft\base\ElementInterface;
-use craft\base\FieldInterface;
-use craft\elements\db\MatrixBlockQuery;
 use craft\elements\MatrixBlock;
 use craft\errors\InvalidFieldException;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 
 class MatrixFieldContentProvider extends AbstractContentProvider
@@ -25,10 +23,12 @@ class MatrixFieldContentProvider extends AbstractContentProvider
     /**
      * @throws InvalidFieldException
      */
-    public function provide(ElementInterface $element, FieldInterface $field): array
+    public function provide(ProvideContentCommand $provideContentCommand): array
     {
+        $element = $provideContentCommand->getElement();
+        $field = $provideContentCommand->getField();
+
         $matrixBlockQuery = $element->getFieldValue($field->handle);
-        assert($matrixBlockQuery instanceof MatrixBlockQuery);
 
         /**
          * @var MatrixBlock[] $blockElements
@@ -43,5 +43,10 @@ class MatrixFieldContentProvider extends AbstractContentProvider
         }
 
         return $blocksContent;
+    }
+
+    public function support(ProvideContentCommand $command): bool
+    {
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX;
     }
 }
