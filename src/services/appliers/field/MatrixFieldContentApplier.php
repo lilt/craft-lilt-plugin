@@ -7,9 +7,7 @@ namespace lilthq\craftliltplugin\services\appliers\field;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\MatrixBlock;
 use craft\fields\Matrix;
-use craft\fields\RadioButtons;
-use craft\fields\Table;
-use lilthq\craftliltplugin\records\I18NRecord;
+use lilthq\craftliltplugin\Craftliltplugin;
 
 class MatrixFieldContentApplier extends AbstractContentApplier implements ApplierInterface
 {
@@ -33,9 +31,6 @@ class MatrixFieldContentApplier extends AbstractContentApplier implements Applie
              */
             $matrixBlockQuery = $element->getFieldValue($field->handle);
 
-            $serializedData = $field->serializeValue($matrixBlockQuery, $element);
-
-
             /**
              * @var MatrixBlock $block
              */
@@ -43,92 +38,30 @@ class MatrixFieldContentApplier extends AbstractContentApplier implements Applie
                 foreach ($block->getFieldLayout()->getFields() as $blockField) {
                     $blockId = $block->getCanonicalId();
 
-                    if ($blockField instanceof Table) {
-                        $tableSource = $content[$field->handle][$blockId]['fields'][$blockField->handle]['content'];
-                        foreach ($blockField->columns as $column => $columnData) {
-                            foreach ($tableSource as $rowId => $rows) {
-                                $tableSource[$rowId][$column] = $tableSource[$rowId][$columnData['handle']];
-                            }
-                        }
-                        $content[$field->handle][$blockId]['fields'][$blockField->handle]['content'] = $tableSource;
-
-                        if(isset($content[$field->handle][$blockId]['fields'][$blockField->handle]['columns'])) {
-                            $columns = $content[$field->handle][$blockId]['fields'][$blockField->handle]['columns'];
-                            foreach ($blockField->columns as $column) {
-                                $translation = [
-                                    'target' => $columns[$column['handle']],
-                                    'source' => $column['heading'],
-                                    'sourceSiteId' => $command->getSourceSiteId(),
-                                    'targetSiteId' => $command->getTargetSiteId(),
-                                ];
-
-                                $translation['hash'] = md5(json_encode($translation));
-
-
-                                $record = new I18NRecord();
-                                $record->target = $translation['target'];
-                                $record->source = $translation['source'];
-                                $record->sourceSiteId = $translation['sourceSiteId'];
-                                $record->targetSiteId = $translation['targetSiteId'];
-                                $record->hash = $translation['hash'];
-
-                                $i18NRecords[$record->hash] = $record;
-                            }
-                        }
-
-                        $content[$field->handle][$blockId]['fields'][$blockField->handle] = $content[$field->handle][$blockId]['fields'][$blockField->handle]['content'];
+                    if (!isset(
+                        $content[$field->handle][$blockId]['fields'][$blockField->handle]
+                    )) {
+                        continue;
                     }
 
-                    if ($blockField instanceof RadioButtons) {
-                        $options = $blockField->options;
+                    $blockCommand = new ApplyContentCommand(
+                        $block,
+                        $blockField,
+                        $content[$field->handle][$blockId]['fields'],
+                        $command->getSourceSiteId(),
+                        $command->getTargetSiteId()
+                    );
 
-                        if (!isset(
-                            $content[$field->handle][$blockId]['fields'][$blockField->handle]
-                        )) {
-                            continue;
-                        }
+                    $result = Craftliltplugin::getInstance()->fieldContentApplier->apply($blockCommand);
 
-                        $optionsTranslated = $content[$field->handle][$blockId]['fields'][$blockField->handle];
-
-                        foreach ($options as $option) {
-                            $translation = [
-                                'target' => $optionsTranslated[$option['value']],
-                                'source' => $option['label'],
-                                'sourceSiteId' => $command->getSourceSiteId(),
-                                'targetSiteId' => $command->getTargetSiteId(),
-                            ];
-
-                            $translation['hash'] = md5(json_encode($translation));
-
-
-                            $record = new I18NRecord();
-                            $record->target = $translation['target'];
-                            $record->source = $translation['source'];
-                            $record->sourceSiteId = $translation['sourceSiteId'];
-                            $record->targetSiteId = $translation['targetSiteId'];
-                            $record->hash = $translation['hash'];
-
-                            $i18NRecords[$record->hash] = $record;
-                        }
-                    }
+                    $i18NRecords[] = $result->getI18nRecords();
                 }
             }
-
-
-            $contentWithoutIds = [$field->handle => array_values($content[$field->handle])];
-
-            $i = 0;
-            foreach ($serializedData as $key => $value) {
-                $serializedData[$key] = $this->merge(
-                    $serializedData[$key],
-                    $contentWithoutIds[$field->handle][$i++]
-                );
-            }
-
-            $element->setFieldValue($field->handle, $serializedData);
         }
 
-        return new ApplyContentResult(false, $i18NRecords);
+        return ApplyContentResult::applied(
+            array_merge(...$i18NRecords)
+        );
     }
 
     public function support(ApplyContentCommand $command): bool

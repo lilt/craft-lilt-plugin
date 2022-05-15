@@ -23,7 +23,7 @@ class FieldContentApplier
         }
 
         if(!$this->appliersMap[$fieldClass]->support($command)) {
-            return false;
+            return ApplyContentResult::fail();
         }
 
         return $this->appliersMap[$fieldClass]->apply($command);
