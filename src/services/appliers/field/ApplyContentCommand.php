@@ -57,6 +57,17 @@ class ApplyContentCommand
     }
 
     /**
+     * @return self
+     */
+    public function setElement(ElementInterface $element): self
+    {
+        //TODO: in use?
+        $element = $this->element;
+
+        return $this;
+    }
+
+    /**
      * @return FieldInterface
      */
     public function getField(): FieldInterface

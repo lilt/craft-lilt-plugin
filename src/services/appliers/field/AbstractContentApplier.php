@@ -21,9 +21,22 @@ abstract class AbstractContentApplier
     protected function forceSave(ApplyContentCommand $command): ?bool
     {
         if ($this->isForceToSave($command)) {
-            return Craft::$app->elements->saveElement(
+            //TODO: check this, seems to be overcomplicated
+            $command->getElement()->setIsFresh();
+
+            $success = Craft::$app->elements->saveElement(
                 $command->getElement()
             );
+
+            Craft::$app->elements->invalidateCachesForElement($command->getElement());
+            $element = Craft::$app->elements->getElementById($command->getElement()->id, null, $command->getTargetSiteId());
+            $element->setIsFresh();
+
+            $command->setElement(
+                Craft::$app->elements->getElementById($command->getElement()->id, null, $command->getTargetSiteId())
+            );
+
+            return $success;
         }
 
         return null;

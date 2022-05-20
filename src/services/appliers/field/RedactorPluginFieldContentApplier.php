@@ -26,7 +26,7 @@ class RedactorPluginFieldContentApplier extends AbstractContentApplier implement
 
         $this->forceSave($command);
 
-        return ApplyContentResult::applied();
+        return ApplyContentResult::applied([], $command->getElement()->getFieldValue($command->getField()->handle));
     }
 
     public function support(ApplyContentCommand $command): bool

@@ -55,9 +55,10 @@ class ElementTranslatableContentApplier
             $draftElement->title = $content['title'];
         }
 
-        if (!empty($draftElement->slug)) {
-            $draftElement->slug = $content['slug'];
-        }
+        # TODO: clarify should we translate slug or not
+        #if (!empty($draftElement->slug)) {
+        #    $draftElement->slug = $content['slug'];
+        #}
 
         $fieldLayout = $draftElement->getFieldLayout();
 
@@ -91,6 +92,10 @@ class ElementTranslatableContentApplier
                 //TODO: is it possible?
             }
 
+            if ($result->isApplied() && $result->getFieldValue()) {
+                $draftElement->setFieldValue($field->handle, $result->getFieldValue());
+            }
+
             $i18NRecords[] = $result->getI18nRecords();
         }
 
@@ -110,6 +115,16 @@ class ElementTranslatableContentApplier
                 $i18NRecord->save();
             }
         }
+
+        /* Craft::$app->elements->invalidateCachesForElement($draftElement);
+
+        $draftElement = Craft::$app->elements->getElementById(
+            $draftElement->id,
+            null,
+            $translationApplyCommand->getTargetSiteId()
+        ); */
+
+        $draftElement->setIsFresh();
 
         Craft::$app->elements->saveElement(
             $draftElement
@@ -157,6 +172,8 @@ class ElementTranslatableContentApplier
         if (!$draftElement) {
             //TODO: freshly created not found? Is it possible?
             throw new DraftNotFoundException();
+            //TODO: some issue
+            //return $draft;
         }
 
         return $draftElement;

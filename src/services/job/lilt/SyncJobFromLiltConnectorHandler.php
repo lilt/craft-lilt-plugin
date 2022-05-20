@@ -98,7 +98,7 @@ class SyncJobFromLiltConnectorHandler
                         'targetSiteId' => Craftliltplugin::getInstance()
                             ->languageMapper
                             ->getSiteIdByLanguage($targetLanguage),
-                        'elementId' => $elementId,
+                        'elementId' => $draft->getCanonicalId() ?? $elementId,
                         'jobId' => $job->getId()
                     ]);
                     $translationRecord->translatedDraftId = $draft->getId();

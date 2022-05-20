@@ -2,7 +2,7 @@
 
 <div class="heading" style="min-height: 30px">
     <h3 style="float:left;">Translations</h3>
-    <div id="entries-remove-action" data-icon="view" class="btn submit" style="float:right">
+    <div id="translations-review-action" data-icon="view" class="btn submit" style="float:right">
         Review changes
     </div>
 </div>
@@ -12,7 +12,10 @@
     <tr>
         <th class="checkbox-cell selectallcontainer orderable" role="checkbox" tabindex="0" aria-checked="false"
             aria-label="Select all">
-            <div class="checkbox"></div>
+            {{ forms.checkbox({
+                name: 'translationIdsSelectAll',
+                value: 'all'
+            }) }}
         </th>
         <th scope="col" data-attribute="title">Title</th>
         <!-- <th scope="col" data-attribute="sourceSiteId">Source locale</th> -->
@@ -25,7 +28,7 @@
     </thead>
     <tbody>
     {% for translation in element.translations %}
-        <tr data-id="{{ translation.id }}" tabindex="0">
+        <tr data-id="{{ translation.id }}" data-status="{{ translation.status }}" data-title="{{ element.elementsMappedById[translation.elementId].title }}" tabindex="0">
             <td class="checkbox-cell">
                 <!--<div class="checkbox" title="Select" aria-label="Select"></div>-->
                 {{ forms.checkbox({
@@ -64,8 +67,8 @@
                    data-icon="world"></a>
             </td> -->
 
-            <td data-title="Action" data-attr="preview" style="text-align: center; font-size: 14pt">
-                <span class='lilt-review-translation {{ translation.status is same as 'published' ? 'disabled' : '' }}' title="Review" data-id="{{ translation.id }}" data-icon="view" style="margin-right: 5px;color: #0b69a3;cursor: pointer;"></span>
+            <td data-title="Action" data-attr="preview" style="font-size: 14pt">
+                <span class='lilt-review-translation {{ translation.status is same as 'published' ? 'disabled' : '' }}' title="Review" data-id="{{ translation.id }}" data-title="{{ element.elementsMappedById[translation.elementId].title }}" data-icon="view" style="margin-right: 5px;color: #0b69a3;cursor: pointer;"></span>
                 <a href="{{ translation.previewUrl }}" title="Visit webpage" rel="noopener" target="_blank"
                    data-icon="world"></a>
             </td>

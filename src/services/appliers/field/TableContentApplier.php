@@ -16,6 +16,12 @@ class TableContentApplier extends AbstractContentApplier implements ApplierInter
         $i18NRecords = [];
 
         if (!isset($content[$fieldKey])) {
+            //TODO: check this case
+            return ApplyContentResult::fail();
+        }
+
+        if (!isset($content[$field->handle]['content'])) {
+            //TODO: check this case
             return ApplyContentResult::fail();
         }
 
@@ -48,7 +54,7 @@ class TableContentApplier extends AbstractContentApplier implements ApplierInter
 
         $this->forceSave($command);
 
-        return ApplyContentResult::applied($i18NRecords);
+        return ApplyContentResult::applied($i18NRecords, null);
     }
 
     public function support(ApplyContentCommand $command): bool

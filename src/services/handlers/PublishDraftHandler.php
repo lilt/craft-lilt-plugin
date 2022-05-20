@@ -31,6 +31,11 @@ class PublishDraftHandler
             $targetSiteId
         );
 
+        if(!$draftElement) {
+            //TODO: published already or what? Why we are here?
+            return;
+        }
+
         $this->draftRepository->applyDraft($draftElement);
     }
 }

@@ -18,15 +18,26 @@ class ApplyContentResult
      */
     private $applied;
 
-    public function __construct(bool $applied, array $i18nRecords = [])
+    private $fieldValue;
+
+    public function __construct(bool $applied, array $i18nRecords = [], $fieldValue = null)
     {
         $this->applied = $applied;
         $this->i18nRecords = $i18nRecords;
+        $this->fieldValue = $fieldValue;
     }
 
-    public static function applied(array $i18nRecords = []): self
+    /**
+     * @return mixed
+     */
+    public function getFieldValue()
     {
-        return new self(true, $i18nRecords);
+        return $this->fieldValue;
+    }
+
+    public static function applied(array $i18nRecords = [], $field = null): self
+    {
+        return new self(true, $i18nRecords, $field);
     }
 
     public static function fail(): self

@@ -44,6 +44,11 @@ class PostEditJobController extends AbstractJobController
             return $this->renderJobForm($job);
         }
 
+        if($job->versions === '[]') {
+            //TODO: fix FE part
+            $job->versions = [];
+        }
+
         $command = new EditJobCommand(
             $job->id,
             $job->title,

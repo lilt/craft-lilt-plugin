@@ -72,6 +72,11 @@ class TranslationModel extends Model
     public function getElementUrl(): ?string
     {
         $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
+
+        if(!$draft) {
+            $draft = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
+        }
+
         return $draft->getUrl();
     }
 

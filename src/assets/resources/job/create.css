@@ -26,6 +26,7 @@
 
 #entries-to-translate-field .elements select {
     max-width: 100px !important;
+    min-width: 100px !important;
 }
 
 #create-job-form #create-job-selected-entries-field {
@@ -52,6 +53,13 @@ OVERVIEW
 
 #lilt-translations-table tr {
     cursor: pointer;
+}
+
+#lilt-preview-modal.hidden-footer .footer{
+    display: none;
+}
+#lilt-preview-modal.hidden-footer #lilt-modal-preview-tabs #content{
+    padding-bottom: 0;
 }
 
 #lilt-preview-modal .body .spinner.big {

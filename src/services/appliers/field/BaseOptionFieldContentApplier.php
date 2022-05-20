@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
+use Craft;
 use craft\fields\data\MultiOptionsFieldData;
 use craft\fields\data\SingleOptionFieldData;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
@@ -42,7 +43,13 @@ class BaseOptionFieldContentApplier extends AbstractContentApplier implements Ap
             $i18NRecords[$translation['hash']] = $this->createI18NRecord($translation);
         }
 
-        return ApplyContentResult::applied($i18NRecords);
+        $originalElement = Craft::$app->elements->getElementById(
+            $command->getElement()->getCanonicalId(),
+            null,
+            $command->getSourceSiteId()
+        );
+
+        return ApplyContentResult::applied($i18NRecords, $originalElement->getFieldValue($field->handle));
     }
 
     public function support(ApplyContentCommand $command): bool

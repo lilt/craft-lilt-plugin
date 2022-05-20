@@ -1,4 +1,7 @@
 $('.addAnEntry').on('click', function(e) {
+  const alreadySelected = $('#create-job-selected-entries').val();
+  const elementIds = (alreadySelected !== undefined && alreadySelected !== '') ? JSON.parse(alreadySelected) : [];
+
   Craft.liltPluginModal = Craft.createElementSelectorModal(
       'craft\\elements\\Entry', {
         storageKey: null,
@@ -8,13 +11,14 @@ $('.addAnEntry').on('click', function(e) {
         criteria: {},
         multiSelect: 1,
         disableOnSelect: true,
+        disabledElementIds: elementIds,
         onCancel: function() {},
         onSelect: function(entries) {
           const entiriesSelected = entries.map((entry) => {
-            return entry.id;
+            return entry.id.toString();
           });
 
-          const currentValue = $('.create-job-selected-entries').val();
+          const currentValue = $('.create-job-selected-entries').val().toString();
           let alreadySelected = [];
           try {
             alreadySelected = currentValue !== undefined && currentValue !== ''
@@ -24,7 +28,9 @@ $('.addAnEntry').on('click', function(e) {
             console.log(e);
           }
 
-          const newSelected = [...entiriesSelected, ...alreadySelected];
+          let newSelected = [...entiriesSelected, ...alreadySelected];
+
+          newSelected.forEach((element) => { return parseInt(element); })
 
           $('.create-job-selected-entries').
               val(JSON.stringify(newSelected));
@@ -36,10 +42,12 @@ $('.addAnEntry').on('click', function(e) {
                 elementTypeName: 'Entry',
                 elementTypePluralName: 'Entries',
                 context: 'index',
+                sources: '*',
                 storageKey: 'elementindex.craft\\elements\\Entry',
                 siteId: $('#sourceSite').val(),
                 criteria: {
-                  siteId: $('#sourceSite').val(), where: {
+                  siteId: $('#sourceSite').val(),
+                  where: {
                     'elements.id': newSelected,
                   },
                 },
@@ -64,8 +72,6 @@ $('.addAnEntry').on('click', function(e) {
                         let hiddenInput = $(`#hidden-input-element-draft-${elementId}`);
                         if (hiddenInput.length > 0) {
                           draftId = hiddenInput.val();
-
-                          console.log(draftId);
 
                           const value = {
                             elementId: parseInt(elementId),
@@ -126,6 +132,7 @@ $(document).ready(function() {
                 },
               },
               canHaveDrafts: true,
+              sources: '*',
               hideSidebar: true,
               onSelectionChange: function() {
                 if (Craft.elementIndex.getSelectedElementIds().length > 0) {
@@ -203,6 +210,8 @@ $(document).ready(function() {
 $('#entries-remove-action').on('click', function() {
   let remove = Craft.elementIndex.getSelectedElementIds();
 
+  remove = remove.map((element) => element.toString());
+
   const currentValue = $('.create-job-selected-entries').val();
   let alreadySelected = [];
   try {
@@ -213,9 +222,7 @@ $('#entries-remove-action').on('click', function() {
     console.log(e);
   }
 
-  alreadySelected = alreadySelected.filter(function(el) {
-    return remove.indexOf(el) < 0;
-  });
+  alreadySelected = alreadySelected.filter((el) => remove.indexOf(el) === -1);
 
   if (alreadySelected.length === 0) {
     Craft.elementIndex = null;
@@ -296,10 +303,30 @@ $('#targetSiteIds-field input.all').on('click', function(e) {
 });
 //END
 
-$('#create-order-submit-form').on('click', function() {
-  $('#create-job-form').submit();
-});
-
 $(document).ready(function() {
   $('#sourceSite').trigger('change');
+
+  let formSubmitting = false;
+
+  $('#create-order-submit-form').on('click', function() {
+    $('#create-job-form').submit();
+    formSubmitting = true;
+  });
+
+  window.addEventListener("beforeunload", function (e) {
+
+    if(document.location.pathname.indexOf('/admin/craft-lilt-plugin/job/edit') === 0) {
+      return undefined;
+    }
+
+    if (formSubmitting) {
+      return undefined;
+    }
+
+    var confirmationMessage = 'It looks like you have been editing something. '
+        + 'If you leave before saving, your changes will be lost.';
+
+    (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+    return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+  });
 });

@@ -75,7 +75,7 @@ class Install extends Migration
         $this->createIndex(
             null,
             CraftliltpluginParameters::TRANSLATION_TABLE_NAME,
-            ['jobId','elementId','targetSiteId'],
+            ['jobId','elementId','sourceSiteId','targetSiteId'],
             true
         );
 

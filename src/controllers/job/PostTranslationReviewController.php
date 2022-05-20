@@ -10,15 +10,11 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
-use craft\errors\ElementNotFoundException;
-use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
-use yii\base\Exception;
-use yii\base\InvalidConfigException;
 use yii\web\Response;
 
 class PostTranslationReviewController extends AbstractJobController
@@ -47,6 +43,37 @@ class PostTranslationReviewController extends AbstractJobController
             ['status' => TranslationRecord::STATUS_READY_TO_PUBLISH],
             ['id' => $translation->id]
         );
+
+        if ($updated) {
+
+            $readyToPublish = true;
+
+            $jobRecord = JobRecord::findOne(['id' => $translation->jobId]);
+            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($translation->jobId);
+            foreach ($translations as $translation) {
+                if ($translation->status !== TranslationRecord::STATUS_READY_TO_PUBLISH) {
+                    $readyToPublish = false;
+                    break;
+                }
+            }
+
+            if ($readyToPublish) {
+                $jobRecord->status = Job::STATUS_READY_TO_PUBLISH;
+                $jobRecord->save();
+
+                Craft::$app->elements->invalidateCachesForElementType(
+                    Job::class
+                );
+            }
+
+            /*
+            Queue::push((new UpdateJobStatusOnTranslationChange(
+                [
+                    'jobId' => $translation->jobId,
+                ]
+            )));
+            */
+        }
 
         if ($updated !== 1) {
             //TODO: handle when we update more then one row

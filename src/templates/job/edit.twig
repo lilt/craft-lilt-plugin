@@ -2,7 +2,7 @@
 {% import '_includes/forms' as forms %}
 
 {% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
-{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() %}
+{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() or constant('STATUS_READY_TO_PUBLISH', element) is same as element.getStatus() or constant('STATUS_COMPLETE', element) is same as element.getStatus() %}
 
 {% set title = isJobInProgress ? "Job edit" : "Job overview" %}
 

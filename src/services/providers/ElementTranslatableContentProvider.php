@@ -36,9 +36,10 @@ class ElementTranslatableContentProvider
             $content['title'] = $element->title;
         }
 
-        if (!empty($element->slug)) {
-            $content['slug'] = $element->slug;
-        }
+        # TODO: clarify should we translate slug or not
+        #if (!empty($element->slug)) {
+        #    $content['slug'] = $element->slug;
+        #}
 
         $fieldLayout = $element->getFieldLayout();
 

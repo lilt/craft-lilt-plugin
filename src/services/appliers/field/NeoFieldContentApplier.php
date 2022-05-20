@@ -61,13 +61,30 @@ class NeoFieldContentApplier extends AbstractContentApplier implements ApplierIn
 
                 $result = Craftliltplugin::getInstance()->fieldContentApplier->apply($blockCommand);
 
+                if (!$result->isApplied()) {
+                    //TODO: handle?
+                }
+
+                if ($result->isApplied()) {
+                    $block->setFieldValue($field->handle, $result->getFieldValue());
+                }
+
                 $i18NRecords[] = $result->getI18nRecords();
             }
+            $block->setIsFresh();
         }
 
         $i18NRecords = !empty($i18NRecords) ? array_merge(...$i18NRecords) : [];
 
-        return ApplyContentResult::applied($i18NRecords);
+        $fieldValue = $field->serializeValue($element->getFieldValue($field->handle), $element);
+
+        $element->setFieldValue($field->handle,$fieldValue);
+        $this->forceSave($command);
+
+        //$blockElements = $fieldValue->all();
+        //$blockElementsNew = $command->getElement()->getFieldValue($field->handle)->all();
+
+        return ApplyContentResult::applied($i18NRecords, $fieldValue);
     }
 
     public function support(ApplyContentCommand $command): bool

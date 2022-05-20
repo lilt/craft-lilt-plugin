@@ -12,17 +12,15 @@ namespace lilthq\craftliltplugin\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\actions\Delete;
-use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
-use craft\elements\db\EntryQuery;
 use craft\helpers\UrlHelper;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\JobQuery;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -62,6 +60,12 @@ class Job extends Element
     public $dateUpdated;
 
     private $_author;
+
+    public function beforeDelete(): bool
+    {
+        JobRecord::deleteAll(['id' => $this->id]);
+        return parent::beforeDelete();
+    }
 
     public function getSidebarHtml(): string
     {
@@ -161,7 +165,7 @@ class Job extends Element
             self::STATUS_SUBMITTED => ['label' => 'Submitted', 'color' => 'purple'],
             self::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
             self::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
-            self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'lightseagreen'],
+            self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
             self::STATUS_COMPLETE => ['label' => 'Complete', 'color' => 'green'],
             self::STATUS_FAILED => ['label' => 'Failed', 'color' => 'red'],
         ];
@@ -407,6 +411,21 @@ class Job extends Element
         }
 
         $this->_translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($this->id);
+
+        //TODO: it should be not here, it is a logic
+        $readyToPublish = true;
+
+        foreach ($this->_translations as $translation) {
+            if($translation->status !== TranslationRecord::STATUS_READY_TO_PUBLISH) {
+                $readyToPublish = false;
+                break;
+            }
+        }
+
+        if($readyToPublish) {
+            $this->status = Job::STATUS_READY_TO_PUBLISH;
+            Craft::$app->elements->saveElement($this);
+        }
 
         return $this->_translations;
     }
