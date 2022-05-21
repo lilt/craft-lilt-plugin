@@ -1,6 +1,8 @@
 $('.addAnEntry').on('click', function(e) {
   const alreadySelected = $('#create-job-selected-entries').val();
-  const elementIds = (alreadySelected !== undefined && alreadySelected !== '') ? JSON.parse(alreadySelected) : [];
+  const elementIds = (alreadySelected !== undefined && alreadySelected !== '')
+      ? JSON.parse(alreadySelected)
+      : [];
 
   Craft.liltPluginModal = Craft.createElementSelectorModal(
       'craft\\elements\\Entry', {
@@ -18,7 +20,9 @@ $('.addAnEntry').on('click', function(e) {
             return entry.id.toString();
           });
 
-          const currentValue = $('.create-job-selected-entries').val().toString();
+          const currentValue = $('.create-job-selected-entries').
+              val().
+              toString();
           let alreadySelected = [];
           try {
             alreadySelected = currentValue !== undefined && currentValue !== ''
@@ -30,7 +34,7 @@ $('.addAnEntry').on('click', function(e) {
 
           let newSelected = [...entiriesSelected, ...alreadySelected];
 
-          newSelected.forEach((element) => { return parseInt(element); })
+          newSelected.forEach((element) => { return parseInt(element); });
 
           $('.create-job-selected-entries').
               val(JSON.stringify(newSelected));
@@ -244,21 +248,6 @@ $('#entries-remove-action').on('click', function() {
     Craft.elementIndex.updateElements();
   }
 });
-
-$('#sourceSite').on('change', function(e) {
-  $('#targetSiteIds-field input.checkbox').each(function() {
-    $(this).prop('disabled', false);
-    if ($('#targetSiteIds-field input.all').prop('checked') === true) {
-      $(this).prop('checked', true);
-    }
-    $(this).removeClass('disabled');
-  });
-
-  $('#targetSiteIds-field input.checkbox[value=' + $(this).val() + ']').
-      prop('disabled', true).
-      prop('checked', false);
-});
-
 $(document).ready(function() {
   $('#create-job-form .disabled').on('click', function() {
     return false;
@@ -276,36 +265,9 @@ $(document).ready(function() {
   });
 });
 
-$('#targetSiteIds-field input.all').on('click', function(e) {
-  let checked = $(this).prop('checked');
-
-  $('#targetSiteIds-field input.checkbox').each(function() {
-    if ($(this).hasClass('all')) {
-      return;
-    }
-
-    $(this).prop('disabled', true);
-
-    if ($('#sourceSite').val() !== $(this).val()) {
-      $(this).prop('checked', checked);
-    }
-
-    if ($('#sourceSite').val() === $(this).val()) {
-      if (checked) {
-        $(this).addClass('disabled');
-      }
-
-      if (!checked) {
-        $(this).removeClass('disabled');
-      }
-    }
-  });
-});
 //END
 
 $(document).ready(function() {
-  $('#sourceSite').trigger('change');
-
   let formSubmitting = false;
 
   $('#create-order-submit-form').on('click', function() {
@@ -313,9 +275,10 @@ $(document).ready(function() {
     formSubmitting = true;
   });
 
-  window.addEventListener("beforeunload", function (e) {
+  window.addEventListener('beforeunload', function(e) {
 
-    if(document.location.pathname.indexOf('/admin/craft-lilt-plugin/job/edit') === 0) {
+    if (document.location.pathname.indexOf(
+        '/admin/craft-lilt-plugin/job/edit') === 0) {
       return undefined;
     }
 
