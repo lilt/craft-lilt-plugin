@@ -270,9 +270,40 @@ $(document).ready(function() {
 $(document).ready(function() {
   let formSubmitting = false;
 
-  $('#create-order-submit-form').on('click', function() {
-    $('#create-job-form').submit();
-    formSubmitting = true;
+  $('#create-job-submit-form, #create-draft-job-submit-form').
+      on('click', function() {
+
+        if ($(this).parent().hasClass('disabled')) {
+          return false;
+        }
+
+        const $spinner = $(
+            '<div class="spinner" style="position: absolute"></div>');
+        //$(this).prepend($spinner);
+        $(this).prepend($spinner);
+        $(this).parent().addClass('disabled');
+        //$(this).addClass('disabled');
+        //$(this).disable();
+
+        const actionButton = $(this).data('action-button');
+        $('#create-job-form').
+            append(
+                $(`<input name="actionButton" value="${actionButton}" type="hidden" />`));
+
+        $('#create-job-form').submit();
+
+        formSubmitting = true;
+      });
+
+  $('.btn.submit.menubtn').on('click', function() {
+    console.log('create-draft');
+    $(this).data('menubtn').settings.onOptionSelect = function(o) {
+      if ($(o).hasClass('formsubmit')) {
+        if ($(o).data('action-button') === 'create-job-draft') {
+          $('#create-draft-job-submit-form').click();
+        }
+      }
+    };
   });
 
   window.addEventListener('beforeunload', function(e) {

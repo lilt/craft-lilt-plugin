@@ -29,6 +29,12 @@
     min-width: 100px !important;
 }
 
+#entries-to-translate-field .elements.busy {
+    /* Min height for elements spinner */
+    /* min-height: inherit; */
+    min-height: 40px;
+}
+
 #create-job-form #create-job-selected-entries-field {
     margin-bottom: 0;
 }

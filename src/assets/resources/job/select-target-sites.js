@@ -1,58 +1,16 @@
-
-
 $(document).ready(function() {
-  $('#sourceSite').trigger('change');
-
-  $('#sourceSite').on('change', function(e) {
-    $('#targetSiteIds-field input.checkbox').each(function() {
-      $(this).prop('disabled', false);
-      if ($('#targetSiteIds-field input.all').prop('checked') === true) {
-        $(this).prop('checked', true);
-      }
-      $(this).removeClass('disabled');
-    });
-
-    $('#targetSiteIds-field input.checkbox[value=' + $(this).val() + ']').
-        prop('disabled', true).
-        prop('checked', false);
-  });
-
-
-  $('#targetSiteIds-field input.all').on('click', function(e) {
-    let checked = $(this).prop('checked');
-
-    $('#targetSiteIds-field input.checkbox').each(function() {
-      if ($(this).hasClass('all')) {
-        return;
-      }
-
-      $(this).prop('disabled', true);
-
-      if ($('#sourceSite').val() !== $(this).val()) {
-        $(this).prop('checked', checked);
-      }
-
-      if ($('#sourceSite').val() === $(this).val()) {
-        if (checked) {
-          $(this).addClass('disabled');
-        }
-
-        if (!checked) {
-          $(this).removeClass('disabled');
-        }
-      }
-    });
-  });
+  const sourceSite = $('#sourceSite');
+  //$('#sourceSite').trigger('change');
 
   let selected = [];
-  const sourceSiteValue = $('#sourceSite').val();
+  let allSelected = false;
 
-  const index = $('#sourceSite').val();
+  const sourceSiteValue = sourceSite.val();
 
-  $(`#targetSiteIds-field input.checkbox[value="${index}"]`).
+  $(`#targetSiteIds-field input.checkbox[value="${sourceSiteValue}"]`).
       on('change', function() {
 
-        console.log(`#targetSiteIds-field input.checkbox[value="${index}"]`, 'change')
+        console.log(`#targetSiteIds-field input.checkbox[value="${sourceSiteValue}"]`, 'change')
 
         if ($('#sourceSite').val() === $(this).val()) {
           $(this).prop('disabled', true)
@@ -72,15 +30,49 @@ $(document).ready(function() {
 
     selected[checkBox.val()] = checkBox.prop('checked');
   });
+  const checkboxSelect = $('.checkbox-select').data('checkboxSelect');
+  checkboxSelect.addListener(checkboxSelect.$all, 'change', function() {
+    const sourceSite = $('#sourceSite').val();
+
+    this.$options.map((option) => {
+      const value = $(this.$options[option]).val();
+
+      if (value === sourceSite) {
+        $(this.$options[option]).prop({
+          checked: false,
+          disabled: true,
+        });
+      }
+    });
+  });
 
   if (selected.indexOf(false) === -1) {
     $('#targetSiteIds-field input.checkbox.all').prop('checked', true);
-
-    //TODO why checkbox predisabling is not working?
-    /* selected.forEach((value, index) => {
-      $(`#targetSiteIds-field input.checkbox[value="${index}"]`).prop('disabled', true);
-      $(`#targetSiteIds-field input.checkbox[value="${index}"]`).addClass('disabled');
-      $(`#targetSiteIds-field input.checkbox[value="${index}"]`).attr('disabled', true);
-    }) */
+    allSelected = true;
   }
+
+  if(allSelected) {
+    checkboxSelect.$all.trigger('change');
+  }
+
+  sourceSite.on('change', function(e) {
+    $('#targetSiteIds-field input.checkbox').each(function() {
+
+      if ($(this).hasClass('all')) {
+        return;
+      }
+
+      $(this).prop('disabled', false);
+      $(this).removeClass('disabled');
+
+      if ($('#targetSiteIds-field input.all').prop('checked') === true) {
+        $(this).prop('checked', true);
+        $(this).attr('disabled', true);
+      }
+    });
+
+    $('#targetSiteIds-field input.checkbox[value=' + $(this).val() + ']').
+        prop('disabled', true).
+        prop('checked', false);
+  });
 });

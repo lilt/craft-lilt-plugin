@@ -36,7 +36,6 @@ class GetJobCreateFormController extends AbstractJobController
         }
 
         $job = (new Job());
-        $job->dueDate = (new DateTime())->setTimestamp(strtotime('+1 week'));
         $job->versions = [];
 
         $elementIds = $request->getQueryParam('elementIds');
@@ -54,7 +53,6 @@ class GetJobCreateFormController extends AbstractJobController
         return $this->renderJobForm(
             $job,
             [
-                'liltTranslationWorkflowsOptions' => ['instant' => 'Instant', 'verified' => 'Verified'],
                 'crumbs' => [
                     [
                         'label' => 'Lilt Plugin',

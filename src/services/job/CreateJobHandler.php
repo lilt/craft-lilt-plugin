@@ -17,12 +17,12 @@ use RuntimeException;
 
 class CreateJobHandler
 {
-    public function __invoke(CreateJobCommand $command): Job
+    public function __invoke(CreateJobCommand $command, bool $asDraft = false): Job
     {
         $element = new Job();
         $element->title = $command->getTitle();
         $element->liltJobId = null;
-        $element->status = Job::STATUS_NEW;
+        $element->status = $asDraft ? Job::STATUS_DRAFT : Job::STATUS_NEW;
         $element->sourceSiteId = $command->getSourceSiteId();
 
         $element->sourceSiteLanguage = Craftliltplugin::getInstance()
@@ -34,7 +34,7 @@ class CreateJobHandler
         $element->targetSiteIds = $command->getTargetSitesIds();
         $element->elementIds = $command->getEntries();
         $element->versions = $command->getVersions();
-        $element->dueDate = $command->getDueDate();
+        $element->translationWorkflow = $command->getTranslationWorkflow();
         $element->draftId = null;
         $element->revisionId = null;
         $jobRecord = new JobRecord();

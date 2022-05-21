@@ -12,7 +12,6 @@ namespace lilthq\craftliltplugin\elements\db;
 use craft\elements\db\ElementQuery;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class JobQuery extends ElementQuery
 {
@@ -65,6 +64,7 @@ class JobQuery extends ElementQuery
             'lilt_jobs.targetSiteIds',
             'lilt_jobs.elementIds',
             'lilt_jobs.versions',
+            'lilt_jobs.translationWorkflow',
             'lilt_jobs.dueDate',
             'lilt_jobs.dateCreated',
             'lilt_jobs.dateUpdated',

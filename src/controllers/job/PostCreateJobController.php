@@ -54,12 +54,14 @@ class PostCreateJobController extends AbstractJobController
             $job->elementIds,
             $job->targetSiteIds,
             $job->sourceSiteId,
-            $job->dueDate,
+            $job->translationWorkflow,
             $job->versions
         );
 
+        $asDraft = $request->getBodyParam('actionButton') === 'create-job-draft';
+
         $job = Craftliltplugin::getInstance()->createJobHandler->__invoke(
-            $command
+            $command, $asDraft
         );
 
         Craft::$app->getCache()->flush();

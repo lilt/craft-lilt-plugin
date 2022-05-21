@@ -36,6 +36,7 @@ use yii\base\Exception;
 class Job extends Element
 {
     public const STATUS_NEW = 'new';
+    public const STATUS_DRAFT = 'draft';
     public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_IN_PROGRESS = 'in-progress';
     public const STATUS_READY_FOR_REVIEW = 'ready-for-review';
@@ -56,6 +57,7 @@ class Job extends Element
     public $elementIds;
     public $versions;
     public $dueDate;
+    public $translationWorkflow;
     public $dateCreated;
     public $dateUpdated;
 
@@ -161,7 +163,8 @@ class Job extends Element
     public static function statuses(): array
     {
         return [
-            self::STATUS_NEW => ['label' => 'New', 'color' => ''],
+            self::STATUS_NEW => ['label' => 'New', 'color' => 'turquoise'],
+            self::STATUS_DRAFT => ['label' => 'Draft', 'color' => ''],
             self::STATUS_SUBMITTED => ['label' => 'Submitted', 'color' => 'purple'],
             self::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
             self::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
@@ -197,8 +200,18 @@ class Job extends Element
         return [
             [
                 'key' => 'all',
-                'label' => 'All Orders',
+                'label' => 'All Jobs',
                 'criteria' => [],
+                'defaultSort' => ['dateCreated', 'desc']
+            ],
+            [
+                'key' => 'draft',
+                'label' => 'Draft',
+                'criteria' => [
+                    'status' => [
+                        self::STATUS_DRAFT
+                    ]
+                ],
                 'defaultSort' => ['dateCreated', 'desc']
             ],
             [
@@ -280,7 +293,7 @@ class Job extends Element
             'title' => 'Title',
             'status' => 'Status',
             'sourceSiteId' => 'Site source',
-            'dueDate' => 'Due Date',
+            #'dueDate' => 'Due Date',
             'dateCreated' => 'Created',
             'dateUpdated' => 'Updated',
         ];
@@ -302,7 +315,7 @@ class Job extends Element
             'status' => 'Status',
             'sourceSiteId' => 'Site source',
             'targetSiteIds' => 'Target source',
-            'dueDate' => 'Due Date',
+            #'dueDate' => 'Due Date',
             'dateCreated' => 'Created',
             'dateUpdated' => 'Updated',
         ];
@@ -315,7 +328,7 @@ class Job extends Element
             'status',
             'sourceSiteId',
             'targetSiteIds',
-            'dueDate',
+            #'dueDate',
             'dateCreated',
             'dateUpdated',
         ];
@@ -351,13 +364,11 @@ class Job extends Element
 
             case 'status':
                 return $this->getStatusHtml();
-            case 'dueDate':
-                #return (new \DateTime($this->dueDate))->format(
-                #    Craft::$app->locale->getDateFormat('short', 'php')
-                #);
-                return $this->dueDate->format(
-                    Craft::$app->locale->getDateFormat('short', 'php')
-                );
+            //TODO: due date not in use at the moment
+            //case 'dueDate':
+            //    return $this->dueDate->format(
+            //        Craft::$app->locale->getDateFormat('short', 'php')
+            //    );
             case 'targetSiteIds':
             {
                 $html = '<ul class="target-languages-list">';
@@ -502,7 +513,7 @@ class Job extends Element
     public function rules(): array
     {
         return [
-            [['title', 'sourceSiteId', 'elementIds', 'dueDate', 'targetSiteIds'], 'required'],
+            [['title', 'sourceSiteId', 'elementIds',/* 'dueDate',*/ 'targetSiteIds'], 'required'],
         ];
     }
 }

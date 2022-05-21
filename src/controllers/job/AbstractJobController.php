@@ -34,8 +34,12 @@ class AbstractJobController extends Controller
         $job->title = $bodyParams['title'];
         $job->sourceSiteId = (int)$bodyParams['sourceSite'];
         $job->versions = $bodyParams['versions'] ?? [];
+        $job->translationWorkflow = $bodyParams['translationWorkflow'];
         $job->elementIds = json_decode($bodyParams['entries'], false) ?? [];
-        $job->dueDate = DateTimeHelper::toDateTime($this->request->getBodyParam('dueDate')) ?: null;
+
+        //TODO: due date not using right now
+        //$job->dueDate = DateTimeHelper::toDateTime($this->request->getBodyParam('dueDate')) ?: null;
+
         $job->targetSiteIds = $bodyParams['targetSiteIds'] === '*' ?
             Craftliltplugin::getInstance()->languageMapper->getLanguageToSiteId()
             : $bodyParams['targetSiteIds'];
@@ -51,6 +55,10 @@ class AbstractJobController extends Controller
         Craft::$app->getView()->registerAssetBundle(JobFormAsset::class);
 
         $variables = [
+            //TODO: default from lilt api
+            'defaultTranslationWorkflow' => 'instant',
+
+            'translationWorkflowsOptions' => ['instant' => 'Instant', 'verified' => 'Verified'],
             'availableSites' => Craftliltplugin::getInstance()->languageMapper->getAvailableSitesForFormField(),
             'targetSites' =>  Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
             'element' => $job,

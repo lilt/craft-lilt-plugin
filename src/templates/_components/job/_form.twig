@@ -24,6 +24,8 @@
         disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
     }) }}
 
+    <hr />
+
     <div id="entries-to-translate-field" class="field">
         <div class="heading">
             {{ forms.textField({
@@ -71,6 +73,8 @@
         </div>
     </div>
 
+    <hr />
+
     {{ forms.selectField({
         label: 'Source site <span class="required"/>',
         options: availableSites,
@@ -78,16 +82,6 @@
         id: 'sourceSite',
         value: element.sourceSiteId ?? '',
         errors: element.getErrors('sourceSiteId'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
-    }) }}
-
-    {{ forms.dateField({
-        status: element.getAttributeStatus('dueDate'),
-        label: "Due Date"|t('app'),
-        id: 'dueDate',
-        name: 'dueDate',
-        value: (element.dueDate ? element.dueDate : null),
-        errors: element.getErrors('dueDate'),
         disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
     }) }}
 
@@ -103,5 +97,23 @@
         class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
     }) }}
 
+    <hr/>
+
+    <a class="fieldtoggle collapsed" data-target="types-craft-fields-Assets-advanced">Advanced</a>
+    <div id="types-craft-fields-Assets-advanced" class="hidden" style="overflow: hidden; height: 0px;">
+
+        {{ forms.selectField({
+            label: 'Translation(s) Workflow <span class="required"/>',
+            options: translationWorkflowsOptions,
+            showAllOption: true,
+            name: 'translationWorkflow',
+            id: 'translationWorkflow',
+            value: element.translationWorkflow ?? defaultTranslationWorkflow,
+            errors: element.getErrors('liltTranslationWorkflow'),
+            disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
+            class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
+        }) }}
+
+    </div>
 
 </form>

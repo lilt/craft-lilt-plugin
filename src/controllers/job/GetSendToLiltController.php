@@ -41,7 +41,7 @@ class GetSendToLiltController extends Controller
             return (new Response())->setStatusCode(405);
         }
 
-        $jobId = (int) $request->getSegment(4);
+        $jobId = (int)$request->getSegment(4);
         $job = Job::findOne(['id' => $jobId]);
 
         if (!$job) {
@@ -52,7 +52,7 @@ class GetSendToLiltController extends Controller
 
         Craft::$app->getSession()->setFlash(
             'cp-notice',
-            'Job uploaded to Lilt platform successfully'
+            Craft::t('craft-lilt-plugin', 'The job was transferred successfully')
         );
 
         return $this->redirect($job->getCpEditUrl());

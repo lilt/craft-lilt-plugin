@@ -2,6 +2,7 @@
 {% import '_includes/forms' as forms %}
 
 {% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
+{% set isDraftJob = constant('STATUS_DRAFT', element) is same as element.getStatus() %}
 {% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() or constant('STATUS_READY_TO_PUBLISH', element) is same as element.getStatus() or constant('STATUS_COMPLETE', element) is same as element.getStatus() %}
 
 {% set title = isJobInProgress ? "Job edit" : "Job overview" %}
@@ -15,9 +16,11 @@
 {% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
 
     {% block actionButton %}
-        {% if (not isJobInProgress and not isJobReadyForReview) %}
+        {% if isDraftJob %}
+            {% include 'craft-lilt-plugin/_components/job/_create_actions.twig' %}
+        {% elseif (not isJobInProgress and not isJobReadyForReview) %}
             <div id="save-btn-container" class="submit">
-                <button id="create-order-submit-form" type="submit" class="btn submit">
+                <button id="create-job-submit-form" type="submit" class="btn submit">
                     Save job
                 </button>
             </div>

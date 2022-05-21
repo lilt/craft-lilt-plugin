@@ -4,11 +4,12 @@
             <nav id="tabs" class="pane-tabs">
                 <ul class="">
                     <li data-id="preview">
-                        <a id="tab-preview" class="sel" data-id="preview"> Preview
+                        <a id="tab-preview" class="sel" data-id="preview">
+                            {{ 'Preview'|t('craft-lilt-plugin') }}
                         </a></li>
                     <li data-id="translation">
                         <a id="tab-translation" data-id="translation">
-                            Translation
+                            {{ 'Text'|t('craft-lilt-plugin') }}
                         </a></li>
                 </ul>
             </nav>
@@ -38,14 +39,24 @@
             <table style="height: 100%;width: 100%; margin-top: -24px">
                 <tr style="text-align: center;padding: 0">
                     <td style="text-align: center;padding: 0;padding-top: 10px"><span data-icon="world"
-                                                         style="margin-right: 5px"></span>{{ translation.sourceLocale }}</td>
+                                                                                      style="margin-right: 5px"></span>{{ translation.sourceLocale }}
+                    </td>
                     <td style="text-align: center;padding: 0;padding-top: 10px"><span data-icon="world"
-                                                         style="margin-right: 5px"></span>{{ translation.targetLocale }}</td>
+                                                                                      style="margin-right: 5px"></span>{{ translation.targetLocale }}
+                    </td>
                 </tr>
                 {% for key,value in translation.sourceContentValues %}
                     <tr style="font-size: 10px;padding: 0px">
-                        <td style="color: grey"><div><div class="translation-text" style="float: left;">{{ key }}</div><span data-icon="clipboard" style="float:right"></span></div></td>
-                        <td style="color: grey"><div><div class="translation-text" style="float: left;">{{ key }}</div><span data-icon="clipboard" style="float:right"></span></div></td>
+                        <td style="color: grey">
+                            <div>
+                                <div class="translation-text" style="float: left;">{{ key }}</div>
+                                <span data-icon="clipboard" style="float:right"></span></div>
+                        </td>
+                        <td style="color: grey">
+                            <div>
+                                <div class="translation-text" style="float: left;">{{ key }}</div>
+                                <span data-icon="clipboard" style="float:right"></span></div>
+                        </td>
                     </tr>
                     <tr>
                         <td>{{ value }}</td>
@@ -57,14 +68,20 @@
 
         <div id="preview" class="flex-fields">
             <div class="iframe-box">
-                <div class="locale"><span data-icon="world"
-                                          style="margin-right: 5px"></span>{{ translation.sourceLocale }}</div>
+                <div class="locale">
+                    <a href="{{ originalUrl }}" target="_blank">
+                        <span data-icon="world" style="margin-right: 5px"></span>{{ translation.sourceLocale }}
+                    </a>
+                </div>
                 <iframe src="{{ originalUrl }}"></iframe>
             </div>
 
             <div class="iframe-box">
-                <div class="locale"><span data-icon="world"
-                                          style="margin-right: 5px"></span>{{ translation.targetLocale }}</div>
+                <div class="locale">
+                    <a href="{{ previewUrl }}" target="_blank">
+                        <span data-icon="world" style="margin-right: 5px"></span>{{ translation.targetLocale }}
+                    </a>
+                </div>
                 <iframe src="{{ previewUrl }}"></iframe>
             </div>
         </div>

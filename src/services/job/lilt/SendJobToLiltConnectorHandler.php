@@ -35,7 +35,8 @@ class SendJobToLiltConnectorHandler
     public function __invoke(Job $job): void
     {
         $jobLilt = Craftliltplugin::getInstance()->connectorJobRepository->create(
-            $job->title . ' | {today}'
+            $job->title . ' | {today}',
+            strtoupper($job->translationWorkflow)
         );
 
         $elementIdsToTranslate = $job->getElementIds();
@@ -52,7 +53,7 @@ class SendJobToLiltConnectorHandler
                 $versions[$elementId] = null;
             }
 
-            $versionId = (int) ($versions[$elementId] ?? $elementId);
+            $versionId = (int)($versions[$elementId] ?? $elementId);
 
             $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
 
@@ -71,7 +72,7 @@ class SendJobToLiltConnectorHandler
                 $jobLilt->getId(),
                 Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
                 $targetLanguages,
-                $job->dueDate
+                null //TODO: $job->dueDate is not in use
             );
 
             $translationRecords[] = array_values(
@@ -130,9 +131,10 @@ class SendJobToLiltConnectorHandler
         int $jobId,
         string $sourceLanguage,
         array $targetSiteLanguages,
-        DateTimeInterface $dueDate
+        ?DateTimeInterface $dueDate
     ): void {
         $contentString = json_encode($content);
+
         Craftliltplugin::getInstance()->connectorJobsFileRepository->addFileToJob(
             $jobId,
             'element_' . $entryId . '.json+html',
@@ -142,20 +144,4 @@ class SendJobToLiltConnectorHandler
             $dueDate
         );
     }
-
-    #private function createTranslateFile(int $id, array $content): string
-    #{
-    #    $tempPath = Craft::$app->path->getTempPath();
-    #    $fileName = sprintf(
-    #        'lilt-translate-file-%d-%s.json',
-    #        $id,
-    #        date('Y-m-d')
-    #    );
-
-    #    $contentString = json_encode($content);
-
-    #    file_put_contents($tempPath . '/' . $fileName, $contentString);
-
-    #    return $tempPath . '/' . $fileName;
-    #}
 }

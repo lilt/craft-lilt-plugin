@@ -55,7 +55,7 @@ class PostEditJobController extends AbstractJobController
             $job->elementIds,
             $job->targetSiteIds,
             $job->sourceSiteId,
-            $job->dueDate,
+            $job->translationWorkflow,
             $job->versions
         );
 

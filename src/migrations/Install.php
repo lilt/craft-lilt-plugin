@@ -26,10 +26,11 @@ class Install extends Migration
             'status' => $this->string(50),
             'elementIds' => $this->json(),
             'versions' => $this->json(), //contains which version of element should be translated, empty if current
+            'translationWorkflow' => $this->string(50),
             'sourceSiteId' => $this->integer()->unsigned()->notNull(),
             'sourceSiteLanguage' => $this->string(50),
             'targetSiteIds' => $this->json(),
-            'dueDate' => $this->dateTime(),
+            'dueDate' => $this->dateTime()->null(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
             'uid' => $this->uid()

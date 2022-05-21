@@ -15,12 +15,10 @@
 {% set sources = craft.app.elementIndexes.getSources('craft\\elements\\Entry', 'index') %}
 {% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
 
+{#{% set fullPageForm = true %}#}
+
 {% block actionButton %}
-    <div id="save-btn-container" class="submit">
-        <button id="create-order-submit-form" type="submit" class="btn submit">
-            Create job
-        </button>
-    </div>
+    {% include 'craft-lilt-plugin/_components/job/_create_actions.twig' %}
 {% endblock %}
 
 {% block content %}

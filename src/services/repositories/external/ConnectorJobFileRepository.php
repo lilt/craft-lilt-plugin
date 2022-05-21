@@ -21,7 +21,7 @@ class ConnectorJobFileRepository extends AbstractConnectorExternalRepository
         string $filePath,
         string $sourceLanguage,
         array $targetLanguages,
-        DateTimeInterface $dueDate
+        ?DateTimeInterface $dueDate
     ): bool {
         try {
             $this->apiInstance->servicesApiJobsAddFile(

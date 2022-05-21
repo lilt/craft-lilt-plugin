@@ -17,7 +17,7 @@ class CreateJobCommand
     private $entries;
     private $sourceSiteId;
     private $targetSitesIds;
-    private $dueDate;
+    private $translationWorkflow;
     private $versions;
 
     public function __construct(
@@ -25,14 +25,14 @@ class CreateJobCommand
         array $entries,
         array $targetSitesIds,
         int $sourceSiteId,
-        DateTimeInterface $dueDate,
+        string $translationWorkflow,
         array $versions
     ) {
         $this->title = $title;
         $this->entries = $entries;
         $this->targetSitesIds = $targetSitesIds;
         $this->sourceSiteId = $sourceSiteId;
-        $this->dueDate = $dueDate;
+        $this->translationWorkflow = $translationWorkflow;
         $this->versions = $versions;
 
         //Remove source site from target site if it is there
@@ -41,9 +41,9 @@ class CreateJobCommand
         }
     }
 
-    public function getDueDate(): DateTimeInterface
+    public function getTranslationWorkflow(): string
     {
-        return $this->dueDate;
+        return $this->translationWorkflow;
     }
 
     public function getSourceSiteId(): int
