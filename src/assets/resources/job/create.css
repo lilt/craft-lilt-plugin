@@ -6,6 +6,18 @@
     content: "";
 }
 
+#entries-to-translate-field #create-job-selected-entries-field {
+    margin-bottom: 0;
+}
+
+/* TODO remove when jobId-field removed */
+#create-job-form #jobId-field {
+    margin: 0;
+}
+#create-job-form #title-field {
+    margin-top: 0;
+}
+
 #status-value > span.status.blue {
     animation: blinker 1s linear infinite;
 }

@@ -1,7 +1,7 @@
 {% extends "_layouts/cp" %}
 {% import '_includes/forms' as forms %}
 
-{% set title = title ?? "Job create" %}
+{% set title = title ?? "Create a new job" %}
 
 {% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
 {% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() %}
@@ -15,10 +15,43 @@
 {% set sources = craft.app.elementIndexes.getSources('craft\\elements\\Entry', 'index') %}
 {% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
 
-{#{% set fullPageForm = true %}#}
+{% set fullPageForm = true %}
 
-{% block actionButton %}
-    {% include 'craft-lilt-plugin/_components/job/_create_actions.twig' %}
+{% set formActions = [] %}
+{% set mainFormAttributes = {
+    id: 'create-job-form',
+} %}
+
+{% set isUnpublishedDraft = true %}
+
+{% set saveDraftAction = 'craft-lilt-plugin/job/post-create-job/invoke' %}
+{% set redirectUrl = 'craft-lilt-plugin/job/create' %}
+{% set saveSourceAction = 'craft-lilt-plugin/job/post-create-job/invoke' %}
+{% set canUpdateSource = true %}
+
+{% set formActions = formActions|push({
+    label: 'Create and add another'|t('app'),
+    redirect: 'craft-lilt-plugin/job/create'|hash,
+    action: saveSourceAction,
+    shortcut: true,
+    shift: true,
+    eventData: {
+        autosave: false,
+    },
+}) %}
+
+{% set formActions = formActions|push({
+    label: 'Save draft'|t('app'),
+    action: saveDraftAction,
+    redirect: 'craft-lilt-plugin/jobs'|hash,
+    shortcut: true,
+    eventData: {
+        autosave: false,
+    },
+}) %}
+
+{% block submitButton %}
+    <button type="submit" data-icon="language" class="btn submit">{{ 'Create job'|t('app') }}</button>
 {% endblock %}
 
 {% block content %}

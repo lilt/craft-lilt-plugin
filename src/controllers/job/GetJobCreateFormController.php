@@ -40,19 +40,34 @@ class GetJobCreateFormController extends AbstractJobController
 
         $elementIds = $request->getQueryParam('elementIds');
 
-        if($elementIds) {
+        if ($elementIds) {
             $job->elementIds = $elementIds;
         }
 
         $sourceSiteId = $request->getQueryParam('sourceSiteId');
 
-        if($sourceSiteId) {
+        if ($sourceSiteId) {
             $job->sourceSiteId = $sourceSiteId;
         }
+
+        /**
+         * [{"label":"Create and continue editing","redirect":"8b4635887d078088430ed1ef32a141d02be90d9017624c9a2268adae0f3b0ab1{cpEditUrl}","shortcut":true,"retainScroll":true,"eventData":{"autosave":false}},{"label":"Create and add another","action":"entry-revisions\/publish-draft","redirect":"10b438699a9a92c9a2791885ea037a1d65357e1496087ef66d4bd0676f444d5eentries\/blog\/new?site=default","shortcut":true,"shift":true,"eventData":{"autosave":false}},{"label":"Save draft","action":"entry-revisions\/save-draft","redirect":"3142e9b53d10551091aadf3761447a4078d5946b38456518ac9fde16adf90e21entries\/blog#","eventData":{"autosave":false}},{"destructive":true,"label":"Delete draft","action":"entry-revisions\/delete-draft","redirect":"3142e9b53d10551091aadf3761447a4078d5946b38456518ac9fde16adf90e21entries\/blog#","confirm":"Are you sure you want to delete this draft?"}]
+         */
 
         return $this->renderJobForm(
             $job,
             [
+                /*'formActions' => [
+                    [
+                        "label" => "Create and continue editing",
+                        "redirect" => "{cpEditUrl}",
+                        "shortcut" => true,
+                        "retainScroll" => true,
+                        "eventData" => [
+                            "autosave" => false
+                        ]
+                    ]
+                ],*/
                 'crumbs' => [
                     [
                         'label' => 'Lilt Plugin',

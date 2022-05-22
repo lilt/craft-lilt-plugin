@@ -1,6 +1,5 @@
 $(document).ready(function() {
   const sourceSite = $('#sourceSite');
-  //$('#sourceSite').trigger('change');
 
   let selected = [];
   let allSelected = false;
@@ -25,11 +24,13 @@ $(document).ready(function() {
     }
 
     if (checkBox.val() === sourceSiteValue) {
+      checkBox.prop('disabled', true)
       return;
     }
 
     selected[checkBox.val()] = checkBox.prop('checked');
   });
+
   const checkboxSelect = $('.checkbox-select').data('checkboxSelect');
   checkboxSelect.addListener(checkboxSelect.$all, 'change', function() {
     const sourceSite = $('#sourceSite').val();

@@ -71,6 +71,6 @@ class PostCreateJobController extends AbstractJobController
             'Translate job created successfully.'
         );
 
-        return $this->redirect($job->getCpEditUrl());
+        return $this->redirectToPostedUrl(); //$this->redirect($job->getCpEditUrl());
     }
 }

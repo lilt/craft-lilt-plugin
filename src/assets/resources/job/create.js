@@ -270,41 +270,28 @@ $(document).ready(function() {
 $(document).ready(function() {
   let formSubmitting = false;
 
-  $('#create-job-submit-form, #create-draft-job-submit-form').
-      on('click', function() {
+  const onFormSubmit = () => {
+    formSubmitting = true;
 
-        if ($(this).parent().hasClass('disabled')) {
-          return false;
-        }
+    const $spinner = $(
+        '<div class="spinner flex" style="margin-right: 10px"></div>')
 
-        const $spinner = $(
-            '<div class="spinner" style="position: absolute"></div>');
-        //$(this).prepend($spinner);
-        $(this).prepend($spinner);
-        $(this).parent().addClass('disabled');
-        //$(this).addClass('disabled');
-        //$(this).disable();
+    $('#action-button').prepend($spinner);
+    $('#action-button').addClass('disabled');
+  }
 
-        const actionButton = $(this).data('action-button');
-        $('#create-job-form').
-            append(
-                $(`<input name="actionButton" value="${actionButton}" type="hidden" />`));
-
-        $('#create-job-form').submit();
-
-        formSubmitting = true;
-      });
+  $('#action-button .btngroup .submit[type="submit"]').on('click', function() {
+    onFormSubmit()
+  })
 
   $('.btn.submit.menubtn').on('click', function() {
     console.log('create-draft');
     $(this).data('menubtn').settings.onOptionSelect = function(o) {
       if ($(o).hasClass('formsubmit')) {
-        if ($(o).data('action-button') === 'create-job-draft') {
-          $('#create-draft-job-submit-form').click();
-        }
+        onFormSubmit()
       }
-    };
-  });
+    }
+  })
 
   window.addEventListener('beforeunload', function(e) {
 

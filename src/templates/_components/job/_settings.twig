@@ -2,7 +2,7 @@
 
 {% block settings %}
 
-    {% if element.id is defined and element.id is not null %}
+    {% if element.id is defined and element.id > 0 %}
     <div id="slug-field" class="field">
         <div class="heading">
             <label id="slug-label" for="slug">Job ID</label>

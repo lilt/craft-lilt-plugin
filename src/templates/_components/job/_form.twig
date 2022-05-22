@@ -3,7 +3,7 @@
 <form method="post" id="create-job-form" accept-charset="UTF-8" action="{{ formActionUrl }}">
     {{ csrfInput() }}
 
-    {% if element %}
+    {% if element.id is not same as null %}
         {{ forms.textField({
             name: 'jobId',
             id: 'jobId',
@@ -45,7 +45,7 @@
                 value: element.getVersionsAsString ?? '[]',
             }) }}
         </div>
-        <div class="content-pane" id="entries-to-translate" style="display: none; margin-top: 20px">
+        <div class="content-pane" id="entries-to-translate" style="display: none; margin-top: 5px">
             <div style="display: none">
                 {% include '_elements/toolbar' with {
                     showSiteMenu: false,
