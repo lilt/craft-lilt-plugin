@@ -19,6 +19,11 @@ class Install extends Migration
      */
     public function safeUp(): void
     {
+        $this->dropTableIfExists(CraftliltpluginParameters::TRANSLATION_TABLE_NAME);
+        $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
+        $this->dropTableIfExists(CraftliltpluginParameters::I18N_TABLE_NAME);
+        $this->dropTableIfExists(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
+
         $this->createTable(CraftliltpluginParameters::JOB_TABLE_NAME, [
             'id' => $this->primaryKey()->unsigned(),
             'title' => $this->string()->null(),
@@ -73,10 +78,26 @@ class Install extends Migration
             true
         );
 
+        $this->createTable(CraftliltpluginParameters::SETTINGS_TABLE_NAME, [
+            'id' => $this->primaryKey()->unsigned(),
+            'uid' => $this->uid(),
+            'name' => $this->string(255),
+            'value' => $this->string(255),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+        ]);
+
+        $this->createIndex(
+            null,
+            CraftliltpluginParameters::SETTINGS_TABLE_NAME,
+            ['name'],
+            true
+        );
+
         $this->createIndex(
             null,
             CraftliltpluginParameters::TRANSLATION_TABLE_NAME,
-            ['jobId','elementId','sourceSiteId','targetSiteId'],
+            ['jobId', 'elementId', 'sourceSiteId', 'targetSiteId'],
             true
         );
 
@@ -99,5 +120,6 @@ class Install extends Migration
         $this->dropTableIfExists(CraftliltpluginParameters::TRANSLATION_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::I18N_TABLE_NAME);
+        $this->dropTableIfExists(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
     }
 }

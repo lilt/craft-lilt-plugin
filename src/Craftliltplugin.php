@@ -18,9 +18,12 @@ use craft\base\Plugin;
 use craft\events\RegisterElementDefaultTableAttributesEvent;
 use craft\events\RegisterElementTableAttributesEvent;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\App;
+use craft\helpers\UrlHelper;
 use craft\web\UrlManager;
 use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
+use LiltConnectorSDK\Api\SettingsApi;
 use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
@@ -62,6 +65,7 @@ use yii\base\InvalidConfigException;
 use craft\events\RegisterComponentTypesEvent;
 use craft\services\Elements;
 use craft\redactor\Field as RedactorPluginField;
+use yii\web\Response;
 
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
@@ -91,6 +95,7 @@ use craft\redactor\Field as RedactorPluginField;
  * @property Configuration $connectorConfiguration
  * @property JobsApi $connectorJobsApi
  * @property TranslationsApi $connectorTranslationsApi
+ * @property SettingsApi $connectorSettingsApi
  * @property LanguageMapper $languageMapper
  * @property ElementTranslatableContentProvider $elementTranslatableContentProvider
  * @property FieldContentProvider $fieldContentProvider
@@ -130,26 +135,26 @@ class Craftliltplugin extends Plugin
      */
     public $hasCpSettings = true;
 
-    /*
-    public function getSettingsResponse()
+    public function getSettingsResponse(): Response
     {
         return \Craft::$app
             ->controller
-            ->renderTemplate('my-plugin-handle/settings/template');
+            ->redirect('craft-lilt-plugin/settings/lilt-configuration');
     }
 
-    protected function createSettingsModel()
-    {
-        return new \mynamespace\models\Settings();
-    }
-        */
-    /*protected function settingsHtml()
-    {
-        return \Craft::$app->getView()->renderTemplate(
-            'craft-lilt-plugin/settings',
-            [ 'settings' => $this->getSettings() ]
-        );
-    }*/
+    /*
+        protected function createSettingsModel()
+        {
+            return new \mynamespace\models\Settings();
+        }
+
+        protected function settingsHtml()
+        {
+            return \Craft::$app->getView()->renderTemplate(
+                'craft-lilt-plugin/settings',
+                [ 'settings' => $this->getSettings() ]
+            );
+        }*/
 
     /**
      * Set to `true` if the plugin should have its own section (main nav item) in the control panel.
@@ -165,6 +170,25 @@ class Craftliltplugin extends Plugin
 
     // Public Methods
     // =========================================================================
+
+    protected function afterInstall()
+    {
+        parent::afterInstall();
+
+        $request = Craft::$app->getRequest();
+        if (!$request->isCpRequest) {
+            return;
+        }
+
+        Craft::$app
+            ->getResponse()
+            ->redirect(
+                UrlHelper::cpUrl(
+                    'craft-lilt-plugin/settings/lilt-system-report'
+                )
+            )
+            ->send();
+    }
 
     /**
      * Set our $plugin static property to this class so that it can be accessed via
@@ -204,6 +228,9 @@ class Craftliltplugin extends Plugin
                 $event->rules['GET craft-lilt-plugin'] = 'craft-lilt-plugin/index/index';
                 $event->rules['GET craft-lilt-plugin/jobs'] = 'craft-lilt-plugin/jobs/index';
                 $event->rules['craft-lilt-plugin'] = 'craft-lilt-plugin/job/get-translation-review/invoke';
+                $event->rules['GET craft-lilt-plugin/settings/<id>'] = 'craft-lilt-plugin/get-settings-form/invoke';
+                $event->rules['craft-lilt-plugin/settings'] = 'craft-lilt-plugin/get-settings-form/invoke';
+                $event->rules['POST craft-lilt-plugin/settings/lilt-configuration'] = 'craft-lilt-plugin/post-configuration/invoke';
             }
         );
 
@@ -330,6 +357,16 @@ class Craftliltplugin extends Plugin
         );
 
         $this->set(
+            'connectorSettingsApi',
+            function () {
+                return new SettingsApi(
+                    new Client(),
+                    $this->connectorConfiguration
+                );
+            }
+        );
+
+        $this->set(
             'connectorJobRepository',
             [
                 'class' => ConnectorJobRepository::class,
@@ -371,7 +408,9 @@ class Craftliltplugin extends Plugin
 
         $getProvidersMap = function () {
             return [
-                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentProvider($this->elementTranslatableContentProvider),
+                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentProvider(
+                    $this->elementTranslatableContentProvider
+                ),
                 CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentProvider(),
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
@@ -392,6 +431,20 @@ class Craftliltplugin extends Plugin
             [
                 'class' => FieldContentProvider::class,
                 'providersMap' => $getProvidersMap(),
+                'fieldsTranslatableMap' => [
+                    'craft\fields\Assets' => ['translatable' => false,],
+                    'craft\fields\Categories' => ['translatable' => false,],
+                    'craft\fields\Color' => ['translatable' => false,],
+                    'craft\fields\Date' => ['translatable' => false,],
+                    'craft\fields\Email' => ['translatable' => false,],
+                    'craft\fields\Entries' => ['translatable' => true,],
+                    'craft\fields\Lightswitch' => ['translatable' => false,],
+                    'craft\fields\Number' => ['translatable' => false,],
+                    'craft\fields\Tags' => ['translatable' => false,],
+                    'craft\fields\Time' => ['translatable' => false,],
+                    'craft\fields\Url' => ['translatable' => false,],
+                    'craft\fields\Users' => ['translatable' => false,],
+                ],
             ]
         );
 

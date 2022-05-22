@@ -12,6 +12,11 @@ class FieldContentProvider
     public $providersMap;
 
     /**
+     * @var string[]
+     */
+    public $fieldsTranslatableMap;
+
+    /**
      * @return mixed
      */
     public function provide(ProvideContentCommand $provideContentCommand)
