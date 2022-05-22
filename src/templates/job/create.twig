@@ -23,11 +23,11 @@
 } %}
 
 {% set isUnpublishedDraft = true %}
+{% set canUpdateSource = true %}
 
 {% set saveDraftAction = 'craft-lilt-plugin/job/post-create-job/invoke' %}
 {% set redirectUrl = 'craft-lilt-plugin/job/create' %}
 {% set saveSourceAction = 'craft-lilt-plugin/job/post-create-job/invoke' %}
-{% set canUpdateSource = true %}
 
 {% set formActions = formActions|push({
     label: 'Create and add another'|t('app'),
@@ -45,6 +45,9 @@
     action: saveDraftAction,
     redirect: 'craft-lilt-plugin/jobs'|hash,
     shortcut: true,
+    params: {
+        saveDraft: 1,
+    },
     eventData: {
         autosave: false,
     },

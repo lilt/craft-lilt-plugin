@@ -12,11 +12,13 @@ namespace lilthq\craftliltplugin\controllers\job;
 use Craft;
 use craft\errors\MissingComponentException;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\services\job\CreateJobCommand;
+use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\services\job\EditJobCommand;
+use RuntimeException;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
-class PostCreateJobController extends AbstractJobController
+class PostPublishDraftJobController extends AbstractJobController
 {
     protected $allowAnonymous = false;
 
@@ -35,46 +37,45 @@ class PostCreateJobController extends AbstractJobController
         $job = $this->getJobModel();
         $job->validate();
 
-        if ($job->hasErrors()) {
-            Craft::$app->getSession()->setFlash(
-                'cp-error',
-                'Couldn’t create job.'
-            );
+        if (!$job->id) {
+            throw new RuntimeException('Job id cant be empty');
+        }
 
+        if ($job->hasErrors()) {
             return $this->renderJobForm($job);
         }
 
-        if($job->versions === '[]') {
+        if ($job->versions === '[]') {
             //TODO: fix FE part
             $job->versions = [];
         }
 
-        $command = new CreateJobCommand(
+        $command = new EditJobCommand(
+            $job->id,
             $job->title,
             $job->elementIds,
             $job->targetSiteIds,
             $job->sourceSiteId,
             $job->translationWorkflow,
-            $job->versions
+            $job->versions,
+            Job::STATUS_NEW
         );
 
-        $asDraft = ((int) $request->getBodyParam('saveDraft') === 1);
-
-        $job = Craftliltplugin::getInstance()->createJobHandler->__invoke(
-            $command, $asDraft
+        Craftliltplugin::getInstance()->editJobHandler->__invoke(
+            $command
         );
 
         Craft::$app->getCache()->flush();
 
 
-            Craft::$app->getSession()->setFlash(
-                'cp-notice',
-                'Translate job created successfully.'
-            );
+        Craft::$app->getSession()->setFlash(
+            'cp-notice',
+            'Translate job draft published.'
+        );
 
 
         $redirectUrl = $this->request->getValidatedBodyParam('redirect');
-        if($redirectUrl === null || $redirectUrl === '{cpEditUrl}') {
+        if ($redirectUrl === null || $redirectUrl === '{cpEditUrl}') {
             return $this->redirect($job->getCpEditUrl());
         }
 

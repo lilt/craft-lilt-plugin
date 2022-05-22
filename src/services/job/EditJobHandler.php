@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\services\job;
 
 use Craft;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\exeptions\JobNotFoundException;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
@@ -23,7 +24,7 @@ class EditJobHandler
      */
     public $jobRepository;
 
-    public function __invoke(EditJobCommand $command): void
+    public function __invoke(EditJobCommand $command): Job
     {
         $job = $this->jobRepository->findOneById(
             $command->getJobId()
@@ -47,6 +48,10 @@ class EditJobHandler
                 $command->getSourceSiteId()
             );
 
+        if($command->getStatus()) {
+            $job->status = $command->getStatus();
+        }
+
         $job->targetSiteIds = $command->getTargetSitesIds();
         $job->elementIds = $command->getEntries();
         $job->translationWorkflow = $command->getTranslationWorkflow();
@@ -66,5 +71,7 @@ class EditJobHandler
         if (!$status || !$statusElement) {
             throw new RuntimeException("Cant edit the job");
         }
+
+        return $job;
     }
 }

@@ -294,7 +294,6 @@ $(document).ready(function() {
   })
 
   window.addEventListener('beforeunload', function(e) {
-
     if (document.location.pathname.indexOf(
         '/admin/craft-lilt-plugin/job/edit') === 0) {
       return undefined;

@@ -85,7 +85,7 @@ class SystemReport extends Utility
                 'warning' => !$isSupported
             ];
 
-            if(!$hasProvider && !$hasError) {
+            if(!$hasProvider && !$hasError && !$isTranslatable) {
                 $fieldSupport['memo'] = sprintf('%s is not translatable', $fieldType);
             }
 
