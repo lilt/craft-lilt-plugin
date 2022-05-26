@@ -67,7 +67,6 @@ class PostPublishDraftJobController extends AbstractJobController
 
         Craft::$app->getCache()->flush();
 
-
         Craft::$app->getSession()->setFlash(
             'cp-notice',
             'Translate job draft published.'

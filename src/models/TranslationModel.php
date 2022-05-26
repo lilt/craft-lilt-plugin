@@ -162,7 +162,9 @@ class TranslationModel extends Model
             case TranslationRecord::STATUS_READY_TO_PUBLISH:
                 return 'Ready to publish';
             case TranslationRecord::STATUS_NEW:
-                return 'Waiting translation';
+                return 'New';
+            case TranslationRecord::STATUS_IN_PROGRESS:
+                return 'In progress';
             case TranslationRecord::STATUS_READY_FOR_REVIEW:
                 return 'Ready for review';
             case TranslationRecord::STATUS_PUBLISHED:
@@ -177,6 +179,8 @@ class TranslationModel extends Model
     public function getStatusColor(): string
     {
         switch ($this->status) {
+            case TranslationRecord::STATUS_IN_PROGRESS:
+                return 'blue';
             case TranslationRecord::STATUS_READY_TO_PUBLISH:
                 return 'purple';
             case TranslationRecord::STATUS_READY_FOR_REVIEW:

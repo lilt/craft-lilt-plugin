@@ -23,6 +23,26 @@ class TranslationRepository
         );
     }
 
+    public function findUnprocessedByJobIdMapped(int $jobId): array
+    {
+        $result = TranslationRecord::findAll(
+            [
+                'jobId' => $jobId,
+                'status' => [
+                    TranslationRecord::STATUS_IN_PROGRESS,
+                    TranslationRecord::STATUS_NEW
+                ]
+            ]
+        );
+
+        $mapped = [];
+        foreach ($result as $item) {
+            $mapped[$item->elementId][$item->targetSiteId] = $item;
+        }
+
+        return $mapped;
+    }
+
     public function findOneById(int $id): TranslationModel
     {
         $translationRecord = TranslationRecord::findOne(['id' => $id]);

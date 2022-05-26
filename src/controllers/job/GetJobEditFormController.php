@@ -80,6 +80,20 @@ class GetJobEditFormController extends AbstractJobController
             return (new Response())->setStatusCode(404);
         }
 
+        /*
+        Craft::$app->response->on(Response::EVENT_AFTER_SEND, function ($event) {
+
+            $start = time();
+
+            $end = $start + 30;
+
+            while (time() < $end) {
+
+            }
+
+            return;
+        });
+        */
         return $this->renderJobForm(
             $job,
             [

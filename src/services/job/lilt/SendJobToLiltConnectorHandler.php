@@ -35,7 +35,7 @@ class SendJobToLiltConnectorHandler
     public function __invoke(Job $job): void
     {
         $jobLilt = Craftliltplugin::getInstance()->connectorJobRepository->create(
-            $job->title . ' | {today}',
+            $job->title,
             strtoupper($job->translationWorkflow)
         );
 

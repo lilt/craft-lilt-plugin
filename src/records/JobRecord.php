@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\records;
 
 use craft\db\ActiveRecord;
 use craft\gql\types\elements\Element;
+use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use yii\db\ActiveQueryInterface;
 
@@ -27,6 +28,7 @@ use yii\db\ActiveQueryInterface;
  * @property string $dueDate [datetime]
  *
  * @property-read ActiveQueryInterface $element
+ * @property string $translationWorkflow [varchar(50)]
  */
 class JobRecord extends ActiveRecord
 {
@@ -47,5 +49,18 @@ class JobRecord extends ActiveRecord
     public function getElement(): ActiveQueryInterface
     {
         return $this->hasOne(Element::class, ['id' => 'id']);
+    }
+
+    public function isInstantFlow(): bool
+    {
+        return strtolower($this->translationWorkflow) === strtolower(
+                SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
+            );
+    }
+    public function isVerifiedFlow(): bool
+    {
+        return strtolower($this->translationWorkflow) === strtolower(
+                SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
+            );
     }
 }

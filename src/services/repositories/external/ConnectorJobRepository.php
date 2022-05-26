@@ -16,12 +16,10 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
      * @throws ApiException
      */
     public function create(
-        string $projectNameTemplate = 'CraftCMS | {today}',
-        string $liltTranslationWorkflow = SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
-        string $projectPrefix = ''
+        string $projectPrefix,
+        string $liltTranslationWorkflow = SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
     ): JobResponse {
         $settings_response = new SettingsResponse();
-        $settings_response->setProjectNameTemplate($projectNameTemplate);
         $settings_response->setLiltTranslationWorkflow($liltTranslationWorkflow);
         $settings_response->setProjectPrefix($projectPrefix);
 

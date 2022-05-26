@@ -8,6 +8,7 @@ use Craft;
 use craft\helpers\Queue;
 use craft\queue\BaseJob;
 use LiltConnectorSDK\Model\JobResponse;
+use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -46,12 +47,30 @@ class FetchJobStatusFromConnector extends BaseJob
 
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
 
-        if ($liltJob->getStatus() === JobResponse::STATUS_COMPLETE) {
-            $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
+        if(strcmp($jobRecord->translationWorkflow, SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED) > 0) {
+            //LILT_TRANSLATION_WORKFLOW_VERIFIED
+            $jobRecord->status = Job::STATUS_IN_PROGRESS;
+
+            Queue::push((new FetchVerifiedJobTranslationsFromConnector(
+                [
+                    'jobId' => $this->jobId,
+                    'liltJobId' => $this->liltJobId,
+                ]
+            )));
         }
 
-        if ($liltJob->getStatus() === JobResponse::STATUS_FAILED) {
-            $jobRecord->status = Job::STATUS_FAILED;
+        if(strcmp($jobRecord->translationWorkflow, SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT) > 0) {
+            //LILT_TRANSLATION_WORKFLOW_INSTANT
+            if ($liltJob->getStatus() === JobResponse::STATUS_FAILED) {
+                $jobRecord->status = Job::STATUS_FAILED;
+            }
+
+            Queue::push((new FetchInstantJobTranslationsFromConnector(
+                [
+                    'jobId' => $this->jobId,
+                    'liltJobId' => $this->liltJobId,
+                ]
+            )));
         }
 
         $jobRecord->save();
@@ -60,13 +79,6 @@ class FetchJobStatusFromConnector extends BaseJob
         Craft::$app->elements->invalidateCachesForElementType(
             Job::class
         );
-
-        Queue::push((new FetchJobTranslationsFromConnector(
-            [
-                'jobId' => $this->jobId,
-                'liltJobId' => $this->liltJobId,
-            ]
-        )));
     }
 
     /**

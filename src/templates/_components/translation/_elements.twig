@@ -33,7 +33,7 @@
                 <!--<div class="checkbox" title="Select" aria-label="Select"></div>-->
                 {{ forms.checkbox({
                     name: 'translationIds[]',
-                    value: translation.id
+                    value: translation.id,
                 }) }}
             </td>
             <th data-title="Title" data-titlecell="">
@@ -59,8 +59,8 @@
 
             <td data-title="Due Date" data-attr="dueDate">{{ translation.lastDelivery }}</td>
 
-            <td data-title="Status" data-attr="status"><span
-                        class="status {{ translation.statusColor }}"></span>{{ translation.statusLabel }}</td>
+            <td data-title="Status" data-attr="status"><span style="white-space: nowrap;"><span
+                        class="status {{ translation.statusColor }}"></span>{{ translation.statusLabel }}</span></td>
 
             <!-- <td data-title="Preview" data-attr="preview">
                 <a href="{{ translation.previewUrl }}" title="Visit webpage" rel="noopener" target="_blank"
@@ -68,7 +68,7 @@
             </td> -->
 
             <td data-title="Action" data-attr="preview" style="font-size: 14pt">
-                <span class='lilt-review-translation {{ translation.status is same as 'published' ? 'disabled' : '' }}' title="Review" data-id="{{ translation.id }}" data-title="{{ element.elementsMappedById[translation.elementId].title }}" data-icon="view" style="margin-right: 5px;color: #0b69a3;cursor: pointer;"></span>
+                <span class='lilt-review-translation {{ translation.status is same as 'published' or translation.status is same as 'failed'  or translation.status is same as 'new' ? 'disabled' : '' }}' title="Review" data-id="{{ translation.id }}" data-title="{{ element.elementsMappedById[translation.elementId].title }}" data-icon="view" style="margin-right: 5px;color: #0b69a3;cursor: pointer;"></span>
                 <a href="{{ translation.previewUrl }}" title="Visit webpage" rel="noopener" target="_blank"
                    data-icon="world"></a>
             </td>

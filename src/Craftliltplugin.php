@@ -292,11 +292,11 @@ class Craftliltplugin extends Plugin
     {
         $navItem = parent::getCpNavItem();
         $navItem['subnav'] = [
-            [
+            'jobs' => [
                 'label' => 'Jobs',
                 'url' => 'craft-lilt-plugin/jobs',
             ],
-            [
+            'settings' => [
                 'label' => 'Settings',
                 'url' => 'craft-lilt-plugin/settings',
             ]

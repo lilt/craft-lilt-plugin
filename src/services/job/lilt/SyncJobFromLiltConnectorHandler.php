@@ -6,12 +6,15 @@ namespace lilthq\craftliltplugin\services\job\lilt;
 
 use Craft;
 use craft\errors\InvalidFieldException;
+use Exception;
 use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\models\TranslationModel;
+use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\appliers\TranslationApplyCommand;
 use Throwable;
@@ -28,89 +31,170 @@ class SyncJobFromLiltConnectorHandler
         $jobLilt = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
             (int)$job->liltJobId
         );
-
-        $elements = $job->getElementsMappedById();
-        $translationModels = $job->getTranslations();
-
-        $result = [];
+        $jobRecord = JobRecord::findOne(['id' => $job->id]);
 
         if ($jobLilt->getStatus() === JobResponse::STATUS_COMPLETE) {
             $translations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
                 (int)$job->liltJobId
             );
 
-            $values = array_map(static function (TranslationResponse $translationResponse) {
-                /* return [
-                    'translationStatus' => $translationResponse->getStatus(),
-                    'translationId' => $translationResponse->getId(),
-                    'trgLang' => $translationResponse->getTrgLang(),
-                    'trgLocale' => $translationResponse->getTrgLocale(),
-                    'updatedAt' => $translationResponse->getUpdatedAt(),
-                ]; */
-            }, $translations->getResults());
+            $unprocessedTranslations = Craftliltplugin::getInstance()
+                ->translationRepository
+                ->findUnprocessedByJobIdMapped($job->id);
 
-            foreach ($translations->getResults() as $translationDto) {
-                $content = Craftliltplugin::getInstance()->connectorTranslationRepository->findTranslationContentById(
-                    $translationDto->getId()
-                );
+            if (!empty($unprocessedTranslations)) {
+                foreach ($translations->getResults() as $translationDto) {
+                    try {
+                        $this->processTranslation($translationDto, $job);
+                    } catch (Exception $ex) {
+                        $translationRecord = $this->handleTranslationRecord(
+                            $translationDto,
+                            $job,
+                            $unprocessedTranslations
+                        );
 
-                $result[] = [
-                    'translationId' => $translationDto->getId(),
-                    'targetLanguage' => sprintf(
-                        '%s-%s',
-                        $translationDto->getTrgLang(),
-                        $translationDto->getTrgLocale()
-                    ),
-                    'content' => json_decode($content, true)
-                ];
-            }
+                        $translationRecord->status = TranslationRecord::STATUS_FAILED;
+                        $translationRecord->lastDelivery = new DateTime();
+                        $translationRecord->save();
 
-            //apply the text
-            foreach ($result as $translatedItem) {
-                $targetLanguage = $translatedItem['targetLanguage'];
-                $translationId = $translatedItem['translationId'];
-
-                foreach ($translatedItem['content'] as $elementId => $contentDto) {
-                    $element = Craft::$app->elements->getElementById(
-                        (int)$elementId,
-                        null,
-                        //Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage)
-                        $job->sourceSiteId
-                    );
-
-                    if (!$element) {
-                        //TODO: handle
-                        continue;
+                        Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
                     }
-
-                    $translationApplyCommand = new TranslationApplyCommand(
-                        $element,
-                        $job,
-                        $contentDto,
-                        $targetLanguage
-                    );
-
-                    $draft = Craftliltplugin::getInstance()->elementTranslatableContentApplier->apply(
-                        $translationApplyCommand
-                    );
-
-                    $translationRecord = TranslationRecord::findOne([
-                        'targetSiteId' => Craftliltplugin::getInstance()
-                            ->languageMapper
-                            ->getSiteIdByLanguage($targetLanguage),
-                        'elementId' => $draft->getCanonicalId() ?? $elementId,
-                        'jobId' => $job->getId()
-                    ]);
-                    $translationRecord->translatedDraftId = $draft->getId();
-                    $translationRecord->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
-                    $translationRecord->targetContent = [$elementId => $contentDto];
-                    $translationRecord->connectorTranslationId = $translationId;
-                    $translationRecord->lastDelivery = new DateTime();
-
-                    $translationRecord->save();
                 }
             }
-            return;
+
+            $translationRecords = Craftliltplugin::getInstance()
+                ->translationRepository
+                ->findByJobId($job->id);
+
+            $statuses = array_map(static function (TranslationModel $tr) {
+                return $tr->status;
+            }, $translationRecords);
+
+            if (in_array('failed', $statuses, true)) {
+                $jobRecord->status = Job::STATUS_FAILED;
+                $jobRecord->save();
+            } else {
+                $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
+                $jobRecord->save();
+            }
+        }
+    }
+
+
+    function getElementIdFromFileName(TranslationResponse $translationResponse): int
+    {
+        $regExpr = '/\d+_element_(\d+).json\+html/';
+        preg_match($regExpr, $translationResponse->getName(), $matches);
+
+        if (!isset($matches[1])) {
+            throw new \RuntimeException('Cant find element id from translation name');
+        }
+
+        return (int)$matches[1];
+    }
+
+    /**
+     * @param $translationResponse
+     * @param $job
+     * @param array $unprocessedTranslations
+     * @return mixed
+     */
+    function handleTranslationRecord($translationResponse, $job, array $unprocessedTranslations)
+    {
+        $translationTargetLanguage = sprintf(
+            '%s-%s',
+            $translationResponse->getTrgLang(),
+            $translationResponse->getTrgLocale()
+        );
+
+        $elementId = $this->getElementIdFromFileName($translationResponse);
+
+        $element = Craft::$app->elements->getElementById(
+            $elementId,
+            null,
+            $job->sourceSiteId
+        );
+
+        if (!$element) {
+            //TODO: handle when element not found?
+        }
+
+        $targetSiteId = Craftliltplugin::getInstance()
+            ->languageMapper
+            ->getSiteIdByLanguage($translationTargetLanguage);
+        $parentElementId = $element->getCanonicalId() ?? $elementId;
+
+        $translationRecord = $unprocessedTranslations[$parentElementId][$targetSiteId];
+
+        if (empty($translationRecord->translatedDraftId)) {
+            $translationRecord->translatedDraftId = $element->getId();
+        }
+        return $translationRecord;
+    }
+
+    /**
+     * @param $translationResponse
+     * @param Job $job
+     * @return void
+     * @throws ApiException
+     * @throws InvalidFieldException
+     * @throws Throwable
+     */
+    public function processTranslation(TranslationResponse $translationResponse, Job $job): void
+    {
+        $content = Craftliltplugin::getInstance()->connectorTranslationRepository->findTranslationContentById(
+            $translationResponse->getId()
+        );
+
+        $content = json_decode($content, true);
+
+        $translationId = $translationResponse->getId();
+
+        $targetLanguage = sprintf(
+            '%s-%s',
+            $translationResponse->getTrgLang(),
+            $translationResponse->getTrgLocale()
+        );
+
+        foreach ($content as $elementId => $elementContent) {
+            $element = Craft::$app->elements->getElementById(
+                (int)$elementId,
+                null,
+                $job->sourceSiteId
+            );
+
+            if (!$element) {
+                //TODO: handle
+                continue;
+            }
+
+            $translationApplyCommand = new TranslationApplyCommand(
+                $element,
+                $job,
+                $elementContent,
+                $targetLanguage
+            );
+
+            $draft = Craftliltplugin::getInstance()->elementTranslatableContentApplier->apply(
+                $translationApplyCommand
+            );
+
+            //TODO: move to repository or so
+            $translationRecord = TranslationRecord::findOne([
+                'targetSiteId' => Craftliltplugin::getInstance()
+                    ->languageMapper
+                    ->getSiteIdByLanguage($targetLanguage),
+                'elementId' => $draft->getCanonicalId() ?? $elementId,
+                'jobId' => $job->getId()
+            ]);
+
+            $translationRecord->translatedDraftId = $draft->getId();
+            $translationRecord->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
+            $translationRecord->targetContent = [$elementId => $elementContent];
+            $translationRecord->connectorTranslationId = $translationId;
+            $translationRecord->lastDelivery = new DateTime();
+
+            $translationRecord->save();
         }
     }
 }

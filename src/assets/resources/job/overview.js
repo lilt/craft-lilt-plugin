@@ -151,8 +151,6 @@ const showModal = function() {
     if (selectedValues.length <= next) {
       $modalFooterNext.attr('disabled', true);
       $modalFooterNext.addClass('disabled');
-
-      return;
     }
 
   });
@@ -369,7 +367,8 @@ $('#lilt-translations-table th.checkbox-cell.selectallcontainer .checkbox').
     on('click', function() {
       const allChecked = $(this).prop('checked');
       $('#lilt-translations-table tr td input.checkbox').each(function() {
-        if ($('#lilt-translations-table tr[data-id="' + $(this).val() + '"]').data('status') === 'published') {
+        const status = $('#lilt-translations-table tr[data-id="' + $(this).val() + '"]').data('status');
+        if (status === 'published' || status === 'failed'|| status === 'new') {
           return;
         }
         $(this).prop('checked', allChecked);
@@ -383,7 +382,8 @@ $(document).ready(
           attr('disabled', true);
 
       $('#lilt-translations-table tr').each(function() {
-        if ($(this).data('status') === 'published') {
+        const status = $(this).data('status');
+        if (status === 'published' || status === 'failed'|| status === 'new') {
           $(this).find('.checkbox-cell').addClass('disabled').disable();
           $(this).find('.checkbox-cell').on('click', function(){return false;})
         }

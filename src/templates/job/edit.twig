@@ -3,7 +3,7 @@
 
 {% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
 {% set isDraftJob = constant('STATUS_DRAFT', element) is same as element.getStatus() %}
-{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() or constant('STATUS_READY_TO_PUBLISH', element) is same as element.getStatus() or constant('STATUS_COMPLETE', element) is same as element.getStatus() %}
+{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() or constant('STATUS_READY_TO_PUBLISH', element) is same as element.getStatus() or constant('STATUS_COMPLETE', element) is same as element.getStatus() or constant('STATUS_FAILED', element) is same as element.getStatus() %}
 
 {% set title = isJobInProgress ? "Job edit" : "Job overview" %}
 
@@ -115,7 +115,7 @@
                             'submit',
                             'formsubmit',
                         ]|filter,
-                        text: 'Create a draft'|t('app'),
+                        text: 'Create job'|t('app'),
                         data: {
                             action: publishDraftAction,
                             redirect: hashedCpEditUrl,

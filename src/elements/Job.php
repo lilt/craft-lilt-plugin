@@ -14,6 +14,7 @@ use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\UrlHelper;
+use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\JobQuery;
@@ -37,7 +38,7 @@ class Job extends Element
 {
     public const STATUS_NEW = 'new';
     public const STATUS_DRAFT = 'draft';
-    public const STATUS_SUBMITTED = 'submitted';
+    #public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_IN_PROGRESS = 'in-progress';
     public const STATUS_READY_FOR_REVIEW = 'ready-for-review';
     public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
@@ -157,6 +158,19 @@ class Job extends Element
         return true;
     }
 
+    public function isInstantFlow(): bool
+    {
+        return strtolower($this->translationWorkflow) === strtolower(
+                SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
+            );
+    }
+    public function isVerifiedFlow(): bool
+    {
+        return strtolower($this->translationWorkflow) === strtolower(
+                SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
+            );
+    }
+
     /**
      * @inheritdoc
      */
@@ -165,7 +179,7 @@ class Job extends Element
         return [
             self::STATUS_NEW => ['label' => 'New', 'color' => 'turquoise'],
             self::STATUS_DRAFT => ['label' => 'Draft', 'color' => ''],
-            self::STATUS_SUBMITTED => ['label' => 'Submitted', 'color' => 'purple'],
+            #self::STATUS_SUBMITTED => ['label' => 'Submitted', 'color' => 'purple'],
             self::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
             self::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
             self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
@@ -224,7 +238,7 @@ class Job extends Element
                 ],
                 'defaultSort' => ['dateCreated', 'desc']
             ],
-            [
+            /* [
                 'key' => 'submitted',
                 'label' => 'Submitted',
                 'criteria' => [
@@ -233,7 +247,7 @@ class Job extends Element
                     ]
                 ],
                 'defaultSort' => ['dateCreated', 'desc']
-            ],
+            ], */
             [
                 'key' => 'in-progress',
                 'label' => 'In progress',

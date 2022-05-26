@@ -22,7 +22,7 @@
                        href="{{ url(sendToLiltActionLink) }}"
                        style="margin-right: 5px;">
                         <span class="icon icon-mask"
-                              style="margin-right: 5px;margin-top: 5px">{{ svg('/app/vendor/lilthq/craft-lilt-plugin/src/icon-mask.svg') }}</span>
+                              style="margin-right: 5px;margin-top: 5px">{{ svg(alias('@lilthq/craftliltplugin') ~ '/icon-mask.svg') }}</span>
                         {{ 'Translate'|t }}
                     </a>
 
@@ -38,7 +38,7 @@
                     <a id="lilt-btn-create-new-job" class="btn icon btn-create-new-job" href="{{ url(syncFromLiltActionLink) }}"
                        style="margin-right: 5px;">
                         <span class="icon icon-mask"
-                              style="margin-right: 5px;margin-top: 5px">{{ svg('/app/vendor/lilthq/craft-lilt-plugin/src/icon-mask.svg') }}</span>
+                              style="margin-right: 5px;margin-top: 5px">{{ svg(alias('@lilthq/craftliltplugin') ~ '/icon-mask.svg') }}</span>
                         {{ 'Fetch translate'|t }}
                     </a>
 
