@@ -288,7 +288,7 @@ $(document).ready(function() {
       if (entryIds.length > 0) {
         Craft.elementIndex = new Craft.LiltElementIndex(
             'lilthq\\craftliltplugin\\elements\\TranslateEntry',
-            $('#page-container'), {
+            $('#entries-to-translate'), {
               elementTypeName: 'Entry',
               elementTypePluralName: 'Entries',
               context: 'index',

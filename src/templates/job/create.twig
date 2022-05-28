@@ -8,6 +8,9 @@
 
 {% set formActionUrl = formActionUrl ?? cpUrl('craft-lilt-plugin/job/create') %}
 
+{% set isDraftJob  = true %}
+{% set isNewJob = true %}
+
 {% set context = 'index' %}
 {% set elementType = 'craft\\elements\\Entry' %}
 {% set userElementType = 'craft\\elements\\User' %}

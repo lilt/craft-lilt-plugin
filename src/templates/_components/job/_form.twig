@@ -58,19 +58,16 @@
             <div id="toolbar-element-index" class="flex flex-nowrap"></div>
         </div>
 
+        {% if isDraftJob or isNewJob %}
         <div class="flex">
             <div class="submit">
-                {% if(constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()) %}
-                    <button type="button" class="btn add icon dashed disabled">{{ 'Add an entry'|t }}</button>
-                {% endif %}
-                {% if(constant('STATUS_IN_PROGRESS', element) is not same as element.getStatus()) %}
                     <button type="button" class="btn add icon dashed addAnEntry">{{ 'Add an entry'|t }}</button>
-                {% endif %}
             </div>
             <div id="entries-remove-action" class="btn submit" style="visibility: hidden;float:right">
                 Remove
             </div>
         </div>
+        {% endif %}
     </div>
 
     <hr/>

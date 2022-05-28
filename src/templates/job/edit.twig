@@ -3,6 +3,8 @@
 
 {% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
 {% set isDraftJob = constant('STATUS_DRAFT', element) is same as element.getStatus() %}
+{% set isNewJob = constant('STATUS_NEW', element) is same as element.getStatus() %}
+{% set isFailed = constant('STATUS_FAILED', element) is same as element.getStatus() %}
 {% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() or constant('STATUS_READY_TO_PUBLISH', element) is same as element.getStatus() or constant('STATUS_COMPLETE', element) is same as element.getStatus() or constant('STATUS_FAILED', element) is same as element.getStatus() %}
 
 {% set title = isJobInProgress ? "Job edit" : "Job overview" %}
@@ -20,7 +22,23 @@
 {% set formActions = [] %}
 {% set mainFormAttributes = {
     id: 'create-job-form',
+    data: {
+        'confirm-unload': isDraftJob or isNewJob,
+    },
 } %}
+
+{% if not isDraftJob and not isNewJob %}
+{% set tabs = {
+    translations: {
+        label: 'Translations'|t('app'),
+        url: "#translations",
+    },
+    overview: {
+        label: 'Overview'|t('app'),
+        url: "#overview",
+    },
+} %}
+{% endif %}
 
 
 {% set publishDraftAction = 'craft-lilt-plugin/job/post-publish-draft-job/invoke' %}
@@ -121,11 +139,11 @@
                             redirect: hashedCpEditUrl,
                         },
                     }) }}
-                {% elseif not isJobReadyForReview %}
+                {% elseif not isJobReadyForReview and not isJobInProgress %}
                     <button type="submit" data-icon="language" class="btn submit">{{ 'Save job'|t('app') }}</button>
                 {% endif %}
             {% endblock %}
-            {% if formActions ?? false %}
+            {% if formActions ?? false and not isJobInProgress %}
                 <button type="button" class="btn submit menubtn"></button>
                 {% include '_layouts/components/form-action-menu' %}
             {% endif %}
@@ -134,10 +152,10 @@
 {% endblock %}
 
 {% block content %}
-    {% if not isJobReadyForReview %}
-        {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
+    {% if not isDraftJob and not isNewJob %}
+    {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
     {% else %}
-        {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
+        {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
     {% endif %}
 {% endblock %}
 

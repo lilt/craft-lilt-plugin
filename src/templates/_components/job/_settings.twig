@@ -38,6 +38,7 @@
     {% endif %}
 
 
+    {# TODO: do we need author?
     {{ forms.elementSelectField({
         status: element.getAttributeStatus('authorId'),
         label: "Author"|t('app'),
@@ -50,4 +51,5 @@
         elements: (author is defined and author ? [author]),
         disabled: true
     }) }}
+    #}
 {% endblock %}
