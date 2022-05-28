@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\parameters;
 
+use lilthq\craftliltplugin\services\listeners\AfterDraftAppliedListener;
+
 class CraftliltpluginParameters
 {
     public const JOB_EDIT_PATH = 'craft-lilt-plugin/job/edit';
@@ -31,4 +33,8 @@ class CraftliltpluginParameters
     public const CRAFT_FIELDS_CHECKBOXES        = 'craft\fields\Checkboxes';
     public const CRAFT_FIELDS_BASEOPTIONSFIELD  = 'craft\fields\BaseOptionsField';
     public const BENF_NEO_FIELD                 = 'benf\neo\Field';
+
+    public const LISTENERS = [
+        AfterDraftAppliedListener::class
+    ];
 }

@@ -43,6 +43,7 @@ use lilthq\craftliltplugin\services\job\CreateJobHandler;
 use lilthq\craftliltplugin\services\job\EditJobHandler;
 use lilthq\craftliltplugin\services\job\lilt\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\job\lilt\SyncJobFromLiltConnectorHandler;
+use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\ExpandedContentProvider;
@@ -104,6 +105,7 @@ use yii\web\Response;
  * @property FieldContentApplier $fieldContentApplier
  * @property I18NRepository $i18NRepository
  * @property LoadI18NHandler $loadI18NHandler
+ * @property ListenerRegister $listenerRegister
  */
 class Craftliltplugin extends Plugin
 {
@@ -213,7 +215,9 @@ class Craftliltplugin extends Plugin
         $this->connectorKey = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
 
         Craft::$app->getView()->registerAssetBundle(CraftLiltPluginAsset::class);
+
         $this->loadComponents();
+        $this->listenerRegister->register();
 
         Event::on(
             UrlManager::class,
@@ -330,6 +334,14 @@ class Craftliltplugin extends Plugin
             'translationRepository' => TranslationRepository::class,
             'i18NRepository' => I18NRepository::class,
         ]);
+
+        $this->set(
+            'listenerRegister',
+            [
+                'class' => ListenerRegister::class,
+                'availableListeners' =>  CraftliltpluginParameters::LISTENERS,
+            ]
+        );
 
         $this->set(
             'connectorConfiguration',
