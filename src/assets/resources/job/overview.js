@@ -340,7 +340,8 @@ const showModal = function() {
 
   $('#lilt-preview-modal .close-modal').on('click', function() {
 
-    $('#content-container #content #lilt-translations-table').addClass('disabled');
+    $('#content-container #content #lilt-translations-table').
+        addClass('disabled');
     $('#content-container #content').append(
         $('<div style="margin-left: 10px; position: absolute;top: 50%;left: 50%;margin: -24px 0 0 -24px;"/>').
             addClass('spinner').
@@ -367,8 +368,10 @@ $('#lilt-translations-table th.checkbox-cell.selectallcontainer .checkbox').
     on('click', function() {
       const allChecked = $(this).prop('checked');
       $('#lilt-translations-table tr td input.checkbox').each(function() {
-        const status = $('#lilt-translations-table tr[data-id="' + $(this).val() + '"]').data('status');
-        if (status === 'published' || status === 'failed'|| status === 'new') {
+        const status = $(
+            '#lilt-translations-table tr[data-id="' + $(this).val() + '"]').
+            data('status');
+        if (status === 'published' || status === 'failed' || status === 'new') {
           return;
         }
         $(this).prop('checked', allChecked);
@@ -383,9 +386,11 @@ $(document).ready(
 
       $('#lilt-translations-table tr').each(function() {
         const status = $(this).data('status');
-        if (status === 'published' || status === 'failed'|| status === 'new') {
+        if (status === 'published' || status === 'failed' || status === 'new') {
           $(this).find('.checkbox-cell').addClass('disabled').disable();
-          $(this).find('.checkbox-cell').on('click', function(){return false;})
+          $(this).
+              find('.checkbox-cell').
+              on('click', function() {return false;});
         }
       });
 
@@ -409,6 +414,25 @@ $(document).ready(
             addClass('disabled').
             attr('disabled', true);
       });
+
+      //TRY AGAIN
+      $('#lilt-try-again-sync').on('click', function() {
+
+        if($(this).hasClass('disabled')) {
+          return;
+        }
+
+        $(this).addClass('disabled')
+        const $spinner = $(
+            '<div class="spinner flex" style="margin-right: 10px; float: right"></div>');
+        $(this).parent().prepend($spinner);
+
+        const jobId = $(this).data('job-id');
+
+        //TODO: download again
+
+      });
+      //END TRY AGAIN
     },
 );
 

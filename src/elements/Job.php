@@ -367,14 +367,40 @@ class Job extends Element
         return json_decode($this->targetSiteIds, true) ?? [];
     }
 
+    public function getSourceSiteIdHtml(): string
+    {
+        return
+            "<span class='source-language' data-icon='world'>"
+            . Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$this->sourceSiteId)
+            . "</span>";
+    }
+
+    public function getTargetSiteIdsHtml(): string
+    {
+        $html = '<ul class="target-languages-list">';
+
+        $targetSites = json_decode($this->targetSiteIds, true);
+        if (isset($targetSites[0]) && is_array($targetSites[0]) && isset($targetSites[0]['id'])) {
+            $targetSites = array_column($targetSites, 'id');
+        }
+
+        $languages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+            $targetSites
+        );
+
+        foreach ($languages as $language) {
+            $html .= "<li><span data-icon='world'>{$language}</span></li>";
+        }
+        $html .= '</ul>';
+
+        return $html;
+    }
+
     protected function tableAttributeHtml(string $attribute): string
     {
         switch ($attribute) {
             case 'sourceSiteId':
-                return
-                    "<span class='source-language' data-icon='world'>"
-                    . Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$this->sourceSiteId)
-                    . "</span>";
+                return $this->getSourceSiteIdHtml();
 
             case 'status':
                 return $this->getStatusHtml();
@@ -384,25 +410,7 @@ class Job extends Element
             //        Craft::$app->locale->getDateFormat('short', 'php')
             //    );
             case 'targetSiteIds':
-            {
-                $html = '<ul class="target-languages-list">';
-
-                $targetSites = json_decode($this->targetSiteIds, true);
-                if (isset($targetSites[0]) && is_array($targetSites[0]) && isset($targetSites[0]['id'])) {
-                    $targetSites = array_column($targetSites, 'id');
-                }
-
-                $languages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
-                    $targetSites
-                );
-
-                foreach ($languages as $language) {
-                    $html .= "<li><span data-icon='world'>{$language}</span></li>";
-                }
-                $html .= '</ul>';
-
-                return $html;
-            }
+                return $this->getTargetSiteIdsHtml();
         }
 
         return parent::tableAttributeHtml($attribute);
@@ -441,13 +449,13 @@ class Job extends Element
         $readyToPublish = true;
 
         foreach ($this->_translations as $translation) {
-            if($translation->status !== TranslationRecord::STATUS_READY_TO_PUBLISH) {
+            if ($translation->status !== TranslationRecord::STATUS_READY_TO_PUBLISH) {
                 $readyToPublish = false;
                 break;
             }
         }
 
-        if($readyToPublish) {
+        if ($readyToPublish) {
             $this->status = Job::STATUS_READY_TO_PUBLISH;
             Craft::$app->elements->saveElement($this);
         }

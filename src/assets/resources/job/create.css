@@ -2,6 +2,13 @@
     box-shadow: none;
 }
 
+#create-job-form div.elements.disabled {
+    opacity: 1;
+}
+#create-job-form div.elements.disabled tr.disabled {
+    opacity: .6;
+}
+
 #targetSiteIds-field input.checkbox.disabled + label:before {
     content: "";
 }

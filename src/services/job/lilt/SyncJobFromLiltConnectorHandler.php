@@ -28,56 +28,64 @@ class SyncJobFromLiltConnectorHandler
      */
     public function __invoke(Job $job): void
     {
+        if(empty($job->liltJobId)) {
+            return;
+        }
+
         $jobLilt = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
+            (int) $job->liltJobId
+        );
+
+        if ($jobLilt->getStatus() !== JobResponse::STATUS_COMPLETE) {
+            return;
+        }
+
+        $jobRecord = JobRecord::findOne(['id' => $job->id]);
+        $translations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
             (int)$job->liltJobId
         );
-        $jobRecord = JobRecord::findOne(['id' => $job->id]);
 
-        if ($jobLilt->getStatus() === JobResponse::STATUS_COMPLETE) {
-            $translations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
-                (int)$job->liltJobId
-            );
+        $unprocessedTranslations = Craftliltplugin::getInstance()
+            ->translationRepository
+            ->findUnprocessedByJobIdMapped($job->id);
 
-            $unprocessedTranslations = Craftliltplugin::getInstance()
-                ->translationRepository
-                ->findUnprocessedByJobIdMapped($job->id);
+        if (!empty($unprocessedTranslations)) {
+            foreach ($translations->getResults() as $translationDto) {
+                try {
+                    $this->processTranslation($translationDto, $job);
+                } catch (Exception $ex) {
+                    $translationRecord = $this->handleTranslationRecord(
+                        $translationDto,
+                        $job,
+                        $unprocessedTranslations
+                    );
 
-            if (!empty($unprocessedTranslations)) {
-                foreach ($translations->getResults() as $translationDto) {
-                    try {
-                        $this->processTranslation($translationDto, $job);
-                    } catch (Exception $ex) {
-                        $translationRecord = $this->handleTranslationRecord(
-                            $translationDto,
-                            $job,
-                            $unprocessedTranslations
-                        );
+                    $translationRecord->status = TranslationRecord::STATUS_FAILED;
+                    $translationRecord->lastDelivery = new DateTime();
+                    $translationRecord->save();
 
-                        $translationRecord->status = TranslationRecord::STATUS_FAILED;
-                        $translationRecord->lastDelivery = new DateTime();
-                        $translationRecord->save();
-
-                        Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
-                    }
+                    Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
                 }
             }
-
-            $translationRecords = Craftliltplugin::getInstance()
-                ->translationRepository
-                ->findByJobId($job->id);
-
-            $statuses = array_map(static function (TranslationModel $tr) {
-                return $tr->status;
-            }, $translationRecords);
-
-            if (in_array('failed', $statuses, true)) {
-                $jobRecord->status = Job::STATUS_FAILED;
-                $jobRecord->save();
-            } else {
-                $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
-                $jobRecord->save();
-            }
         }
+
+        $translationRecords = Craftliltplugin::getInstance()
+            ->translationRepository
+            ->findByJobId($job->id);
+
+        $statuses = array_map(static function (TranslationModel $tr) {
+            return $tr->status;
+        }, $translationRecords);
+
+        if (in_array('failed', $statuses, true)) {
+            $jobRecord->status = Job::STATUS_FAILED;
+            $jobRecord->save();
+        } else {
+            $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
+            $jobRecord->save();
+        }
+
+        Craft::$app->elements->invalidateCachesForElement($job);
     }
 
 

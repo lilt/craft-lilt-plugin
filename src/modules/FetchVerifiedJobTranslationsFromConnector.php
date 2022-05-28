@@ -8,8 +8,6 @@ use Craft;
 use craft\helpers\Queue;
 use craft\queue\BaseJob;
 use Exception;
-use LiltConnectorSDK\Model\JobResponse;
-use LiltConnectorSDK\Model\JobResponse1;
 use LiltConnectorSDK\Model\SettingsResponse;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
@@ -139,6 +137,10 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
         }
         if ($statuses === ['failed']) {
             $jobRecord->status = Job::STATUS_FAILED;
+            $jobRecord->save();
+            $this->markAsDone($queue);
+        } else if (in_array('in-progress', $statuses, true)) {
+            $jobRecord->status = Job::STATUS_IN_PROGRESS;
             $jobRecord->save();
             $this->markAsDone($queue);
         } else {

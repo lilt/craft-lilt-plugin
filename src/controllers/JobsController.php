@@ -11,12 +11,15 @@ namespace lilthq\craftliltplugin\controllers;
 
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
+use lilthq\craftliltplugin\assets\JobsAsset;
 use yii\web\Response;
 
 class JobsController extends Controller
 {
     public function actionIndex(): Response
     {
+        $this->getView()->registerAssetBundle(JobsAsset::class);
+
         return $this->renderTemplate(
             'craft-lilt-plugin/jobs.twig',
             [

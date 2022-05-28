@@ -32,27 +32,30 @@ $(document).ready(function() {
   });
 
   const checkboxSelect = $('.checkbox-select').data('checkboxSelect');
-  checkboxSelect.addListener(checkboxSelect.$all, 'change', function() {
-    const sourceSite = $('#sourceSite').val();
 
-    this.$options.map((option) => {
-      const value = $(this.$options[option]).val();
+  if(checkboxSelect !== undefined) {
+    checkboxSelect.addListener(checkboxSelect.$all, 'change', function() {
+      const sourceSite = $('#sourceSite').val();
 
-      if (value === sourceSite) {
-        $(this.$options[option]).prop({
-          checked: false,
-          disabled: true,
-        });
-      }
+      this.$options.map((option) => {
+        const value = $(this.$options[option]).val();
+
+        if (value === sourceSite) {
+          $(this.$options[option]).prop({
+            checked: false,
+            disabled: true,
+          });
+        }
+      });
     });
-  });
+  }
 
   if (selected.indexOf(false) === -1) {
     $('#targetSiteIds-field input.checkbox.all').prop('checked', true);
     allSelected = true;
   }
 
-  if(allSelected) {
+  if(checkboxSelect !== undefined && allSelected) {
     checkboxSelect.$all.trigger('change');
   }
 

@@ -14,6 +14,14 @@ class JobRepository
         return Job::findOne(['id' => $id]);
     }
 
+    /**
+     * @return Job[]
+     */
+    public function findByIds(array $ids): array
+    {
+        return Job::findAll(['id' => $ids]);
+    }
+
     public function saveJob(Job $job): bool
     {
         $jobRecord = new JobRecord();

@@ -1,5 +1,14 @@
 {% import '_includes/forms' as forms %}
 
+{# TODO: proper error message #}
+<div class="meta read-only error">
+    <p>Unexpected error happened while processing translations. You can contact our <a
+                href="https://lilt.atlassian.net/servicedesk/customer/portals" target="_blank">customer support</a></p>
+    <div>
+        <div id="lilt-try-again-sync" data-job-id="{{ element.id }}" class="btn" data-icon="refresh">Try again</div>
+    </div>
+</div>
+
 {% if notices ?? false %}
     <div class="meta read-only warning">
         {% for notice in notices %}
@@ -35,7 +44,8 @@
             <div id="settings-lilt" class="meta">
                 <div id="translate-field" class="field" style="padding-top: 5px; padding-bottom: 5px">
                     <div class="heading"><label for="author">Lilt Tranlsation</label></div>
-                    <a id="lilt-btn-create-new-job" class="btn icon btn-create-new-job" href="{{ url(syncFromLiltActionLink) }}"
+                    <a id="lilt-btn-create-new-job" class="btn icon btn-create-new-job"
+                       href="{{ url(syncFromLiltActionLink) }}"
                        style="margin-right: 5px;">
                         <span class="icon icon-mask"
                               style="margin-right: 5px;margin-top: 5px">{{ svg(alias('@lilthq/craftliltplugin') ~ '/icon-mask.svg') }}</span>
@@ -110,3 +120,22 @@
         },
     }) }}
 {% endif %}
+
+<div class="meta read-only">
+    <table>
+        <tbody>
+        <tr>
+            <td>First change</td>
+            <td>2020/05/05 11:37:24</td>
+        </tr>
+        <tr>
+            <td>Second change</td>
+            <td>2020/05/05 11:37:24</td>
+        </tr>
+        <tr>
+            <td>Third change</td>
+            <td>2020/05/05 11:37:24</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

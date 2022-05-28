@@ -78,6 +78,29 @@ class TranslationModel extends Model
         }
 
         return $draft->getUrl();
+
+        /* TODO: not working for default site? We can't preview disabled entries for default site?
+        $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
+        $element = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
+
+        $preview = [
+            'elementType' => get_class($element),
+            'sourceId' => $element->getId(),
+            'draftId' => $draft->draftId,
+            'siteId' => $this->targetSiteId,
+            'template' => 'blog/_entry',
+        ];
+
+        $token = Craft::$app->tokens->createToken([
+            "preview/preview",
+            $preview
+        ]);
+
+        return UrlHelper::urlWithParams(
+            $element->getUrl(),
+            ['token' => $token]
+        );
+        */
     }
 
     public function getLastDeliveryFormatted(): ?string
@@ -93,7 +116,6 @@ class TranslationModel extends Model
         }
 
         $element = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->targetSiteId);
-
 
         if (!$element) {
             $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);

@@ -30,7 +30,8 @@ class TranslationRepository
                 'jobId' => $jobId,
                 'status' => [
                     TranslationRecord::STATUS_IN_PROGRESS,
-                    TranslationRecord::STATUS_NEW
+                    TranslationRecord::STATUS_NEW,
+                    TranslationRecord::STATUS_FAILED,
                 ]
             ]
         );

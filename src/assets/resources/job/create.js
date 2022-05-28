@@ -9,20 +9,24 @@ $(document).ready(function() {
       newState.title = $('#create-job-form #title').val();
       newState.sourceSite = $('#create-job-form #sourceSite').val();
 
-      const options = $(
+      const checkboxSelect = $(
           '#create-job-form #targetSiteIds-field .checkbox-select').
-          data('checkboxSelect').$options.get();
+          data('checkboxSelect');
 
-      const optionsSelected = options.map(
-          function(o) {
-            if ($(o).val() === '') {
-              return;
-            }
-            return [$(o).val(), $(o).prop('checked')];
-          },
-      );
+      if(checkboxSelect !== undefined) {
+        const options = checkboxSelect.$options.get();
 
-      newState.targetSiteIds = optionsSelected;
+        const optionsSelected = options.map(
+            function(o) {
+              if ($(o).val() === '') {
+                return;
+              }
+              return [$(o).val(), $(o).prop('checked')];
+            },
+        );
+
+        newState.targetSiteIds = optionsSelected;
+      }
 
       const alreadySelected = $('#create-job-selected-entries').val();
       newState.selectedElements = (alreadySelected !== undefined &&
@@ -184,9 +188,14 @@ $(document).ready(function() {
     onFormSubmit();
   });
 
+  $('#lilt-btn-create-new-job').on('click', function() {
+    Craft.forceConfirmUnload = false;
+    $(window).on('beforeunload', function(e) {
+      return undefined;
+    });
+  });
+
   $('.btn.submit.menubtn').on('click', function() {
-    console.log('create-draft');
-    console.log($(this).data('menubtn'));
     $(this).data('menubtn').settings.onOptionSelect = function(o) {
       if ($(o).hasClass('formsubmit')) {
         onFormSubmit();
@@ -291,7 +300,8 @@ $(document).ready(function() {
               },
               canHaveDrafts: true,
               sources: '*',
-              hideSidebar: true,
+              disabledElementIds: $('#create-job-form #entries-to-translate .elements').hasClass('disabled') ? JSON.parse(selectedEntries) : [],
+              actions: null,
               onSelectionChange: function() {
                 if (Craft.elementIndex.getSelectedElementIds().length > 0) {
                   $('#entries-remove-action').css('visibility', 'visible');
@@ -303,8 +313,21 @@ $(document).ready(function() {
               },
               onUpdateElements: form.onUpdateElements,
             });
-
         $('#entries-to-translate').show();
+
+        $('#create-job-form #entries-to-translate .disabled.elements').on('DOMSubtreeModified', function() {
+          $('#create-job-form .disabled select').each(
+              function() {
+                //$(this).attr('disabled', true);
+                //$(this).prop('disabled', true);
+                $(this).on('mousedown', function(e) {
+                  e.preventDefault();
+                  return false;
+                })
+              },
+          );
+        })
+
       }
     } catch (e) {
       console.log(e);

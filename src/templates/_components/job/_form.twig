@@ -21,10 +21,10 @@
         errors: model is defined and model ? model.getErrors('title'),
         maxlength: 255,
         errors: element.getErrors('title'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
+        readonly: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
     }) }}
 
-    <hr />
+    <hr/>
 
     <div id="entries-to-translate-field" class="field">
         <div class="heading">
@@ -73,7 +73,8 @@
         </div>
     </div>
 
-    <hr />
+    <hr/>
+
 
     {{ forms.selectField({
         label: 'Source site <span class="required"/>',
@@ -82,7 +83,8 @@
         id: 'sourceSite',
         value: element.sourceSiteId ?? '',
         errors: element.getErrors('sourceSiteId'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
+        readonly: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
+        class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
     }) }}
 
     {{ forms.checkboxSelectField({
@@ -93,7 +95,7 @@
         name: 'targetSiteIds',
         id: 'targetSiteIds',
         errors: element.getErrors('targetSiteIds'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
+        readonly: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
         class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
     }) }}
 
@@ -110,7 +112,7 @@
             id: 'translationWorkflow',
             value: element.translationWorkflow ?? defaultTranslationWorkflow,
             errors: element.getErrors('liltTranslationWorkflow'),
-            disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
+            readonly: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
             class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
         }) }}
 

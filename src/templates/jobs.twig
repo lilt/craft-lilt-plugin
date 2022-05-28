@@ -5,6 +5,7 @@
 {% extends '_layouts/elementindex.html' %}
 
 {% block actionButton %}
+    <a id="lilt-sync-jobs" class="btn big icon btn-create-new-job disabled" data-icon="refresh">{{ 'Sync job(s)'|t }}</a>
     <a class="btn big submit icon btn-create-new-job" data-icon="language" href="{{ url('craft-lilt-plugin/job/create') }}">{{ 'New job'|t }}</a>
 {% endblock %}
 

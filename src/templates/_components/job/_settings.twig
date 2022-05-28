@@ -1,7 +1,6 @@
 {% import '_includes/forms' as forms %}
 
 {% block settings %}
-
     {% if element.id is defined and element.id > 0 %}
     <div id="slug-field" class="field">
         <div class="heading">
@@ -20,6 +19,25 @@
     </div>
     {% endif %}
 
+    {% if element.sourceSiteId is defined and element.sourceSiteId is not null %}
+    <div id="slug-field" class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug">Source Site</label>
+        </div>
+        <div class="ltr">{{ element.sourceSiteIdHtml | raw }}</div>
+    </div>
+    {% endif %}
+
+    {% if element.targetSiteIds is defined and element.targetSiteIds is not null and element.targetSiteIds is not empty %}
+    <div id="slug-field" class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug">Target Site(s)</label>
+        </div>
+        <div class="ltr" style="padding-top: 10px; padding-bottom: 10px">{{ element.targetSiteIdsHtml | raw }}</div>
+    </div>
+    {% endif %}
+
+
     {{ forms.elementSelectField({
         status: element.getAttributeStatus('authorId'),
         label: "Author"|t('app'),
@@ -30,5 +48,6 @@
         criteria: authorOptionCriteria,
         limit: 1,
         elements: (author is defined and author ? [author]),
+        disabled: true
     }) }}
 {% endblock %}
