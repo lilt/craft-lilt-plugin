@@ -419,17 +419,29 @@ $(document).ready(
       $('#lilt-try-again-sync').on('click', function() {
 
         if($(this).hasClass('disabled')) {
-          return;
+          return
         }
 
         $(this).addClass('disabled')
         const $spinner = $(
-            '<div class="spinner flex" style="margin-right: 10px; float: right"></div>');
-        $(this).parent().prepend($spinner);
+            '<div class="spinner flex" style="margin-right: 10px; float: right"></div>')
+        $(this).parent().prepend($spinner)
 
-        const jobId = $(this).data('job-id');
+        const jobId = $(this).data('job-id')
 
-        //TODO: download again
+        Craft.sendActionRequest(
+            'POST',
+            'craft-lilt-plugin/job/post-job-retry/invoke',
+            {data: {jobIds: [jobId]}},
+        ).then(response => {
+            location.reload();
+        }).catch(exception => {
+          Craft.cp.displayError(Craft.t('app',
+              'Can\'t submit review, unexpected issue occurred'))
+          $spinner.remove()
+          $(this).removeClass('disabled')
+        });
+
 
       });
       //END TRY AGAIN
