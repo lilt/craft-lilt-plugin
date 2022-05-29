@@ -26,6 +26,7 @@ class CraftliltpluginParameters
     public const TRANSLATION_TABLE_NAME = '{{%lilt_translations}}';
     public const I18N_TABLE_NAME = '{{%lilt_i18n}}';
     public const SETTINGS_TABLE_NAME = '{{%lilt_settings}}';
+    public const JOB_LOGS_TABLE_NAME = '{{%lilt_jobs_logs}}';
 
     public const CRAFT_FIELDS_MATRIX            = 'craft\fields\Matrix';
     public const CRAFT_FIELDS_PLAINTEXT         = 'craft\fields\PlainText';

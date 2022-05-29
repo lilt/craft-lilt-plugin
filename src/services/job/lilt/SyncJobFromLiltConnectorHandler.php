@@ -85,6 +85,12 @@ class SyncJobFromLiltConnectorHandler
             $jobRecord->save();
         }
 
+        Craftliltplugin::getInstance()->jobLogsRepository->create(
+            $jobRecord->id,
+            Craft::$app->getUser()->getId(),
+            'Translations downloaded'
+        );
+
         Craft::$app->elements->invalidateCachesForElement($job);
     }
 

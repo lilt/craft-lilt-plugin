@@ -1,3 +1,30 @@
+.lilt-job-activity-log span.info:not(.warning):before {
+    content: "time";
+}
+
+.lilt-job-activity-log span.info {
+    float: right;
+}
+
+.lilt-job-activity-log ul li {
+    padding: 5px;
+}
+
+.lilt-job-activity-log {
+    padding-top: 20px !important;
+    max-height: 350px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+#create-job-form #details #settings #author .elements .element {
+    float: right;
+}
+
+#create-job-form #details #settings #author .elements .element {
+    margin-right: 0;
+}
+
 #entries-to-translate-field #entries-to-translate {
     box-shadow: none;
 }
@@ -76,9 +103,9 @@
 OVERVIEW
  */
 
-#lilt-translations-table tr {
+/* #lilt-translations-table tr {
     cursor: pointer;
-}
+} */
 
 #lilt-preview-modal.hidden-footer .footer{
     display: none;

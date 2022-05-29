@@ -72,6 +72,12 @@ class EditJobHandler
             throw new RuntimeException("Cant edit the job");
         }
 
+        Craftliltplugin::getInstance()->jobLogsRepository->create(
+            $jobRecord->id,
+            Craft::$app->getUser()->getId(),
+            'Job edited'
+        );
+
         return $job;
     }
 }

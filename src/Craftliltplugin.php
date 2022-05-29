@@ -59,6 +59,7 @@ use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileReposi
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
+use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use yii\base\Event;
@@ -106,6 +107,7 @@ use yii\web\Response;
  * @property I18NRepository $i18NRepository
  * @property LoadI18NHandler $loadI18NHandler
  * @property ListenerRegister $listenerRegister
+ * @property JobLogsRepository $jobLogsRepository
  */
 class Craftliltplugin extends Plugin
 {
@@ -275,6 +277,7 @@ class Craftliltplugin extends Plugin
             'jobRepository' => JobRepository::class,
             'translationRepository' => TranslationRepository::class,
             'i18NRepository' => I18NRepository::class,
+            'jobLogsRepository' => JobLogsRepository::class,
         ]);
 
         $this->set(

@@ -127,21 +127,17 @@
 {% endif %}
 #}
 
-<div class="meta read-only">
-    <table>
-        <tbody>
-        <tr>
-            <td>First change</td>
-            <td>2020/05/05 11:37:24</td>
-        </tr>
-        <tr>
-            <td>Second change</td>
-            <td>2020/05/05 11:37:24</td>
-        </tr>
-        <tr>
-            <td>Third change</td>
-            <td>2020/05/05 11:37:24</td>
-        </tr>
-        </tbody>
-    </table>
+{% if jobLogs ?? false %}
+<div class="meta read-only lilt-job-activity-log">
+    <h4 class="title">Activity log:</h4>
+    <ul>
+        <!--<span class="info" data-icon="time">2022/02/02 02:02:02</span>-->
+        {% for jobLog in jobLogs %}
+        <li>
+            <div style="font-size: 8px; color:grey">{{ jobLog.dateCreated }}</div>
+            <div>{{ jobLog.summary }}</div>
+        </li>
+        {% endfor %}
+    </ul>
 </div>
+{% endif %}

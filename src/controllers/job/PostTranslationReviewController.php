@@ -46,6 +46,12 @@ class PostTranslationReviewController extends AbstractJobController
 
         if ($updated) {
 
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $translation->jobId,
+                Craft::$app->getUser()->getId(),
+                sprintf('Translation (id: %d) reviewed', $translation->id)
+            );
+
             $readyToPublish = true;
 
             $jobRecord = JobRecord::findOne(['id' => $translation->jobId]);
@@ -60,6 +66,12 @@ class PostTranslationReviewController extends AbstractJobController
             if ($readyToPublish) {
                 $jobRecord->status = Job::STATUS_READY_TO_PUBLISH;
                 $jobRecord->save();
+
+                Craftliltplugin::getInstance()->jobLogsRepository->create(
+                    $jobRecord->id,
+                    Craft::$app->getUser()->getId(),
+                    'Job reviewed'
+                );
 
                 Craft::$app->elements->invalidateCachesForElementType(
                     Job::class

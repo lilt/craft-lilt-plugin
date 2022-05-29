@@ -189,10 +189,16 @@ $(document).ready(function() {
   });
 
   $('#lilt-btn-create-new-job').on('click', function() {
+    //TODO: I think we shouldn't depend on it so much
     Craft.forceConfirmUnload = false;
-    $(window).on('beforeunload', function(e) {
-      return undefined;
-    });
+    const $form = $('#create-job-form');
+    let serialized;
+    if (typeof $form.data('serializer') === 'function') {
+      serialized = $form.data('serializer')();
+    } else {
+      serialized = $form.serialize();
+    }
+    $form.data('initialSerializedValue', serialized)
   });
 
   $('.btn.submit.menubtn').on('click', function() {

@@ -39,6 +39,12 @@ class SendJobToLiltConnectorHandler
             strtoupper($job->translationWorkflow)
         );
 
+        Craftliltplugin::getInstance()->jobLogsRepository->create(
+            $job->id,
+            Craft::$app->getUser()->getId(),
+            sprintf('Lilt job created (id: %d)', $jobLilt->getId())
+        );
+
         $elementIdsToTranslate = $job->getElementIds();
 
         $targetLanguages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
@@ -116,6 +122,12 @@ class SendJobToLiltConnectorHandler
         $jobRecord->update();
         Craft::$app->getCache()->flush();
         Craftliltplugin::getInstance()->connectorJobRepository->start($jobLilt->getId());
+
+        Craftliltplugin::getInstance()->jobLogsRepository->create(
+            $jobRecord->id,
+            Craft::$app->getUser()->getId(),
+            'Job uploaded to Lilt Platform'
+        );
 
         Queue::push(
             (new FetchJobStatusFromConnector([

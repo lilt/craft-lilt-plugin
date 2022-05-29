@@ -56,6 +56,12 @@ class PostTranslationPublishController extends AbstractJobController
         if ($updated) {
             $published = true;
 
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $translation->jobId,
+                Craft::$app->getUser()->getId(),
+                sprintf('Translation (id: %d) published', $translation->id)
+            );
+
             $jobRecord = JobRecord::findOne(['id' => $translation->jobId]);
             $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($translation->jobId);
             foreach ($translations as $translation) {
@@ -68,6 +74,12 @@ class PostTranslationPublishController extends AbstractJobController
             if ($published) {
                 $jobRecord->status = Job::STATUS_COMPLETE;
                 $jobRecord->save();
+
+                Craftliltplugin::getInstance()->jobLogsRepository->create(
+                    $jobRecord->id,
+                    Craft::$app->getUser()->getId(),
+                    'Job published'
+                );
 
                 Craft::$app->elements->invalidateCachesForElementType(
                     Job::class

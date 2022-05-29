@@ -1,6 +1,20 @@
 {% import '_includes/forms' as forms %}
 
 {% block settings %}
+    {# TODO: do we need author? #}
+    {{ forms.elementSelectField({
+        status: element.getAttributeStatus('authorId'),
+        label: "Author"|t('app'),
+        id: 'author',
+        name: 'author',
+        elementType: userElementType,
+        selectionLabel: "Choose"|t('app'),
+        criteria: authorOptionCriteria,
+        limit: 1,
+        elements: (author is defined and author ? [author]),
+        disabled: false
+    }) }}
+
     {% if element.id is defined and element.id > 0 %}
     <div id="slug-field" class="field">
         <div class="heading">
@@ -36,20 +50,4 @@
         <div class="ltr" style="padding-top: 10px; padding-bottom: 10px">{{ element.targetSiteIdsHtml | raw }}</div>
     </div>
     {% endif %}
-
-
-    {# TODO: do we need author?
-    {{ forms.elementSelectField({
-        status: element.getAttributeStatus('authorId'),
-        label: "Author"|t('app'),
-        id: 'author',
-        name: 'author',
-        elementType: userElementType,
-        selectionLabel: "Choose"|t('app'),
-        criteria: authorOptionCriteria,
-        limit: 1,
-        elements: (author is defined and author ? [author]),
-        disabled: true
-    }) }}
-    #}
 {% endblock %}

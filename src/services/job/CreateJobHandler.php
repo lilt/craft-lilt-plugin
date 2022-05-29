@@ -57,6 +57,12 @@ class CreateJobHandler
             throw new RuntimeException("Cant create the job");
         }
 
+        Craftliltplugin::getInstance()->jobLogsRepository->create(
+            $jobRecord->id,
+            Craft::$app->getUser()->getId(),
+            'Job created'
+        );
+
         return $element;
     }
 }

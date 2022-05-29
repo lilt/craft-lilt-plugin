@@ -97,6 +97,9 @@ class GetJobEditFormController extends AbstractJobController
         return $this->renderJobForm(
             $job,
             [
+                'jobLogs' => Craftliltplugin::getInstance()->jobLogsRepository->findByJobId(
+                    $job->getId()
+                ),
                 'showLiltTranslateButton' => $job->getStatus() === Job::STATUS_NEW,
                 'showLiltSyncButton' =>  $job->getStatus() === Job::STATUS_READY_FOR_REVIEW,
                 'isUnpublishedDraft' => false,
