@@ -13,7 +13,7 @@ $(document).ready(function() {
           '#create-job-form #targetSiteIds-field .checkbox-select').
           data('checkboxSelect');
 
-      if(checkboxSelect !== undefined) {
+      if (checkboxSelect !== undefined) {
         const options = checkboxSelect.$options.get();
 
         const optionsSelected = options.map(
@@ -188,18 +188,20 @@ $(document).ready(function() {
     onFormSubmit();
   });
 
+  /* TODO: looks like we show alert only when form was change
   $('#lilt-btn-create-new-job').on('click', function() {
     //TODO: I think we shouldn't depend on it so much
     Craft.forceConfirmUnload = false;
-    const $form = $('#create-job-form');
+    const createJobForm = $('#create-job-form');
     let serialized;
-    if (typeof $form.data('serializer') === 'function') {
-      serialized = $form.data('serializer')();
+    if (typeof createJobForm.data('serializer') === 'function') {
+      serialized = createJobForm.data('serializer')();
     } else {
-      serialized = $form.serialize();
+      serialized = createJobForm.serialize();
     }
-    $form.data('initialSerializedValue', serialized)
+    createJobForm.data('initialSerializedValue', serialized);
   });
+   */
 
   $('.btn.submit.menubtn').on('click', function() {
     $(this).data('menubtn').settings.onOptionSelect = function(o) {
@@ -306,7 +308,9 @@ $(document).ready(function() {
               },
               canHaveDrafts: true,
               sources: '*',
-              disabledElementIds: $('#create-job-form #entries-to-translate .elements').hasClass('disabled') ? JSON.parse(selectedEntries) : [],
+              disabledElementIds: $(
+                  '#create-job-form #entries-to-translate .elements').
+                  hasClass('disabled') ? JSON.parse(selectedEntries) : [],
               actions: null,
               onSelectionChange: function() {
                 if (Craft.elementIndex.getSelectedElementIds().length > 0) {
@@ -317,22 +321,33 @@ $(document).ready(function() {
                   $('#entries-remove-action').css('visibility', 'hidden');
                 }
               },
-              onUpdateElements: form.onUpdateElements,
+              onUpdateElements: function() {
+                form.onUpdateElements();
+
+                //REFRESH FORM STATE:
+                const createJobForm = $('#create-job-form');
+                let serialized;
+                if (typeof createJobForm.data('serializer') === 'function') {
+                  serialized = createJobForm.data('serializer')();
+                } else {
+                  serialized = createJobForm.serialize();
+                }
+                createJobForm.data('initialSerializedValue', serialized)
+              },
             });
         $('#entries-to-translate').show();
 
-        $('#create-job-form #entries-to-translate .disabled.elements').on('DOMSubtreeModified', function() {
-          $('#create-job-form .disabled select').each(
-              function() {
-                //$(this).attr('disabled', true);
-                //$(this).prop('disabled', true);
-                $(this).on('mousedown', function(e) {
-                  e.preventDefault();
-                  return false;
-                })
-              },
-          );
-        })
+        $('#create-job-form #entries-to-translate .disabled.elements').
+            on('DOMSubtreeModified', function() {
+              $('#create-job-form .disabled select').each(
+                  function() {
+                    $(this).on('mousedown', function(e) {
+                      e.preventDefault();
+                      return false;
+                    });
+                  },
+              );
+            });
 
       }
     } catch (e) {
