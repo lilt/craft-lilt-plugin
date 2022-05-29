@@ -11,5 +11,5 @@ use yii\base\Event;
 interface ListenerInterface
 {
     public function register(): void;
-    public function __invoke(Event $draftEvent): Event;
+    public function __invoke(Event $event): Event;
 }

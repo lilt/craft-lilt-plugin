@@ -19,14 +19,14 @@ class AfterDraftAppliedListener implements ListenerInterface
         );
     }
 
-    public function __invoke(Event $draftEvent): Event
+    public function __invoke(Event $event): Event
     {
-        if(!$draftEvent instanceof DraftEvent) {
-            return $draftEvent;
+        if(!$event instanceof DraftEvent) {
+            return $event;
         }
 
         //TODO:
 
-        return $draftEvent;
+        return $event;
     }
 }

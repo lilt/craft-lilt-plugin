@@ -217,66 +217,8 @@ class Craftliltplugin extends Plugin
         Craft::$app->getView()->registerAssetBundle(CraftLiltPluginAsset::class);
 
         $this->loadComponents();
+
         $this->listenerRegister->register();
-
-        Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_CP_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['POST ' . CraftliltpluginParameters::JOB_CREATE_PATH] = 'craft-lilt-plugin/job/post-create-job/invoke';
-                $event->rules['GET craft-lilt-plugin/job/create'] = 'craft-lilt-plugin/job/get-job-create-form/invoke';
-                $event->rules['GET ' . CraftliltpluginParameters::JOB_EDIT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-job-edit-form/invoke';
-                $event->rules['POST ' . CraftliltpluginParameters::JOB_EDIT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/post-edit-job/invoke';
-                $event->rules['GET ' . CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-send-to-lilt/invoke';
-                $event->rules['GET ' . CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-sync-from-lilt/invoke';
-                $event->rules['GET craft-lilt-plugin'] = 'craft-lilt-plugin/index/index';
-                $event->rules['GET craft-lilt-plugin/jobs'] = 'craft-lilt-plugin/jobs/index';
-                $event->rules['craft-lilt-plugin'] = 'craft-lilt-plugin/job/get-translation-review/invoke';
-                $event->rules['GET craft-lilt-plugin/settings/<id>'] = 'craft-lilt-plugin/get-settings-form/invoke';
-                $event->rules['craft-lilt-plugin/settings'] = 'craft-lilt-plugin/get-settings-form/invoke';
-                $event->rules['POST craft-lilt-plugin/settings/lilt-configuration'] = 'craft-lilt-plugin/post-configuration/invoke';
-            }
-        );
-
-        Event::on(
-            Elements::class,
-            Elements::EVENT_REGISTER_ELEMENT_TYPES,
-            function (RegisterComponentTypesEvent $event) {
-                $event->types[] = Job::class;
-            }
-        );
-
-
-        Event::on(
-            Element::class,
-            Element::EVENT_REGISTER_DEFAULT_TABLE_ATTRIBUTES,
-            function (RegisterElementDefaultTableAttributesEvent $event) {
-                $params = Craft::$app->getRequest()->getBodyParams();
-
-                if ($params['elementType'] === 'lilthq\craftliltplugin\elements\TranslateEntry') {
-                    $expiryDateKey = array_search('expiryDate', $event->tableAttributes);
-
-                    if ($expiryDateKey !== false) {
-                        unset($event->tableAttributes[$expiryDateKey]);
-                    }
-
-                    $event->tableAttributes = array_merge(['drafts'], $event->tableAttributes);
-                }
-            }
-        );
-
-        Event::on(
-            Element::class,
-            Element::EVENT_REGISTER_TABLE_ATTRIBUTES,
-            function (RegisterElementTableAttributesEvent $event) {
-                $params = Craft::$app->getRequest()->getBodyParams();
-
-                if (!empty($params['elementType']) && isset($event->tableAttributes['drafts']['label']) && $params['elementType'] === 'lilthq\craftliltplugin\elements\TranslateEntry') {
-                    $event->tableAttributes['drafts']['label'] = 'Version';
-                }
-            }
-        );
-
         $this->loadI18NHandler->__invoke();
 
         Craft::info(

@@ -10,6 +10,10 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\parameters;
 
 use lilthq\craftliltplugin\services\listeners\AfterDraftAppliedListener;
+use lilthq\craftliltplugin\services\listeners\RegisterDefaultTableAttributesListener;
+use lilthq\craftliltplugin\services\listeners\RegisterElementTypesListener;
+use lilthq\craftliltplugin\services\listeners\RegisterTableAttributesListener;
+use lilthq\craftliltplugin\services\listeners\RegisterCpUrlRulesListener;
 
 class CraftliltpluginParameters
 {
@@ -35,6 +39,10 @@ class CraftliltpluginParameters
     public const BENF_NEO_FIELD                 = 'benf\neo\Field';
 
     public const LISTENERS = [
-        AfterDraftAppliedListener::class
+        AfterDraftAppliedListener::class,
+        RegisterCpUrlRulesListener::class,
+        RegisterElementTypesListener::class,
+        RegisterDefaultTableAttributesListener::class,
+        RegisterTableAttributesListener::class,
     ];
 }

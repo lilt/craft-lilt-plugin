@@ -14,15 +14,6 @@ use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class I18NRecord extends ActiveRecord
 {
-//    public $id;
-//    public $uid;
-//    public $target;
-//    public $source;
-//    public $sourceSiteId;
-//    public $targetSiteId;
-//    public $dateCreated;
-//    public $dateUpdated;
-
     /**
      * @inheritdoc
      * @return string

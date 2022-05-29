@@ -3,13 +3,14 @@
 {# TODO: proper error message #}
 
 {% if isFailed ?? false %}
-<div class="meta read-only error">
-    <p>Unexpected error happened while processing translations. You can contact our <a
-                href="https://lilt.atlassian.net/servicedesk/customer/portals" target="_blank">customer support</a></p>
-    <div>
-        <div id="lilt-try-again-sync" data-job-id="{{ element.id }}" class="btn" data-icon="refresh">Try again</div>
+    <div class="meta read-only error">
+        <p>Unexpected error happened while processing translations. You can contact our <a
+                    href="https://lilt.atlassian.net/servicedesk/customer/portals" target="_blank">customer support</a>
+        </p>
+        <div>
+            <div id="lilt-try-again-sync" data-job-id="{{ element.id }}" class="btn" data-icon="refresh">Try again</div>
+        </div>
     </div>
-</div>
 {% endif %}
 
 {% if notices ?? false %}
