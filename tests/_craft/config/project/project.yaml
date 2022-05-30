@@ -1,0 +1,28 @@
+dateModified: 1653934227
+email:
+  fromEmail: support@craftcms.com
+  fromName: 'Craft test site'
+  transportType: craft\mail\transportadapters\Sendmail
+meta:
+  __names__:
+    8ac254eb-deea-43ad-967d-67b8894b2dc6: 'Craft test site' # Craft test site
+    65d0873e-da96-4c13-9411-c24c2f7c745e: Common # Common
+    6079373e-91f5-453f-b89a-19153d873db6: 'Public Schema' # Public Schema
+    c44b2991-c9ea-4c3c-964b-2fe091765cc9: 'Craft test site' # Craft test site
+plugins:
+  craft-lilt-plugin:
+    edition: standard
+    enabled: true
+    schemaVersion: 1.0.0
+system:
+  edition: solo
+  live: true
+  name: 'Craft test site'
+  schemaVersion: 3.7.33
+  timeZone: America/Los_Angeles
+users:
+  allowPublicRegistration: false
+  defaultGroup: null
+  photoSubpath: null
+  photoVolumeUid: null
+  requireEmailVerification: true
