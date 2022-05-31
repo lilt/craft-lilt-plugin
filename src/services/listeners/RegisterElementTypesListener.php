@@ -20,7 +20,7 @@ class RegisterElementTypesListener implements ListenerInterface
 
     public function __invoke(Event $event): Event
     {
-        if(!$event instanceof RegisterComponentTypesEvent) {
+        if (!$event instanceof RegisterComponentTypesEvent) {
             return $event;
         }
 

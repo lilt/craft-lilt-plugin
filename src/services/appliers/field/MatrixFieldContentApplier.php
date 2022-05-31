@@ -66,13 +66,14 @@ class MatrixFieldContentApplier extends AbstractContentApplier implements Applie
 
         //TODO: check this, is it only one way to apply
         $fieldValue = $field->serializeValue($element->getFieldValue($field->handle), $element);
-        $element->setFieldValue($field->handle,$fieldValue);
+        $element->setFieldValue($field->handle, $fieldValue);
         $this->forceSave($command);
 
 
         return ApplyContentResult::applied(
             //$i18NRecords, $command->getElement()->getFieldValue($field->handle)
-            $i18NRecords, $fieldValue
+            $i18NRecords,
+            $fieldValue
         );
     }
 

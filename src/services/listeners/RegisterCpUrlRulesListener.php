@@ -22,22 +22,34 @@ class RegisterCpUrlRulesListener implements ListenerInterface
 
     public function __invoke(Event $event): Event
     {
-        if(!$event instanceof RegisterUrlRulesEvent) {
+        if (!$event instanceof RegisterUrlRulesEvent) {
             return $event;
         }
 
-        $event->rules['POST ' . CraftliltpluginParameters::JOB_CREATE_PATH] = 'craft-lilt-plugin/job/post-create-job/invoke';
-        $event->rules['GET craft-lilt-plugin/job/create'] = 'craft-lilt-plugin/job/get-job-create-form/invoke';
-        $event->rules['GET ' . CraftliltpluginParameters::JOB_EDIT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-job-edit-form/invoke';
-        $event->rules['POST ' . CraftliltpluginParameters::JOB_EDIT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/post-edit-job/invoke';
-        $event->rules['GET ' . CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-send-to-lilt/invoke';
-        $event->rules['GET ' . CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH . '/<jobId:\d+>'] = 'craft-lilt-plugin/job/get-sync-from-lilt/invoke';
-        $event->rules['GET craft-lilt-plugin'] = 'craft-lilt-plugin/index/index';
-        $event->rules['GET craft-lilt-plugin/jobs'] = 'craft-lilt-plugin/jobs/index';
-        $event->rules['craft-lilt-plugin'] = 'craft-lilt-plugin/job/get-translation-review/invoke';
-        $event->rules['GET craft-lilt-plugin/settings/<id>'] = 'craft-lilt-plugin/get-settings-form/invoke';
-        $event->rules['craft-lilt-plugin/settings'] = 'craft-lilt-plugin/get-settings-form/invoke';
-        $event->rules['POST craft-lilt-plugin/settings/lilt-configuration'] = 'craft-lilt-plugin/post-configuration/invoke';
+        $event->rules['POST ' . CraftliltpluginParameters::JOB_CREATE_PATH]
+            = 'craft-lilt-plugin/job/post-create-job/invoke';
+        $event->rules['GET craft-lilt-plugin/job/create']
+            = 'craft-lilt-plugin/job/get-job-create-form/invoke';
+        $event->rules['GET ' . CraftliltpluginParameters::JOB_EDIT_PATH . '/<jobId:\d+>']
+            = 'craft-lilt-plugin/job/get-job-edit-form/invoke';
+        $event->rules['POST ' . CraftliltpluginParameters::JOB_EDIT_PATH . '/<jobId:\d+>']
+            = 'craft-lilt-plugin/job/post-edit-job/invoke';
+        $event->rules['GET ' . CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH . '/<jobId:\d+>']
+            = 'craft-lilt-plugin/job/get-send-to-lilt/invoke';
+        $event->rules['GET ' . CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH . '/<jobId:\d+>']
+            = 'craft-lilt-plugin/job/get-sync-from-lilt/invoke';
+        $event->rules['GET craft-lilt-plugin']
+            = 'craft-lilt-plugin/index/index';
+        $event->rules['GET craft-lilt-plugin/jobs']
+            = 'craft-lilt-plugin/jobs/index';
+        $event->rules['craft-lilt-plugin']
+            = 'craft-lilt-plugin/job/get-translation-review/invoke';
+        $event->rules['GET craft-lilt-plugin/settings/<id>']
+            = 'craft-lilt-plugin/get-settings-form/invoke';
+        $event->rules['craft-lilt-plugin/settings']
+            = 'craft-lilt-plugin/get-settings-form/invoke';
+        $event->rules['POST craft-lilt-plugin/settings/lilt-configuration']
+            = 'craft-lilt-plugin/post-configuration/invoke';
 
         return $event;
     }

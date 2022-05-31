@@ -31,7 +31,8 @@ class FetchJobStatusFromConnector extends BaseJob
     public function execute($queue): void
     {
         $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
-        $isTranslationFinished = $liltJob->getStatus() !== JobResponse::STATUS_PROCESSING && $liltJob->getStatus() !== JobResponse::STATUS_QUEUED;
+        $isTranslationFinished = $liltJob->getStatus() !== JobResponse::STATUS_PROCESSING
+            && $liltJob->getStatus() !== JobResponse::STATUS_QUEUED;
 
         if (!$isTranslationFinished) {
             Queue::push((new FetchJobStatusFromConnector(
@@ -46,7 +47,7 @@ class FetchJobStatusFromConnector extends BaseJob
 
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
 
-        if($jobRecord->isVerifiedFlow()) {
+        if ($jobRecord->isVerifiedFlow()) {
             //LILT_TRANSLATION_WORKFLOW_VERIFIED
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
 
@@ -58,7 +59,7 @@ class FetchJobStatusFromConnector extends BaseJob
             )));
         }
 
-        if($jobRecord->isInstantFlow()) {
+        if ($jobRecord->isInstantFlow()) {
             //LILT_TRANSLATION_WORKFLOW_INSTANT
             if ($liltJob->getStatus() === JobResponse::STATUS_FAILED) {
                 $jobRecord->status = Job::STATUS_FAILED;

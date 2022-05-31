@@ -50,8 +50,11 @@ class AbstractJobController extends Controller
     /**
      * @throws InvalidConfigException
      */
-    protected function renderJobForm(Job $job, array $variablesToAdd = [], string $template = 'craft-lilt-plugin/job/create.twig'): Response
-    {
+    protected function renderJobForm(
+        Job $job,
+        array $variablesToAdd = [],
+        string $template = 'craft-lilt-plugin/job/create.twig'
+    ): Response {
         Craft::$app->getView()->registerAssetBundle(JobFormAsset::class);
 
         $variables = [

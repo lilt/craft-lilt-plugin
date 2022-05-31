@@ -29,11 +29,20 @@ abstract class AbstractContentApplier
             );
 
             Craft::$app->elements->invalidateCachesForElement($command->getElement());
-            $element = Craft::$app->elements->getElementById($command->getElement()->id, null, $command->getTargetSiteId());
+
+            $element = Craft::$app->elements->getElementById(
+                $command->getElement()->id,
+                null,
+                $command->getTargetSiteId()
+            );
             $element->setIsFresh();
 
             $command->setElement(
-                Craft::$app->elements->getElementById($command->getElement()->id, null, $command->getTargetSiteId())
+                Craft::$app->elements->getElementById(
+                    $command->getElement()->id,
+                    null,
+                    $command->getTargetSiteId()
+                )
             );
 
             return $success;

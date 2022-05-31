@@ -90,8 +90,10 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
 
                         return TranslationRecord::STATUS_READY_FOR_REVIEW;
                     }
-                    if ($translationResponse->getStatus() === TranslationResponse::STATUS_IMPORT_FAILED
-                        || $translationResponse->getStatus() === TranslationResponse::STATUS_EXPORT_FAILED) {
+                    if (
+                        $translationResponse->getStatus() === TranslationResponse::STATUS_IMPORT_FAILED
+                        || $translationResponse->getStatus() === TranslationResponse::STATUS_EXPORT_FAILED
+                    ) {
                         //failed
 
                         $translationRecord = $this->handleTranslationRecord(
@@ -139,7 +141,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
             $jobRecord->status = Job::STATUS_FAILED;
             $jobRecord->save();
             $this->markAsDone($queue);
-        } else if (in_array('in-progress', $statuses, true)) {
+        } elseif (in_array('in-progress', $statuses, true)) {
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
             $jobRecord->save();
             $this->markAsDone($queue);
@@ -157,8 +159,8 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
     private function getTranslationStatus(string $translationStatusFromResponse, string $workflow): string
     {
         $isVerifiedTranslationWorkflow = strtolower($workflow) === strtolower(
-                SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
-            );
+            SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
+        );
 
         if ($isVerifiedTranslationWorkflow) {
             if ($translationStatusFromResponse === TranslationResponse::STATUS_IMPORT_COMPLETE) {
@@ -173,7 +175,8 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
         return TranslationRecord::STATUS_FAILED;
     }
 
-    function getElementIdFromFileName(TranslationResponse $translationResponse): int
+    //TODO: remove duplicate function
+    private function getElementIdFromFileName(TranslationResponse $translationResponse): int
     {
         $regExpr = '/\d+_element_(\d+).json\+html/';
         preg_match($regExpr, $translationResponse->getName(), $matches);
@@ -191,7 +194,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
      * @param array $unprocessedTranslations
      * @return mixed
      */
-    function handleTranslationRecord($translationResponse, $job, array $unprocessedTranslations)
+    private function handleTranslationRecord($translationResponse, $job, array $unprocessedTranslations)
     {
         $translationTargetLanguage = sprintf(
             '%s-%s',

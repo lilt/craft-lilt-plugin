@@ -14,3 +14,7 @@ jobs:
         run: make composer-install
       - name: Quality
         run: make quality
+      - name: Codeception Integration
+        run: make integration
+      - name: Codeception Functional
+        run: make functional

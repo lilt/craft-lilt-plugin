@@ -54,13 +54,13 @@ class JobRecord extends ActiveRecord
     public function isInstantFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(
-                SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
-            );
+            SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
+        );
     }
     public function isVerifiedFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(
-                SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
-            );
+            SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
+        );
     }
 }

@@ -21,7 +21,7 @@ class PostJobRetryController extends Controller
 
         $jobIds = $request->getBodyParam('jobIds', []);
 
-        if(count($jobIds) === 0) {
+        if (count($jobIds) === 0) {
             return $this->response->setStatusCode(400, json_encode(['msg' => 'Empty jobs']));
         }
 
@@ -42,7 +42,7 @@ class PostJobRetryController extends Controller
         }
 
 
-        if(count($jobs) === 0) {
+        if (count($jobs) === 0) {
             return $this->response->setStatusCode(400, json_encode(['msg' => 'Job not found']));
         }
 

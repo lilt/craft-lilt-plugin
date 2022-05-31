@@ -73,7 +73,7 @@ class TranslationModel extends Model
     {
         $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
 
-        if(!$draft) {
+        if (!$draft) {
             $draft = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
         }
 

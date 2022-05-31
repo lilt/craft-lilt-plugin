@@ -34,7 +34,9 @@ class NeoFieldContentProvider extends AbstractContentProvider
 
         foreach ($blockElements as $blockElement) {
             $blockId = $blockElement->getId();
-            $content[$blockId]['fields'] = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide($blockElement)[$blockId];
+            $content[$blockId]['fields'] = Craftliltplugin::getInstance()
+                ->elementTranslatableContentProvider
+                ->provide($blockElement)[$blockId];
         }
 
         return $content;

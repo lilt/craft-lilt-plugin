@@ -44,7 +44,7 @@ class PostCreateJobController extends AbstractJobController
             return $this->renderJobForm($job);
         }
 
-        if($job->versions === '[]') {
+        if ($job->versions === '[]') {
             //TODO: fix FE part
             $job->versions = [];
         }
@@ -61,7 +61,8 @@ class PostCreateJobController extends AbstractJobController
         $asDraft = ((int) $request->getBodyParam('saveDraft') === 1);
 
         $job = Craftliltplugin::getInstance()->createJobHandler->__invoke(
-            $command, $asDraft
+            $command,
+            $asDraft
         );
 
         Craft::$app->getCache()->flush();
@@ -74,7 +75,7 @@ class PostCreateJobController extends AbstractJobController
 
 
         $redirectUrl = $this->request->getValidatedBodyParam('redirect');
-        if($redirectUrl === null || $redirectUrl === '{cpEditUrl}') {
+        if ($redirectUrl === null || $redirectUrl === '{cpEditUrl}') {
             return $this->redirect($job->getCpEditUrl());
         }
 

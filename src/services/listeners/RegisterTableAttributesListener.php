@@ -20,13 +20,17 @@ class RegisterTableAttributesListener implements ListenerInterface
 
     public function __invoke(Event $event): Event
     {
-        if(!$event instanceof RegisterElementTableAttributesEvent) {
+        if (!$event instanceof RegisterElementTableAttributesEvent) {
             return $event;
         }
 
         $params = Craft::$app->getRequest()->getBodyParams();
 
-        if (!empty($params['elementType']) && isset($event->tableAttributes['drafts']['label']) && $params['elementType'] === 'lilthq\craftliltplugin\elements\TranslateEntry') {
+        if (
+            !empty($params['elementType'])
+            && isset($event->tableAttributes['drafts']['label'])
+            && $params['elementType'] === 'lilthq\craftliltplugin\elements\TranslateEntry'
+        ) {
             $event->tableAttributes['drafts']['label'] = 'Version';
         }
 

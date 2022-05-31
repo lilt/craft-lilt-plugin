@@ -48,7 +48,7 @@ class EditJobHandler
                 $command->getSourceSiteId()
             );
 
-        if($command->getStatus()) {
+        if ($command->getStatus()) {
             $job->status = $command->getStatus();
         }
 

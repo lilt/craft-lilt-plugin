@@ -14,13 +14,13 @@ class ListenerRegister
     /**
      * @var ListenerInterface<string>
      */
-    private $_listeners = [];
+    private $listeners = [];
 
     public function register(): void
     {
         foreach ($this->availableListeners as $availableListener) {
-            $this->_listeners[$availableListener] = new $availableListener;
-            $this->_listeners[$availableListener]->register();
+            $this->listeners[$availableListener] = new $availableListener();
+            $this->listeners[$availableListener]->register();
         }
     }
 }

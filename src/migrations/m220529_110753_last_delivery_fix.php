@@ -8,7 +8,9 @@ use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 /**
  * m220529_110753_last_delivery_fix migration.
  */
+// @codingStandardsIgnoreStart
 class m220529_110753_last_delivery_fix extends Migration
+// @codingStandardsIgnoreEnd
 {
     /**
      * @inheritdoc

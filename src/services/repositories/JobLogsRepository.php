@@ -8,7 +8,8 @@ use lilthq\craftliltplugin\records\JobLogRecord;
 
 class JobLogsRepository
 {
-    public function findByJobId(int $jobId): array {
+    public function findByJobId(int $jobId): array
+    {
         return JobLogRecord::find()
             ->where(['jobId' => $jobId])
             ->orderBy(['id' => SORT_DESC])

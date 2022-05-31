@@ -40,7 +40,9 @@ class MatrixFieldContentProvider extends AbstractContentProvider
 
         foreach ($blockElements as $blockElement) {
             $blockId = $blockElement->getId();
-            $blocksContent[$blockId]['fields'] = $this->elementTranslatableContentProvider->provide($blockElement)[$blockId];
+
+            $blocksContent[$blockId]['fields'] = $this->elementTranslatableContentProvider
+                ->provide($blockElement)[$blockId];
         }
 
         return $blocksContent;

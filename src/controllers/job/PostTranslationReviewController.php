@@ -45,7 +45,6 @@ class PostTranslationReviewController extends AbstractJobController
         );
 
         if ($updated) {
-
             Craftliltplugin::getInstance()->jobLogsRepository->create(
                 $translation->jobId,
                 Craft::$app->getUser()->getId(),

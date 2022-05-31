@@ -14,6 +14,7 @@ cli:
 composer-install:
 	docker-compose exec -T -u root nginx sh -c "apk add git"
 	docker-compose exec -T -u root nginx sh -c "chown -R www-data:www-data /craft-lilt-plugin"
+	docker-compose exec -T -u www-data nginx sh -c "cp tests/.env.test tests/.env"
 	docker-compose exec -T -u www-data nginx sh -c "curl -s https://getcomposer.org/installer | php"
 	docker-compose exec -T -u www-data nginx sh -c "php composer.phar install"
 
@@ -22,3 +23,9 @@ quality:
 
 quality-fix:
 	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/phpcbf"
+
+integration:
+	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/codecept run integration"
+
+functional:
+	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/codecept run functional"

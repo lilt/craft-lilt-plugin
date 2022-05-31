@@ -34,7 +34,7 @@ class SystemReport extends Utility
                 'mandatory' => true,
                 'condition' => true,
                 'memo' => 'PHP 7.2 or later is required.',
-                'error' => !version_compare( App::phpVersion(), '7.2', '>='),
+                'error' => !version_compare(App::phpVersion(), '7.2', '>='),
                 'warning' => false
             ],
             [
@@ -42,7 +42,7 @@ class SystemReport extends Utility
                 'mandatory' => true,
                 'condition' => true,
                 'memo' => 'Craft CMS 3.7.38 or later is required',
-                'error' => !version_compare( Craft::$app->getVersion(),'3.7.38', '>='),
+                'error' => !version_compare(Craft::$app->getVersion(), '3.7.38', '>='),
                 'warning' => false
             ],
         ];
@@ -85,15 +85,15 @@ class SystemReport extends Utility
                 'warning' => !$isSupported
             ];
 
-            if(!$hasProvider && !$hasError && !$isTranslatable) {
+            if (!$hasProvider && !$hasError && !$isTranslatable) {
                 $fieldSupport['memo'] = sprintf('%s is not translatable', $fieldType);
             }
 
-            if($hasError) {
+            if ($hasError) {
                 $fieldSupport['memo'] = sprintf('%s is not supported', $fieldType);
             }
 
-            $requirements['requirements'][] =$fieldSupport;
+            $requirements['requirements'][] = $fieldSupport;
         }
 
         return Craft::$app->getView()->renderTemplate('craft-lilt-plugin/_components/utilities/system-report.twig', [

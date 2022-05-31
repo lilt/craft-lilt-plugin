@@ -28,7 +28,7 @@ class SyncJobFromLiltConnectorHandler
      */
     public function __invoke(Job $job): void
     {
-        if(empty($job->liltJobId)) {
+        if (empty($job->liltJobId)) {
             return;
         }
 
@@ -95,7 +95,7 @@ class SyncJobFromLiltConnectorHandler
     }
 
 
-    function getElementIdFromFileName(TranslationResponse $translationResponse): int
+    private function getElementIdFromFileName(TranslationResponse $translationResponse): int
     {
         $regExpr = '/\d+_element_(\d+).json\+html/';
         preg_match($regExpr, $translationResponse->getName(), $matches);
@@ -113,7 +113,7 @@ class SyncJobFromLiltConnectorHandler
      * @param array $unprocessedTranslations
      * @return mixed
      */
-    function handleTranslationRecord($translationResponse, $job, array $unprocessedTranslations)
+    private function handleTranslationRecord($translationResponse, $job, array $unprocessedTranslations)
     {
         $translationTargetLanguage = sprintf(
             '%s-%s',

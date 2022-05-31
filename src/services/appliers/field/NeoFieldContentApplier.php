@@ -78,7 +78,7 @@ class NeoFieldContentApplier extends AbstractContentApplier implements ApplierIn
 
         $fieldValue = $field->serializeValue($element->getFieldValue($field->handle), $element);
 
-        $element->setFieldValue($field->handle,$fieldValue);
+        $element->setFieldValue($field->handle, $fieldValue);
         $this->forceSave($command);
 
         //$blockElements = $fieldValue->all();

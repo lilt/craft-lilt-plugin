@@ -31,7 +31,7 @@ class PublishDraftHandler
             $targetSiteId
         );
 
-        if(!$draftElement) {
+        if (!$draftElement) {
             //TODO: published already or what? Why we are here?
             return;
         }

@@ -17,7 +17,7 @@ use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\utilities\Configuration;
 use Throwable;
 use yii\web\Response;
-use \LiltConnectorSDK\Model\SettingsResponse1 as SettingsRequest;
+use LiltConnectorSDK\Model\SettingsResponse1 as SettingsRequest;
 
 class PostConfigurationController extends AbstractJobController
 {
@@ -31,7 +31,7 @@ class PostConfigurationController extends AbstractJobController
         $request = $this->request;
 
         $connectorApiKeyRecord = SettingRecord::findOne(['name' => 'connector_api_key']);
-        if(!$connectorApiKeyRecord) {
+        if (!$connectorApiKeyRecord) {
             $connectorApiKeyRecord = new SettingRecord(['name' => 'connector_api_key']);
         }
 

@@ -62,7 +62,11 @@ class Job extends Element
     public $dateCreated;
     public $dateUpdated;
 
+    // @codingStandardsIgnoreStart
     private $_author;
+    private $_elements;
+    private $_translations;
+    // @codingStandardsIgnoreEnd
 
     public function beforeDelete(): bool
     {
@@ -161,14 +165,14 @@ class Job extends Element
     public function isInstantFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(
-                SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
-            );
+            SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
+        );
     }
     public function isVerifiedFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(
-                SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
-            );
+            SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
+        );
     }
 
     /**
@@ -430,9 +434,6 @@ class Job extends Element
     {
         return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
     }
-
-    private $_elements;
-    private $_translations;
 
     /**
      * @return TranslationModel[]

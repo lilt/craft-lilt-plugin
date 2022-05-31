@@ -12,7 +12,7 @@ use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\FieldsFixture;
 use PHPUnit\Framework\Assert;
 
-class ElementTranslatableContentProviderCest extends TestCase
+class ElementTranslatableContentProviderCest
 {
     public function _fixtures(): array
     {
@@ -65,7 +65,5 @@ class ElementTranslatableContentProviderCest extends TestCase
             ],
             array_values($elementContent['matrixField'])
         );
-
-        return;
     }
 }

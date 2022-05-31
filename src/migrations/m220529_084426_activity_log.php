@@ -10,7 +10,9 @@ use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 /**
  * m220529_084426_activity_log migration.
  */
+// @codingStandardsIgnoreStart
 class m220529_084426_activity_log extends Migration
+// @codingStandardsIgnoreEnd
 {
     /**
      * @inheritdoc
