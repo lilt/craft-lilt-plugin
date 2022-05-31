@@ -28,9 +28,8 @@ use Codeception\Lib\Friend;
  * @SuppressWarnings(PHPMD)
  *
  */
-class FunctionalTester extends Actor
+class IntegrationTester extends Actor
 {
-    use _generated\FunctionalTesterActions;
-
+    use _generated\UnitTesterActions;
 
 }
