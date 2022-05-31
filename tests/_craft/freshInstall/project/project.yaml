@@ -1,0 +1,33 @@
+dateModified: 1653981648
+email:
+  fromEmail: volodymyr.hadomskyi@lilt.com
+  fromName: 'Craft test'
+  transportType: craft\mail\transportadapters\Sendmail
+meta:
+  __names__:
+    1aadc7f1-a090-4e44-9556-d50c5bb012f1: 'Public Schema' # Public Schema
+    5b0ee380-fdee-46c2-a2c0-1ed3903a7a58: body # body
+    9cdb6f52-9acf-4557-8ab5-039ae51883ea: blog # blog
+    83c42488-1dbd-458e-b0f6-614eeda66822: Default # Default
+    88f20aaf-5201-4d58-aa48-b7537f61942e: 'Craft test de' # Craft test de
+    0627f912-b8df-4043-8c0d-a772390763fd: Blog # Blog
+    3386b29e-5958-4e2c-9996-d451fc003bb1: Common # Common
+    a7a27152-dfa3-4699-9d02-c8cf41744079: 'Craft test' # Craft test
+    a5335e9e-3da3-45c8-9ed3-5fcce32f85b4: 'Craft test' # Craft test
+plugins:
+  redactor:
+    edition: standard
+    enabled: true
+    schemaVersion: 2.3.0
+system:
+  edition: solo
+  live: true
+  name: 'Craft test'
+  schemaVersion: 3.7.33
+  timeZone: America/Los_Angeles
+users:
+  allowPublicRegistration: false
+  defaultGroup: null
+  photoSubpath: null
+  photoVolumeUid: null
+  requireEmailVerification: true
