@@ -24,8 +24,11 @@ quality:
 quality-fix:
 	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/phpcbf"
 
-integration:
+codecept-build:
+	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/codecept build"
+
+integration: codecept-build
 	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/codecept run integration"
 
-functional:
+functional: codecept-build
 	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/codecept run functional"
