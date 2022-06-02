@@ -55,7 +55,8 @@ class PostCreateJobController extends AbstractJobController
             $job->targetSiteIds,
             $job->sourceSiteId,
             $job->translationWorkflow,
-            $job->versions
+            $job->versions,
+            $job->authorId
         );
 
         $asDraft = ((int) $request->getBodyParam('saveDraft') === 1);

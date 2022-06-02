@@ -42,6 +42,9 @@ class JobQuery extends ElementQuery
                 if (!empty($element->liltJobId)) {
                     $element->liltJobId = (int)$element->liltJobId;
                 }
+                if (!empty($element->authorId)) {
+                    $element->authorId = (int)$element->authorId;
+                }
                 if (!empty($element->sourceSiteId)) {
                     $element->sourceSiteId = (int)$element->sourceSiteId;
                 }
@@ -57,6 +60,7 @@ class JobQuery extends ElementQuery
 
         $this->query->select([
             'lilt_jobs.title',
+            'lilt_jobs.authorId',
             'lilt_jobs.liltJobId',
             'lilt_jobs.status',
             'lilt_jobs.sourceSiteId',

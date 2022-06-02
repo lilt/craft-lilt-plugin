@@ -40,6 +40,7 @@ class EditJobHandler
         }
 
         $job->title = $command->getTitle();
+        $job->authorId = $command->getAuthorId();
         $job->sourceSiteId = $command->getSourceSiteId();
 
         $job->sourceSiteLanguage = Craftliltplugin::getInstance()

@@ -73,7 +73,8 @@ class GetJobCreateFormController extends AbstractJobController
                         'label' => 'Jobs',
                         'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin/jobs')
                     ],
-                ]
+                ],
+                'author' => Craft::$app->getUser()->getIdentity()
             ]
         );
     }

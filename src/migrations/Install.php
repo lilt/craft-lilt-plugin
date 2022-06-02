@@ -21,12 +21,14 @@ class Install extends Migration
     {
         $this->dropTableIfExists(CraftliltpluginParameters::TRANSLATION_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
+        $this->dropTableIfExists(CraftliltpluginParameters::JOB_LOGS_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::I18N_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
 
         $this->createTable(CraftliltpluginParameters::JOB_TABLE_NAME, [
             'id' => $this->primaryKey()->unsigned(),
             'title' => $this->string()->null(),
+            'authorId' => $this->integer()->null(),
             'liltJobId' => $this->integer()->null(),
             'status' => $this->string(50),
             'elementIds' => $this->json(),
@@ -52,7 +54,7 @@ class Install extends Migration
             'targetSiteId' => $this->integer()->null(),
             'sourceContent' => $this->json(),
             'targetContent' => $this->json(),
-            'lastDelivery' => $this->integer()->null(),
+            'lastDelivery' => $this->dateTime()->null(),
             'status' => $this->string(50)->null(),
             'connectorTranslationId' => $this->integer()->unsigned()->null(),
             'dateCreated' => $this->dateTime()->notNull(),
@@ -110,6 +112,26 @@ class Install extends Migration
             'CASCADE',
             null
         );
+
+        $this->createTable(CraftliltpluginParameters::JOB_LOGS_TABLE_NAME, [
+            'id' => $this->primaryKey()->unsigned(),
+            'uid' => $this->uid(),
+            'jobId' => $this->integer()->unsigned()->null(),
+            'userId' => $this->integer()->unsigned()->null(),
+            'summary' => $this->string(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+        ]);
+
+        $this->addForeignKey(
+            null,
+            CraftliltpluginParameters::JOB_LOGS_TABLE_NAME,
+            ['jobId'],
+            CraftliltpluginParameters::JOB_TABLE_NAME,
+            ['id'],
+            'CASCADE',
+            null
+        );
     }
 
     /**
@@ -117,6 +139,7 @@ class Install extends Migration
      */
     public function safeDown(): void
     {
+        $this->dropTableIfExists(CraftliltpluginParameters::JOB_LOGS_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::TRANSLATION_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::I18N_TABLE_NAME);

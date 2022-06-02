@@ -34,6 +34,7 @@ class AbstractJobController extends Controller
         $job->title = $bodyParams['title'];
         $job->sourceSiteId = (int)$bodyParams['sourceSite'];
         $job->versions = $bodyParams['versions'] ?? [];
+        $job->authorId = !empty($bodyParams['author'][0])? (int) $bodyParams['author'][0] : null;
         $job->translationWorkflow = $bodyParams['translationWorkflow'];
         $job->elementIds = json_decode($bodyParams['entries'], false) ?? [];
 
@@ -71,7 +72,7 @@ class AbstractJobController extends Controller
             'authorOptionCriteria' => [
                 'can' => 'editEntries:edit-lilt-jobs'
             ],
-            'author' => Craft::$app->getUser()->getIdentity(),
+            'author' => (!empty($job->authorId)) ? Craft::$app->users->getUserById($job->authorId) : null,
         ];
 
         return $this->renderTemplate(

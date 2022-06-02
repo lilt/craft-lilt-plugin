@@ -45,10 +45,9 @@ class Job extends Element
     public const STATUS_COMPLETE = 'complete';
     public const STATUS_FAILED = 'failed';
 
-    //TODO: add to database
-    public $authorId;
 
     public $uid;
+    public $authorId;
     public $title;
     public $liltJobId;
     public $status;

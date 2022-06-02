@@ -9,12 +9,11 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\job;
 
-use DateTimeInterface;
-
 class EditJobCommand
 {
     //TODO: refactor to use JobModel ._.
     private $jobId;
+    private $authorId;
     private $title;
     private $entries;
     private $sourceSiteId;
@@ -25,6 +24,7 @@ class EditJobCommand
 
     public function __construct(
         int $jobId,
+        ?int $authorId,
         string $title,
         array $entries,
         array $targetSitesIds,
@@ -34,6 +34,7 @@ class EditJobCommand
         string $status = null
     ) {
         $this->jobId = $jobId;
+        $this->authorId = $authorId;
         $this->title = $title;
         $this->entries = $entries;
         $this->targetSitesIds = $targetSitesIds;
@@ -56,6 +57,11 @@ class EditJobCommand
     public function getJobId(): int
     {
         return $this->jobId;
+    }
+
+    public function getAuthorId(): ?int
+    {
+        return $this->authorId;
     }
 
     public function getTranslationWorkflow(): string

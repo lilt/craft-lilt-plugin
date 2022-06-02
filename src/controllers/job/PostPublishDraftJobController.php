@@ -52,6 +52,7 @@ class PostPublishDraftJobController extends AbstractJobController
 
         $command = new EditJobCommand(
             $job->id,
+            $job->authorId,
             $job->title,
             $job->elementIds,
             $job->targetSiteIds,

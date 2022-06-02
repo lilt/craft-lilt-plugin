@@ -19,6 +19,7 @@ class CreateJobCommand
     private $targetSitesIds;
     private $translationWorkflow;
     private $versions;
+    private $authorId;
 
     public function __construct(
         string $title,
@@ -26,7 +27,8 @@ class CreateJobCommand
         array $targetSitesIds,
         int $sourceSiteId,
         string $translationWorkflow,
-        array $versions
+        array $versions,
+        ?int $authorId
     ) {
         $this->title = $title;
         $this->entries = $entries;
@@ -34,11 +36,17 @@ class CreateJobCommand
         $this->sourceSiteId = $sourceSiteId;
         $this->translationWorkflow = $translationWorkflow;
         $this->versions = $versions;
+        $this->authorId = $authorId;
 
         //Remove source site from target site if it is there
         if (in_array($this->sourceSiteId, $this->targetSitesIds, true)) {
             $this->targetSitesIds = array_diff($this->targetSitesIds, [$this->sourceSiteId]);
         }
+    }
+
+    public function getAuthorId(): ?int
+    {
+        return $this->authorId;
     }
 
     public function getTranslationWorkflow(): string

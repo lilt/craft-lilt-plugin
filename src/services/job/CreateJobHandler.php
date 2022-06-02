@@ -20,6 +20,7 @@ class CreateJobHandler
     public function __invoke(CreateJobCommand $command, bool $asDraft = false): Job
     {
         $element = new Job();
+        $element->authorId = $command->getAuthorId();
         $element->title = $command->getTitle();
         $element->liltJobId = null;
         $element->status = $asDraft ? Job::STATUS_DRAFT : Job::STATUS_NEW;
