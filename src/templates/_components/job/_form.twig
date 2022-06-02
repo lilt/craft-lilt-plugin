@@ -1,6 +1,8 @@
 {% import '_includes/forms' as forms %}
 
-<form method="post" id="create-job-form" accept-charset="UTF-8" action="{{ formActionUrl }}">
+{% set isFormElementsReadOnly = not (constant('STATUS_NEW', element) is same as element.getStatus()) and not (constant('STATUS_DRAFT', element) is same as element.getStatus())  %}
+
+<form method="post" id="create-job-form" class="{{ isFormElementsReadOnly ? 'submitted-job-preview' : '' }}" accept-charset="UTF-8" action="{{ formActionUrl }}">
     {{ csrfInput() }}
 
     {% if element.id is not same as null %}
@@ -21,7 +23,8 @@
         errors: model is defined and model ? model.getErrors('title'),
         maxlength: 255,
         errors: element.getErrors('title'),
-        readonly: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
+        readonly: isFormElementsReadOnly,
+        class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
     }) }}
 
     <hr/>
@@ -52,7 +55,7 @@
                 } %}
             </div>
             <div class="main">
-                <div class="elements {{ isJobInProgress ? 'disabled' : '' }}"></div>
+                <div class="elements {{ isFormElementsReadOnly ? 'disabled' : '' }}"></div>
             </div>
 
             <div id="toolbar-element-index" class="flex flex-nowrap"></div>
@@ -80,8 +83,8 @@
         id: 'sourceSite',
         value: element.sourceSiteId ?? '',
         errors: element.getErrors('sourceSiteId'),
-        readonly: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
-        class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
+        readonly: isFormElementsReadOnly,
+        class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
     }) }}
 
     {{ forms.checkboxSelectField({
@@ -92,14 +95,14 @@
         name: 'targetSiteIds',
         id: 'targetSiteIds',
         errors: element.getErrors('targetSiteIds'),
-        readonly: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
-        class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
+        readonly: isFormElementsReadOnly,
+        class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
     }) }}
 
     <hr/>
 
     <a class="fieldtoggle collapsed" data-target="types-craft-fields-Assets-advanced">Advanced</a>
-    <div id="types-craft-fields-Assets-advanced" class="hidden" style="overflow: hidden; height: 0px;">
+    <div id="types-craft-fields-Assets-advanced" class="hidden" style="overflow: hidden; height: 0;">
 
         {{ forms.selectField({
             label: 'Translation(s) Workflow <span class="required"/>',
@@ -109,8 +112,8 @@
             id: 'translationWorkflow',
             value: element.translationWorkflow ?? defaultTranslationWorkflow,
             errors: element.getErrors('liltTranslationWorkflow'),
-            readonly: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()),
-            class: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() ? 'disabled' : '')
+            readonly: isFormElementsReadOnly,
+            class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
         }) }}
 
     </div>

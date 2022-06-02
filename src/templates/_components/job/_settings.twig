@@ -12,7 +12,7 @@
         criteria: authorOptionCriteria,
         limit: 1,
         elements: (author is defined and author ? [author]),
-        disabled: false
+        disabled: not ((constant('STATUS_NEW', element) is same as element.getStatus() or constant('STATUS_DRAFT', element) is same as element.getStatus()))
     }) }}
 
     {% if element.id is defined and element.id > 0 %}

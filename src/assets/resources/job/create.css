@@ -21,6 +21,10 @@
     float: right;
 }
 
+#create-job-form #details #settings #author.elementselect .flex {
+    float: right;
+}
+
 #create-job-form #details #settings #author .elements .element {
     margin-right: 0;
 }
@@ -29,13 +33,11 @@
     box-shadow: none;
 }
 
-#create-job-form div.elements.disabled {
-    opacity: 1;
-}
+#create-job-form div.elements.disabled,
+#create-job-form .no-opacity.disabled,
 #create-job-form div.elements.disabled tr.disabled {
-    opacity: .6;
+    opacity: .7;
 }
-
 #targetSiteIds-field input.checkbox.disabled + label:before {
     content: "";
 }
@@ -62,8 +64,9 @@
     }
 }
 
-#create-job-form div.disabled {
-    opacity: .60;
+/** Show disabled elements without any opacity **/
+#create-job-form.submitted-job-preview div.disabled {
+    opacity: 1;
 }
 
 #lilt-btn-create-new-job .icon .h-8 {

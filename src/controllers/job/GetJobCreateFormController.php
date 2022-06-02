@@ -37,6 +37,7 @@ class GetJobCreateFormController extends AbstractJobController
 
         $job = (new Job());
         $job->versions = [];
+        $job->status = Job::STATUS_DRAFT;
 
         $elementIds = $request->getQueryParam('elementIds');
 
