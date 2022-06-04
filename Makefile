@@ -18,8 +18,10 @@ composer-install:
 	docker-compose exec -T -u www-data nginx sh -c "curl -s https://getcomposer.org/installer | php"
 	docker-compose exec -T -u www-data nginx sh -c "php composer.phar install"
 
-quality:
+quality: up
+	docker-compose exec -T -u www-data nginx sh -c "curl -L -s https://phar.phpunit.de/phpcpd.phar --output phpcpd.phar"
 	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/phpcs"
+	docker-compose exec -T -u www-data nginx sh -c "php phpcpd.phar src"
 
 quality-fix:
 	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/phpcbf"

@@ -38,6 +38,19 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
         $job = Job::findOne(['id' => $this->jobId]);
         $jobRecord = JobRecord::findOne(['id' => $job->id]);
 
+        if (!$jobRecord) {
+            Craft::error(
+                sprintf(
+                    'Job record %d not found, looks like job was removed. Translation fetching aborted.',
+                    $job->id
+                )
+            );
+
+            $this->markAsDone($queue);
+
+            return;
+        }
+
         if ($job->isInstantFlow()) {
             $this->markAsDone($queue);
 
@@ -73,7 +86,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
                                 $job
                             );
                         } catch (Exception $ex) {
-                            $translationRecord = $this->handleTranslationRecord(
+                            $translationRecord = Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                                 $translationResponse,
                                 $job,
                                 $unprocessedTranslations
@@ -173,58 +186,6 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
         }
 
         return TranslationRecord::STATUS_FAILED;
-    }
-
-    //TODO: remove duplicate function
-    private function getElementIdFromFileName(TranslationResponse $translationResponse): int
-    {
-        $regExpr = '/\d+_element_(\d+).json\+html/';
-        preg_match($regExpr, $translationResponse->getName(), $matches);
-
-        if (!isset($matches[1])) {
-            throw new \RuntimeException('Cant find element id from translation name');
-        }
-
-        return (int)$matches[1];
-    }
-
-    /**
-     * @param $translationResponse
-     * @param $job
-     * @param array $unprocessedTranslations
-     * @return mixed
-     */
-    private function handleTranslationRecord($translationResponse, $job, array $unprocessedTranslations)
-    {
-        $translationTargetLanguage = sprintf(
-            '%s-%s',
-            $translationResponse->getTrgLang(),
-            $translationResponse->getTrgLocale()
-        );
-
-        $elementId = $this->getElementIdFromFileName($translationResponse);
-
-        $element = Craft::$app->elements->getElementById(
-            $elementId,
-            null,
-            $job->sourceSiteId
-        );
-
-        if (!$element) {
-            //TODO: handle when element not found?
-        }
-
-        $targetSiteId = Craftliltplugin::getInstance()
-            ->languageMapper
-            ->getSiteIdByLanguage($translationTargetLanguage);
-        $parentElementId = $element->getCanonicalId() ?? $elementId;
-
-        $translationRecord = $unprocessedTranslations[$parentElementId][$targetSiteId];
-
-        if (empty($translationRecord->translatedDraftId)) {
-            $translationRecord->translatedDraftId = $element->getId();
-        }
-        return $translationRecord;
     }
 
     /**

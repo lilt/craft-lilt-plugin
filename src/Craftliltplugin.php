@@ -9,36 +9,23 @@
  * @copyright Copyright (c) 2022 Lilt Devs
  */
 
+declare(strict_types=1);
+
 namespace lilthq\craftliltplugin;
 
-use benf\neo\Field;
 use Craft;
-use craft\base\Element;
 use craft\base\Plugin;
-use craft\events\RegisterElementDefaultTableAttributesEvent;
-use craft\events\RegisterElementTableAttributesEvent;
-use craft\events\RegisterUrlRulesEvent;
-use craft\helpers\App;
 use craft\helpers\UrlHelper;
-use craft\web\UrlManager;
-use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
 use LiltConnectorSDK\Api\SettingsApi;
 use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
-use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\BaseOptionFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\MatrixFieldContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\NeoFieldContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
+use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\job\CreateJobHandler;
 use lilthq\craftliltplugin\services\job\EditJobHandler;
 use lilthq\craftliltplugin\services\job\lilt\SendJobToLiltConnectorHandler;
@@ -48,13 +35,7 @@ use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\ExpandedContentProvider;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
-use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
-use lilthq\craftliltplugin\services\providers\field\MatrixFieldContentProvider;
-use lilthq\craftliltplugin\services\providers\field\NeoFieldContentProvider;
-use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
-use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
-use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
@@ -62,11 +43,8 @@ use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
-use yii\base\Event;
+use lilthq\craftliltplugin\services\ServiceInitializer;
 use yii\base\InvalidConfigException;
-use craft\events\RegisterComponentTypesEvent;
-use craft\services\Elements;
-use craft\redactor\Field as RedactorPluginField;
 use yii\web\Response;
 
 /**
@@ -108,6 +86,8 @@ use yii\web\Response;
  * @property LoadI18NHandler $loadI18NHandler
  * @property ListenerRegister $listenerRegister
  * @property JobLogsRepository $jobLogsRepository
+ * @property TranslationFailedHandler $translationFailedHandler
+ * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin
 {
@@ -175,7 +155,7 @@ class Craftliltplugin extends Plugin
     // Public Methods
     // =========================================================================
 
-    protected function afterInstall()
+    protected function afterInstall(): void
     {
         parent::afterInstall();
 
@@ -210,18 +190,16 @@ class Craftliltplugin extends Plugin
     {
         parent::init();
 
-        //Queue::push(new FetchTranslationJob(['jobId' => 102]));
-
         self::$plugin = $this;
 
         $this->connectorKey = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
 
         Craft::$app->getView()->registerAssetBundle(CraftLiltPluginAsset::class);
 
-        $this->loadComponents();
-
-        $this->listenerRegister->register();
-        $this->loadI18NHandler->__invoke();
+        $this->setComponents([
+            'serviceInitializer' => ServiceInitializer::class
+        ]);
+        $this->serviceInitializer->run();
 
         Craft::info(
             Craft::t(
@@ -261,192 +239,8 @@ class Craftliltplugin extends Plugin
         return $this->connectorKey;
     }
 
-    /**
-     * @throws InvalidConfigException
-     */
-    private function loadComponents(): void
+    public static function getInstance(): Craftliltplugin
     {
-        $this->setComponents([
-            'createJobHandler' => CreateJobHandler::class,
-            'sendJobToLiltConnectorHandler' => SendJobToLiltConnectorHandler::class,
-            'syncJobFromLiltConnectorHandler' => SyncJobFromLiltConnectorHandler::class,
-            'connectorConfigurationProvider' => ConnectorConfigurationProvider::class,
-            'elementTranslatableContentProvider' => ElementTranslatableContentProvider::class,
-            'expandedContentProvider' => ExpandedContentProvider::class,
-            'languageMapper' => LanguageMapper::class,
-            'jobRepository' => JobRepository::class,
-            'translationRepository' => TranslationRepository::class,
-            'i18NRepository' => I18NRepository::class,
-            'jobLogsRepository' => JobLogsRepository::class,
-        ]);
-
-        $this->set(
-            'listenerRegister',
-            [
-                'class' => ListenerRegister::class,
-                'availableListeners' =>  CraftliltpluginParameters::LISTENERS,
-            ]
-        );
-
-        $this->set(
-            'connectorConfiguration',
-            $this->connectorConfigurationProvider->provide()
-        );
-
-        $this->set(
-            'connectorJobsApi',
-            function () {
-                return new JobsApi(
-                    new Client(),
-                    $this->connectorConfiguration
-                );
-            }
-        );
-
-        $this->set(
-            'connectorTranslationsApi',
-            function () {
-                return new TranslationsApi(
-                    new Client(),
-                    $this->connectorConfiguration
-                );
-            }
-        );
-
-        $this->set(
-            'connectorSettingsApi',
-            function () {
-                return new SettingsApi(
-                    new Client(),
-                    $this->connectorConfiguration
-                );
-            }
-        );
-
-        $this->set(
-            'connectorJobRepository',
-            [
-                'class' => ConnectorJobRepository::class,
-                'apiInstance' => $this->connectorJobsApi,
-            ]
-        );
-
-        $this->set(
-            'publishDraftsHandler',
-            [
-                'class' => PublishDraftHandler::class,
-                'draftRepository' => Craft::$app->getDrafts(),
-            ]
-        );
-
-        $this->set(
-            'connectorTranslationRepository',
-            [
-                'class' => ConnectorTranslationRepository::class,
-                'apiInstance' => $this->connectorTranslationsApi,
-            ]
-        );
-
-        $this->set(
-            'connectorJobsFileRepository',
-            [
-                'class' => ConnectorJobFileRepository::class,
-                'apiInstance' => $this->connectorJobsApi,
-            ]
-        );
-
-        $this->set(
-            'editJobHandler',
-            [
-                'class' => EditJobHandler::class,
-                'jobRepository' => $this->jobRepository,
-            ]
-        );
-
-        $getProvidersMap = function () {
-            return [
-                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentProvider(
-                    $this->elementTranslatableContentProvider
-                ),
-                CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentProvider(),
-                CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentProvider(),
-                CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
-
-                # Options
-                CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentProvider(),
-                CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentProvider(),
-                CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentProvider(),
-                CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentProvider(),
-
-                #Neo Plugin
-                CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldContentProvider(),
-            ];
-        };
-
-        $this->set(
-            'fieldContentProvider',
-            [
-                'class' => FieldContentProvider::class,
-                'providersMap' => $getProvidersMap(),
-                'fieldsTranslatableMap' => [
-                    'craft\fields\Assets' => ['translatable' => false,],
-                    'craft\fields\Categories' => ['translatable' => false,],
-                    'craft\fields\Color' => ['translatable' => false,],
-                    'craft\fields\Date' => ['translatable' => false,],
-                    'craft\fields\Email' => ['translatable' => false,],
-                    'craft\fields\Entries' => ['translatable' => true,],
-                    'craft\fields\Lightswitch' => ['translatable' => false,],
-                    'craft\fields\Number' => ['translatable' => false,],
-                    'craft\fields\Tags' => ['translatable' => false,],
-                    'craft\fields\Time' => ['translatable' => false,],
-                    'craft\fields\Url' => ['translatable' => false,],
-                    'craft\fields\Users' => ['translatable' => false,],
-                ],
-            ]
-        );
-
-        $getAppliersMap = static function () {
-            return [
-                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentApplier(),
-                CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentApplier(),
-                CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentApplier(),
-                CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentApplier(),
-
-                # Options
-                CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentApplier(),
-                CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentApplier(),
-                CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentApplier(),
-                CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentApplier(),
-
-                #Neo Plugin
-                CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldContentApplier(),
-            ];
-        };
-
-        $this->set(
-            'fieldContentApplier',
-            [
-                'class' => FieldContentApplier::class,
-                'appliersMap' => $getAppliersMap(),
-            ]
-        );
-
-        $this->set(
-            'elementTranslatableContentApplier',
-            [
-                'class' => ElementTranslatableContentApplier::class,
-                'draftRepository' => Craft::$app->getDrafts(),
-                'fieldContentApplier' => $this->fieldContentApplier,
-            ]
-        );
-
-        $this->set(
-            'loadI18NHandler',
-            function () {
-                return new LoadI18NHandler(
-                    Craft::$app->i18n
-                );
-            }
-        );
+        return parent::getInstance();
     }
 }

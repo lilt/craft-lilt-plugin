@@ -33,7 +33,7 @@ class SyncJobFromLiltConnectorHandler
         }
 
         $jobLilt = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
-            (int) $job->liltJobId
+            (int)$job->liltJobId
         );
 
         if ($jobLilt->getStatus() !== JobResponse::STATUS_COMPLETE) {
@@ -41,6 +41,11 @@ class SyncJobFromLiltConnectorHandler
         }
 
         $jobRecord = JobRecord::findOne(['id' => $job->id]);
+
+        if (!$jobRecord) {
+            return;
+        }
+
         $translations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
             (int)$job->liltJobId
         );
@@ -54,7 +59,7 @@ class SyncJobFromLiltConnectorHandler
                 try {
                     $this->processTranslation($translationDto, $job);
                 } catch (Exception $ex) {
-                    $translationRecord = $this->handleTranslationRecord(
+                    $translationRecord = Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                         $translationDto,
                         $job,
                         $unprocessedTranslations
@@ -92,58 +97,6 @@ class SyncJobFromLiltConnectorHandler
         );
 
         Craft::$app->elements->invalidateCachesForElement($job);
-    }
-
-
-    private function getElementIdFromFileName(TranslationResponse $translationResponse): int
-    {
-        $regExpr = '/\d+_element_(\d+).json\+html/';
-        preg_match($regExpr, $translationResponse->getName(), $matches);
-
-        if (!isset($matches[1])) {
-            throw new \RuntimeException('Cant find element id from translation name');
-        }
-
-        return (int)$matches[1];
-    }
-
-    /**
-     * @param $translationResponse
-     * @param $job
-     * @param array $unprocessedTranslations
-     * @return mixed
-     */
-    private function handleTranslationRecord($translationResponse, $job, array $unprocessedTranslations)
-    {
-        $translationTargetLanguage = sprintf(
-            '%s-%s',
-            $translationResponse->getTrgLang(),
-            $translationResponse->getTrgLocale()
-        );
-
-        $elementId = $this->getElementIdFromFileName($translationResponse);
-
-        $element = Craft::$app->elements->getElementById(
-            $elementId,
-            null,
-            $job->sourceSiteId
-        );
-
-        if (!$element) {
-            //TODO: handle when element not found?
-        }
-
-        $targetSiteId = Craftliltplugin::getInstance()
-            ->languageMapper
-            ->getSiteIdByLanguage($translationTargetLanguage);
-        $parentElementId = $element->getCanonicalId() ?? $elementId;
-
-        $translationRecord = $unprocessedTranslations[$parentElementId][$targetSiteId];
-
-        if (empty($translationRecord->translatedDraftId)) {
-            $translationRecord->translatedDraftId = $element->getId();
-        }
-        return $translationRecord;
     }
 
     /**
@@ -201,6 +154,16 @@ class SyncJobFromLiltConnectorHandler
                 'elementId' => $draft->getCanonicalId() ?? $elementId,
                 'jobId' => $job->getId()
             ]);
+
+            if (!$translationRecord) {
+                Craft::error(
+                    sprintf(
+                        'Translation record of jobId: %d not found, looks like job was removed.'
+                        . ' Translation fetching aborted.',
+                        $job->getId()
+                    )
+                );
+            }
 
             $translationRecord->translatedDraftId = $draft->getId();
             $translationRecord->status = TranslationRecord::STATUS_READY_FOR_REVIEW;

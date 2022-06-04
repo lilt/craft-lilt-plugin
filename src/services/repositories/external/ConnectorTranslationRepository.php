@@ -6,6 +6,7 @@ namespace lilthq\craftliltplugin\services\repositories\external;
 
 use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse1 as ConnectorTranslationsResponse;
+use LiltConnectorSDK\Model\TranslationResponse;
 
 class ConnectorTranslationRepository extends AbstractConnectorExternalRepository
 {
@@ -29,5 +30,17 @@ class ConnectorTranslationRepository extends AbstractConnectorExternalRepository
         return $this->apiInstance->servicesApiDeliveriesDownloadDelivery(
             $translationId
         );
+    }
+
+    public function getElementIdFromTranslationResponse(TranslationResponse $translationResponse): int
+    {
+        $regExpr = '/\d+_element_(\d+).json\+html/';
+        preg_match($regExpr, $translationResponse->getName(), $matches);
+
+        if (!isset($matches[1])) {
+            throw new \RuntimeException('Cant find element id from translation name');
+        }
+
+        return (int)$matches[1];
     }
 }
