@@ -33,7 +33,6 @@ use lilthq\craftliltplugin\services\job\lilt\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
-use lilthq\craftliltplugin\services\providers\ExpandedContentProvider;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
@@ -79,7 +78,6 @@ use yii\web\Response;
  * @property LanguageMapper $languageMapper
  * @property ElementTranslatableContentProvider $elementTranslatableContentProvider
  * @property FieldContentProvider $fieldContentProvider
- * @property ExpandedContentProvider $expandedContentProvider
  * @property ElementTranslatableContentApplier $elementTranslatableContentApplier
  * @property FieldContentApplier $fieldContentApplier
  * @property I18NRepository $i18NRepository

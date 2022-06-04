@@ -30,7 +30,6 @@ use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
-use lilthq\craftliltplugin\services\providers\ExpandedContentProvider;
 use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\MatrixFieldContentProvider;
@@ -61,7 +60,6 @@ class ServiceInitializer
             'syncJobFromLiltConnectorHandler' => SyncJobFromLiltConnectorHandler::class,
             'connectorConfigurationProvider' => ConnectorConfigurationProvider::class,
             'elementTranslatableContentProvider' => ElementTranslatableContentProvider::class,
-            'expandedContentProvider' => ExpandedContentProvider::class,
             'languageMapper' => LanguageMapper::class,
             'jobRepository' => JobRepository::class,
             'translationRepository' => TranslationRepository::class,
