@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugintests\integration;
 
+use Codeception\Exception\ModuleException;
+use Codeception\Util\HttpCode;
 use Craft;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
@@ -19,10 +21,7 @@ use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\job\CreateJobCommand;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
-use WireMock\Client\WireMock;
 use yii\base\InvalidConfigException;
-
-use function PHPUnit\Framework\assertSame;
 
 class GetSendToLiltControllerCest
 {
@@ -64,6 +63,166 @@ class GetSendToLiltControllerCest
             ['id' => 1000,]
         );
 
+        $expectedUrl = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=de-DE'
+            . '&trglang=es-ES'
+            . '&trglang=ru-RU' .
+            '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $element->getId())
+            )
+        );
+        $expectedBody = $this->getExpectedBody($element);
+
+        $I->expectJobTranslationsRequest($expectedUrl, $expectedBody, HttpCode::OK);
+
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $job = $this->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            'versions' => [],
+            'authorId' => 1,
+        ]);
+
+        $I->amOnPage(
+            sprintf(
+                '?p=admin/%s/%d',
+                CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH,
+                $job->id
+            )
+        );
+
+        $jobActual = Job::findOne(['id' => $job->id]);
+
+        $translations = array_map(function (TranslationRecord $translationRecord) use ($element, $expectedBody) {
+            Assert::assertSame(Job::STATUS_IN_PROGRESS, $translationRecord->status);
+            Assert::assertSame($element->id, $translationRecord->versionId);
+            Assert::assertEquals($expectedBody, $translationRecord->sourceContent);
+            Assert::assertSame(
+                Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+                $translationRecord->sourceSiteId
+            );
+            Assert::assertNull($translationRecord->translatedDraftId);
+
+            return [
+                'versionId' => $translationRecord->versionId,
+                'translatedDraftId' => $translationRecord->translatedDraftId,
+                'sourceSiteId' => $translationRecord->sourceSiteId,
+                'targetSiteId' => $translationRecord->targetSiteId,
+                'sourceContent' => $translationRecord->sourceContent,
+                'status' => $translationRecord->status,
+                'connectorTranslationId' => $translationRecord->connectorTranslationId,
+            ];
+        }, TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id]));
+
+        Assert::assertEquals(
+            ['de-DE', 'es-ES', 'ru-RU'],
+            Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+                array_column($translations, 'targetSiteId')
+            )
+        );
+
+        Assert::assertSame(Job::STATUS_IN_PROGRESS, $jobActual->status);
+    }
+
+    /**
+     * @throws ModuleException
+     */
+    public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I): void
+    {
+        $element = Entry::find()
+            ->where(['authorId' => 1])
+            ->orderBy(['id' => SORT_DESC])
+            ->one();
+
+        $I->expectJobCreateRequest(
+            [
+                'project_prefix' => 'Awesome test job',
+                'lilt_translation_workflow' => 'INSTANT',
+            ],
+            200,
+            ['id' => 1000,]
+        );
+
+        $expectedUrl = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=de-DE'
+            . '&trglang=es-ES'
+            . '&trglang=ru-RU' .
+            '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $element->getId())
+            )
+        );
+        $expectedBody = $this->getExpectedBody($element);
+
+        $I->expectJobTranslationsRequest($expectedUrl, $expectedBody, HttpCode::INTERNAL_SERVER_ERROR);
+
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $job = $this->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            'versions' => [],
+            'authorId' => 1,
+        ]);
+
+        $I->amOnPage(
+            sprintf(
+                '?p=admin/%s/%d',
+                CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH,
+                $job->id
+            )
+        );
+
+        $jobActual = Job::findOne(['id' => $job->id]);
+
+        Assert::assertEmpty(
+            TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id])
+        );
+
+        Assert::assertSame(Job::STATUS_FAILED, $jobActual->status);
+    }
+
+    private function createJob(array $data = []): Job
+    {
+        if ($data['targetSiteIds'] === '*') {
+            $data['targetSiteIds'] = Craftliltplugin::getInstance()->languageMapper->getLanguageToSiteId();
+        }
+
+        $createJobCommand = new CreateJobCommand(
+            $data['title'],
+            $data['elementIds'],
+            $data['targetSiteIds'],
+            $data['sourceSiteId'],
+            $data['translationWorkflow'],
+            $data['versions'],
+            $data['authorId']
+        );
+
+        return Craftliltplugin::getInstance()->createJobHandler->__invoke(
+            $createJobCommand
+        );
+    }
+
+    /**
+     * @param $element
+     * @return array[]
+     */
+    private function getExpectedBody($element): array
+    {
         /**
          * @var MatrixBlockQuery $matrixField
          */
@@ -95,113 +254,6 @@ class GetSendToLiltControllerCest
                 ],
             ],
         ];
-
-
-        $wireMock = WireMock::create('wiremock', 80);
-        Assert::assertTrue($wireMock->isAlive());
-
-        $wireMock->stubFor(
-            WireMock::post(
-                WireMock::urlEqualTo(
-                    sprintf(
-                        '/api/v1.0/jobs/1000/files?name=%s'
-                        . '&srclang=en-US'
-                        . '&trglang=de-DE'
-                        . '&trglang=es-ES'
-                        . '&trglang=ru-RU' .
-                        '&due=',
-                        urlencode(
-                            sprintf('element_%d.json+html', $element->getId())
-                        )
-                    )
-                )
-            )
-                //{"project_prefix":"Awesome test job","lilt_translation_workflow":"INSTANT"}
-                ->withRequestBody(
-                    WireMock::equalToJson(
-                        json_encode($body),
-                        true,
-                        false
-                    )
-                )
-                ->willReturn(
-                    WireMock::aResponse()
-                        ->withStatus(200)
-                )
-        );
-
-        $user = Craft::$app->getUsers()->getUserById(1);
-        $I->amLoggedInAs($user);
-
-        $job = $this->createJob([
-            'title' => 'Awesome test job',
-            'elementIds' => [$element->id],
-            'targetSiteIds' => '*',
-            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
-            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
-            'versions' => [],
-            'authorId' => 1,
-        ]);
-
-        $I->amOnPage(
-            sprintf(
-                '?p=admin/%s/%d',
-                CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH,
-                $job->id
-            )
-        );
-
-        $jobActual = Job::findOne(['id' => $job->id]);
-
-        $translations = array_map(function (TranslationRecord $translationRecord) use ($element, $body) {
-            Assert::assertSame(Job::STATUS_IN_PROGRESS, $translationRecord->status);
-            Assert::assertSame($element->id, $translationRecord->versionId);
-            Assert::assertEquals($body, $translationRecord->sourceContent);
-            Assert::assertSame(
-                Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
-                $translationRecord->sourceSiteId
-            );
-            Assert::assertNull($translationRecord->translatedDraftId);
-
-            return [
-                'versionId' => $translationRecord->versionId,
-                'translatedDraftId' => $translationRecord->translatedDraftId,
-                'sourceSiteId' => $translationRecord->sourceSiteId,
-                'targetSiteId' => $translationRecord->targetSiteId,
-                'sourceContent' => $translationRecord->sourceContent,
-                'status' => $translationRecord->status,
-                'connectorTranslationId' => $translationRecord->connectorTranslationId,
-            ];
-        }, TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id]));
-
-        Assert::assertEquals(
-            ['de-DE', 'es-ES', 'ru-RU'],
-            Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
-                array_column($translations, 'targetSiteId')
-            )
-        );
-
-        Assert::assertSame(Job::STATUS_IN_PROGRESS, $jobActual->status);
-    }
-
-    private function createJob(array $data = []): Job
-    {
-        if ($data['targetSiteIds'] === '*') {
-            $data['targetSiteIds'] = Craftliltplugin::getInstance()->languageMapper->getLanguageToSiteId();
-        }
-
-        $createJobCommand = new CreateJobCommand(
-            $data['title'],
-            $data['elementIds'],
-            $data['targetSiteIds'],
-            $data['sourceSiteId'],
-            $data['translationWorkflow'],
-            $data['versions'],
-            $data['authorId']
-        );
-
-        return Craftliltplugin::getInstance()->createJobHandler->__invoke(
-            $createJobCommand
-        );
+        return $body;
     }
 }

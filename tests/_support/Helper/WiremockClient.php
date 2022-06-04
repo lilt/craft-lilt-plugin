@@ -29,7 +29,30 @@ class WiremockClient extends Module
         Assert::assertTrue($this->wireMock->isAlive());
     }
 
-    public function expectJobCreateRequest(array $body, int $responseCode, array $responseBody): void {
+    public function expectJobTranslationsRequest(string $expectedUrl, array $expectedBody, int $statusCode): void
+    {
+        $this->wireMock->stubFor(
+            WireMock::post(
+                WireMock::urlEqualTo(
+                    $expectedUrl
+                )
+            )
+                ->withRequestBody(
+                    WireMock::equalToJson(
+                        json_encode($expectedBody),
+                        true,
+                        false
+                    )
+                )
+                ->willReturn(
+                    WireMock::aResponse()
+                        ->withStatus($statusCode)
+                )
+        );
+    }
+
+    public function expectJobCreateRequest(array $body, int $responseCode, array $responseBody): void
+    {
         $this->wireMock->stubFor(
             WireMock::post(WireMock::urlEqualTo('/api/v1.0/jobs'))
                 ->withRequestBody(
