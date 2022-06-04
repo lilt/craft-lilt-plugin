@@ -21,5 +21,11 @@ use Codeception\Module;
  */
 class Integration extends Module
 {
+    public function seeHeader(string $name, string $value): void
+    {
+        $response = \Craft::$app->getResponse();
 
+        $this->assertTrue($response->headers->has($name));
+        $this->assertSame($value, $response->headers->get($name));
+    }
 }

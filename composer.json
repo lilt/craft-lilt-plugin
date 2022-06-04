@@ -37,7 +37,8 @@
     "fruitstudios/linkit": "1.1.12.1",
     "percipioglobal/craft-colour-swatches": "^1.5",
     "spicyweb/craft-neo": "^2.13",
-    "verbb/super-table": "^2.7"
+    "verbb/super-table": "^2.7",
+    "wiremock-php/wiremock-php": "^2.33"
   },
   "autoload": {
     "psr-4": {

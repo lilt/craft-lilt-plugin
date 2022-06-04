@@ -29,6 +29,9 @@ quality-fix:
 codecept-build:
 	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/codecept build"
 
+codecept-coverage:
+	docker-compose exec -T -u www-data nginx sh -c "php -dxdebug.mode=coverage vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
+
 integration: codecept-build
 	docker-compose exec -T -u www-data nginx sh -c "php vendor/bin/codecept run integration"
 

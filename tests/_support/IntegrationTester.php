@@ -30,6 +30,6 @@ use Codeception\Lib\Friend;
  */
 class IntegrationTester extends Actor
 {
-    use _generated\UnitTesterActions;
+    use _generated\IntegrationTesterActions;
 
 }

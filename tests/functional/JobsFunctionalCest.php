@@ -13,7 +13,6 @@ class JobsFunctionalCest
     public function testPageLoad(FunctionalTester $I): void
     {
         $user = Craft::$app->getUsers()->getUserById(1);
-
         $I->amLoggedInAs($user);
 
         $I->amOnPage('?p=admin/craft-lilt-plugin/jobs');

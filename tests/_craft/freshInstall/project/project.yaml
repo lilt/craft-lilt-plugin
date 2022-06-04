@@ -1,4 +1,4 @@
-dateModified: 1654012833
+dateModified: 1654353144
 email:
   fromEmail: volodymyr.hadomskyi@lilt.com
   fromName: 'Craft test'
@@ -6,7 +6,9 @@ email:
 meta:
   __names__:
     1aadc7f1-a090-4e44-9556-d50c5bb012f1: 'Public Schema' # Public Schema
+    1df27e7b-6036-4a18-9738-cc15a012ec7b: 'Craft test es' # Craft test es
     02bfb062-ba26-4630-a3b4-cc59961be333: matrix # matrix
+    3bcf6709-d7d3-4adb-95a1-92c09ef1b99f: 'Craft test ru' # Craft test ru
     5b0ee380-fdee-46c2-a2c0-1ed3903a7a58: body # body
     7fd51776-ba5a-4278-86e5-11fc0f8d7a99: 'Plain text first block' # Plain text first block
     9cdb6f52-9acf-4557-8ab5-039ae51883ea: blog # blog

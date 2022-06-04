@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugintests\integration;
 
-use Codeception\PHPUnit\TestCase;
 use craft\elements\Entry;
 use FunctionalTester;
 use lilthq\craftliltplugin\Craftliltplugin;

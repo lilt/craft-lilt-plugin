@@ -16,3 +16,8 @@ services:
       MYSQL_USER: "craft-lilt-test"
       MYSQL_PASSWORD: "craft-lilt-test"
     container_name: craft-lilt-plugin-mysql-test
+
+  wiremock:
+    image: wiremock/wiremock
+    container_name: craft-lilt-plugin-wiremock
+    command: --port 80 --verbose
