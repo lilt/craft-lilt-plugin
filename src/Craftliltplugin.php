@@ -192,7 +192,7 @@ class Craftliltplugin extends Plugin
 
         $connectorKey = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
 
-        if($connectorKey) {
+        if ($connectorKey) {
             $this->connectorKey = $connectorKey;
         }
 

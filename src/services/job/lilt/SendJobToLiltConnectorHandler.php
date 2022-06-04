@@ -82,7 +82,7 @@ class SendJobToLiltConnectorHandler
                 null //TODO: $job->dueDate is not in use
             );
 
-            if(!$result) {
+            if (!$result) {
                 //TODO: set job failed and exit
                 $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
                 return;

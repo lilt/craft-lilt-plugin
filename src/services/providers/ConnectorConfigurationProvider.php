@@ -30,13 +30,13 @@ class ConnectorConfigurationProvider
             $connectorApiUrlRecord = null;
         }
 
-        if($connectorApiUrlRecord) {
+        if ($connectorApiUrlRecord) {
             $config->setHost($connectorApiUrlRecord->value);
         }
 
-        if(!$connectorApiUrlRecord) {
+        if (!$connectorApiUrlRecord) {
             $connectorApiUrl = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_URL');
-            if($connectorApiUrl) {
+            if ($connectorApiUrl) {
                 $config->setHost($connectorApiUrl);
             }
         }

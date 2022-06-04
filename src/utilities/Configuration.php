@@ -45,7 +45,8 @@ class Configuration extends Utility
         $connectorApiKey = $connectorApiKeyRecord->value ?? getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
 
         $connectorApiUrlRecord = SettingRecord::findOne(['name' => 'connector_api_url']);
-        $connectorApiUrl = $connectorApiUrlRecord->value ?? \LiltConnectorSDK\Configuration::getDefaultConfiguration()->getHost();
+        $connectorApiUrl = $connectorApiUrlRecord->value
+            ?? \LiltConnectorSDK\Configuration::getDefaultConfiguration()->getHost();
 
         return Craft::$app->getView()->renderTemplate(
             'craft-lilt-plugin/_components/utilities/configuration.twig',
