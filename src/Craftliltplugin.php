@@ -190,7 +190,11 @@ class Craftliltplugin extends Plugin
 
         self::$plugin = $this;
 
-        $this->connectorKey = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
+        $connectorKey = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
+
+        if($connectorKey) {
+            $this->connectorKey = $connectorKey;
+        }
 
         Craft::$app->getView()->registerAssetBundle(CraftLiltPluginAsset::class);
 

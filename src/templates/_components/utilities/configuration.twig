@@ -17,6 +17,16 @@
         }) }}
 
         {{ forms.textField({
+            label: 'API URL <span class="required"/>'|t,
+            placeholder: 'API Url',
+            name: 'connectorApiUrl',
+            id: 'connectorApiUrl',
+            value: connectorApiUrl ?? '',
+            maxlength: 255,
+            errors: model is defined? model.getErrors('connectorApiUrl') : [],
+        }) }}
+
+        {{ forms.textField({
             label: 'Project Prefix'|t('craft-lilt-plugin'),
             placeholder: 'Project Prefix',
             name: 'projectPrefix',

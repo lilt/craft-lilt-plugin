@@ -44,6 +44,9 @@ class Configuration extends Utility
         $connectorApiKeyRecord = SettingRecord::findOne(['name' => 'connector_api_key']);
         $connectorApiKey = $connectorApiKeyRecord->value ?? getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
 
+        $connectorApiUrlRecord = SettingRecord::findOne(['name' => 'connector_api_url']);
+        $connectorApiUrl = $connectorApiUrlRecord->value ?? \LiltConnectorSDK\Configuration::getDefaultConfiguration()->getHost();
+
         return Craft::$app->getView()->renderTemplate(
             'craft-lilt-plugin/_components/utilities/configuration.twig',
             [
@@ -52,6 +55,7 @@ class Configuration extends Utility
                 'liltTranslationWorkflow' => $settingsResult->getLiltTranslationWorkflow(),
                 'liltTranslationWorkflowAllowableValues' => $workflowAllowableOptions,
                 'connectorApiKey' => $connectorApiKey,
+                'connectorApiUrl' => $connectorApiUrl,
                 'formActionUrl' => UrlHelper::cpUrl('craft-lilt-plugin/settings/lilt-configuration'),
             ]
         );

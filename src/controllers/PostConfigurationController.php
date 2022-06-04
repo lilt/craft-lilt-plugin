@@ -30,6 +30,7 @@ class PostConfigurationController extends AbstractJobController
     {
         $request = $this->request;
 
+        # connectorApiKey
         $connectorApiKeyRecord = SettingRecord::findOne(['name' => 'connector_api_key']);
         if (!$connectorApiKeyRecord) {
             $connectorApiKeyRecord = new SettingRecord(['name' => 'connector_api_key']);
@@ -37,6 +38,14 @@ class PostConfigurationController extends AbstractJobController
 
         $connectorApiKeyRecord->value = $request->getBodyParam('connectorApiKey');
         $connectorApiKeyRecord->save();
+
+        # connectorApiUrl
+        $connectorApiUrlRecord = SettingRecord::findOne(['name' => 'connector_api_url']);
+        if (!$connectorApiUrlRecord) {
+            $connectorApiUrlRecord = new SettingRecord(['name' => 'connector_api_url']);
+        }
+        $connectorApiUrlRecord->value = $request->getBodyParam('connectorApiUrl');
+        $connectorApiUrlRecord->save();
 
         $settingsRequest = new SettingsRequest();
         $settingsRequest->setProjectPrefix(
