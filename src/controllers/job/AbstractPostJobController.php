@@ -23,7 +23,7 @@ abstract class AbstractPostJobController extends AbstractJobController
      */
     protected function getJob(): Job
     {
-        $request = Craft::$app->getRequest();
+        $request = $this->request;
 
         if (!$request->getIsPost()) {
             throw new MethodNotAllowedHttpException('Method not allowed, only POST');
@@ -31,10 +31,6 @@ abstract class AbstractPostJobController extends AbstractJobController
 
         $job = $this->convertRequestToJobModel();
         $job->validate();
-
-        if (!$job->id) {
-            throw new RuntimeException('Job id cant be empty');
-        }
 
         if ($job->versions === '[]') {
             //TODO: fix FE part?

@@ -30,6 +30,10 @@ class PostEditJobController extends AbstractPostJobController
     {
         $job = $this->getJob();
 
+        if (!$job->id) {
+            throw new \RuntimeException('Job id cant be empty');
+        }
+
         if ($job->hasErrors()) {
             return $this->renderJobForm($job);
         }
