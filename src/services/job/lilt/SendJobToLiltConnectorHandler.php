@@ -14,6 +14,7 @@ use craft\errors\ElementNotFoundException;
 use craft\helpers\Queue;
 use DateTimeInterface;
 use LiltConnectorSDK\ApiException;
+use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
@@ -72,7 +73,7 @@ class SendJobToLiltConnectorHandler
                 $element
             );
 
-            $this->createJobFile(
+            $result = $this->createJobFile(
                 $content,
                 $versionId,
                 $jobLilt->getId(),
@@ -80,6 +81,12 @@ class SendJobToLiltConnectorHandler
                 $targetLanguages,
                 null //TODO: $job->dueDate is not in use
             );
+
+            if(!$result) {
+                //TODO: set job failed and exit
+                $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
+                return;
+            }
 
             $translationRecords[] = array_values(
                 array_map(
@@ -91,7 +98,7 @@ class SendJobToLiltConnectorHandler
                             'sourceSiteId' => $job->sourceSiteId,
                             'targetSiteId' => $targetSiteId,
                             'sourceContent' => $content,
-                            'status' => TranslationRecord::STATUS_NEW,
+                            'status' => TranslationRecord::STATUS_IN_PROGRESS,
                         ]);
                     },
                     $job->getTargetSiteIds()
@@ -109,22 +116,12 @@ class SendJobToLiltConnectorHandler
         }
 
         $job->liltJobId = $jobLilt->getId();
-        $job->status = Job::STATUS_IN_PROGRESS;
+        $this->updateJob($job, $jobLilt->getId(), Job::STATUS_IN_PROGRESS);
 
-        //TODO: check how it works
-        Craft::$app->getElements()->saveElement($job, true, true, true);
-
-        $jobRecord = JobRecord::findOne(['id' => $job->id]);
-
-        $jobRecord->status = Job::STATUS_IN_PROGRESS;
-        $jobRecord->liltJobId = $jobLilt->getId();
-
-        $jobRecord->update();
-        Craft::$app->getCache()->flush();
         Craftliltplugin::getInstance()->connectorJobRepository->start($jobLilt->getId());
 
         Craftliltplugin::getInstance()->jobLogsRepository->create(
-            $jobRecord->id,
+            $job->id,
             Craft::$app->getUser()->getId(),
             'Job uploaded to Lilt Platform'
         );
@@ -132,7 +129,7 @@ class SendJobToLiltConnectorHandler
         Queue::push(
             (new FetchJobStatusFromConnector([
                 'jobId' => $job->id,
-                'liltJobId' => $jobRecord->liltJobId,
+                'liltJobId' => $jobLilt->getId(),
             ]))
         );
     }
@@ -144,10 +141,10 @@ class SendJobToLiltConnectorHandler
         string $sourceLanguage,
         array $targetSiteLanguages,
         ?DateTimeInterface $dueDate
-    ): void {
+    ): bool {
         $contentString = json_encode($content);
 
-        Craftliltplugin::getInstance()->connectorJobsFileRepository->addFileToJob(
+        return Craftliltplugin::getInstance()->connectorJobsFileRepository->addFileToJob(
             $jobId,
             'element_' . $entryId . '.json+html',
             $contentString,
@@ -155,5 +152,31 @@ class SendJobToLiltConnectorHandler
             $targetSiteLanguages,
             $dueDate
         );
+    }
+
+    /**
+     * @param JobResponse $jobLilt
+     * @param Job $job
+     * @return JobRecord|null
+     * @throws ElementNotFoundException
+     * @throws Exception
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
+    private function updateJob(Job $job, int $jobLiltId, string $status): void
+    {
+        $job->liltJobId = $jobLiltId;
+        $job->status = $status;
+
+        //TODO: check how it works
+        Craft::$app->getElements()->saveElement($job, true, true, true);
+
+        $jobRecord = JobRecord::findOne(['id' => $job->id]);
+
+        $jobRecord->status = $status;
+        $jobRecord->liltJobId = $jobLiltId;
+
+        $jobRecord->update();
+        Craft::$app->getCache()->flush();
     }
 }
