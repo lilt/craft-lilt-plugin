@@ -13,40 +13,25 @@ use Craft;
 use craft\errors\MissingComponentException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\services\job\EditJobCommand;
-use RuntimeException;
 use yii\base\InvalidConfigException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response;
 
-class PostEditJobController extends AbstractJobController
+class PostEditJobController extends AbstractPostJobController
 {
     protected $allowAnonymous = false;
 
     /**
      * @throws InvalidConfigException
      * @throws MissingComponentException
+     * @throws MethodNotAllowedHttpException
      */
     public function actionInvoke(): Response
     {
-        $request = Craft::$app->getRequest();
-
-        if (!$request->getIsPost()) {
-            return (new Response())->setStatusCode(405);
-        }
-
-        $job = $this->getJobModel();
-        $job->validate();
-
-        if (!$job->id) {
-            throw new RuntimeException('Job id cant be empty');
-        }
+        $job = $this->getJob();
 
         if ($job->hasErrors()) {
             return $this->renderJobForm($job);
-        }
-
-        if ($job->versions === '[]') {
-            //TODO: fix FE part
-            $job->versions = [];
         }
 
         $command = new EditJobCommand(

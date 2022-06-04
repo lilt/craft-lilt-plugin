@@ -25,7 +25,7 @@ class AbstractJobController extends Controller
      * @throws InvalidConfigException
      * @throws Exception
      */
-    protected function getJobModel(): Job
+    protected function convertRequestToJobModel(): Job
     {
         $bodyParams = $this->request->getBodyParams();
 
@@ -34,7 +34,7 @@ class AbstractJobController extends Controller
         $job->title = $bodyParams['title'];
         $job->sourceSiteId = (int)$bodyParams['sourceSite'];
         $job->versions = $bodyParams['versions'] ?? [];
-        $job->authorId = !empty($bodyParams['author'][0])? (int) $bodyParams['author'][0] : null;
+        $job->authorId = !empty($bodyParams['author'][0]) ? (int) $bodyParams['author'][0] : null;
         $job->translationWorkflow = $bodyParams['translationWorkflow'];
         $job->elementIds = json_decode($bodyParams['entries'], false) ?? [];
 

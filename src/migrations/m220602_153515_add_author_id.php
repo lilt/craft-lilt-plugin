@@ -7,7 +7,9 @@ namespace lilthq\craftliltplugin\migrations;
 use craft\db\Migration;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
+// @codingStandardsIgnoreStart
 class m220602_153515_add_author_id extends Migration
+// @codingStandardsIgnoreEnd
 {
     /**
      * @inheritdoc

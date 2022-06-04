@@ -16,7 +16,7 @@ use lilthq\craftliltplugin\services\job\CreateJobCommand;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
-class PostCreateJobController extends AbstractJobController
+class PostCreateJobController extends AbstractPostJobController
 {
     protected $allowAnonymous = false;
 
@@ -26,14 +26,7 @@ class PostCreateJobController extends AbstractJobController
      */
     public function actionInvoke(): Response
     {
-        $request = Craft::$app->getRequest();
-
-        if (!$request->getIsPost()) {
-            return (new Response())->setStatusCode(405);
-        }
-
-        $job = $this->getJobModel();
-        $job->validate();
+        $job = $this->getJob();
 
         if ($job->hasErrors()) {
             Craft::$app->getSession()->setFlash(
@@ -42,11 +35,6 @@ class PostCreateJobController extends AbstractJobController
             );
 
             return $this->renderJobForm($job);
-        }
-
-        if ($job->versions === '[]') {
-            //TODO: fix FE part
-            $job->versions = [];
         }
 
         $command = new CreateJobCommand(
@@ -59,7 +47,8 @@ class PostCreateJobController extends AbstractJobController
             $job->authorId
         );
 
-        $asDraft = ((int) $request->getBodyParam('saveDraft') === 1);
+        $saveDraft = (int)Craft::$app->getRequest()->getBodyParam('saveDraft');
+        $asDraft = ($saveDraft === 1);
 
         $job = Craftliltplugin::getInstance()->createJobHandler->__invoke(
             $command,
@@ -68,12 +57,10 @@ class PostCreateJobController extends AbstractJobController
 
         Craft::$app->getCache()->flush();
 
-
-            Craft::$app->getSession()->setFlash(
-                'cp-notice',
-                'Translate job created successfully.'
-            );
-
+        Craft::$app->getSession()->setFlash(
+            'cp-notice',
+            'Translate job created successfully.'
+        );
 
         $redirectUrl = $this->request->getValidatedBodyParam('redirect');
         if ($redirectUrl === null || $redirectUrl === '{cpEditUrl}') {
