@@ -58,10 +58,16 @@ class PostCreateJobControllerCest
                 'targetSiteIds' => '*',
             ]
         );
+        $I->seeResponseCodeIs(302);
 
         $job = Job::find()
             ->orderBy(['id' => SORT_DESC])
             ->one();
+
+        $I->seeHeader(
+            'x-redirect',
+            sprintf('https://localhost/index.php?p=admin/craft-lilt-plugin/job/edit/%d', $job->id)
+        );
 
         Assert::assertSame('Awesome test job', $job->title);
         Assert::assertSame([$element->id], $job->getElementIds());
@@ -84,12 +90,6 @@ class PostCreateJobControllerCest
                 ->getLanguagesBySiteIds(
                     $job->getTargetSiteIds()
                 )
-        );
-
-        $I->seeResponseCodeIs(302);
-        $I->seeHeader(
-            'x-redirect',
-            sprintf('https://localhost/index.php?p=admin/craft-lilt-plugin/job/edit/%d', $job->id)
         );
     }
 }
