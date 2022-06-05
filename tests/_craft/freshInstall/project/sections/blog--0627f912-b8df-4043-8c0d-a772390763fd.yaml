@@ -4,6 +4,21 @@ handle: blog
 name: Blog
 propagationMethod: all
 siteSettings:
+  1df27e7b-6036-4a18-9738-cc15a012ec7b: # Craft test es
+    enabledByDefault: true
+    hasUrls: false
+    template: null
+    uriFormat: null
+  3bcf6709-d7d3-4adb-95a1-92c09ef1b99f: # Craft test ru
+    enabledByDefault: true
+    hasUrls: false
+    template: null
+    uriFormat: null
+  88f20aaf-5201-4d58-aa48-b7537f61942e: # Craft test de
+    enabledByDefault: true
+    hasUrls: false
+    template: null
+    uriFormat: null
   a5335e9e-3da3-45c8-9ed3-5fcce32f85b4: # Craft test
     enabledByDefault: true
     hasUrls: true
