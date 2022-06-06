@@ -14,10 +14,14 @@ use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\UrlHelper;
+use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\JobQuery;
+use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -33,15 +37,17 @@ use yii\base\Exception;
 class Job extends Element
 {
     public const STATUS_NEW = 'new';
-    public const STATUS_SUBMITTED = 'submitted';
+    public const STATUS_DRAFT = 'draft';
+    #public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_IN_PROGRESS = 'in-progress';
+    public const STATUS_READY_FOR_REVIEW = 'ready-for-review';
+    public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
     public const STATUS_COMPLETE = 'complete';
     public const STATUS_FAILED = 'failed';
 
-    //TODO: add to database
-    public $authorId;
 
     public $uid;
+    public $authorId;
     public $title;
     public $liltJobId;
     public $status;
@@ -49,12 +55,24 @@ class Job extends Element
     public $sourceSiteLanguage;
     public $targetSiteIds;
     public $elementIds;
-    public $files;
+    public $versions;
     public $dueDate;
+    public $translationWorkflow;
     public $dateCreated;
     public $dateUpdated;
 
+    // @codingStandardsIgnoreStart
     private $_author;
+    private $_elements;
+    private $_translations;
+
+    // @codingStandardsIgnoreEnd
+
+    public function beforeDelete(): bool
+    {
+        JobRecord::deleteAll(['id' => $this->id]);
+        return parent::beforeDelete();
+    }
 
     public function getSidebarHtml(): string
     {
@@ -62,6 +80,7 @@ class Job extends Element
         //TODO: add status here
         return $html;
     }
+
     /**
      * @throws SyntaxError
      * @throws RuntimeError
@@ -76,9 +95,9 @@ class Job extends Element
                 'element' => $this,
                 'formActionUrl' => UrlHelper::cpUrl('craft-lilt-plugin/job/edit/' . $this->getId()),
                 'availableSites' => Craftliltplugin::getInstance()->languageMapper->getAvailableSitesForFormField(),
-                'targetSites' =>  Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
-                'isRevision' =>  false,
-                'elementType' =>  self::class,
+                'targetSites' => Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
+                'isRevision' => false,
+                'elementType' => self::class,
             ]
         );
     }
@@ -93,7 +112,46 @@ class Job extends Element
             return $this->elementIds;
         }
 
-        return json_decode($this->elementIds, true) ?? [];
+        $elementIds = json_decode($this->elementIds, true) ?? [];
+        $this->elementIds = [];
+
+        foreach ($elementIds as $elementId) {
+            $this->elementIds[] = (int) $elementId;
+        }
+
+        return $this->elementIds;
+    }
+
+
+    public function getVersions(): array
+    {
+        if (empty($this->versions)) {
+            return [];
+        }
+
+        if (is_array($this->versions)) {
+            return $this->versions;
+        }
+
+        $this->versions = json_decode($this->versions, true) ?? [];
+
+        return $this->versions;
+    }
+
+    public function getElementVersionId(int $elementId): int
+    {
+        $versions = $this->getVersions();
+
+        if (isset($versions[$elementId]) && $versions[$elementId] === 'null') {
+            $versions[$elementId] = null;
+        }
+
+        return (int)($versions[$elementId] ?? $elementId);
+    }
+
+    public function getVersionsAsString(): string
+    {
+        return json_encode($this->getVersions() ?? []);
     }
 
     public function getElementIdsAsString(): string
@@ -117,17 +175,41 @@ class Job extends Element
         return false;
     }
 
+    public function afterDelete(): bool
+    {
+        JobRecord::deleteAll(['id' => $this->id]);
+        parent::afterDelete();
+        return true;
+    }
+
+    public function isInstantFlow(): bool
+    {
+        return strtolower($this->translationWorkflow) === strtolower(
+            SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
+        );
+    }
+
+    public function isVerifiedFlow(): bool
+    {
+        return strtolower($this->translationWorkflow) === strtolower(
+            SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
+        );
+    }
+
     /**
      * @inheritdoc
      */
     public static function statuses(): array
     {
         return [
-            self::STATUS_NEW            => ['label' => 'New', 'color' => ''],
-            self::STATUS_IN_PROGRESS    => ['label' => 'In Progress', 'color' => 'blue'],
-            self::STATUS_SUBMITTED      => ['label' => 'Submitted', 'color' => 'purple'],
-            self::STATUS_COMPLETE       => ['label' => 'Complete', 'color' => 'green'],
-            self::STATUS_FAILED         => ['label' => 'Failed', 'color' => 'red'],
+            self::STATUS_NEW => ['label' => 'New', 'color' => 'turquoise'],
+            self::STATUS_DRAFT => ['label' => 'Draft', 'color' => ''],
+            #self::STATUS_SUBMITTED => ['label' => 'Submitted', 'color' => 'purple'],
+            self::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
+            self::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
+            self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
+            self::STATUS_COMPLETE => ['label' => 'Complete', 'color' => 'green'],
+            self::STATUS_FAILED => ['label' => 'Failed', 'color' => 'red'],
         ];
     }
 
@@ -157,8 +239,18 @@ class Job extends Element
         return [
             [
                 'key' => 'all',
-                'label' => 'All Orders',
+                'label' => 'All Jobs',
                 'criteria' => [],
+                'defaultSort' => ['dateCreated', 'desc']
+            ],
+            [
+                'key' => 'draft',
+                'label' => 'Draft',
+                'criteria' => [
+                    'status' => [
+                        self::STATUS_DRAFT
+                    ]
+                ],
                 'defaultSort' => ['dateCreated', 'desc']
             ],
             [
@@ -171,6 +263,16 @@ class Job extends Element
                 ],
                 'defaultSort' => ['dateCreated', 'desc']
             ],
+            /* [
+                'key' => 'submitted',
+                'label' => 'Submitted',
+                'criteria' => [
+                    'status' => [
+                        self::STATUS_SUBMITTED
+                    ]
+                ],
+                'defaultSort' => ['dateCreated', 'desc']
+            ], */
             [
                 'key' => 'in-progress',
                 'label' => 'In progress',
@@ -182,11 +284,21 @@ class Job extends Element
                 'defaultSort' => ['dateCreated', 'desc']
             ],
             [
-                'key' => 'submitted',
-                'label' => 'Submitted',
+                'key' => 'ready-for-review',
+                'label' => 'Ready for review',
                 'criteria' => [
                     'status' => [
-                        self::STATUS_SUBMITTED
+                        self::STATUS_READY_FOR_REVIEW
+                    ]
+                ],
+                'defaultSort' => ['dateCreated', 'desc']
+            ],
+            [
+                'key' => 'ready-to-publish',
+                'label' => 'Ready to publish',
+                'criteria' => [
+                    'status' => [
+                        self::STATUS_READY_TO_PUBLISH
                     ]
                 ],
                 'defaultSort' => ['dateCreated', 'desc']
@@ -217,12 +329,12 @@ class Job extends Element
     protected static function defineSortOptions(): array
     {
         return [
-            'title'         => 'Title',
-            'status'        => 'Status',
-            'sourceSiteId'  => 'Site source',
-            'dueDate'       => 'Due Date',
-            'dateCreated'   => 'Created',
-            'dateUpdated'   => 'Updated',
+            'title' => 'Title',
+            'status' => 'Status',
+            'sourceSiteId' => 'Site source',
+            #'dueDate' => 'Due Date',
+            'dateCreated' => 'Created',
+            'dateUpdated' => 'Updated',
         ];
     }
 
@@ -238,13 +350,13 @@ class Job extends Element
     protected static function defineTableAttributes(): array
     {
         return [
-            'title'         => 'Title',
-            'status'        => 'Status',
-            'sourceSiteId'  => 'Site source',
+            'title' => 'Title',
+            'status' => 'Status',
+            'sourceSiteId' => 'Site source',
             'targetSiteIds' => 'Target source',
-            'dueDate'       => 'Due Date',
-            'dateCreated'   => 'Created',
-            'dateUpdated'   => 'Updated',
+            #'dueDate' => 'Due Date',
+            'dateCreated' => 'Created',
+            'dateUpdated' => 'Updated',
         ];
     }
 
@@ -255,7 +367,7 @@ class Job extends Element
             'status',
             'sourceSiteId',
             'targetSiteIds',
-            'dueDate',
+            #'dueDate',
             'dateCreated',
             'dateUpdated',
         ];
@@ -280,41 +392,50 @@ class Job extends Element
         return json_decode($this->targetSiteIds, true) ?? [];
     }
 
+    public function getSourceSiteIdHtml(): string
+    {
+        return
+            "<span class='source-language' data-icon='world'>"
+            . Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$this->sourceSiteId)
+            . "</span>";
+    }
+
+    public function getTargetSiteIdsHtml(): string
+    {
+        $html = '<ul class="target-languages-list">';
+
+        $targetSites = json_decode($this->targetSiteIds, true);
+        if (isset($targetSites[0]) && is_array($targetSites[0]) && isset($targetSites[0]['id'])) {
+            $targetSites = array_column($targetSites, 'id');
+        }
+
+        $languages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+            $targetSites
+        );
+
+        foreach ($languages as $language) {
+            $html .= "<li><span data-icon='world'>{$language}</span></li>";
+        }
+        $html .= '</ul>';
+
+        return $html;
+    }
+
     protected function tableAttributeHtml(string $attribute): string
     {
         switch ($attribute) {
             case 'sourceSiteId':
-                return
-                    "<span class='source-language' data-icon='world'>"
-                    . Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$this->sourceSiteId)
-                    . "</span>";
+                return $this->getSourceSiteIdHtml();
 
             case 'status':
                 return $this->getStatusHtml();
-            case 'dueDate':
-                return (new \DateTime($this->dueDate))->format(
-                    Craft::$app->locale->getDateFormat('short', 'php')
-                );
+            //TODO: due date not in use at the moment
+            //case 'dueDate':
+            //    return $this->dueDate->format(
+            //        Craft::$app->locale->getDateFormat('short', 'php')
+            //    );
             case 'targetSiteIds':
-            {
-                $html = '<ul class="target-languages-list">';
-
-                $targetSites = json_decode($this->targetSiteIds, true);
-                if (isset($targetSites[0]) && is_array($targetSites[0]) && isset($targetSites[0]['id'])) {
-                    $targetSites = array_column($targetSites, 'id');
-                }
-
-                $languages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
-                    $targetSites
-                );
-
-                foreach ($languages as $language) {
-                    $html .= "<li><span data-icon='world'>{$language}</span></li>";
-                }
-                $html .= '</ul>';
-
-                return $html;
-            }
+                return $this->getTargetSiteIdsHtml();
         }
 
         return parent::tableAttributeHtml($attribute);
@@ -333,6 +454,55 @@ class Job extends Element
     public function getUrl(): string
     {
         return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
+    }
+
+    /**
+     * @return TranslationModel[]
+     */
+    public function getTranslations(): array
+    {
+        if (!empty($this->_elements)) {
+            return $this->_elements;
+        }
+
+        $this->_translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($this->id);
+
+        //TODO: it should be not here, it is a logic
+        $readyToPublish = true;
+
+        foreach ($this->_translations as $translation) {
+            if ($translation->status !== TranslationRecord::STATUS_READY_TO_PUBLISH) {
+                $readyToPublish = false;
+                break;
+            }
+        }
+
+        if ($readyToPublish) {
+            $this->status = Job::STATUS_READY_TO_PUBLISH;
+            Craft::$app->elements->saveElement($this);
+        }
+
+        return $this->_translations;
+    }
+
+    public function getElementsMappedById(): array
+    {
+        if (!empty($this->_elements)) {
+            return $this->_elements;
+        }
+
+        $this->_elements = [];
+
+        //TODO: maybe other way to select, not one by one?
+        $elements = array_map(function (int $id) {
+            return Craft::$app->elements->getElementById($id);
+        }, $this->getElementIds());
+
+        foreach ($elements as $element) {
+            $this->_elements[$element->id] = $element;
+        }
+
+        return $this->_elements;
     }
 
     public function getCpEditUrl()
@@ -387,7 +557,7 @@ class Job extends Element
     public function rules(): array
     {
         return [
-            [['title','sourceSiteId','elementIds','dueDate','targetSiteIds'], 'required'],
+            [['title', 'sourceSiteId', 'elementIds',/* 'dueDate',*/ 'targetSiteIds'], 'required'],
         ];
     }
 }

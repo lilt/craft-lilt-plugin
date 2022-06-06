@@ -17,38 +17,40 @@ use RuntimeException;
 
 class CreateJobHandler
 {
-    public function __invoke(CreateJobCommand $command): void
+    public function __invoke(CreateJobCommand $command, bool $asDraft = false): Job
     {
-        $element = new Job();
-        $element->title = $command->getTitle();
-        $element->liltJobId = null;
-        $element->status = 'new';
-        $element->sourceSiteId = $command->getSourceSiteId();
+        $job = new Job();
+        $job->authorId = $command->getAuthorId();
+        $job->title = $command->getTitle();
+        $job->liltJobId = null;
+        $job->status = $asDraft ? Job::STATUS_DRAFT : Job::STATUS_NEW;
+        $job->sourceSiteId = $command->getSourceSiteId();
 
-        $element->sourceSiteLanguage = Craftliltplugin::getInstance()
+        $job->sourceSiteLanguage = Craftliltplugin::getInstance()
             ->languageMapper
             ->getLanguageBySiteId(
                 $command->getSourceSiteId()
             );
 
-        $element->targetSiteIds = $command->getTargetSitesIds();
-        $element->elementIds = $command->getEntries();
-        $element->files = [];
-        $element->dueDate = $command->getDueDate();
-        $element->draftId = null;
-        $element->revisionId = null;
+        $job->targetSiteIds = $command->getTargetSitesIds();
+        $job->elementIds = $command->getEntries();
+        $job->versions = $command->getVersions();
+        $job->translationWorkflow = $command->getTranslationWorkflow();
+        $job->draftId = null;
+        $job->revisionId = null;
+
         $jobRecord = new JobRecord();
-        $jobRecord->setAttributes($element->getAttributes(), false);
+        $jobRecord->setAttributes($job->getAttributes(), false);
 
         $statusElement = Craft::$app->getElements()->saveElement(
-            $element,
+            $job,
             true,
             true,
             true
         );
 
-        #TODO: rethink this, what if we use separate id for elemnts table and separate for job record
-        $jobRecord->id = $element->id;
+        #TODO: rethink this, what if we use separate id for elements table and separate for job record
+        $jobRecord->id = $job->id;
 
         $status = $jobRecord->save();
 
@@ -56,5 +58,13 @@ class CreateJobHandler
         if (!$status || !$statusElement) {
             throw new RuntimeException("Cant create the job");
         }
+
+        Craftliltplugin::getInstance()->jobLogsRepository->create(
+            $jobRecord->id,
+            Craft::$app->getUser()->getId(),
+            'Job created'
+        );
+
+        return $job;
     }
 }

@@ -16,7 +16,7 @@ use lilthq\craftliltplugin\services\job\CreateJobCommand;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
-class PostCreateJobController extends AbstractJobController
+class PostCreateJobController extends AbstractPostJobController
 {
     protected $allowAnonymous = false;
 
@@ -26,16 +26,14 @@ class PostCreateJobController extends AbstractJobController
      */
     public function actionInvoke(): Response
     {
-        $request = Craft::$app->getRequest();
-
-        if (!$request->getIsPost()) {
-            return (new Response())->setStatusCode(405);
-        }
-
-        $job = $this->getJobModel();
-        $job->validate();
+        $job = $this->getJob();
 
         if ($job->hasErrors()) {
+            Craft::$app->getSession()->setFlash(
+                'cp-error',
+                'Couldn’t create job.'
+            );
+
             return $this->renderJobForm($job);
         }
 
@@ -44,11 +42,17 @@ class PostCreateJobController extends AbstractJobController
             $job->elementIds,
             $job->targetSiteIds,
             $job->sourceSiteId,
-            $job->dueDate
+            $job->translationWorkflow,
+            $job->versions,
+            $job->authorId
         );
 
-        Craftliltplugin::getInstance()->createJobHandler->__invoke(
-            $command
+        $saveDraft = (int)Craft::$app->getRequest()->getBodyParam('saveDraft');
+        $asDraft = ($saveDraft === 1);
+
+        $job = Craftliltplugin::getInstance()->createJobHandler->__invoke(
+            $command,
+            $asDraft
         );
 
         Craft::$app->getCache()->flush();
@@ -58,6 +62,11 @@ class PostCreateJobController extends AbstractJobController
             'Translate job created successfully.'
         );
 
-        return $this->redirect('admin/craft-lilt-plugin/jobs');
+        $redirectUrl = $this->request->getValidatedBodyParam('redirect');
+        if ($redirectUrl === null || $redirectUrl === '{cpEditUrl}') {
+            return $this->redirect($job->getCpEditUrl());
+        }
+
+        return $this->redirectToPostedUrl();
     }
 }

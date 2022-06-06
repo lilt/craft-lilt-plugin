@@ -5,8 +5,7 @@ paths:
   data: tests/_data
   support: tests/_support
   envs: tests/_envs
-settings:
-  bootstrap: _bootstrap.php
+bootstrap: _bootstrap.php
 coverage:
   enabled: true
   include:
@@ -28,12 +27,15 @@ modules:
     \craft\test\Craft:
       configFile: 'tests/_craft/config/test.php'
       entryUrl: 'https://test.craftcms.test/index.php'
-      projectConfig: {}
+      projectConfig: { folder: 'freshInstall/project', reset: false }
       migrations: []
       plugins:
         craft-lilt-plugin:
           class: '\lilthq\craftliltplugin\Craftliltplugin'
           handle: craft-lilt-plugin
+        redactor:
+          class: '\craft\redactor\Plugin'
+          handle: redactor
       cleanup: true
       transaction: true
       dbSetup: {clean: true, setupCraft: true}

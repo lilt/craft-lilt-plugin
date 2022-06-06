@@ -17,20 +17,26 @@ class CreateJobCommand
     private $entries;
     private $sourceSiteId;
     private $targetSitesIds;
-    private $dueDate;
+    private $translationWorkflow;
+    private $versions;
+    private $authorId;
 
     public function __construct(
         string $title,
         array $entries,
         array $targetSitesIds,
         int $sourceSiteId,
-        DateTimeInterface $dueDate
+        string $translationWorkflow,
+        array $versions,
+        ?int $authorId
     ) {
         $this->title = $title;
         $this->entries = $entries;
         $this->targetSitesIds = $targetSitesIds;
         $this->sourceSiteId = $sourceSiteId;
-        $this->dueDate = $dueDate;
+        $this->translationWorkflow = $translationWorkflow;
+        $this->versions = $versions;
+        $this->authorId = $authorId;
 
         //Remove source site from target site if it is there
         if (in_array($this->sourceSiteId, $this->targetSitesIds, true)) {
@@ -38,9 +44,14 @@ class CreateJobCommand
         }
     }
 
-    public function getDueDate(): DateTimeInterface
+    public function getAuthorId(): ?int
     {
-        return $this->dueDate;
+        return $this->authorId;
+    }
+
+    public function getTranslationWorkflow(): string
+    {
+        return $this->translationWorkflow;
     }
 
     public function getSourceSiteId(): int
@@ -61,5 +72,15 @@ class CreateJobCommand
     public function getTargetSitesIds(): array
     {
         return $this->targetSitesIds;
+    }
+
+    public function getVersions(): array
+    {
+        return $this->versions;
+    }
+
+    public function setVersions(array $versions): void
+    {
+        $this->versions = $versions;
     }
 }

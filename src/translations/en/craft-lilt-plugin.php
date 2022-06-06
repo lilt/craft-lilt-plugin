@@ -23,4 +23,7 @@
  */
 return [
     'craft-lilt-plugin plugin loaded' => 'craft-lilt-plugin plugin loaded',
+    'Text'      => 'Text',
+    'Preview'   => 'Preview',
+    'The job was transferred successfully'   => 'The job was transferred successfully',
 ];

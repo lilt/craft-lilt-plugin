@@ -1,0 +1,13 @@
+#details .meta.warning {
+    border: 2px solid #fadb5f;
+    padding: 19px 22px;
+    background: #fff;
+    color: #3f4d5a !important;
+}
+
+#details .meta.error {
+    border: 2px solid rgba(207,17,36,.5);
+    padding: 19px 22px;
+    background: #fff;
+    color: #3f4d5a !important;
+}

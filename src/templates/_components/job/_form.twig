@@ -1,9 +1,11 @@
 {% import '_includes/forms' as forms %}
 
-<form method="post" id="create-job-form" accept-charset="UTF-8" action="{{ formActionUrl }}">
+{% set isFormElementsReadOnly = not (constant('STATUS_NEW', element) is same as element.getStatus()) and not (constant('STATUS_DRAFT', element) is same as element.getStatus())  %}
+
+<form method="post" id="create-job-form" class="{{ isFormElementsReadOnly ? 'submitted-job-preview' : '' }}" accept-charset="UTF-8" action="{{ formActionUrl }}">
     {{ csrfInput() }}
 
-    {% if element %}
+    {% if element.id is not same as null %}
         {{ forms.textField({
             name: 'jobId',
             id: 'jobId',
@@ -21,8 +23,58 @@
         errors: model is defined and model ? model.getErrors('title'),
         maxlength: 255,
         errors: element.getErrors('title'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
+        readonly: isFormElementsReadOnly,
+        class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
     }) }}
+
+    <hr/>
+
+    <div id="entries-to-translate-field" class="field">
+        <div class="heading">
+            {{ forms.textField({
+                label: 'Entries <span class="required"/>'|t,
+                name: 'entries',
+                id: 'create-job-selected-entries',
+                class: 'create-job-selected-entries hidden',
+                value: element.getElementIdsAsString ?? '[]',
+                errors: model is defined and model ? model.getErrors('title'),
+                maxlength: 255,
+                errors: element.getErrors('elementIds'),
+            }) }}
+            {{ forms.textField({
+                name: 'versions',
+                id: 'create-job-selected-versions',
+                class: 'create-job-selected-versions hidden',
+                value: element.getVersionsAsString ?? '[]',
+            }) }}
+        </div>
+        <div class="content-pane" id="entries-to-translate" style="display: none; margin-top: 5px">
+            <div style="display: none">
+                {% include '_elements/toolbar' with {
+                    showSiteMenu: false,
+                } %}
+            </div>
+            <div class="main">
+                <div class="elements {{ isFormElementsReadOnly ? 'disabled' : '' }}"></div>
+            </div>
+
+            <div id="toolbar-element-index" class="flex flex-nowrap"></div>
+        </div>
+
+        {% if isDraftJob or isNewJob %}
+        <div class="flex">
+            <div class="submit">
+                    <button type="button" class="btn add icon dashed addAnEntry">{{ 'Add an entry'|t }}</button>
+            </div>
+            <div id="entries-remove-action" class="btn submit" style="visibility: hidden;float:right">
+                Remove
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <hr/>
+
 
     {{ forms.selectField({
         label: 'Source site <span class="required"/>',
@@ -31,17 +83,8 @@
         id: 'sourceSite',
         value: element.sourceSiteId ?? '',
         errors: element.getErrors('sourceSiteId'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
-    }) }}
-
-    {{ forms.dateField({
-        status: element.getAttributeStatus('dueDate'),
-        label: "Due Date"|t('app'),
-        id: 'dueDate',
-        name: 'dueDate',
-        value: (element.dueDate ? element.dueDate : null),
-        errors: element.getErrors('dueDate'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
+        readonly: isFormElementsReadOnly,
+        class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
     }) }}
 
     {{ forms.checkboxSelectField({
@@ -52,49 +95,27 @@
         name: 'targetSiteIds',
         id: 'targetSiteIds',
         errors: element.getErrors('targetSiteIds'),
-        disabled: (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus())
+        readonly: isFormElementsReadOnly,
+        class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
     }) }}
 
+    <hr/>
 
-    <div id="entries-to-translate-field" class="field">
-        <div class="heading">
-            {{ forms.textField({
-                label: 'Entries <span class="required"/>'|t,
-                name: 'entries',
-                id: 'create-job-selected-entries',
-                class: 'create-job-selected-entries hidden',
-                value: element.getElementIdsAsString ?? '',
-                errors: model is defined and model ? model.getErrors('title'),
-                maxlength: 255,
-                errors: element.getErrors('elementIds'),
-            }) }}
-        </div>
-        <div class="content-pane" id="entries-to-translate" style="display: none; margin-top: 20px">
-            <div style="display: none">
-                {% include '_elements/toolbar' with {
-                    showSiteMenu: false,
-                } %}
-            </div>
-            <div class="main">
-                <div class="elements"></div>
-            </div>
+    <a class="fieldtoggle collapsed" data-target="types-craft-fields-Assets-advanced">Advanced</a>
+    <div id="types-craft-fields-Assets-advanced" class="hidden" style="overflow: hidden; height: 0;">
 
-            <div id="toolbar-element-index" class="flex flex-nowrap"></div>
-        </div>
+        {{ forms.selectField({
+            label: 'Translation(s) Workflow <span class="required"/>',
+            options: translationWorkflowsOptions,
+            showAllOption: true,
+            name: 'translationWorkflow',
+            id: 'translationWorkflow',
+            value: element.translationWorkflow ?? defaultTranslationWorkflow,
+            errors: element.getErrors('liltTranslationWorkflow'),
+            readonly: isFormElementsReadOnly,
+            class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
+        }) }}
 
-        <div class="flex">
-            <div class="submit">
-                {% if(constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()) %}
-                    <button type="button" class="btn add icon dashed disabled">{{ 'Add an entry'|t }}</button>
-                {% endif %}
-                {% if(constant('STATUS_IN_PROGRESS', element) is not same as element.getStatus()) %}
-                    <button type="button" class="btn add icon dashed addAnEntry">{{ 'Add an entry'|t }}</button>
-                {% endif %}
-            </div>
-            <div id="entries-remove-action" class="btn" style="visibility: hidden;float:right">
-                Remove
-            </div>
-        </div>
     </div>
 
 </form>

@@ -1,7 +1,13 @@
 {% extends "_layouts/cp" %}
 {% import '_includes/forms' as forms %}
 
-{% set title = "Job edit" %}
+{% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
+{% set isDraftJob = constant('STATUS_DRAFT', element) is same as element.getStatus() %}
+{% set isNewJob = constant('STATUS_NEW', element) is same as element.getStatus() %}
+{% set isFailed = constant('STATUS_FAILED', element) is same as element.getStatus() %}
+{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() or constant('STATUS_READY_TO_PUBLISH', element) is same as element.getStatus() or constant('STATUS_COMPLETE', element) is same as element.getStatus() or constant('STATUS_FAILED', element) is same as element.getStatus() %}
+
+{% set title = isJobInProgress ? "Job edit" : "Job overview" %}
 
 {% set formActionUrl = cpUrl('craft-lilt-plugin/job/edit/' ~ element.id) %}
 
@@ -11,32 +17,152 @@
 {% set sources = craft.app.elementIndexes.getSources('craft\\elements\\Entry', 'index') %}
 {% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
 
+{% set fullPageForm = true %}
+
+{% set formActions = [] %}
+{% set mainFormAttributes = {
+    id: 'create-job-form',
+    data: {
+        'confirm-unload': isDraftJob or isNewJob,
+    },
+} %}
+
+{% if not isDraftJob and not isNewJob %}
+{% set tabs = {
+    translations: {
+        label: 'Translations'|t('app'),
+        url: "#translations",
+    },
+    overview: {
+        label: 'Submited job'|t('app'),
+        url: "#overview",
+    },
+} %}
+{% endif %}
+
+
+{% set publishDraftAction = 'craft-lilt-plugin/job/post-publish-draft-job/invoke' %}
+{% set saveAsNewJobAction = 'craft-lilt-plugin/job/post-create-job/invoke' %}
+{% set postCreateJobAction = 'craft-lilt-plugin/job/post-create-job/invoke' %}
+{% set postEditJobAction = 'craft-lilt-plugin/job/post-edit-job/invoke' %}
+
+{% set redirectUrl = 'craft-lilt-plugin/job/create' %}
+{% set hashedCpEditUrl = '{cpEditUrl}'|hash %}
+
+{% if isDraftJob %}
+
+    {% set formActions = formActions|push({
+        label: 'Create and continue editing'|t('app'),
+        action: publishDraftAction,
+        redirect: hashedCpEditUrl,
+        shortcut: true,
+        eventData: {
+            autosave: false,
+        },
+    }) %}
+
+    {% set formActions = formActions|push({
+        label: 'Create and add another'|t('app'),
+        action: publishDraftAction,
+        redirect: 'craft-lilt-plugin/job/create'|hash,
+        shortcut: true,
+        shift: true,
+        eventData: {
+            autosave: false,
+        },
+    }) %}
+{% elseif not isJobReadyForReview %}
+    {% set formActions = formActions|push({
+        label: 'Save and add another'|t('app'),
+        action: postEditJobAction,
+        redirect: 'craft-lilt-plugin/job/create'|hash,
+        shortcut: true,
+        shift: true,
+        params: {
+            performAction: 'save',
+        },
+        eventData: {
+            autosave: false,
+        },
+    }) %}
+
+    {% set formActions = formActions|push({
+        label: 'Save as new job'|t('app'),
+        action: saveAsNewJobAction,
+        redirect: 'craft-lilt-plugin/jobs'|hash,
+        shortcut: true,
+        params: {
+            performAction: 'save',
+        },
+        eventData: {
+            autosave: false,
+        },
+    }) %}
+{% endif %}
+
 {% block actionButton %}
-    <div id="save-btn-container" class="submit">
-        <button id="create-order-submit-form" type="submit" class="btn submit">
-            Save job
-        </button>
-    </div>
+    {# TODO: create draft from published versions #}
+    {% if not isDraftJob and not isJobReadyForReview %}
+        <div id="save-draft-btn-container">
+            {{ tag('button', {
+                type: 'button',
+                class: [
+                    'btn',
+                    'formsubmit',
+                ]|filter,
+                text: 'Create a draft'|t('app'),
+                data: {
+                    action: saveAsNewJobAction,
+                    redirect: hashedCpEditUrl,
+                    param: 'saveDraft',
+                    value: 1,
+                },
+            }) }}
+        </div>
+    {% endif %}
+
+    {# TODO: create draft from published versions #}
+    {% if fullPageForm and not isJobReadyForReview %}
+        <div class="btngroup">
+            {% block submitButton %}
+                {% if isDraftJob %}
+                    {{ tag('button', {
+                        type: 'button',
+                        class: [
+                            'btn',
+                            'submit',
+                            'formsubmit',
+                        ]|filter,
+                        text: 'Create job'|t('app'),
+                        data: {
+                            action: publishDraftAction,
+                            redirect: hashedCpEditUrl,
+                        },
+                    }) }}
+                {% elseif not isJobReadyForReview and not isJobInProgress %}
+                    <button type="submit" data-icon="language" class="btn submit">{{ 'Save job'|t('app') }}</button>
+                {% endif %}
+            {% endblock %}
+            {% if formActions ?? false and not isJobInProgress %}
+                <button type="button" class="btn submit menubtn"></button>
+                {% include '_layouts/components/form-action-menu' %}
+            {% endif %}
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-    {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
+    {% if not isDraftJob and not isNewJob %}
+    {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
+    {% else %}
+        {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
+    {% endif %}
 {% endblock %}
 
 {% set isRevision = false %}
 
 {% block settings %}
-    {{ forms.elementSelectField({
-        status: element.getAttributeStatus('authorId'),
-        label: "Author"|t('app'),
-        id: 'author',
-        name: 'author',
-        elementType: userElementType,
-        selectionLabel: "Choose"|t('app'),
-        criteria: authorOptionCriteria,
-        limit: 1,
-        elements: (author is defined and author ? [author]),
-    }) }}
+    {% include 'craft-lilt-plugin/_components/job/_settings.twig' %}
 {% endblock %}
 
 {% set settingsHtml = (block('settings') ?? '')|trim %}
@@ -46,7 +172,7 @@
 {% set isRevision = false %}
 {% set isProvisionalDraft = false %}
 {% set isLikeCurrent = false %}
-{% set showNotes = false %}
+{% set showNotes = true %}
 {% set isDraft = true %}
 {% set isCurrent = true %}
 

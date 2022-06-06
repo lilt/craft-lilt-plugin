@@ -12,6 +12,7 @@ namespace lilthq\craftliltplugin\controllers\job;
 use Craft;
 use craft\helpers\DateTimeHelper;
 use craft\web\Controller;
+use Exception;
 use lilthq\craftliltplugin\assets\JobFormAsset;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
@@ -20,7 +21,11 @@ use yii\web\Response;
 
 class AbstractJobController extends Controller
 {
-    protected function getJobModel(): Job
+    /**
+     * @throws InvalidConfigException
+     * @throws Exception
+     */
+    protected function convertRequestToJobModel(): Job
     {
         $bodyParams = $this->request->getBodyParams();
 
@@ -28,8 +33,14 @@ class AbstractJobController extends Controller
         $job->id = (int) ($bodyParams['jobId'] ?? null);
         $job->title = $bodyParams['title'];
         $job->sourceSiteId = (int)$bodyParams['sourceSite'];
+        $job->versions = $bodyParams['versions'] ?? [];
+        $job->authorId = !empty($bodyParams['author'][0]) ? (int) $bodyParams['author'][0] : null;
+        $job->translationWorkflow = $bodyParams['translationWorkflow'];
         $job->elementIds = json_decode($bodyParams['entries'], false) ?? [];
-        $job->dueDate = DateTimeHelper::toDateTime($this->request->getBodyParam('dueDate')) ?: null;
+
+        //TODO: due date not using right now
+        //$job->dueDate = DateTimeHelper::toDateTime($this->request->getBodyParam('dueDate')) ?: null;
+
         $job->targetSiteIds = $bodyParams['targetSiteIds'] === '*' ?
             Craftliltplugin::getInstance()->languageMapper->getLanguageToSiteId()
             : $bodyParams['targetSiteIds'];
@@ -40,21 +51,28 @@ class AbstractJobController extends Controller
     /**
      * @throws InvalidConfigException
      */
-    protected function renderJobForm(?Job $job = null, array $variablesToAdd = [], string $template = 'craft-lilt-plugin/job/create.twig'): Response
-    {
+    protected function renderJobForm(
+        Job $job,
+        array $variablesToAdd = [],
+        string $template = 'craft-lilt-plugin/job/create.twig'
+    ): Response {
         Craft::$app->getView()->registerAssetBundle(JobFormAsset::class);
 
         $variables = [
+            //TODO: default from lilt api
+            'defaultTranslationWorkflow' => 'instant',
+
+            'translationWorkflowsOptions' => ['instant' => 'Instant', 'verified' => 'Verified'],
             'availableSites' => Craftliltplugin::getInstance()->languageMapper->getAvailableSitesForFormField(),
             'targetSites' =>  Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
-            'element' => $job ?? new Job(),
+            'element' => $job,
             'showLiltTranslateButton' => false,
             'isUnpublishedDraft' => true,
             'permissionSuffix' => ':edit-lilt-jobs',
             'authorOptionCriteria' => [
                 'can' => 'editEntries:edit-lilt-jobs'
             ],
-            'author' => Craft::$app->getUser()->getIdentity(),
+            'author' => (!empty($job->authorId)) ? Craft::$app->users->getUserById($job->authorId) : null,
         ];
 
         return $this->renderTemplate(

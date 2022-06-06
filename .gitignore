@@ -30,3 +30,14 @@
 !.vscode/extensions.json
 config.codekit3
 prepros-6.config
+
+*.zip
+phpcpd.phar
+composer.phar
+composer.lock
+/cpresources
+/tests/_output
+/tests/_craft/storage
+/tests/_support/_generated
+
+docker-compose.override.yml

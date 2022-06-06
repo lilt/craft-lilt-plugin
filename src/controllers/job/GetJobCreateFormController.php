@@ -14,6 +14,9 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
+use craft\helpers\UrlHelper;
+use lilthq\craftliltplugin\datetime\DateTime;
+use lilthq\craftliltplugin\elements\Job;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
@@ -32,6 +35,48 @@ class GetJobCreateFormController extends AbstractJobController
             return (new Response())->setStatusCode(405);
         }
 
-        return $this->renderJobForm();
+        $job = (new Job());
+        $job->versions = [];
+        $job->status = Job::STATUS_DRAFT;
+
+        $elementIds = $request->getQueryParam('elementIds');
+
+        if ($elementIds) {
+            $job->elementIds = $elementIds;
+        }
+
+        $sourceSiteId = $request->getQueryParam('sourceSiteId');
+
+        if ($sourceSiteId) {
+            $job->sourceSiteId = $sourceSiteId;
+        }
+
+        return $this->renderJobForm(
+            $job,
+            [
+                /*'formActions' => [
+                    [
+                        "label" => "Create and continue editing",
+                        "redirect" => "{cpEditUrl}",
+                        "shortcut" => true,
+                        "retainScroll" => true,
+                        "eventData" => [
+                            "autosave" => false
+                        ]
+                    ]
+                ],*/
+                'crumbs' => [
+                    [
+                        'label' => 'Lilt Plugin',
+                        'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin')
+                    ],
+                    [
+                        'label' => 'Jobs',
+                        'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin/jobs')
+                    ],
+                ],
+                'author' => Craft::$app->getUser()->getIdentity()
+            ]
+        );
     }
 }

@@ -9,7 +9,7 @@ use craft\web\assets\cp\CpAsset;
 
 class JobFormAsset extends AssetBundle
 {
-    public function init()
+    public function init(): void
     {
         $this->sourcePath = '@lilthq/craftliltplugin/assets/resources';
 
@@ -20,10 +20,13 @@ class JobFormAsset extends AssetBundle
         $this->js = [
             'elements/LiltElementIndex.js',
             'job/create.js',
+            'job/select-target-sites.js',
+            'job/overview.js',
         ];
 
         $this->css = [
             'job/create.css',
+            'job/overview.css',
         ];
 
         parent::init();

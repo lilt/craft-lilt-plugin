@@ -13,31 +13,25 @@ use Craft;
 use craft\errors\MissingComponentException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\services\job\EditJobCommand;
-use RuntimeException;
 use yii\base\InvalidConfigException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response;
 
-class PostEditJobController extends AbstractJobController
+class PostEditJobController extends AbstractPostJobController
 {
     protected $allowAnonymous = false;
 
     /**
      * @throws InvalidConfigException
      * @throws MissingComponentException
+     * @throws MethodNotAllowedHttpException
      */
     public function actionInvoke(): Response
     {
-        $request = Craft::$app->getRequest();
-
-        if (!$request->getIsPost()) {
-            return (new Response())->setStatusCode(405);
-        }
-
-        $job = $this->getJobModel();
-        $job->validate();
+        $job = $this->getJob();
 
         if (!$job->id) {
-            throw new RuntimeException('Job id cant be empty');
+            throw new \RuntimeException('Job id cant be empty');
         }
 
         if ($job->hasErrors()) {
@@ -46,11 +40,13 @@ class PostEditJobController extends AbstractJobController
 
         $command = new EditJobCommand(
             $job->id,
+            $job->authorId,
             $job->title,
             $job->elementIds,
             $job->targetSiteIds,
             $job->sourceSiteId,
-            $job->dueDate
+            $job->translationWorkflow,
+            $job->versions
         );
 
         Craftliltplugin::getInstance()->editJobHandler->__invoke(
@@ -64,6 +60,6 @@ class PostEditJobController extends AbstractJobController
             'Translate job saved successfully.'
         );
 
-        return $this->redirect('admin/craft-lilt-plugin/jobs');
+        return $this->redirect($job->getCpEditUrl());
     }
 }

@@ -1,11 +1,57 @@
-#entries-to-translate-field #entries-to-translate
-{
+.lilt-job-activity-log span.info:not(.warning):before {
+    content: "time";
+}
+
+.lilt-job-activity-log span.info {
+    float: right;
+}
+
+.lilt-job-activity-log ul li {
+    padding: 5px;
+}
+
+.lilt-job-activity-log {
+    padding-top: 20px !important;
+    max-height: 200px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+#create-job-form #details #settings #author .elements .element {
+    float: right;
+}
+
+#create-job-form #details #settings #author.elementselect .flex {
+    float: right;
+}
+
+#create-job-form #details #settings #author .elements .element {
+    margin-right: 0;
+}
+
+#entries-to-translate-field #entries-to-translate {
     box-shadow: none;
 }
 
-#targetSiteIds-field input.checkbox.disabled+label:before
-{
+#create-job-form div.elements.disabled,
+#create-job-form .no-opacity.disabled,
+#create-job-form div.elements.disabled tr.disabled {
+    opacity: .7;
+}
+#targetSiteIds-field input.checkbox.disabled + label:before {
     content: "";
+}
+
+#entries-to-translate-field #create-job-selected-entries-field {
+    margin-bottom: 0;
+}
+
+/* TODO remove when jobId-field removed */
+#create-job-form #jobId-field {
+    margin: 0;
+}
+#create-job-form #title-field {
+    margin-top: 0;
 }
 
 #status-value > span.status.blue {
@@ -16,4 +62,115 @@
     50% {
         opacity: 0.25;
     }
+}
+
+/** Show disabled elements without any opacity **/
+#create-job-form.submitted-job-preview div.disabled {
+    opacity: 1;
+}
+
+#lilt-btn-create-new-job .icon .h-8 {
+    height: 16px !important;
+}
+
+#entries-to-translate-field .elements select {
+    max-width: 100px !important;
+    min-width: 100px !important;
+}
+
+#entries-to-translate-field .elements.busy {
+    /* Min height for elements spinner */
+    /* min-height: inherit; */
+    min-height: 40px;
+}
+
+#create-job-form #create-job-selected-entries-field {
+    margin-bottom: 0;
+}
+
+/* TODO: this is for spiner
+.busy:after {
+    display: block;
+    content: "";
+    font-size: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,.75) url(../images/spinner.gif) no-repeat 50% 50%;
+    border-radius: 5px;
+} */
+
+/**
+OVERVIEW
+ */
+
+/* #lilt-translations-table tr {
+    cursor: pointer;
+} */
+
+#lilt-preview-modal.hidden-footer .footer{
+    display: none;
+}
+#lilt-preview-modal.hidden-footer #lilt-modal-preview-tabs #content{
+    padding-bottom: 0;
+}
+
+#lilt-preview-modal .body .spinner.big {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -24px 0 0 -24px;
+}
+
+#lilt-preview-modal .body {
+    position: relative;
+    height: calc(100% - 62px);
+    width: 100%;
+
+    overflow-y: scroll;
+
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+#lilt-preview-modal #preview .locale{
+    width: 100%;
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#lilt-preview-modal #preview {
+    margin-left: -24px;
+    margin-right: -24px;
+    margin-top: -24px;
+    min-height: 800px;
+}
+#lilt-preview-modal .iframe-box {
+    display: inline-block;
+    width: calc(50% - 2px);
+    height: 100%;
+    min-height: 800px;
+}
+#lilt-preview-modal iframe {
+    height: 100%;
+    width: 100%;
+    min-height: 800px;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+#lilt-preview-modal .flex-container {
+    display: flex;
+}
+
+#lilt-preview-modal .flex-child {
+    flex: 1;
+    border: 2px solid yellow;
+}
+
+#lilt-preview-modal .flex-child:first-child {
+    margin-right: 20px;
 }

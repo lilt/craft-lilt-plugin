@@ -1,0 +1,64 @@
+{% import "_includes/forms" as forms %}
+
+<div class="readable">
+    <h2>{{ "Configuration options"|t('app') }}</h2>
+
+    <form method="post" id="create-job-form" accept-charset="UTF-8" action="{{ formActionUrl }}">
+        {{ csrfInput() }}
+
+        {{ forms.textField({
+            label: 'API Key <span class="required"/>'|t,
+            placeholder: 'API Key',
+            name: 'connectorApiKey',
+            id: 'connectorApiKey',
+            value: connectorApiKey ?? '',
+            maxlength: 255,
+            errors: model is defined? model.getErrors('connectorApiKey') : [],
+        }) }}
+
+        {{ forms.textField({
+            label: 'API URL <span class="required"/>'|t,
+            placeholder: 'API Url',
+            name: 'connectorApiUrl',
+            id: 'connectorApiUrl',
+            value: connectorApiUrl ?? '',
+            maxlength: 255,
+            errors: model is defined? model.getErrors('connectorApiUrl') : [],
+        }) }}
+
+        {{ forms.textField({
+            label: 'Project Prefix'|t('craft-lilt-plugin'),
+            placeholder: 'Project Prefix',
+            name: 'projectPrefix',
+            id: 'projectPrefix',
+            value: projectPrefix ?? '',
+            maxlength: 255,
+            errors: model is defined? model.getErrors('projectPrefix') : [],
+        }) }}
+
+        {{ forms.textField({
+            label: 'Project Name Template'|t('craft-lilt-plugin'),
+            placeholder: 'Project Name Template',
+            name: 'projectNameTemplate',
+            id: 'projectNameTemplate',
+            value: projectNameTemplate ?? '',
+            maxlength: 255,
+            errors: model is defined? model.getErrors('projectNameTemplate') : [],
+        }) }}
+
+        {{ forms.selectField({
+            label: 'Lilt Translation Workflow <span class="required"/>',
+            options: liltTranslationWorkflowAllowableValues,
+            name: 'liltTranslationWorkflow',
+            id: 'liltTranslationWorkflow',
+            value: liltTranslationWorkflow ?? '',
+            errors: model is defined? model.getErrors('liltTranslationWorkflow') : [],
+        }) }}
+
+        <div class="buttons">
+            <button type="submit" class="btn submit">{{ 'Update configuration'|t('craft-lilt-plugin') }}</button>
+            <div class="utility-status"></div>
+        </div>
+
+    </form>
+</div>

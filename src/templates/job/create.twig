@@ -1,9 +1,15 @@
 {% extends "_layouts/cp" %}
 {% import '_includes/forms' as forms %}
 
-{% set title = title ?? "Job create" %}
+{% set title = title ?? "Create a new job" %}
+
+{% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
+{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() %}
 
 {% set formActionUrl = formActionUrl ?? cpUrl('craft-lilt-plugin/job/create') %}
+
+{% set isDraftJob  = true %}
+{% set isNewJob = true %}
 
 {% set context = 'index' %}
 {% set elementType = 'craft\\elements\\Entry' %}
@@ -12,12 +18,46 @@
 {% set sources = craft.app.elementIndexes.getSources('craft\\elements\\Entry', 'index') %}
 {% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
 
-{% block actionButton %}
-    <div id="save-btn-container" class="submit">
-        <button id="create-order-submit-form" type="submit" class="btn submit">
-            Create job
-        </button>
-    </div>
+{% set fullPageForm = true %}
+
+{% set formActions = [] %}
+{% set mainFormAttributes = {
+    id: 'create-job-form',
+} %}
+
+{% set isUnpublishedDraft = true %}
+{% set canUpdateSource = true %}
+
+{% set saveDraftAction = 'craft-lilt-plugin/job/post-create-job/invoke' %}
+{% set redirectUrl = 'craft-lilt-plugin/job/create' %}
+{% set saveSourceAction = 'craft-lilt-plugin/job/post-create-job/invoke' %}
+
+{% set formActions = formActions|push({
+    label: 'Create and add another'|t('app'),
+    redirect: 'craft-lilt-plugin/job/create'|hash,
+    action: saveSourceAction,
+    shortcut: true,
+    shift: true,
+    eventData: {
+        autosave: false,
+    },
+}) %}
+
+{% set formActions = formActions|push({
+    label: 'Save draft'|t('app'),
+    action: saveDraftAction,
+    redirect: 'craft-lilt-plugin/jobs'|hash,
+    shortcut: true,
+    params: {
+        saveDraft: 1,
+    },
+    eventData: {
+        autosave: false,
+    },
+}) %}
+
+{% block submitButton %}
+    <button type="submit" data-icon="language" class="btn submit">{{ 'Create job'|t('app') }}</button>
 {% endblock %}
 
 {% block content %}

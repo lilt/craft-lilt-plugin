@@ -1,5 +1,18 @@
 {% import '_includes/forms' as forms %}
 
+{# TODO: proper error message #}
+
+{% if isFailed ?? false %}
+    <div class="meta read-only error">
+        <p>Unexpected error happened while processing translations. You can contact our <a
+                    href="https://lilt.atlassian.net/servicedesk/customer/portals" target="_blank">customer support</a>
+        </p>
+        <div>
+            <div id="lilt-try-again-sync" data-job-id="{{ element.id }}" class="btn" data-icon="refresh">Try again</div>
+        </div>
+    </div>
+{% endif %}
+
 {% if notices ?? false %}
     <div class="meta read-only warning">
         {% for notice in notices %}
@@ -18,10 +31,11 @@
             <div id="settings-lilt" class="meta">
                 <div id="translate-field" class="field" style="padding-top: 5px; padding-bottom: 5px">
                     <div class="heading"><label for="author">Lilt Tranlsation</label></div>
-                    <a class="btn icon btn-create-new-order" href="{{ url(sendToLiltActionLink) }}"
+                    <a id="lilt-btn-create-new-job" class="btn icon btn-create-new-job"
+                       href="{{ url(sendToLiltActionLink) }}"
                        style="margin-right: 5px;">
                         <span class="icon icon-mask"
-                              style="margin-right: 5px;margin-top: 5px">{{ svg('/app/vendor/lilthq/craft-lilt-plugin/src/icon-mask.svg') }}</span>
+                              style="margin-right: 5px;margin-top: 5px">{{ svg(alias('@lilthq/craftliltplugin') ~ '/icon-mask.svg') }}</span>
                         {{ 'Translate'|t }}
                     </a>
 
@@ -30,14 +44,15 @@
         {% endif %}
 
         {% set showLiltSyncButton = showLiltSyncButton ?? false %}
-        {% if showLiltSyncButton %}
+        {% if showLiltSyncButton and not isJobReadyForReview %}
             <div id="settings-lilt" class="meta">
                 <div id="translate-field" class="field" style="padding-top: 5px; padding-bottom: 5px">
                     <div class="heading"><label for="author">Lilt Tranlsation</label></div>
-                    <a class="btn icon btn-create-new-order" href="{{ url(syncFromLiltActionLink) }}"
+                    <a id="lilt-btn-create-new-job" class="btn icon btn-create-new-job"
+                       href="{{ url(syncFromLiltActionLink) }}"
                        style="margin-right: 5px;">
                         <span class="icon icon-mask"
-                              style="margin-right: 5px;margin-top: 5px">{{ svg('/app/vendor/lilthq/craft-lilt-plugin/src/icon-mask.svg') }}</span>
+                              style="margin-right: 5px;margin-top: 5px">{{ svg(alias('@lilthq/craftliltplugin') ~ '/icon-mask.svg') }}</span>
                         {{ 'Fetch translate'|t }}
                     </a>
 
@@ -95,6 +110,7 @@
     {% endblock %}
 </div>
 
+{# TODO: do we need notes?
 {% if (showNotes and (isLikeCurrent and (hasRevisions ?? false) or isDraft)) %}
     {{ forms.textarea({
         id: 'notes',
@@ -108,4 +124,20 @@
             },
         },
     }) }}
+{% endif %}
+#}
+
+{% if jobLogs ?? false %}
+<div class="meta read-only lilt-job-activity-log">
+    <h4 class="title">Activity log:</h4>
+    <ul>
+        <!--<span class="info" data-icon="time">2022/02/02 02:02:02</span>-->
+        {% for jobLog in jobLogs %}
+        <li>
+            <div style="font-size: 8px; color:grey">{{ jobLog.dateCreated }}</div>
+            <div>{{ jobLog.summary }}</div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endif %}

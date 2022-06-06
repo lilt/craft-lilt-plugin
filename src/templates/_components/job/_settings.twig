@@ -1,6 +1,7 @@
 {% import '_includes/forms' as forms %}
 
 {% block settings %}
+    {# TODO: do we need author? #}
     {{ forms.elementSelectField({
         status: element.getAttributeStatus('authorId'),
         label: "Author"|t('app'),
@@ -11,5 +12,51 @@
         criteria: authorOptionCriteria,
         limit: 1,
         elements: (author is defined and author ? [author]),
+        disabled: not ((constant('STATUS_NEW', element) is same as element.getStatus() or constant('STATUS_DRAFT', element) is same as element.getStatus()))
     }) }}
+
+    {% if element.id is defined and element.id > 0 %}
+    <div class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug">Job ID</label>
+        </div>
+        <div class="ltr">{{element.id}}</div>
+    </div>
+    {% endif %}
+
+    {% if element.liltJobId is defined and element.liltJobId is not null %}
+    <div class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug">Lilt ID</label>
+        </div>
+        <div class="ltr">{{element.liltJobId}}</div>
+    </div>
+    {% endif %}
+
+    {% if element.sourceSiteId is defined and element.sourceSiteId is not null %}
+    <div class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug">Source Site</label>
+        </div>
+        <div class="ltr">{{ element.sourceSiteIdHtml | raw }}</div>
+    </div>
+    {% endif %}
+
+    {% if element.targetSiteIds is defined and element.targetSiteIds is not null and element.targetSiteIds is not empty %}
+    <div class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug">Target Site(s)</label>
+        </div>
+        <div class="ltr" style="padding-top: 10px; padding-bottom: 10px">{{ element.targetSiteIdsHtml | raw }}</div>
+    </div>
+    {% endif %}
+
+    {% if element.translationWorkflow is defined and element.translationWorkflow is not null %}
+    <div class="field">
+        <div class="heading">
+            <label id="slug-label" for="slug" style="white-space: nowrap;">Translation workflow</label>
+        </div>
+        <div class="ltr" style="padding-top: 10px; padding-bottom: 10px">{{ element.translationWorkflow[:1]|upper ~ element.translationWorkflow[1:] }}</div>
+    </div>
+    {% endif %}
 {% endblock %}

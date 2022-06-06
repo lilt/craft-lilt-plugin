@@ -1,0 +1,7 @@
+actor: IntegrationTester
+modules:
+  enabled:
+    - \craft\test\Craft
+    - \Helper\Integration
+    - \Helper\WiremockClient
+    - \Helper\CraftLiltPluginHelper

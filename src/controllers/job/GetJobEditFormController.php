@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
 use craft\errors\ElementNotFoundException;
+use craft\helpers\UrlHelper;
 use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
@@ -44,8 +45,9 @@ class GetJobEditFormController extends AbstractJobController
         $job = Job::findOne(['id' => $jobId]);
 
         //TODO: move to separate class, maybe post request from FE
-        if ($job->liltJobId !== null) {
-            $liltJob = Craftliltplugin::getInstance()->liltJobRepository->findOneById(
+        //TODO: now it is processing by queue
+        /** if ($job->liltJobId !== null) {
+            $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
                 (int)$job->liltJobId
             );
             $jobRecord = JobRecord::findOne(['id' => $job->getId()]);
@@ -59,7 +61,7 @@ class GetJobEditFormController extends AbstractJobController
             }
 
             if ($liltJob->getStatus() === JobResponse::STATUS_COMPLETE) {
-                $job->status = Job::STATUS_COMPLETE;
+                $job->status = Job::STATUS_READY_FOR_REVIEW;
             }
 
             $jobRecord->setAttributes($job->getAttributes(), false);
@@ -72,20 +74,47 @@ class GetJobEditFormController extends AbstractJobController
             );
 
             $jobRecord->save();
-        }
+        } **/
 
         if (!$job) {
             return (new Response())->setStatusCode(404);
         }
 
+        /*
+        Craft::$app->response->on(Response::EVENT_AFTER_SEND, function ($event) {
+
+            $start = time();
+
+            $end = $start + 30;
+
+            while (time() < $end) {
+
+            }
+
+            return;
+        });
+        */
         return $this->renderJobForm(
             $job,
             [
+                'jobLogs' => Craftliltplugin::getInstance()->jobLogsRepository->findByJobId(
+                    $job->getId()
+                ),
                 'showLiltTranslateButton' => $job->getStatus() === Job::STATUS_NEW,
-                'showLiltSyncButton' =>  $job->getStatus() === Job::STATUS_COMPLETE,
+                'showLiltSyncButton' =>  $job->getStatus() === Job::STATUS_READY_FOR_REVIEW,
                 'isUnpublishedDraft' => false,
                 'sendToLiltActionLink' => 'craft-lilt-plugin/job/send-to-lilt/' . $jobId,
                 'syncFromLiltActionLink' => 'craft-lilt-plugin/job/sync-from-lilt/' . $jobId,
+                'crumbs' => [
+                    [
+                        'label' => 'Lilt Plugin',
+                        'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin')
+                    ],
+                    [
+                        'label' => 'Jobs',
+                        'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin/jobs')
+                    ],
+                ]
             ],
             'craft-lilt-plugin/job/edit.twig'
         );

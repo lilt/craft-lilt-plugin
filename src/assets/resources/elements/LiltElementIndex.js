@@ -42,6 +42,10 @@ Craft.LiltElementIndex = Craft.BaseElementIndex.extend({
         this.setSortAttribute(sortAttr);
         this.setSortDirection(sortDir);
     },
+    getDefaultSourceKey: function() {
+        this.instanceState.selectedSource = '*'
+        return this.instanceState.selectedSource
+    },
     selectSource: function($source) {
         if (!$source || !$source.length) {
             return false;
