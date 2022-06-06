@@ -2,9 +2,10 @@ version: '3'
 
 services:
   cli-app:
-    image: craftcms/nginx:7.3
-    container_name: craft-lilt-plugin-nginx
+    image: craftcms/cli:7.3
+    container_name: craft-lilt-plugin-cli-app
     working_dir: /craft-lilt-plugin
+    tty: true
     volumes:
       - ./:/craft-lilt-plugin
 
