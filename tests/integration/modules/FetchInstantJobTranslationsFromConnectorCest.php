@@ -59,7 +59,7 @@ class FetchInstantJobTranslationsFromConnectorCest extends AbstractIntegrationCe
 
         $element = Entry::findOne(['authorId' => 1]);
 
-        $I->createJobWithTranslations([
+        [$job, $translations] = $I->createJobWithTranslations([
             'title' => 'Awesome test job',
             'elementIds' => [$element->id],
             'targetSiteIds' => '*',
@@ -74,7 +74,7 @@ class FetchInstantJobTranslationsFromConnectorCest extends AbstractIntegrationCe
             FetchInstantJobTranslationsFromConnector::class,
             [
                 'liltJobId' => 777,
-                'jobId' => 1,
+                'jobId' => $job->id,
             ]
         );
 

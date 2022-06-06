@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugintests\integration;
+namespace lilthq\craftliltplugintests\integration\controllers\job;
 
 use Codeception\Exception\ModuleException;
 use Codeception\Util\HttpCode;
@@ -10,19 +10,15 @@ use Craft;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\elements\MatrixBlock;
-use craft\errors\MissingComponentException;
-use craft\services\Elements;
 use IntegrationTester;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
-use lilthq\craftliltplugin\services\job\CreateJobCommand;
+use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
-use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
 
 class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
@@ -155,7 +151,7 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
             )
         );
 
-        $this->assertTranslations($translations, $expectedContent);
+        $I->assertTranslationsContentMatch($translations, $expectedContent);
     }
 
     private function getExpectedContent(Entry $element): array
@@ -229,40 +225,5 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
                 ],
             ],
         ];
-    }
-
-    /**
-     * @param array $translations
-     * @param array $expectedContent
-     * @return void
-     * @throws \craft\errors\InvalidFieldException
-     */
-    private function assertTranslations(array $translations, array $expectedContent): void
-    {
-        foreach ($translations as $translation) {
-            $translation->refresh();
-
-            Assert::assertNotEmpty($translation->translatedDraftId);
-
-            $translatedDraft = Craft::$app->elements->getElementById(
-                $translation->translatedDraftId,
-                'craft\elements\Entry',
-                $translation->targetSiteId
-            );
-
-            $appliedContent = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
-                $translatedDraft
-            );
-            $translationTargetLanguage = Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
-                $translation->targetSiteId
-            );
-
-            //TODO: maybe we can write our own assertion to be sure that ids are correct
-            //we definitely can't ignore keys
-            Assert::assertEqualsCanonicalizing(
-                $expectedContent[$translationTargetLanguage],
-                $appliedContent
-            );
-        }
     }
 }

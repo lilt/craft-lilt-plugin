@@ -25,9 +25,9 @@ class CraftLiltPluginHelper extends Module
     {
         $job = $this->createJob($data);
 
-        if(empty($data['liltJobId'])) {
-            throw new \RuntimeException('Please provide liltJobId for your test');
-        }
+//        if (empty($data['liltJobId'])) {
+//            throw new \RuntimeException('Please provide liltJobId for your test');
+//        }
 
         //TODO: DRY here?
         $elementIdsToTranslate = $job->getElementIds();
@@ -57,11 +57,11 @@ class CraftLiltPluginHelper extends Module
 
         return [$job, $translations];
     }
+
     public function createJob(array $data): Job
     {
         if ($data['targetSiteIds'] === '*') {
-            $data['targetSiteIds'] = Craftliltplugin::getInstance(
-            )->languageMapper->getLanguageToSiteId();
+            $data['targetSiteIds'] = Craftliltplugin::getInstance()->languageMapper->getLanguageToSiteId();
         }
 
         $createJobCommand = new CreateJobCommand(
@@ -88,9 +88,178 @@ class CraftLiltPluginHelper extends Module
         return $job;
     }
 
-    public function assertJobInQueue(BaseJob $expectedJob): void {
+    public function assertJobInQueue(BaseJob $expectedJob): void
+    {
         $jobInfo = Craft::$app->queue->getJobInfo();
         $actual = Craft::$app->queue->getJobDetails($jobInfo[0]['id']);
         $this->assertEquals($expectedJob, $actual['job']);
+    }
+
+    public function assertTranslationsContentMatch(array $translations, array $expectedContent): void
+    {
+        foreach ($translations as $translation) {
+            $translation->refresh();
+
+            $this->assertNotEmpty($translation->translatedDraftId);
+
+            $translatedDraft = Craft::$app->elements->getElementById(
+                $translation->translatedDraftId,
+                'craft\elements\Entry',
+                $translation->targetSiteId
+            );
+
+            $appliedContent = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
+                $translatedDraft
+            );
+            $translationTargetLanguage = Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                $translation->targetSiteId
+            );
+
+            //TODO: maybe we can write our own assertion to be sure that ids are correct
+            //we definitely can't ignore keys
+            $this->assertEqualsCanonicalizing(
+                $expectedContent[$translationTargetLanguage],
+                $appliedContent
+            );
+        }
+    }
+
+    public function assertTranslationContentMatch(
+        int $jobId,
+        int $elementId,
+        string $targetLanguage,
+        array $expectedContent,
+        int $connectorTranslationId,
+        string $status = TranslationRecord::STATUS_READY_FOR_REVIEW
+    ): void {
+        $translation = TranslationRecord::findOne([
+            'jobId' => $jobId,
+            'elementId' => $elementId,
+            'targetSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage),
+        ]);
+
+        if ($translation === null) {
+            $this->fail('Translation not found');
+        }
+
+        $translation->refresh();
+
+        $this->assertNotEmpty($translation->translatedDraftId);
+
+        $translatedDraft = Craft::$app->elements->getElementById(
+            $translation->translatedDraftId,
+            'craft\elements\Entry',
+            $translation->targetSiteId
+        );
+
+        if ($translatedDraft === null) {
+            $this->fail('Draft not found');
+        }
+
+        $appliedContent = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
+            $translatedDraft
+        );
+        $this->assertSame($connectorTranslationId, $translation->connectorTranslationId);
+        $this->assertSame($status, $translation->status);
+
+        //TODO: maybe we can write our own assertion to be sure that ids are correct
+        //we definitely can't ignore keys
+        $this->assertEqualsCanonicalizing(
+            $expectedContent,
+            $appliedContent
+        );
+    }
+
+    public function assertTranslationFailed(
+        int $jobId,
+        int $elementId,
+        string $targetLanguage,
+        int $connectorTranslationId
+    ): void {
+        $translation = TranslationRecord::findOne(
+            [
+                'jobId' => $jobId,
+                'elementId' => $elementId,
+                'targetSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage),
+            ]
+        );
+
+        if ($translation === null) {
+            $this->fail('Translation not found');
+        }
+
+        $translation->refresh();
+
+        $this->assertEmpty($translation->translatedDraftId);
+        $this->assertEmpty($translation->targetContent);
+        $this->assertSame($connectorTranslationId, $translation->connectorTranslationId);
+        $this->assertSame(TranslationRecord::STATUS_FAILED, $translation->status);
+    }
+
+    public function assertTranslationStatus(int $translationId, string $expectedStatus) {
+        $actualTranslation = TranslationRecord::findOne(
+            [
+                'id' => $translationId
+            ]
+        );
+
+        $this->assertSame($expectedStatus, $actualTranslation->status);
+    }
+
+    public function assertJobStatus(int $jobId, string $expectedStatus) {
+        $actualJob = JobRecord::findOne(
+            [
+                'id' => $jobId
+            ]
+        );
+
+        $this->assertSame($expectedStatus, $actualJob->status);
+    }
+
+    public function setTranslationStatus(
+        int $jobId,
+        int $elementId,
+        string $targetLanguage,
+        string $status
+    ): TranslationRecord {
+        $translation = TranslationRecord::findOne(
+            [
+                'jobId' => $jobId,
+                'elementId' => $elementId,
+                'targetSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage),
+            ]
+        );
+
+        $this->assertInstanceOf(TranslationRecord::class, $translation);
+
+        $translation->status = $status;
+        $translation->save();
+
+        return $translation;
+    }
+
+    public function assertTranslationInProgress(
+        int $jobId,
+        int $elementId,
+        string $targetLanguage
+    ): void {
+        $translation = TranslationRecord::findOne(
+            [
+                'jobId' => $jobId,
+                'elementId' => $elementId,
+                'targetSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($targetLanguage),
+            ]
+        );
+
+        if ($translation === null) {
+            $this->fail('Translation not found');
+        }
+
+        $translation->refresh();
+
+        $this->assertEmpty($translation->translatedDraftId);
+        $this->assertEmpty($translation->targetContent);
+        $this->assertEmpty($translation->connectorTranslationId);
+        $this->assertSame(TranslationRecord::STATUS_IN_PROGRESS, $translation->status);
     }
 }

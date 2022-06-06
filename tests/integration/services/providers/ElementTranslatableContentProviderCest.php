@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugintests\integration;
+namespace lilthq\craftliltplugintests\integration\services\providers;
 
 use craft\elements\Entry;
 use FunctionalTester;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\FieldsFixture;
 use PHPUnit\Framework\Assert;

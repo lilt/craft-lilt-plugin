@@ -171,6 +171,7 @@ class WiremockClient extends Module
             ];
         }
 
+        $unmatched123 = $unmatched->getRequests();
         $this->assertEmpty(
             $unmatched->getRequests(),
             sprintf('Some of requests are unmatched: %s', json_encode($requests, JSON_PRETTY_PRINT))

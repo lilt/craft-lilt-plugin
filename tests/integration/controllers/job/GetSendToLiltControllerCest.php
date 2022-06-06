@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugintests\integration;
+namespace lilthq\craftliltplugintests\integration\controllers\job;
 
 use Codeception\Exception\ModuleException;
-use Codeception\TestInterface;
 use Codeception\Util\HttpCode;
 use Craft;
 use craft\elements\db\MatrixBlockQuery;
@@ -20,6 +19,7 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
