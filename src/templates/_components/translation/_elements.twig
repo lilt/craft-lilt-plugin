@@ -19,20 +19,23 @@
                 }) }}
             </th>
             <th scope="col" data-attribute="title">Title</th>
-            <!-- <th scope="col" data-attribute="sourceSiteId">Source locale</th> -->
             <th scope="col" data-attribute="targetSiteIds">Target locale</th>
             <th scope="col" data-attribute="dueDate">Last delivery</th>
             <th scope="col" data-attribute="status">Status</th>
-            <!--<th scope="col" data-attribute="link" data-icon="world" title="Preview" aria-label="Preview"></th>-->
             <th scope="col" data-attribute="link" title="Actions" aria-label="Actions">Actions</th>
         </tr>
         </thead>
         <tbody>
         {% for translation in element.translations %}
+
+            {% set isTranslationPublished = constant('lilthq\\craftliltplugin\\records\\TranslationRecord::STATUS_PUBLISHED') is same as translation.status %}
+            {% set isTranslationReviewed = isTranslationPublished or constant('lilthq\\craftliltplugin\\records\\TranslationRecord::STATUS_READY_TO_PUBLISH') is same as translation.status %}
+
             <tr data-id="{{ translation.id }}" data-status="{{ translation.status }}"
+                data-is-published="{{ isTranslationPublished }}"
+                data-is-reviewed="{{ isTranslationReviewed }}"
                 data-title="{{ element.elementsMappedById[translation.elementId].title }}" tabindex="0">
                 <td class="checkbox-cell">
-                    <!--<div class="checkbox" title="Select" aria-label="Select"></div>-->
                     {{ forms.checkbox({
                         name: 'translationIds[]',
                         value: translation.id,
@@ -53,8 +56,6 @@
                     </div>
                 </th>
 
-                <!-- <td data-title="Site source" data-attr="sourceSiteId"><span class="source-language" data-icon="world">{{ translation.sourceLocale }}</span> -->
-
                 <td data-title="Target source" data-attr="targetLocale">
                     <span class="source-language" data-icon="world"></span>{{ translation.targetLocale }}
                 </td>
@@ -65,13 +66,8 @@
                                 class="status {{ translation.statusColor }}"></span>{{ translation.statusLabel }}</span>
                 </td>
 
-                <!-- <td data-title="Preview" data-attr="preview">
-                <a href="{{ translation.previewUrl }}" title="Visit webpage" rel="noopener" target="_blank"
-                   data-icon="world"></a>
-            </td> -->
-
                 <td data-title="Action" data-attr="preview" style="font-size: 14pt">
-                    <span class='lilt-review-translation {{ translation.status is same as 'published' or translation.status is same as 'failed'  or translation.status is same as 'new' ? 'disabled' : '' }}'
+                    <span class='lilt-review-translation {{ translation.status is same as 'published' or translation.status is same as 'failed'  or translation.status is same as 'new' or translation.status is same as 'in-progress' ? 'disabled' : '' }}'
                           title="Review" data-id="{{ translation.id }}"
                           data-title="{{ element.elementsMappedById[translation.elementId].title }}" data-icon="view"
                           style="margin-right: 5px;color: #0b69a3;cursor: pointer;"></span>

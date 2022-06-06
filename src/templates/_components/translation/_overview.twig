@@ -50,17 +50,17 @@
                         <td style="color: grey">
                             <div>
                                 <div class="translation-text" style="float: left;">{{ key }}</div>
-                                <span data-icon="clipboard" style="float:right"></span></div>
+                                <span class="lilt-text-copy-to-clipboard" data-icon="clipboard" style="float:right"></span></div>
                         </td>
                         <td style="color: grey">
                             <div>
                                 <div class="translation-text" style="float: left;">{{ key }}</div>
-                                <span data-icon="clipboard" style="float:right"></span></div>
+                                <span class="lilt-text-copy-to-clipboard" data-icon="clipboard" style="float:right"></span></div>
                         </td>
                     </tr>
                     <tr>
-                        <td>{{ value }}</td>
-                        <td>{{ translation.targetContentValues[key] }}</td>
+                        <td data-translation-key="{{ key }}" data-source="original">{{ value }}</td>
+                        <td data-translation-key="{{ key }}" data-source="translated">{{ translation.targetContentValues[key] }}</td>
                     </tr>
                 {% endfor %}
             </table>
