@@ -7,9 +7,10 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\controllers\job;
+namespace lilthq\craftliltplugin\controllers\translation;
 
 use Craft;
+use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -27,7 +28,7 @@ class PostTranslationReviewController extends AbstractJobController
     public function actionInvoke(): Response
     {
         $request = Craft::$app->getRequest();
-        $translationId = $request->getParam('translationId');
+        $translationId = $request->getBodyParam('translationId');
 
         if (!$request->getIsPost()) {
             return (new Response())->setStatusCode(405);
@@ -76,14 +77,6 @@ class PostTranslationReviewController extends AbstractJobController
                     Job::class
                 );
             }
-
-            /*
-            Queue::push((new UpdateJobStatusOnTranslationChange(
-                [
-                    'jobId' => $translation->jobId,
-                ]
-            )));
-            */
         }
 
         if ($updated !== 1) {

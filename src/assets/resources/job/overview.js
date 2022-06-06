@@ -252,8 +252,8 @@ const showModal = function() {
 
         Craft.sendActionRequest(
             'POST',
-            'craft-lilt-plugin/job/post-translation-review/invoke',
-            {params: {translationId: translationId, reviewed: true}},
+            'craft-lilt-plugin/translation/post-translation-review/invoke',
+            {data: {translationId: translationId, reviewed: true}},
         ).then(response => {
           $spinner.remove();
 
@@ -282,8 +282,8 @@ const showModal = function() {
 
         Craft.sendActionRequest(
             'POST',
-            'craft-lilt-plugin/job/post-translation-publish/invoke',
-            {params: {translationId: translationId, reviewed: true}},
+            'craft-lilt-plugin/translation/post-translation-publish/invoke',
+            {data: {translationId: translationId, published: true}},
         ).then(response => {
           Craft.cp.displayNotice(Craft.t('app', 'Translation published'));
           $spinner.remove();
@@ -397,7 +397,7 @@ $('#lilt-translations-table th.checkbox-cell.selectallcontainer .checkbox').
         const status = $(
             '#lilt-translations-table tr[data-id="' + $(this).val() + '"]').
             data('status');
-        if (status === 'published' || status === 'failed' || status === 'new') {
+        if (status === 'published' || status === 'failed' || status === 'new' || status === 'in-progress') {
           return;
         }
         $(this).prop('checked', allChecked);
@@ -412,7 +412,7 @@ $(document).ready(
 
       $('#lilt-translations-table tr').each(function() {
         const status = $(this).data('status');
-        if (status === 'published' || status === 'failed' || status === 'new') {
+        if (status === 'published' || status === 'failed' || status === 'new' || status === 'in-progress') {
           $(this).find('.checkbox-cell').addClass('disabled').disable();
           $(this).
               find('.checkbox-cell').
