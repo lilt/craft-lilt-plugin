@@ -11,6 +11,11 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
+/**
+ * @deprecated TODO: Move logic to separate file and:
+ *  - update PostTranslationReviewController
+ *  - update PostTranslationPublishController
+ */
 class UpdateJobStatusOnTranslationChange extends BaseJob
 {
     /**

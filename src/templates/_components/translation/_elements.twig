@@ -29,16 +29,18 @@
         {% for translation in element.translations %}
 
             {% set isTranslationPublished = constant('lilthq\\craftliltplugin\\records\\TranslationRecord::STATUS_PUBLISHED') is same as translation.status %}
+            {% set isTranslationInProgress = constant('lilthq\\craftliltplugin\\records\\TranslationRecord::STATUS_IN_PROGRESS') is same as translation.status %}
             {% set isTranslationReviewed = isTranslationPublished or constant('lilthq\\craftliltplugin\\records\\TranslationRecord::STATUS_READY_TO_PUBLISH') is same as translation.status %}
 
             <tr data-id="{{ translation.id }}" data-status="{{ translation.status }}"
                 data-is-published="{{ isTranslationPublished }}"
                 data-is-reviewed="{{ isTranslationReviewed }}"
+                data-is-in-progress="{{ isTranslationInProgress }}"
                 data-title="{{ element.elementsMappedById[translation.elementId].title }}" tabindex="0">
                 <td class="checkbox-cell">
                     {{ forms.checkbox({
                         name: 'translationIds[]',
-                        value: translation.id,
+                        value: translation.id
                     }) }}
                 </td>
                 <th data-title="Title" data-titlecell="">

@@ -42,7 +42,7 @@ class RegisterCpUrlRulesListener implements ListenerInterface
             = 'craft-lilt-plugin/index/index';
         $event->rules['GET craft-lilt-plugin/jobs']
             = 'craft-lilt-plugin/jobs/index';
-        $event->rules['craft-lilt-plugin']
+        $event->rules['GET craft-lilt-plugin/job/translation-review']
             = 'craft-lilt-plugin/job/get-translation-review/invoke';
         $event->rules['GET craft-lilt-plugin/settings/<id>']
             = 'craft-lilt-plugin/get-settings-form/invoke';
@@ -50,6 +50,12 @@ class RegisterCpUrlRulesListener implements ListenerInterface
             = 'craft-lilt-plugin/get-settings-form/invoke';
         $event->rules['POST craft-lilt-plugin/settings/lilt-configuration']
             = 'craft-lilt-plugin/post-configuration/invoke';
+
+        $event->rules['POST craft-lilt-plugin/job/translation/publish']
+            = CraftliltpluginParameters::TRANSLATION_PUBLISH_ACTION;
+
+        $event->rules['POST craft-lilt-plugin/job/translation/review']
+            = CraftliltpluginParameters::TRANSLATION_REVIEW_ACTION;
 
         return $event;
     }

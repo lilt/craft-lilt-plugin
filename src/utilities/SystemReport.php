@@ -47,19 +47,8 @@ class SystemReport extends Utility
             ],
         ];
 
-        $craft = Craft::$app->getVersion();
-
         $allFieldTypes = Craft::$app->fields->getAllFieldTypes();
-        $requirements = [
-            'summary' => [
-                "total" => 0,
-                "errors" => 0,
-                "warnings" => 0
-            ],
-            "requirements" => [
-
-            ]
-        ];
+        $requirements = [];
 
         $fieldContentProvider = Craftliltplugin::getInstance()->fieldContentProvider;
 
@@ -93,7 +82,7 @@ class SystemReport extends Utility
                 $fieldSupport['memo'] = sprintf('%s is not supported', $fieldType);
             }
 
-            $requirements['requirements'][] = $fieldSupport;
+            $requirements[] = $fieldSupport;
         }
 
         return Craft::$app->getView()->renderTemplate('craft-lilt-plugin/_components/utilities/system-report.twig', [
@@ -101,7 +90,7 @@ class SystemReport extends Utility
             'plugins' => [],
             'modules' => [],
             'aliases' => [],
-            'requirements' => $requirements['requirements'],
+            'requirements' => $requirements,
             'pluginRequirements' => $pluginRequirements,
         ]);
     }

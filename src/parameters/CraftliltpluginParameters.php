@@ -17,6 +17,10 @@ use lilthq\craftliltplugin\services\listeners\RegisterCpUrlRulesListener;
 
 class CraftliltpluginParameters
 {
+    public const TRANSLATION_REVIEW_ACTION = 'craft-lilt-plugin/translation/post-translation-review/invoke';
+    public const TRANSLATION_PUBLISH_ACTION = 'craft-lilt-plugin/translation/post-translation-publish/invoke';
+    public const TRANSLATION_REVIEW_PATH = 'craft-lilt-plugin/job/translation/review';
+
     public const JOB_EDIT_PATH = 'craft-lilt-plugin/job/edit';
     public const JOB_CREATE_PATH = 'craft-lilt-plugin/job/create';
     public const JOB_SEND_TO_LILT_PATH = 'craft-lilt-plugin/job/send-to-lilt';
