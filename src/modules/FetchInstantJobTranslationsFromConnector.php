@@ -44,21 +44,15 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob
     public function execute($queue): void
     {
         $job = Job::findOne(['id' => $this->jobId]);
-        if (!$job->isInstantFlow()) {
+        if (!$job || !$job->isInstantFlow()) {
             $this->markAsDone($queue);
 
             return;
         }
 
-        //TODO: pass from previous job maybe?
         $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
-        #$jobRecord = JobRecord::findOne(['id' => $this->jobId]);
 
         if ($liltJob->getStatus() === JobResponse::STATUS_COMPLETE) {
-            #$jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
-
-            #$jobRecord->save();
-
             Craft::$app->elements->invalidateCachesForElementType(
                 Job::class
             );

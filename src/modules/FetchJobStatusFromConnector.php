@@ -35,12 +35,16 @@ class FetchJobStatusFromConnector extends BaseJob
             && $liltJob->getStatus() !== JobResponse::STATUS_QUEUED;
 
         if (!$isTranslationFinished) {
-            Queue::push((new FetchJobStatusFromConnector(
-                [
-                    'jobId' => $this->jobId,
-                    'liltJobId' => $this->liltJobId,
-                ]
-            )), null, self::DELAY_IN_SECONDS);
+            Queue::push(
+                (new FetchJobStatusFromConnector(
+                    [
+                        'jobId' => $this->jobId,
+                        'liltJobId' => $this->liltJobId,
+                    ]
+                )),
+                null,
+                self::DELAY_IN_SECONDS
+            );
 
             return;
         }
@@ -48,29 +52,41 @@ class FetchJobStatusFromConnector extends BaseJob
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
 
         if ($jobRecord->isVerifiedFlow()) {
-            //LILT_TRANSLATION_WORKFLOW_VERIFIED
+
+            #LILT_TRANSLATION_WORKFLOW_VERIFIED
+
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
 
-            Queue::push((new FetchVerifiedJobTranslationsFromConnector(
-                [
-                    'jobId' => $this->jobId,
-                    'liltJobId' => $this->liltJobId,
-                ]
-            )));
+            Queue::push(
+                new FetchVerifiedJobTranslationsFromConnector(
+                    [
+                        'jobId' => $this->jobId,
+                        'liltJobId' => $this->liltJobId,
+                    ]
+                ),
+                null,
+                self::DELAY_IN_SECONDS
+            );
         }
 
         if ($jobRecord->isInstantFlow()) {
-            //LILT_TRANSLATION_WORKFLOW_INSTANT
+
+            #LILT_TRANSLATION_WORKFLOW_INSTANT
+
             if ($liltJob->getStatus() === JobResponse::STATUS_FAILED) {
                 $jobRecord->status = Job::STATUS_FAILED;
             }
 
-            Queue::push((new FetchInstantJobTranslationsFromConnector(
-                [
-                    'jobId' => $this->jobId,
-                    'liltJobId' => $this->liltJobId,
-                ]
-            )));
+            Queue::push(
+                new FetchInstantJobTranslationsFromConnector(
+                    [
+                        'jobId' => $this->jobId,
+                        'liltJobId' => $this->liltJobId,
+                    ]
+                ),
+                null,
+                self::DELAY_IN_SECONDS
+            );
         }
 
         $jobRecord->save();

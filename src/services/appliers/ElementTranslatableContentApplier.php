@@ -163,7 +163,7 @@ class ElementTranslatableContentApplier
 
         $draftElement = Craft::$app->elements->getElementById(
             $draft->getId(),
-            null,
+            'craft\elements\Entry',
             Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage(
                 $translationApplyCommand->getTargetLanguage()
             )

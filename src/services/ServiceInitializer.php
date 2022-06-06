@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\services\appliers\field\NeoFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
+use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
@@ -66,6 +67,7 @@ class ServiceInitializer
             'i18NRepository' => I18NRepository::class,
             'jobLogsRepository' => JobLogsRepository::class,
             'translationFailedHandler' => TranslationFailedHandler::class,
+            'createTranslationsHandler' => CreateTranslationsHandler::class,
             'listenerRegister' => [
                 'class' => ListenerRegister::class,
                 'availableListeners' => CraftliltpluginParameters::LISTENERS,

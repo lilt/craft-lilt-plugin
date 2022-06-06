@@ -19,37 +19,38 @@ class CreateJobHandler
 {
     public function __invoke(CreateJobCommand $command, bool $asDraft = false): Job
     {
-        $element = new Job();
-        $element->authorId = $command->getAuthorId();
-        $element->title = $command->getTitle();
-        $element->liltJobId = null;
-        $element->status = $asDraft ? Job::STATUS_DRAFT : Job::STATUS_NEW;
-        $element->sourceSiteId = $command->getSourceSiteId();
+        $job = new Job();
+        $job->authorId = $command->getAuthorId();
+        $job->title = $command->getTitle();
+        $job->liltJobId = null;
+        $job->status = $asDraft ? Job::STATUS_DRAFT : Job::STATUS_NEW;
+        $job->sourceSiteId = $command->getSourceSiteId();
 
-        $element->sourceSiteLanguage = Craftliltplugin::getInstance()
+        $job->sourceSiteLanguage = Craftliltplugin::getInstance()
             ->languageMapper
             ->getLanguageBySiteId(
                 $command->getSourceSiteId()
             );
 
-        $element->targetSiteIds = $command->getTargetSitesIds();
-        $element->elementIds = $command->getEntries();
-        $element->versions = $command->getVersions();
-        $element->translationWorkflow = $command->getTranslationWorkflow();
-        $element->draftId = null;
-        $element->revisionId = null;
+        $job->targetSiteIds = $command->getTargetSitesIds();
+        $job->elementIds = $command->getEntries();
+        $job->versions = $command->getVersions();
+        $job->translationWorkflow = $command->getTranslationWorkflow();
+        $job->draftId = null;
+        $job->revisionId = null;
+
         $jobRecord = new JobRecord();
-        $jobRecord->setAttributes($element->getAttributes(), false);
+        $jobRecord->setAttributes($job->getAttributes(), false);
 
         $statusElement = Craft::$app->getElements()->saveElement(
-            $element,
+            $job,
             true,
             true,
             true
         );
 
         #TODO: rethink this, what if we use separate id for elements table and separate for job record
-        $jobRecord->id = $element->id;
+        $jobRecord->id = $job->id;
 
         $status = $jobRecord->save();
 
@@ -64,6 +65,6 @@ class CreateJobHandler
             'Job created'
         );
 
-        return $element;
+        return $job;
     }
 }

@@ -52,16 +52,9 @@ class SendJobToLiltConnectorHandler
             $job->getTargetSiteIds()
         );
 
-        $translationRecords = [];
-        $versions = $job->getVersions();
-
         foreach ($elementIdsToTranslate as $elementId) {
-            if (isset($versions[$elementId]) && $versions[$elementId] === 'null') {
-                $versions[$elementId] = null;
-            }
 
-            $versionId = (int)($versions[$elementId] ?? $elementId);
-
+            $versionId = $job->getElementVersionId($elementId);
             $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
 
             if (!$element) {
@@ -88,34 +81,20 @@ class SendJobToLiltConnectorHandler
                 return;
             }
 
-            $translationRecords[] = array_values(
-                array_map(
-                    static function (int $targetSiteId) use ($job, $content, $elementId, $versionId) {
-                        return new TranslationRecord([
-                            'jobId' => $job->id,
-                            'elementId' => $elementId,
-                            'versionId' => $versionId,
-                            'sourceSiteId' => $job->sourceSiteId,
-                            'targetSiteId' => $targetSiteId,
-                            'sourceContent' => $content,
-                            'status' => TranslationRecord::STATUS_IN_PROGRESS,
-                        ]);
-                    },
-                    $job->getTargetSiteIds()
-                )
+            $createTranslationsResult = Craftliltplugin::getInstance()->createTranslationsHandler->__invoke(
+                $job,
+                $content,
+                $elementId,
+                $versionId
             );
+
+            if(!$createTranslationsResult) {
+                $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
+
+                throw new \RuntimeException('Translations not created, upload failed');
+            }
         }
 
-        $translationRecords = array_merge(...$translationRecords);
-
-        foreach ($translationRecords as $jobElementRecord) {
-            /**
-             * @var TranslationRecord $jobElementRecord
-             */
-            $jobElementRecord->save();
-        }
-
-        $job->liltJobId = $jobLilt->getId();
         $this->updateJob($job, $jobLilt->getId(), Job::STATUS_IN_PROGRESS);
 
         Craftliltplugin::getInstance()->connectorJobRepository->start($jobLilt->getId());

@@ -125,7 +125,20 @@ class Job extends Element
             return $this->versions;
         }
 
-        return json_decode($this->versions, true) ?? [];
+        $this->versions = json_decode($this->versions, true) ?? [];
+
+        return $this->versions;
+    }
+
+    public function getElementVersionId(int $elementId): int
+    {
+        $versions = $this->getVersions();
+
+        if (isset($versions[$elementId]) && $versions[$elementId] === 'null') {
+            $versions[$elementId] = null;
+        }
+
+        return (int)($versions[$elementId] ?? $elementId);
     }
 
     public function getVersionsAsString(): string

@@ -23,6 +23,7 @@ use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
+use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
@@ -85,6 +86,7 @@ use yii\web\Response;
  * @property ListenerRegister $listenerRegister
  * @property JobLogsRepository $jobLogsRepository
  * @property TranslationFailedHandler $translationFailedHandler
+ * @property CreateTranslationsHandler $createTranslationsHandler
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin

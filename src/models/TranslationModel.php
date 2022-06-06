@@ -58,7 +58,7 @@ class TranslationModel extends Model
 
     public function getContentValues(array $items, string $prefix = ''): array
     {
-        $result = array();
+        $result = [];
         foreach ($items as $key => $value) {
             if (is_array($value)) {
                 $result = array_merge($result, $this->getContentValues($value, $prefix . $key . '.'));
@@ -120,12 +120,12 @@ class TranslationModel extends Model
         if (!$element) {
             $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
 
-            return $element->getUrl();
-        }
+            if ($element === null) {
+                //TODO: handle
+                return null;
+            }
 
-        if ($element === null) {
-            //TODO: handle
-            return null;
+            return $element->getUrl();
         }
 
         $token = Craft::$app->tokens->createToken([
@@ -138,6 +138,7 @@ class TranslationModel extends Model
                 ]
             ]);
 
+        //TODO: Argument 1 passed to craft\helpers\UrlHelper::urlWithParams() must be of the type string, null given, called in /craft-lilt-plugin/src/models/TranslationModel.php on line 143   ?????
         return UrlHelper::urlWithParams(
             $element->getUrl(),
             ['token' => $token]
