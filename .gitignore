@@ -39,3 +39,5 @@ composer.lock
 /tests/_output
 /tests/_craft/storage
 /tests/_support/_generated
+
+docker-compose.override.yml

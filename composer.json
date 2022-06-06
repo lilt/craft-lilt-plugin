@@ -42,7 +42,12 @@
   },
   "autoload": {
     "psr-4": {
-      "lilthq\\craftliltplugin\\": "src/",
+      "lilthq\\craftliltplugin\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "lilthq\\craftliltplugintests\\integration\\": "tests/integration",
       "lilthq\\tests\\fixtures\\": "tests/fixtures/"
     }
   },
