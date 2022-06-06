@@ -32,7 +32,7 @@ class CreateTranslationsHandler
             )
         );
 
-        if(!$translationRecords) {
+        if (!$translationRecords) {
             return false;
         }
 

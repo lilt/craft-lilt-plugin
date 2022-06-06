@@ -53,7 +53,6 @@ class SendJobToLiltConnectorHandler
         );
 
         foreach ($elementIdsToTranslate as $elementId) {
-
             $versionId = $job->getElementVersionId($elementId);
             $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
 
@@ -88,7 +87,7 @@ class SendJobToLiltConnectorHandler
                 $versionId
             );
 
-            if(!$createTranslationsResult) {
+            if (!$createTranslationsResult) {
                 $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
 
                 throw new \RuntimeException('Translations not created, upload failed');

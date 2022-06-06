@@ -52,7 +52,6 @@ class FetchJobStatusFromConnector extends BaseJob
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
 
         if ($jobRecord->isVerifiedFlow()) {
-
             #LILT_TRANSLATION_WORKFLOW_VERIFIED
 
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
@@ -70,7 +69,6 @@ class FetchJobStatusFromConnector extends BaseJob
         }
 
         if ($jobRecord->isInstantFlow()) {
-
             #LILT_TRANSLATION_WORKFLOW_INSTANT
 
             if ($liltJob->getStatus() === JobResponse::STATUS_FAILED) {

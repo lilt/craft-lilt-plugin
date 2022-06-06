@@ -138,7 +138,8 @@ class TranslationModel extends Model
                 ]
             ]);
 
-        //TODO: Argument 1 passed to craft\helpers\UrlHelper::urlWithParams() must be of the type string, null given, called in /craft-lilt-plugin/src/models/TranslationModel.php on line 143   ?????
+        //TODO: Argument 1 passed to craft\helpers\UrlHelper::urlWithParams() must be of the type string, null given,
+        // called in /craft-lilt-plugin/src/models/TranslationModel.php on line 143   ?????
         return UrlHelper::urlWithParams(
             $element->getUrl(),
             ['token' => $token]

@@ -1,6 +1,6 @@
 up:
 	docker-compose up -d
-	docker-compose exec mysql-test bash -c 'while ! mysqladmin ping -h"mysql-test" --silent; do sleep 1; done'
+	docker-compose exec -T mysql-test sh -c 'while ! mysqladmin ping -h"mysql-test" --silent; do sleep 1; done'
 
 down:
 	docker-compose down -v --remove-orphans
