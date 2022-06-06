@@ -11,7 +11,7 @@ use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\FieldsFixture;
 use PHPUnit\Framework\Assert;
 
-class ElementTranslatableContentProviderCest
+class ElementTranslatableContentProviderCest extends AbstractIntegrationCest
 {
     public function _fixtures(): array
     {

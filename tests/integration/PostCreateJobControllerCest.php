@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugintests\integration;
 
+use Codeception\Exception\ModuleException;
 use Craft;
 use craft\elements\Entry;
 use craft\errors\MissingComponentException;
+use craft\helpers\Db;
 use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
@@ -15,8 +17,9 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
+use yii\db\Exception;
 
-class PostCreateJobControllerCest
+class PostCreateJobControllerCest extends AbstractIntegrationCest
 {
     public function _fixtures(): array
     {
@@ -39,6 +42,7 @@ class PostCreateJobControllerCest
     /**
      * @throws MissingComponentException
      * @throws InvalidConfigException
+     * @throws Exception|ModuleException
      */
     public function testCreateJob(IntegrationTester $I): void
     {

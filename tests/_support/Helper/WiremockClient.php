@@ -69,4 +69,111 @@ class WiremockClient extends Module
                 )
         );
     }
+
+    public function expectJobStartRequest(int $liltJobId, int $responseCode): void
+    {
+        $this->wireMock->stubFor(
+            WireMock::post(
+                WireMock::urlEqualTo(
+                    sprintf('/api/v1.0/jobs/%d/start', $liltJobId)
+                )
+            )->willReturn(
+                WireMock::aResponse()
+                    ->withStatus($responseCode)
+            )
+        );
+    }
+
+    public function expectJobGetRequest(int $liltJobId, int $responseCode, ?array $responseBody = null): void
+    {
+        $response = WireMock::aResponse()
+            ->withStatus($responseCode);
+
+        if ($responseBody !== null) {
+            $response->withBody(json_encode($responseBody));
+        }
+
+        $this->wireMock->stubFor(
+            WireMock::get(
+                WireMock::urlEqualTo(
+                    sprintf('/api/v1.0/jobs/%d', $liltJobId)
+                )
+            )->willReturn(
+                $response
+            )
+        );
+    }
+
+    public function expectTranslationsGetRequest(
+        int $liltJobId,
+        int $start,
+        int $limit,
+        int $responseCode,
+        ?array $responseBody = null
+    ): void {
+        $response = WireMock::aResponse()
+            ->withStatus($responseCode);
+
+        if ($responseBody !== null) {
+            $response->withBody(json_encode($responseBody));
+        }
+
+        $realStartValue = $start === 0 ? '00' : (string)$start;
+
+        $this->wireMock->stubFor(
+            WireMock::get(
+                WireMock::urlEqualTo(
+                    sprintf(
+                        '/api/v1.0/translations?limit=%d&start=%s&job_id=%d',
+                        $limit,
+                        $realStartValue,
+                        $liltJobId
+                    )
+                )
+            )->willReturn(
+                $response
+            )
+        );
+    }
+
+    public function expectTranslationDownloadRequest(
+        int $translationId,
+        int $responseCode,
+        ?array $responseBody = null
+    ): void {
+        $response = WireMock::aResponse()
+            ->withStatus($responseCode);
+
+        if ($responseBody !== null) {
+            $response->withBody(json_encode($responseBody));
+        }
+
+        $this->wireMock->stubFor(
+            WireMock::get(
+                WireMock::urlEqualTo(
+                    sprintf('/api/v1.0/translations/%d/download', $translationId)
+                )
+            )->willReturn(
+                $response
+            )
+        );
+    }
+
+    public function expectAllRequestsAreMatched(): void
+    {
+        $unmatched = $this->wireMock->findUnmatchedRequests();
+
+        $requests = [];
+        foreach ($unmatched->getRequests() as $request) {
+            $requests[] = [
+                'url' => $request->getMethod() . ' ' . $request->getUrl(),
+                'body' => $request->getBody()
+            ];
+        }
+
+        $this->assertEmpty(
+            $unmatched->getRequests(),
+            sprintf('Some of requests are unmatched: %s', json_encode($requests, JSON_PRETTY_PRINT))
+        );
+    }
 }

@@ -5,25 +5,26 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugintests\integration;
 
 use Codeception\Exception\ModuleException;
+use Codeception\TestInterface;
 use Codeception\Util\HttpCode;
 use Craft;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\elements\MatrixBlock;
-use craft\errors\MissingComponentException;
+use craft\errors\InvalidFieldException;
 use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
-use lilthq\craftliltplugin\services\job\CreateJobCommand;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
 
-class GetSendToLiltControllerCest
+class GetSendToLiltControllerCest extends AbstractIntegrationCest
 {
     public function _fixtures(): array
     {
@@ -44,24 +45,32 @@ class GetSendToLiltControllerCest
     }
 
     /**
-     * @throws MissingComponentException
-     * @throws InvalidConfigException
+     * @throws ModuleException
      */
     public function testCreateJob(IntegrationTester $I): void
     {
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
         $element = Entry::find()
             ->where(['authorId' => 1])
             ->orderBy(['id' => SORT_DESC])
             ->one();
 
-        $I->expectJobCreateRequest(
-            [
-                'project_prefix' => 'Awesome test job',
-                'lilt_translation_workflow' => 'INSTANT',
-            ],
-            200,
-            ['id' => 1000,]
-        );
+        $job = $I->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            'versions' => [],
+            'authorId' => 1,
+        ]);
+
+        $expectQueueJob = new FetchJobStatusFromConnector([
+            'liltJobId' => 1000,
+            'jobId'     => $job->id
+        ]);
 
         $expectedUrl = sprintf(
             '/api/v1.0/jobs/1000/files?name=%s'
@@ -76,20 +85,16 @@ class GetSendToLiltControllerCest
         );
         $expectedBody = $this->getExpectedBody($element);
 
+        $I->expectJobCreateRequest(
+            [
+                'project_prefix' => 'Awesome test job',
+                'lilt_translation_workflow' => 'INSTANT',
+            ],
+            200,
+            ['id' => 1000,]
+        );
         $I->expectJobTranslationsRequest($expectedUrl, $expectedBody, HttpCode::OK);
-
-        $user = Craft::$app->getUsers()->getUserById(1);
-        $I->amLoggedInAs($user);
-
-        $job = $this->createJob([
-            'title' => 'Awesome test job',
-            'elementIds' => [$element->id],
-            'targetSiteIds' => '*',
-            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
-            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
-            'versions' => [],
-            'authorId' => 1,
-        ]);
+        $I->expectJobStartRequest(1000, HttpCode::OK);
 
         $I->amOnPage(
             sprintf(
@@ -100,7 +105,6 @@ class GetSendToLiltControllerCest
         );
 
         $jobActual = Job::findOne(['id' => $job->id]);
-
         $translations = array_map(function (TranslationRecord $translationRecord) use ($element, $expectedBody) {
             Assert::assertSame(Job::STATUS_IN_PROGRESS, $translationRecord->status);
             Assert::assertSame($element->id, $translationRecord->versionId);
@@ -130,6 +134,8 @@ class GetSendToLiltControllerCest
         );
 
         Assert::assertSame(Job::STATUS_IN_PROGRESS, $jobActual->status);
+
+        $I->assertJobInQueue($expectQueueJob);
     }
 
     /**
@@ -169,7 +175,7 @@ class GetSendToLiltControllerCest
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
-        $job = $this->createJob([
+        $job = $I->createJob([
             'title' => 'Awesome test job',
             'elementIds' => [$element->id],
             'targetSiteIds' => '*',
@@ -196,32 +202,10 @@ class GetSendToLiltControllerCest
         Assert::assertSame(Job::STATUS_FAILED, $jobActual->status);
     }
 
-    private function createJob(array $data = []): Job
-    {
-        if ($data['targetSiteIds'] === '*') {
-            $data['targetSiteIds'] = Craftliltplugin::getInstance()->languageMapper->getLanguageToSiteId();
-        }
-
-        $createJobCommand = new CreateJobCommand(
-            $data['title'],
-            $data['elementIds'],
-            $data['targetSiteIds'],
-            $data['sourceSiteId'],
-            $data['translationWorkflow'],
-            $data['versions'],
-            $data['authorId']
-        );
-
-        return Craftliltplugin::getInstance()->createJobHandler->__invoke(
-            $createJobCommand
-        );
-    }
-
     /**
-     * @param $element
-     * @return array[]
+     * @throws InvalidFieldException
      */
-    private function getExpectedBody($element): array
+    private function getExpectedBody(Entry $element): array
     {
         /**
          * @var MatrixBlockQuery $matrixField
