@@ -12,6 +12,9 @@ restart:
 cli:
 	docker-compose exec -u www-data cli-app sh
 
+root:
+	docker-compose exec -u root cli-app sh
+
 composer-install:
 	docker-compose exec -T -u root cli-app sh -c "apk add git"
 	docker-compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
@@ -30,8 +33,11 @@ quality-fix:
 codecept-build:
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept build"
 
-codecept-coverage:
+coverage-xdebug:
 	docker-compose exec -T -u www-data cli-app sh -c "php -dxdebug.mode=coverage vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
+
+coverage-pcov:
+	docker-compose exec -T -u www-data cli-app sh -c "apk --no-cache add pcre-dev ${PHPIZE_DEPS} && pecl install pcov && docker-php-ext-enable pcov"
 
 integration: codecept-build
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration"

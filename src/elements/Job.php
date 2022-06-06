@@ -65,6 +65,7 @@ class Job extends Element
     private $_author;
     private $_elements;
     private $_translations;
+
     // @codingStandardsIgnoreEnd
 
     public function beforeDelete(): bool
@@ -111,7 +112,14 @@ class Job extends Element
             return $this->elementIds;
         }
 
-        return json_decode($this->elementIds, true) ?? [];
+        $elementIds = json_decode($this->elementIds, true) ?? [];
+        $this->elementIds = [];
+
+        foreach ($elementIds as $elementId) {
+            $this->elementIds[] = (int) $elementId;
+        }
+
+        return $this->elementIds;
     }
 
 
@@ -180,6 +188,7 @@ class Job extends Element
             SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
         );
     }
+
     public function isVerifiedFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(

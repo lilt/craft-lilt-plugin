@@ -59,7 +59,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
 
         $job = $I->createJob([
             'title' => 'Awesome test job',
-            'elementIds' => [$element->id],
+            'elementIds' => [ (string) $element->id ], //string to check type conversion
             'targetSiteIds' => '*',
             'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
             'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,

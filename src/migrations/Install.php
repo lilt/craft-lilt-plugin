@@ -20,10 +20,12 @@ class Install extends Migration
     public function safeUp(): void
     {
         $this->dropTableIfExists(CraftliltpluginParameters::TRANSLATION_TABLE_NAME);
-        $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::JOB_LOGS_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::I18N_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
+
+        # SHOULD BE LAST BECAUSE OF FOREIGN KEYS
+        $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
 
         $this->createTable(CraftliltpluginParameters::JOB_TABLE_NAME, [
             'id' => $this->primaryKey()->unsigned(),
@@ -141,8 +143,10 @@ class Install extends Migration
     {
         $this->dropTableIfExists(CraftliltpluginParameters::JOB_LOGS_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::TRANSLATION_TABLE_NAME);
-        $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::I18N_TABLE_NAME);
         $this->dropTableIfExists(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
+
+        # SHOULD BE LAST BECAUSE OF FOREIGN KEYS
+        $this->dropTableIfExists(CraftliltpluginParameters::JOB_TABLE_NAME);
     }
 }
