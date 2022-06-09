@@ -187,4 +187,6 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
         $I->assertTranslationStatus($translationToSubmit->id, TranslationRecord::STATUS_PUBLISHED);
         $I->assertJobStatus($job->id, Job::STATUS_READY_TO_PUBLISH);
     }
+
+    // TODO: do we need a test case when all fields are translated?
 }

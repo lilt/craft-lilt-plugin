@@ -17,7 +17,7 @@ fieldLayouts:
         sortOrder: 1
 fields:
   7fd51776-ba5a-4278-86e5-11fc0f8d7a99: # Plain text first block
-    columnSuffix: null
+    columnSuffix: kcjfifey
     contentColumnType: text
     fieldGroup: null
     handle: plainTextFirstBlock

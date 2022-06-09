@@ -1,0 +1,14 @@
+columnSuffix: rzfurceq
+contentColumnType: boolean
+fieldGroup: 9cdb6f52-9acf-4557-8ab5-039ae51883ea # blog
+handle: lightswitch
+instructions: ''
+name: Lightswitch
+searchable: false
+settings:
+  default: false
+  offLabel: 'The label text to display beside the lightswitch’s disabled state.'
+  onLabel: 'The label text to display beside the lightswitch’s enabled state'
+translationKeyFormat: null
+translationMethod: language
+type: craft\fields\Lightswitch

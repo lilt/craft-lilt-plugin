@@ -21,6 +21,7 @@ use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
+use lilthq\tests\fixtures\ExpectedElementContent;
 use PHPUnit\Framework\Assert;
 use yii\db\Exception;
 
@@ -147,24 +148,22 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $translationsResponseBody
         );
 
-        $expectedContent = $this->getExpectedContent($element);
-
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            $expectedContent['es-ES']
+            ExpectedElementContent::getExpectedBody($element, 'es-ES')
         );
 
         $I->expectTranslationDownloadRequest(
             703696,
             HttpCode::OK,
-            $expectedContent['de-DE']
+            ExpectedElementContent::getExpectedBody($element, 'de-DE')
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            $expectedContent['ru-RU']
+            ExpectedElementContent::getExpectedBody($element, 'ru-RU')
         );
 
         $I->runQueue(
@@ -175,7 +174,11 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             ]
         );
 
-        $I->assertTranslationsContentMatch($translations, $expectedContent);
+        $I->assertTranslationsContentMatch($translations, [
+            'es-ES' => ExpectedElementContent::getExpectedBody($element, 'es-ES'),
+            'de-DE' => ExpectedElementContent::getExpectedBody($element, 'de-DE'),
+            'ru-RU' => ExpectedElementContent::getExpectedBody($element, 'ru-RU'),
+        ]);
 
         Assert::assertEmpty(
             Craft::$app->queue->getTotalJobs()
@@ -224,19 +227,19 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            $expectedContent['es-ES']
+            ExpectedElementContent::getExpectedBody($element, 'es-ES')
         );
 
         $I->expectTranslationDownloadRequest(
             703696,
             HttpCode::OK,
-            $expectedContent['de-DE']
+            ExpectedElementContent::getExpectedBody($element, 'de-DE')
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            $expectedContent['ru-RU']
+            ExpectedElementContent::getExpectedBody($element, 'ru-RU')
         );
 
         $I->runQueue(
@@ -251,7 +254,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $job->id,
             $element->id,
             'es-ES',
-            $expectedContent['es-ES'],
+            ExpectedElementContent::getExpectedBody($element, 'es-ES'),
             703695
         );
 
@@ -259,7 +262,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $job->id,
             $element->id,
             'de-DE',
-            $expectedContent['de-DE'],
+            ExpectedElementContent::getExpectedBody($element, 'de-DE'),
             703696
         );
 
@@ -309,13 +312,13 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            $expectedContent['es-ES']
+            ExpectedElementContent::getExpectedBody($element, 'es-ES')
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            $expectedContent['ru-RU']
+            ExpectedElementContent::getExpectedBody($element, 'ru-RU')
         );
 
         $I->expectTranslationDownloadRequest(
@@ -335,7 +338,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $job->id,
             $element->id,
             'es-ES',
-            $expectedContent['es-ES'],
+            ExpectedElementContent::getExpectedBody($element, 'es-ES'),
             703695
         );
 
@@ -343,7 +346,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $job->id,
             $element->id,
             'ru-RU',
-            $expectedContent['ru-RU'],
+            ExpectedElementContent::getExpectedBody($element, 'ru-RU'),
             703697
         );
 
@@ -437,7 +440,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
         /**
          * @var MatrixBlockQuery $matrixField
          */
-        $matrixField = $element->getFieldValue('matrixField');
+        $matrixField = $element->getFieldValue('matrix');
         /**
          * @var MatrixBlock[] $blockElements
          */
@@ -451,8 +454,8 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             'de-DE' => [
                 $element->getId() => [
                     'title' => 'de-DE: Some example title',
-                    'body' => 'de-DE: <h1>Here is some header text</h1> Here is some content',
-                    'matrixField' => [
+                    'redactor' => 'de-DE: <h1>Here is some header text</h1> Here is some content',
+                    'matrix' => [
                         $blocksMap['firstBlock'] => [
                             'fields' => [
                                 'plainTextFirstBlock' => 'de-DE: Some text',
@@ -469,8 +472,8 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             'es-ES' => [
                 $element->getId() => [
                     'title' => 'es-ES: Some example title',
-                    'body' => 'es-ES: <h1>Here is some header text</h1> Here is some content',
-                    'matrixField' => [
+                    'redactor' => 'es-ES: <h1>Here is some header text</h1> Here is some content',
+                    'matrix' => [
                         $blocksMap['firstBlock'] => [
                             'fields' => [
                                 'plainTextFirstBlock' => 'es-ES: Some text',
@@ -487,8 +490,8 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             'ru-RU' => [
                 $element->getId() => [
                     'title' => 'ru-RU: Some example title',
-                    'body' => 'ru-RU: <h1>Here is some header text</h1> Here is some content',
-                    'matrixField' => [
+                    'redactor' => 'ru-RU: <h1>Here is some header text</h1> Here is some content',
+                    'matrix' => [
                         $blocksMap['firstBlock'] => [
                             'fields' => [
                                 'plainTextFirstBlock' => 'ru-RU: Some text',

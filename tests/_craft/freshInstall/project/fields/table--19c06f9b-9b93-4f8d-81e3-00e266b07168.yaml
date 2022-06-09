@@ -1,0 +1,110 @@
+columnSuffix: mxbiqthl
+contentColumnType: text
+fieldGroup: 9cdb6f52-9acf-4557-8ab5-039ae51883ea # blog
+handle: table
+instructions: ''
+name: Table
+searchable: false
+settings:
+  addRowLabel: 'Add a row'
+  columnType: text
+  columns:
+    __assoc__:
+      -
+        - col1
+        -
+          __assoc__:
+            -
+              - heading
+              - 'Column Heading 1'
+            -
+              - handle
+              - columnHeading1
+            -
+              - width
+              - ''
+            -
+              - type
+              - singleline
+      -
+        - col2
+        -
+          __assoc__:
+            -
+              - heading
+              - 'Column Heading 2'
+            -
+              - handle
+              - columnHeading2
+            -
+              - width
+              - ''
+            -
+              - type
+              - singleline
+      -
+        - col3
+        -
+          __assoc__:
+            -
+              - heading
+              - 'Column Heading 3'
+            -
+              - handle
+              - columnHeading3
+            -
+              - width
+              - ''
+            -
+              - type
+              - singleline
+      -
+        - col4
+        -
+          __assoc__:
+            -
+              - heading
+              - 'Column Heading 4'
+            -
+              - handle
+              - columnHeading4
+            -
+              - width
+              - ''
+            -
+              - type
+              - singleline
+  defaults:
+    -
+      __assoc__:
+        -
+          - col1
+          - 'First row first value'
+        -
+          - col2
+          - 'First row second value'
+        -
+          - col3
+          - 'First row third value'
+        -
+          - col4
+          - 'First row fourth value'
+    -
+      __assoc__:
+        -
+          - col1
+          - 'Second row first value'
+        -
+          - col2
+          - 'Second row second value'
+        -
+          - col3
+          - 'Second row third value'
+        -
+          - col4
+          - 'Second row fourth value'
+  maxRows: ''
+  minRows: ''
+translationKeyFormat: null
+translationMethod: language
+type: craft\fields\Table

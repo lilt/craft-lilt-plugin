@@ -1,0 +1,46 @@
+columnSuffix: tagtvaau
+contentColumnType: string
+fieldGroup: 9cdb6f52-9acf-4557-8ab5-039ae51883ea # blog
+handle: checkboxes
+instructions: ''
+name: Checkboxes
+searchable: false
+settings:
+  multi: true
+  options:
+    -
+      __assoc__:
+        -
+          - label
+          - 'First checkbox label'
+        -
+          - value
+          - firstCheckboxLabel
+        -
+          - default
+          - ''
+    -
+      __assoc__:
+        -
+          - label
+          - 'Second checkbox label'
+        -
+          - value
+          - secondCheckboxLabel
+        -
+          - default
+          - ''
+    -
+      __assoc__:
+        -
+          - label
+          - 'Third checkbox label'
+        -
+          - value
+          - thirdCheckboxLabel
+        -
+          - default
+          - ''
+translationKeyFormat: null
+translationMethod: language
+type: craft\fields\Checkboxes

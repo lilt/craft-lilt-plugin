@@ -18,7 +18,7 @@ return [
                         ],
                         'field' => [
                             'name' => 'Test field', // Required
-                            'handle' => 'myTestField', // Required
+                            'handle' => 'myFieldFromTest', // Required
                             'fieldType' => PlainText::class, // Required
                         ]
                     ],
@@ -28,7 +28,7 @@ return [
                         ],
                         'field' => [
                             'name' => 'Test redactor field', // Required
-                            'handle' => 'myTestRedactorField', // Required
+                            'handle' => 'myRedactorFieldFromTest', // Required
                             'fieldType' => craft\redactor\Field::class, // Required
                         ]
                     ],

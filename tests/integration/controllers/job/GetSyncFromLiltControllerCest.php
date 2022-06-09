@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
+use lilthq\tests\fixtures\ExpectedElementContent;
 use yii\base\InvalidConfigException;
 
 class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
@@ -123,24 +124,22 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
             $responseBody
         );
 
-        $expectedContent = $this->getExpectedContent($element);
-
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            $expectedContent['es-ES']
+            $this->getExpectedContentEs($element, 'es-ES: ')
         );
 
         $I->expectTranslationDownloadRequest(
             703696,
             HttpCode::OK,
-            $expectedContent['de-DE']
+            $this->getExpectedContentDe($element, 'de-DE: ')
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            $expectedContent['ru-RU']
+            $this->getExpectedContentRu($element, 'ru-RU: ')
         );
 
         $I->amOnPage(
@@ -151,79 +150,36 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
             )
         );
 
-        $I->assertTranslationsContentMatch($translations, $expectedContent);
+        $I->assertTranslationsContentMatch(
+            $translations,
+            [
+                'es-ES' => $this->getExpectedContentEs($element),
+                'de-DE' => $this->getExpectedContentDe($element),
+                'ru-RU' => $this->getExpectedContentRu($element),
+            ]
+        );
+
+        $deSiteId = Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE');
+        $esSiteId = Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('es-ES');
+        $ruSiteId = Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU');
+
+        $I->assertI18NRecordsExist($deSiteId, ExpectedElementContent::getExpectedI18N('de-DE: '));
+        $I->assertI18NRecordsExist($esSiteId, ExpectedElementContent::getExpectedI18N('es-ES: '));
+        $I->assertI18NRecordsExist($ruSiteId, ExpectedElementContent::getExpectedI18N('ru-RU: '));
     }
 
-    private function getExpectedContent(Entry $element): array
+    private function getExpectedContentDe(Entry $element, string $i18nPrefix = ''): array
     {
-        /**
-         * @var MatrixBlockQuery $matrixField
-         */
-        $matrixField = $element->getFieldValue('matrixField');
-        /**
-         * @var MatrixBlock[] $blockElements
-         */
-        $blocks = $matrixField->all();
-        $blocksMap = [];
-        foreach ($blocks as $block) {
-            $blocksMap[$block->type->handle] = $block->id;
-        }
+        return ExpectedElementContent::getExpectedBody($element, 'de-DE: ', $i18nPrefix);
+    }
 
-        return [
-            'de-DE' => [
-                $element->getId() => [
-                    'title' => 'de-DE: Some example title',
-                    'body' => 'de-DE: <h1>Here is some header text</h1> Here is some content',
-                    'matrixField' => [
-                        $blocksMap['firstBlock'] => [
-                            'fields' => [
-                                'plainTextFirstBlock' => 'de-DE: Some text',
-                            ],
-                        ],
-                        $blocksMap['secondblock'] => [
-                            'fields' => [
-                                'plainTextSecondBlock' => 'de-DE: Some text',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            'es-ES' => [
-                $element->getId() => [
-                    'title' => 'es-ES: Some example title',
-                    'body' => 'es-ES: <h1>Here is some header text</h1> Here is some content',
-                    'matrixField' => [
-                        $blocksMap['firstBlock'] => [
-                            'fields' => [
-                                'plainTextFirstBlock' => 'es-ES: Some text',
-                            ],
-                        ],
-                        $blocksMap['secondblock'] => [
-                            'fields' => [
-                                'plainTextSecondBlock' => 'es-ES: Some text',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            'ru-RU' => [
-                $element->getId() => [
-                    'title' => 'ru-RU: Some example title',
-                    'body' => 'ru-RU: <h1>Here is some header text</h1> Here is some content',
-                    'matrixField' => [
-                        $blocksMap['firstBlock'] => [
-                            'fields' => [
-                                'plainTextFirstBlock' => 'ru-RU: Some text',
-                            ],
-                        ],
-                        $blocksMap['secondblock'] => [
-                            'fields' => [
-                                'plainTextSecondBlock' => 'ru-RU: Some text',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ];
+    private function getExpectedContentEs(Entry $element, string $i18nPrefix = ''): array
+    {
+        return ExpectedElementContent::getExpectedBody($element, 'es-ES: ', $i18nPrefix);
+    }
+
+    private function getExpectedContentRu(Entry $element, string $i18nPrefix = ''): array
+    {
+        return ExpectedElementContent::getExpectedBody($element, 'ru-RU: ', $i18nPrefix);
     }
 }

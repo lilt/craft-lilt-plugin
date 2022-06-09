@@ -15,6 +15,7 @@ use \lilthq\craftliltplugin\Craftliltplugin;
 use Codeception\Module;
 use Craft;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\job\CreateJobCommand;
@@ -90,9 +91,16 @@ class CraftLiltPluginHelper extends Module
 
     public function assertJobInQueue(BaseJob $expectedJob): void
     {
-        $jobInfo = Craft::$app->queue->getJobInfo();
-        $actual = Craft::$app->queue->getJobDetails($jobInfo[0]['id']);
-        $this->assertEquals($expectedJob, $actual['job']);
+        $jobInfos = Craft::$app->queue->getJobInfo();
+
+        $this->assertNotEmpty($jobInfos);
+
+        foreach ($jobInfos as $jobInfo) {
+            $actual = Craft::$app->queue->getJobDetails($jobInfo['id']);
+            $jobInfos[get_class($actual['job'])] = $actual['job'];
+        }
+
+        $this->assertEquals($expectedJob, $jobInfos[get_class($expectedJob)]);
     }
 
     public function assertTranslationsContentMatch(array $translations, array $expectedContent): void
@@ -122,6 +130,19 @@ class CraftLiltPluginHelper extends Module
                 $appliedContent
             );
         }
+    }
+
+    public function assertI18NRecordsExist(int $targetSiteId, array $expectedTranslations): void
+    {
+        $actualRecords = Craftliltplugin::getInstance()->i18NRepository->findAllByTargetSiteId($targetSiteId);
+
+        $actualTranslations = array_map(static function (I18NRecord $i18NRecord) {
+            return $i18NRecord->target;
+        }, $actualRecords);
+
+        $diff = array_diff(array_values($expectedTranslations), $actualTranslations);
+
+        $this->assertEmpty($diff);
     }
 
     public function assertTranslationContentMatch(
@@ -196,7 +217,8 @@ class CraftLiltPluginHelper extends Module
         $this->assertSame(TranslationRecord::STATUS_FAILED, $translation->status);
     }
 
-    public function assertTranslationStatus(int $translationId, string $expectedStatus) {
+    public function assertTranslationStatus(int $translationId, string $expectedStatus)
+    {
         $actualTranslation = TranslationRecord::findOne(
             [
                 'id' => $translationId
@@ -206,7 +228,8 @@ class CraftLiltPluginHelper extends Module
         $this->assertSame($expectedStatus, $actualTranslation->status);
     }
 
-    public function assertJobStatus(int $jobId, string $expectedStatus) {
+    public function assertJobStatus(int $jobId, string $expectedStatus)
+    {
         $actualJob = JobRecord::findOne(
             [
                 'id' => $jobId
