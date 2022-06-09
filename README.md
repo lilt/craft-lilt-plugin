@@ -3,9 +3,9 @@
 ![example workflow](https://github.com/lilt/craft-lilt-plugin/actions/workflows/push.yml/badge.svg?branch=1.x)
 [![codecov](https://codecov.io/gh/lilt/craft-lilt-plugin/branch/1.x/graph/badge.svg?token=29FN4ZTOI8)](https://codecov.io/gh/lilt/craft-lilt-plugin)
 
-The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.
+![Screenshot](resources/img/plugin-logo.webp)
 
-![Screenshot](resources/img/plugin-logo.png)
+The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.
 
 ## Requirements
 
