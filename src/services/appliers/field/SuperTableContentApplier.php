@@ -6,10 +6,10 @@ namespace lilthq\craftliltplugin\services\appliers\field;
 
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
-class NeoFieldContentApplier extends AbstractElementQueryContentApplier implements ApplierInterface
+class SuperTableContentApplier extends AbstractElementQueryContentApplier implements ApplierInterface
 {
     public function support(ApplyContentCommand $command): bool
     {
-        return get_class($command->getField()) === CraftliltpluginParameters::BENF_NEO_FIELD;
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE;
     }
 }

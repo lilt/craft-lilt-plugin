@@ -9,13 +9,15 @@ use Craft;
 use craft\base\FieldInterface;
 use craft\elements\MatrixBlock;
 use lilthq\craftliltplugin\records\I18NRecord;
+use verbb\supertable\elements\SuperTableBlockElement;
 
 abstract class AbstractContentApplier
 {
     protected function isForceToSave(ApplyContentCommand $command): bool
     {
         return $command->getElement() instanceof MatrixBlock
-            || $command->getElement() instanceof Block;
+            || $command->getElement() instanceof Block
+            || $command->getElement() instanceof SuperTableBlockElement;
     }
 
     protected function forceSave(ApplyContentCommand $command): ?bool

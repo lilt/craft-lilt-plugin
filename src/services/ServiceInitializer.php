@@ -18,6 +18,7 @@ use lilthq\craftliltplugin\services\appliers\field\MatrixFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\NeoFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\SuperTableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
@@ -110,7 +111,7 @@ class ServiceInitializer
             }
         ]);
 
-        $getProvidersMap = function () use ($pluginInstance) {
+        $getProvidersMap = static function () use ($pluginInstance) {
             return [
                 CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentProvider(
                     $pluginInstance->elementTranslatableContentProvider
@@ -127,6 +128,9 @@ class ServiceInitializer
 
                 #Neo Plugin
                 CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldContentProvider(),
+
+                #SuperTable Plugin
+                CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableContentProvider(),
             ];
         };
 
@@ -167,6 +171,9 @@ class ServiceInitializer
 
                 #Neo Plugin
                 CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldContentApplier(),
+
+                #SuperTable Plugin
+                CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableContentApplier(),
             ];
         };
 

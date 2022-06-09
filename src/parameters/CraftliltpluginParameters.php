@@ -36,6 +36,7 @@ class CraftliltpluginParameters
     public const CRAFT_FIELDS_PLAINTEXT         = 'craft\fields\PlainText';
     public const CRAFT_REDACTOR_FIELD           = 'craft\redactor\Field';
     public const CRAFT_FIELDS_TABLE             = 'craft\fields\Table';
+    public const CRAFT_FIELDS_SUPER_TABLE       = 'verbb\supertable\fields\SuperTableField';
     public const CRAFT_FIELDS_RADIOBUTTONS      = 'craft\fields\RadioButtons';
     public const CRAFT_FIELDS_DROPDOWN          = 'craft\fields\Dropdown';
     public const CRAFT_FIELDS_MULTISELECT       = 'craft\fields\MultiSelect';
