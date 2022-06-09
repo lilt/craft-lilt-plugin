@@ -43,8 +43,13 @@ install-pcov:
 coverage: install-pcov
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
 
+tests-with-coverage: install-pcov
+	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run --coverage-xml"
+
 integration: codecept-build
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration"
 
 functional: codecept-build
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional"
+
+test: quality functional integration

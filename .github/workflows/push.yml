@@ -1,11 +1,17 @@
-name: Docker Image CI
+name: Test
 on:
+  push:
+    branches:
+      - main
+      - 1.0.x-dev #CraftCMS v3 | PHP 7.2
+      - 2.0.x-dev #CraftCMS v4 | PHP 8.0.2
   pull_request:
     branches:
       - "*"
 jobs:
   tests:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
       - name: Build containers
@@ -14,7 +20,9 @@ jobs:
         run: make composer-install
       - name: Quality
         run: make quality
-      - name: Codeception Integration
-        run: make integration
-      - name: Codeception Functional
-        run: make functional
+      - name: Tests
+        run: make tests-with-coverage
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.0
+        with:
+          files: ./tests/_output/coverage.xml

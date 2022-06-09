@@ -1,5 +1,7 @@
 # craft-lilt-plugin for Craft CMS 3.x
 
+![example workflow](https://github.com/lilt/craft-lilt-plugin/actions/workflows/push.yml/badge.svg?branch=main)
+
 The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.
 
 ![Screenshot](resources/img/plugin-logo.png)
