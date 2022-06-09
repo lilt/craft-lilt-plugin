@@ -4,23 +4,15 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\providers\field;
 
-use craft\elements\MatrixBlock;
+use craft\base\Element;
+use craft\elements\db\ElementQuery;
 use craft\errors\InvalidFieldException;
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
-use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
+use lilthq\craftliltplugin\services\providers\field\AbstractContentProvider;
 
-class MatrixFieldContentProvider extends AbstractContentProvider
+class ElementQueryContentProvider extends AbstractContentProvider
 {
-    /**
-     * @var ElementTranslatableContentProvider
-     */
-    private $elementTranslatableContentProvider;
-
-    public function __construct(ElementTranslatableContentProvider $elementTranslatableContentProvider)
-    {
-        $this->elementTranslatableContentProvider = $elementTranslatableContentProvider;
-    }
-
     /**
      * @throws InvalidFieldException
      */
@@ -29,27 +21,33 @@ class MatrixFieldContentProvider extends AbstractContentProvider
         $element = $provideContentCommand->getElement();
         $field = $provideContentCommand->getField();
 
+        $content = [];
+
+        /**
+         * @var ElementQuery
+         */
         $matrixBlockQuery = $element->getFieldValue($field->handle);
 
         /**
-         * @var MatrixBlock[] $blockElements
+         * @var Element[] $blockElements
          */
         $blockElements = $matrixBlockQuery->all();
-
-        $blocksContent = [];
 
         foreach ($blockElements as $blockElement) {
             $blockId = $blockElement->getId();
 
-            $blocksContent[$blockId]['fields'] = $this->elementTranslatableContentProvider
+            $content[$blockId]['fields'] = Craftliltplugin::getInstance()
+                ->elementTranslatableContentProvider
                 ->provide($blockElement)[$blockId];
         }
 
-        return $blocksContent;
+        return $content;
     }
 
     public function support(ProvideContentCommand $command): bool
     {
-        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX;
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX
+            || get_class($command->getField()) === CraftliltpluginParameters::BENF_NEO_FIELD
+            || get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE;
     }
 }

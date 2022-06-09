@@ -13,13 +13,11 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\BaseOptionFieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\ElementQueryContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\LightswitchContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\MatrixFieldContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\NeoFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
-use lilthq\craftliltplugin\services\appliers\field\SuperTableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
@@ -35,13 +33,11 @@ use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\ElementQueryContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\LightswitchContentProvider;
-use lilthq\craftliltplugin\services\providers\field\MatrixFieldContentProvider;
-use lilthq\craftliltplugin\services\providers\field\NeoFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
 use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
-use lilthq\craftliltplugin\services\providers\field\SuperTableContentProvider;
 use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
@@ -50,11 +46,12 @@ use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
+use yii\base\InvalidConfigException;
 
 class ServiceInitializer
 {
     /**
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function run(): void
     {
@@ -118,9 +115,6 @@ class ServiceInitializer
 
         $getProvidersMap = static function () use ($pluginInstance) {
             return [
-                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentProvider(
-                    $pluginInstance->elementTranslatableContentProvider
-                ),
                 CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentProvider(),
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
@@ -132,11 +126,16 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentProvider(),
 
+                ### ELEMENT QUERY PROVIDERS
+
+                #Matrix
+                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new ElementQueryContentProvider(),
+
                 #Neo Plugin
-                CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldContentProvider(),
+                CraftliltpluginParameters::BENF_NEO_FIELD => new ElementQueryContentProvider(),
 
                 #SuperTable Plugin
-                CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableContentProvider(),
+                CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new ElementQueryContentProvider(),
             ];
         };
 
@@ -164,23 +163,27 @@ class ServiceInitializer
 
         $getAppliersMap = static function () {
             return [
-                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentApplier(),
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentApplier(),
 
-                # Options
+                ### Options
                 CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentApplier(),
 
+                ### ELEMENT QUERY APPLIERS
+
+                # Matrix
+                CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new ElementQueryContentApplier(),
+
                 #Neo Plugin
-                CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldContentApplier(),
+                CraftliltpluginParameters::BENF_NEO_FIELD => new ElementQueryContentApplier(),
 
                 #SuperTable Plugin
-                CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new ElementQueryContentApplier(),
             ];
         };
 

@@ -7,8 +7,9 @@ namespace lilthq\craftliltplugin\services\appliers\field;
 use craft\base\Element;
 use craft\elements\db\ElementQuery;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
-abstract class AbstractElementQueryContentApplier extends AbstractContentApplier
+class ElementQueryContentApplier extends AbstractContentApplier implements ApplierInterface
 {
     public function apply(ApplyContentCommand $command): ApplyContentResult
     {
@@ -81,5 +82,12 @@ abstract class AbstractElementQueryContentApplier extends AbstractContentApplier
         $this->forceSave($command);
 
         return ApplyContentResult::applied($i18NRecords, $fieldValue);
+    }
+
+    public function support(ApplyContentCommand $command): bool
+    {
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX
+            || get_class($command->getField()) === CraftliltpluginParameters::BENF_NEO_FIELD
+            || get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE;
     }
 }
