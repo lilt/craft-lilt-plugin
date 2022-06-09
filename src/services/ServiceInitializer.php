@@ -14,6 +14,7 @@ use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\BaseOptionFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\LightswitchContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\MatrixFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\NeoFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
@@ -23,6 +24,7 @@ use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
+use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\job\CreateJobHandler;
 use lilthq\craftliltplugin\services\job\EditJobHandler;
@@ -34,10 +36,12 @@ use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\LightswitchContentProvider;
 use lilthq\craftliltplugin\services\providers\field\MatrixFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\NeoFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
 use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\SuperTableContentProvider;
 use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
@@ -69,6 +73,7 @@ class ServiceInitializer
             'jobLogsRepository' => JobLogsRepository::class,
             'translationFailedHandler' => TranslationFailedHandler::class,
             'createTranslationsHandler' => CreateTranslationsHandler::class,
+            'refreshJobStatusHandler' => RefreshJobStatusHandler::class,
             'listenerRegister' => [
                 'class' => ListenerRegister::class,
                 'availableListeners' => CraftliltpluginParameters::LISTENERS,
@@ -119,6 +124,7 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentProvider(),
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
+                CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentProvider(),
 
                 # Options
                 CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentProvider(),
@@ -146,7 +152,7 @@ class ServiceInitializer
                     'craft\fields\Date' => ['translatable' => false,],
                     'craft\fields\Email' => ['translatable' => false,],
                     'craft\fields\Entries' => ['translatable' => true,],
-                    'craft\fields\Lightswitch' => ['translatable' => false,],
+                    'craft\fields\Lightswitch' => ['translatable' => true,],
                     'craft\fields\Number' => ['translatable' => false,],
                     'craft\fields\Tags' => ['translatable' => false,],
                     'craft\fields\Time' => ['translatable' => false,],
@@ -162,6 +168,7 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentApplier(),
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentApplier(),
+                CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentApplier(),
 
                 # Options
                 CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentApplier(),

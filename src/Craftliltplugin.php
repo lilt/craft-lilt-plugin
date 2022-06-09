@@ -26,6 +26,7 @@ use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
+use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\job\CreateJobHandler;
 use lilthq\craftliltplugin\services\job\EditJobHandler;
@@ -87,6 +88,7 @@ use yii\web\Response;
  * @property JobLogsRepository $jobLogsRepository
  * @property TranslationFailedHandler $translationFailedHandler
  * @property CreateTranslationsHandler $createTranslationsHandler
+ * @property RefreshJobStatusHandler $refreshJobStatusHandler
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin
