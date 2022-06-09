@@ -34,6 +34,7 @@ class CraftliltpluginParameters
 
     public const CRAFT_FIELDS_MATRIX            = 'craft\fields\Matrix';
     public const CRAFT_FIELDS_PLAINTEXT         = 'craft\fields\PlainText';
+    public const CRAFT_FIELDS_LIGHTSWITCH       = 'craft\fields\Lightswitch';
     public const CRAFT_REDACTOR_FIELD           = 'craft\redactor\Field';
     public const CRAFT_FIELDS_TABLE             = 'craft\fields\Table';
     public const CRAFT_FIELDS_SUPER_TABLE       = 'verbb\supertable\fields\SuperTableField';
