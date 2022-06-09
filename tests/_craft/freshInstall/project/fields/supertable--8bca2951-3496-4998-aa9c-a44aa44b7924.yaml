@@ -1,0 +1,20 @@
+columnSuffix: null
+contentColumnType: string
+fieldGroup: 9cdb6f52-9acf-4557-8ab5-039ae51883ea # blog
+handle: supertable
+instructions: ''
+name: Supertable
+searchable: false
+settings:
+  contentTable: '{{%stc_supertable}}'
+  fieldLayout: table
+  maxRows: ''
+  minRows: ''
+  placeholderKey: null
+  propagationKeyFormat: null
+  propagationMethod: all
+  selectionLabel: 'New Row Label'
+  staticField: ''
+translationKeyFormat: null
+translationMethod: site
+type: verbb\supertable\fields\SuperTableField

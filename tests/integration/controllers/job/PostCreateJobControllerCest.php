@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugintests\integration;
+namespace lilthq\craftliltplugintests\integration\controllers\job;
 
 use Codeception\Exception\ModuleException;
 use Craft;
 use craft\elements\Entry;
 use craft\errors\MissingComponentException;
-use craft\helpers\Db;
 use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;

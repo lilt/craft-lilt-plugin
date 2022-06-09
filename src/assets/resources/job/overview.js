@@ -7,6 +7,9 @@ const showModal = function() {
   let translationId = $(this).data('id');
   let translationTitle = $(this).data('title');
 
+  let translation = $(`#lilt-translations-table tr[data-id="${translationId}"]`);
+  let translationIsReviewed = translation.data('is-reviewed');
+
   let isMultiView = false;
 
   let next = null;
@@ -25,9 +28,6 @@ const showModal = function() {
       $('#lilt-modal-preview-tabs nav ul li a').on('click', function() {
         const idToShow = $(this).data('id');
         $('#lilt-modal-preview-tabs nav ul li a').each(function() {
-
-          console.log(idToShow, $(this).data('id'),
-              $(this).data('id') !== idToShow, $(this).data('id') === idToShow);
           const currentId = $(this).data('id');
           if (currentId !== idToShow) {
             $(this).removeClass('sel');
@@ -41,11 +41,52 @@ const showModal = function() {
         });
       });
 
+      $('.lilt-text-copy-to-clipboard').on('click', function() {
+        const key = $(this).prev().html()
+        const original = $(`td[data-translation-key="${key}"][data-source="original"]`).
+            text()
+        const translated = $(`td[data-translation-key="${key}"][data-source="translated"]`).
+            text()
+
+        const textToCopy = `Key: ${key}\n\nContent: ${original}\n\nTranslated: ${translated}`
+
+        if (!navigator.clipboard){
+          const $temp = $('<div>');
+          $('body').append($temp);
+          $temp.attr('contenteditable', true)
+          .text(textToCopy).select()
+          .on("focus", function() { document.execCommand('selectAll',false,null); })
+          .focus();
+          document.execCommand("copy");
+          Craft.cp.displayNotice(Craft.t('app', 'Copied to clipboard.'));
+          $temp.remove();
+        } else {
+          navigator.clipboard.writeText(textToCopy).then(
+              function() {
+                Craft.cp.displayNotice(Craft.t('app', 'Copied to clipboard.'));
+              }).catch(
+              function() {
+                Craft.cp.displayError(Craft.t('app', 'Error occurred.'));
+              }
+          )
+        }
+      });
+
     }).catch(exception => {
       Craft.cp.displayError(
           Craft.t('app', 'Can\'t build preview, unexpected issue occurred'));
       $modal.hide();
     });
+
+    translation = $(`#lilt-translations-table tr[data-id="${translationId}"]`);
+    translationIsReviewed = translation.data('is-reviewed');
+    translationTitle = translation.data('title');
+
+    if (translationIsReviewed === 1) {
+      $modalFooterButtonsSubmit.hide();
+    } else {
+      $modalFooterButtonsSubmit.show();
+    }
   }
 
   if (currentElementId !== 'translations-review-action') {
@@ -139,10 +180,6 @@ const showModal = function() {
     $headerTitle.html(
         '<h1 style="float: left">Review: ' + translationTitle + '</h1>');
 
-    console.log('previous', previous);
-    console.log('current', current);
-    console.log('next', next);
-
     if (selectedValues[previous] !== undefined) {
       $modalFooterPrevious.attr('disabled', false);
       $modalFooterPrevious.removeClass('disabled');
@@ -154,7 +191,6 @@ const showModal = function() {
     }
 
   });
-
   $modalFooterPrevious.on('click', function() {
     $modalElementBody.html('');
     $modalElementBody.append(
@@ -168,22 +204,13 @@ const showModal = function() {
     previous = current - 1;
 
     translationId = selectedValues[current];
-    translationTitle = $(
-        '#lilt-translations-table tr[data-id="' + translationId + '"]').
-        data('title');
 
     $headerTitle.html(
         '<h1 style="float: left">Review: ' + translationTitle + '</h1>');
 
-    console.log('previous', previous);
-    console.log('current', current);
-    console.log('next', next);
-
     if (selectedValues[previous] === undefined) {
       $modalFooterPrevious.attr('disabled', true);
       $modalFooterPrevious.addClass('disabled');
-
-      return;
     }
 
     if (selectedValues[next] !== undefined) {
@@ -225,11 +252,9 @@ const showModal = function() {
 
         Craft.sendActionRequest(
             'POST',
-            'craft-lilt-plugin/job/post-translation-review/invoke',
-            {params: {translationId: translationId, reviewed: true}},
+            'craft-lilt-plugin/translation/post-translation-review/invoke',
+            {data: {translationId: translationId, reviewed: true}},
         ).then(response => {
-          $(this).enable();
-          $(this).removeClass('disabled');
           $spinner.remove();
 
           Craft.cp.displayNotice(Craft.t('app', 'Review complete'));
@@ -244,7 +269,6 @@ const showModal = function() {
         });
       },
   );
-
   $modalFooterButtonsPublish.on('click',
       function() {
         if ($(this).hasClass('disabled')) {
@@ -258,14 +282,11 @@ const showModal = function() {
 
         Craft.sendActionRequest(
             'POST',
-            'craft-lilt-plugin/job/post-translation-publish/invoke',
-            {params: {translationId: translationId, reviewed: true}},
+            'craft-lilt-plugin/translation/post-translation-publish/invoke',
+            {data: {translationId: translationId, published: true}},
         ).then(response => {
           Craft.cp.displayNotice(Craft.t('app', 'Translation published'));
-
-          $(this).enable();
           $spinner.remove();
-          $(this).removeClass('disabled');
 
           if (!isMultiView) {
             location.reload();
@@ -278,6 +299,11 @@ const showModal = function() {
         });
       },
   );
+
+  if (translationIsReviewed === 1) {
+    $modalFooterButtonsSubmit.hide();
+  }
+
   $modalActionButtons.append($modalFooterButtonsSubmit);
   $modalActionButtons.append($modalFooterButtonsPublish);
   $modalActionButtons.append(
@@ -371,7 +397,7 @@ $('#lilt-translations-table th.checkbox-cell.selectallcontainer .checkbox').
         const status = $(
             '#lilt-translations-table tr[data-id="' + $(this).val() + '"]').
             data('status');
-        if (status === 'published' || status === 'failed' || status === 'new') {
+        if (status === 'published' || status === 'failed' || status === 'new' || status === 'in-progress') {
           return;
         }
         $(this).prop('checked', allChecked);
@@ -386,7 +412,7 @@ $(document).ready(
 
       $('#lilt-translations-table tr').each(function() {
         const status = $(this).data('status');
-        if (status === 'published' || status === 'failed' || status === 'new') {
+        if (status === 'published' || status === 'failed' || status === 'new' || status === 'in-progress') {
           $(this).find('.checkbox-cell').addClass('disabled').disable();
           $(this).
               find('.checkbox-cell').
@@ -418,30 +444,29 @@ $(document).ready(
       //TRY AGAIN
       $('#lilt-try-again-sync').on('click', function() {
 
-        if($(this).hasClass('disabled')) {
-          return
+        if ($(this).hasClass('disabled')) {
+          return;
         }
 
-        $(this).addClass('disabled')
+        $(this).addClass('disabled');
         const $spinner = $(
-            '<div class="spinner flex" style="margin-right: 10px; float: right"></div>')
-        $(this).parent().prepend($spinner)
+            '<div class="spinner flex" style="margin-right: 10px; float: right"></div>');
+        $(this).parent().prepend($spinner);
 
-        const jobId = $(this).data('job-id')
+        const jobId = $(this).data('job-id');
 
         Craft.sendActionRequest(
             'POST',
             'craft-lilt-plugin/job/post-job-retry/invoke',
             {data: {jobIds: [jobId]}},
         ).then(response => {
-            location.reload();
+          location.reload();
         }).catch(exception => {
           Craft.cp.displayError(Craft.t('app',
-              'Can\'t submit review, unexpected issue occurred'))
-          $spinner.remove()
-          $(this).removeClass('disabled')
+              'Can\'t submit review, unexpected issue occurred'));
+          $spinner.remove();
+          $(this).removeClass('disabled');
         });
-
 
       });
       //END TRY AGAIN

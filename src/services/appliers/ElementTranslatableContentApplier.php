@@ -134,19 +134,28 @@ class ElementTranslatableContentApplier
     }
 
     /**
+     *
+     * TODO: move to single handler
+     *
      * @param TranslationApplyCommand $translationApplyCommand
      * @param array $newAttributes
      * @return ElementInterface|null
      * @throws Throwable
      */
-    private function createDraftElement(
+    public function createDraftElement(
         TranslationApplyCommand $translationApplyCommand,
         array $newAttributes
     ): ElementInterface {
+
+        # TODO: double check how to create draft from draft
+        #$source = $translationApplyCommand->getElement()->getIsDraft() ? Craft::$app->elements->getElementById(
+        #    $translationApplyCommand->getElement()->getCanonicalId()
+        #) : $translationApplyCommand->getElement();
+
+        $source = $translationApplyCommand->getElement();
+
         $draft = $this->draftRepository->createDraft(
-            $translationApplyCommand->getElement()->getIsDraft() ? Craft::$app->elements->getElementById(
-                $translationApplyCommand->getElement()->getCanonicalId()
-            ) : $translationApplyCommand->getElement(),
+            $source,
             Craft::$app->getUser()->getId(),
             sprintf(
                 '%s [%s -> %s] ' . (new DateTime())->format('H:i:s'),

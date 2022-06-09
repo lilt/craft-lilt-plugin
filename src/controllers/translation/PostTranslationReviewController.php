@@ -7,9 +7,10 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\controllers\job;
+namespace lilthq\craftliltplugin\controllers\translation;
 
 use Craft;
+use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -27,7 +28,7 @@ class PostTranslationReviewController extends AbstractJobController
     public function actionInvoke(): Response
     {
         $request = Craft::$app->getRequest();
-        $translationId = $request->getParam('translationId');
+        $translationId = $request->getBodyParam('translationId');
 
         if (!$request->getIsPost()) {
             return (new Response())->setStatusCode(405);
@@ -51,39 +52,9 @@ class PostTranslationReviewController extends AbstractJobController
                 sprintf('Translation (id: %d) reviewed', $translation->id)
             );
 
-            $readyToPublish = true;
-
-            $jobRecord = JobRecord::findOne(['id' => $translation->jobId]);
-            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($translation->jobId);
-            foreach ($translations as $translation) {
-                if ($translation->status !== TranslationRecord::STATUS_READY_TO_PUBLISH) {
-                    $readyToPublish = false;
-                    break;
-                }
-            }
-
-            if ($readyToPublish) {
-                $jobRecord->status = Job::STATUS_READY_TO_PUBLISH;
-                $jobRecord->save();
-
-                Craftliltplugin::getInstance()->jobLogsRepository->create(
-                    $jobRecord->id,
-                    Craft::$app->getUser()->getId(),
-                    'Job reviewed'
-                );
-
-                Craft::$app->elements->invalidateCachesForElementType(
-                    Job::class
-                );
-            }
-
-            /*
-            Queue::push((new UpdateJobStatusOnTranslationChange(
-                [
-                    'jobId' => $translation->jobId,
-                ]
-            )));
-            */
+            Craftliltplugin::getInstance()->refreshJobStatusHandler->__invoke(
+                $translation->jobId
+            );
         }
 
         if ($updated !== 1) {

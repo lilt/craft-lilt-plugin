@@ -11,3 +11,15 @@
     background: #fff;
     color: #3f4d5a !important;
 }
+
+.lilt-text-copy-to-clipboard {
+    cursor: pointer;
+}
+
+#lilt-modal-preview-tabs #translation table
+{
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}

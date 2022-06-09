@@ -1,0 +1,53 @@
+defaultPlacement: end
+fieldLayouts:
+  708566c4-bdb6-495e-9c24-d7c9717d6747:
+    tabs:
+      -
+        elements:
+          -
+            autocapitalize: true
+            autocomplete: false
+            autocorrect: true
+            class: null
+            disabled: false
+            id: null
+            instructions: null
+            label: null
+            max: null
+            min: null
+            name: null
+            orientation: null
+            placeholder: null
+            readonly: false
+            requirable: false
+            size: null
+            step: null
+            tip: null
+            title: null
+            type: craft\fieldlayoutelements\TitleField
+            warning: null
+            width: 100
+        name: Content
+        sortOrder: 1
+handle: categoryGroup
+name: 'Category Group'
+siteSettings:
+  1df27e7b-6036-4a18-9738-cc15a012ec7b: # Craft test es
+    hasUrls: true
+    template: null
+    uriFormat: 'category-group/{slug}'
+  3bcf6709-d7d3-4adb-95a1-92c09ef1b99f: # Craft test ru
+    hasUrls: true
+    template: null
+    uriFormat: 'category-group/{slug}'
+  88f20aaf-5201-4d58-aa48-b7537f61942e: # Craft test de
+    hasUrls: true
+    template: null
+    uriFormat: 'category-group/{slug}'
+  a5335e9e-3da3-45c8-9ed3-5fcce32f85b4: # Craft test
+    hasUrls: true
+    template: null
+    uriFormat: 'category-group/{slug}'
+structure:
+  maxLevels: null
+  uid: c7d3a2a9-819d-4830-864e-8e6254f8ce23

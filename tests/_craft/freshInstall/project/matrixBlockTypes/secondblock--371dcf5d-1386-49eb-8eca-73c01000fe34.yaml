@@ -17,7 +17,7 @@ fieldLayouts:
         sortOrder: 1
 fields:
   c51cb4db-02ec-4cf0-858d-6d09eb5ca6e9: # Plain Text Second Block
-    columnSuffix: rwrtvebq
+    columnSuffix: null
     contentColumnType: text
     fieldGroup: null
     handle: plainTextSecondBlock

@@ -12,7 +12,7 @@ class PlainTextContentProvider extends AbstractContentProvider
     /**
      * @throws InvalidFieldException
      */
-    public function provide(ProvideContentCommand $provideContentCommand): string
+    public function provide(ProvideContentCommand $provideContentCommand): ?string
     {
         $element = $provideContentCommand->getElement();
         $field = $provideContentCommand->getField();

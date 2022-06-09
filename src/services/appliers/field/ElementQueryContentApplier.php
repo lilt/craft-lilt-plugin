@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
-use benf\neo\elements\Block;
-use benf\neo\elements\db\BlockQuery;
+use craft\base\Element;
+use craft\elements\db\ElementQuery;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
-class NeoFieldContentApplier extends AbstractContentApplier implements ApplierInterface
+class ElementQueryContentApplier extends AbstractContentApplier implements ApplierInterface
 {
     public function apply(ApplyContentCommand $command): ApplyContentResult
     {
@@ -30,12 +30,12 @@ class NeoFieldContentApplier extends AbstractContentApplier implements ApplierIn
         }
 
         /**
-         * @var BlockQuery
+         * @var ElementQuery
          */
         $fieldValue = $element->getFieldValue($field->handle);
 
         /**
-         * @var Block[] $blockElements
+         * @var Element[] $blockElements
          */
         $blockElements = $fieldValue->all();
 
@@ -81,14 +81,13 @@ class NeoFieldContentApplier extends AbstractContentApplier implements ApplierIn
         $element->setFieldValue($field->handle, $fieldValue);
         $this->forceSave($command);
 
-        //$blockElements = $fieldValue->all();
-        //$blockElementsNew = $command->getElement()->getFieldValue($field->handle)->all();
-
         return ApplyContentResult::applied($i18NRecords, $fieldValue);
     }
 
     public function support(ApplyContentCommand $command): bool
     {
-        return get_class($command->getField()) === CraftliltpluginParameters::BENF_NEO_FIELD;
+        return get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX
+            || get_class($command->getField()) === CraftliltpluginParameters::BENF_NEO_FIELD
+            || get_class($command->getField()) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE;
     }
 }

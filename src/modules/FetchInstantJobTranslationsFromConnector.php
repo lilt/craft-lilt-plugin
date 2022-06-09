@@ -50,15 +50,14 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob
             return;
         }
 
-        $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
+        Craftliltplugin::$plugin->syncJobFromLiltConnectorHandler->__invoke($job);
 
+        $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
         if ($liltJob->getStatus() === JobResponse::STATUS_COMPLETE) {
             Craft::$app->elements->invalidateCachesForElementType(
                 Job::class
             );
         }
-
-        Craftliltplugin::$plugin->syncJobFromLiltConnectorHandler->__invoke($job);
 
         $this->markAsDone($queue);
     }

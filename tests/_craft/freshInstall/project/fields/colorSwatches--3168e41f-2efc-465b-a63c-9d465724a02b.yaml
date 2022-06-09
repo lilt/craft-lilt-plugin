@@ -1,0 +1,48 @@
+columnSuffix: mmhqexts
+contentColumnType: text
+fieldGroup: 9cdb6f52-9acf-4557-8ab5-039ae51883ea # blog
+handle: colorSwatches
+instructions: ''
+name: 'Color Swatches'
+searchable: false
+settings:
+  default: null
+  options:
+    -
+      __assoc__:
+        -
+          - label
+          - 'First Color'
+        -
+          - color
+          - '#FFFFFF'
+        -
+          - default
+          - ''
+    -
+      __assoc__:
+        -
+          - label
+          - 'Second Color'
+        -
+          - color
+          - '#FFFFFF'
+        -
+          - default
+          - ''
+    -
+      __assoc__:
+        -
+          - label
+          - 'Third Color'
+        -
+          - color
+          - '#FFFFFF'
+        -
+          - default
+          - ''
+  palette: ''
+  useConfigFile: ''
+translationKeyFormat: null
+translationMethod: language
+type: percipioglobal\colourswatches\fields\ColourSwatches

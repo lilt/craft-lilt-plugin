@@ -8,6 +8,7 @@ use Craft;
 use craft\errors\ElementNotFoundException;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
@@ -52,11 +53,20 @@ class TranslationFailedHandler
             throw new ElementNotFoundException();
         }
 
+        //TODO: get rid of it, we can use repository here
         $translationRecord = $unprocessedTranslations[$parentElementId][$targetSiteId];
 
-        if (empty($translationRecord->translatedDraftId)) {
-            $translationRecord->translatedDraftId = $element->getId();
+//        if (empty($translationRecord->translatedDraftId)) {
+//            $translationRecord->translatedDraftId = $element->getId();
+//        }
+
+        if (empty($translationRecord->connectorTranslationId)) {
+            $translationRecord->connectorTranslationId = $translationResponse->getId();
         }
+
+        $translationRecord->status = TranslationRecord::STATUS_FAILED;
+        $translationRecord->lastDelivery = new DateTime();
+        $translationRecord->save();
 
         return $translationRecord;
     }

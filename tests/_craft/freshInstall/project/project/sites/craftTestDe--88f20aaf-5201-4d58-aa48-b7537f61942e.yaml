@@ -1,0 +1,9 @@
+baseUrl: null
+enabled: true
+handle: craftTestDe
+hasUrls: false
+language: de-DE
+name: 'Craft test de'
+primary: false
+siteGroup: a7a27152-dfa3-4699-9d02-c8cf41744079 # Craft test
+sortOrder: 2

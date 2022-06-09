@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugintests\integration;
+namespace lilthq\craftliltplugintests\integration\controllers\job;
 
+use benf\neo\elements\Block;
+use benf\neo\elements\db\BlockQuery;
+use benf\neo\Plugin;
+use benf\neo\services\BlockTypes;
 use Codeception\Exception\ModuleException;
-use Codeception\TestInterface;
 use Codeception\Util\HttpCode;
 use Craft;
+use craft\base\Element;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\elements\MatrixBlock;
@@ -20,8 +24,11 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
+use lilthq\tests\fixtures\ExpectedElementContent;
 use PHPUnit\Framework\Assert;
+use verbb\supertable\SuperTable;
 use yii\base\InvalidConfigException;
 
 class GetSendToLiltControllerCest extends AbstractIntegrationCest
@@ -59,7 +66,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
 
         $job = $I->createJob([
             'title' => 'Awesome test job',
-            'elementIds' => [ (string) $element->id ], //string to check type conversion
+            'elementIds' => [(string)$element->id], //string to check type conversion
             'targetSiteIds' => '*',
             'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
             'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
@@ -69,7 +76,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
 
         $expectQueueJob = new FetchJobStatusFromConnector([
             'liltJobId' => 1000,
-            'jobId'     => $job->id
+            'jobId' => $job->id
         ]);
 
         $expectedUrl = sprintf(
@@ -83,7 +90,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
                 sprintf('element_%d.json+html', $element->getId())
             )
         );
-        $expectedBody = $this->getExpectedBody($element);
+        $expectedBody = ExpectedElementContent::getExpectedBody($element);
 
         $I->expectJobCreateRequest(
             [
@@ -168,7 +175,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
                 sprintf('element_%d.json+html', $element->getId())
             )
         );
-        $expectedBody = $this->getExpectedBody($element);
+        $expectedBody = ExpectedElementContent::getExpectedBody($element);
 
         $I->expectJobTranslationsRequest($expectedUrl, $expectedBody, HttpCode::INTERNAL_SERVER_ERROR);
 
@@ -205,39 +212,143 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
     /**
      * @throws InvalidFieldException
      */
-    private function getExpectedBody(Entry $element): array
+    private function getExpectedBody(Entry $element, string $prefix = ''): array
     {
-        /**
-         * @var MatrixBlockQuery $matrixField
-         */
-        $matrixField = $element->getFieldValue('matrixField');
-        /**
-         * @var MatrixBlock[] $blockElements
-         */
-        $blocks = $matrixField->all();
-        $blocksMap = [];
-        foreach ($blocks as $block) {
-            $blocksMap[$block->type->handle] = $block->id;
-        }
+        $matrixContent = $this->getExpectedMatrixContent($element);
+        $neoContent = $this->getExpectedNeoContent($element);
+        $supertableContent = $this->getExpectedSupertableValue($element);
 
-        $body = [
+        return [
             $element->getId() => [
-                'title' => 'Some example title',
-                'body' => '<h1>Here is some header text</h1> Here is some content',
-                'matrixField' => [
-                    $blocksMap['firstBlock'] => [
-                        'fields' => [
-                            'plainTextFirstBlock' => 'Some text',
+                'title' => $prefix . 'Some example title',
+                'redactor' => $prefix . '<h1>Here is some header text</h1> Here is some content',
+                'matrix' => $matrixContent,
+                'checkboxes' => [
+                    'firstCheckboxLabel' => $prefix . 'First checkbox label',
+                    'secondCheckboxLabel' => $prefix . 'Second checkbox label',
+                    'thirdCheckboxLabel' => $prefix . 'Third checkbox label',
+                ],
+                'lightswitch' => [
+                    'onLabel' => $prefix . 'The label text to display beside the lightswitch’s enabled state',
+                    'offLabel' => $prefix . 'The label text to display beside the lightswitch’s disabled state.',
+                ],
+                'supertable' => $supertableContent,
+                'table' => [
+                    'columns' => [
+                        'columnHeading1' => $prefix . 'Column Heading 1',
+                        'columnHeading2' => $prefix . 'Column Heading 2',
+                        'columnHeading3' => $prefix . 'Column Heading 3',
+                        'columnHeading4' => $prefix . 'Column Heading 4',
+                    ],
+                    'content' => [
+                        0 => [
+                            'columnHeading1' => $prefix . 'First row first value',
+                            'columnHeading2' => $prefix . 'First row second value',
+                            'columnHeading3' => $prefix . 'First row third value',
+                            'columnHeading4' => $prefix . 'First row fourth value',
+                        ],
+                        1 => [
+                            'columnHeading1' => $prefix . 'Second row first value',
+                            'columnHeading2' => $prefix . 'Second row second value',
+                            'columnHeading3' => $prefix . 'Second row third value',
+                            'columnHeading4' => $prefix . 'Second row fourth value',
                         ],
                     ],
-                    $blocksMap['secondblock'] => [
-                        'fields' => [
-                            'plainTextSecondBlock' => 'Some text',
+                ],
+                'neo' => $neoContent,
+            ],
+        ];
+    }
+    private function getExpectedMatrixContent(Element $element, string $prefix = ''): array
+    {
+        /**
+         * @var MatrixBlockQuery
+         */
+        $matrixFieldValue = $element->getFieldValue('matrix');
+
+        $firstBlockId = $matrixFieldValue->type('firstBlock')->one()->id;
+        $secondBlockId = $matrixFieldValue->type('secondblock')->one()->id;
+
+        $content = [
+            $firstBlockId => [
+                'fields' => [
+                    'plainTextFirstBlock' => sprintf('%s' . 'Plain text first block', $prefix)
+                ]
+            ],
+            $secondBlockId => [
+                'fields' => [
+                    'plainTextSecondBlock' => sprintf('%s' . 'Plain text second block', $prefix)
+                ]
+            ],
+        ];
+
+        return $content;
+    }
+    private function getExpectedSupertableValue(Entry $element, string $prefix = ''): array
+    {
+        $content = [];
+        $field = $element->getFieldValue('supertable');
+        $blocks = $field->all();
+
+        foreach ($blocks as $block) {
+            $content[$block->id] = [
+                'fields' => [
+                    'firstField' => $prefix . 'firstField - Supertable text',
+                    'secondField' => $prefix . 'secondField - Supertable text',
+                ],
+            ];
+        }
+
+        return $content;
+    }
+    private function getExpectedNeoContent(Entry $element, string $prefix = ''): array
+    {
+        /**
+         * @var BlockQuery
+         */
+        $neoFieldValue = $element->getFieldValue('neo');
+
+        /**
+         * @var Block $firstBlock
+         */
+        $firstBlock = $neoFieldValue->type('firstBlockType')->one();
+        $firstBlockId = $neoFieldValue->type('firstBlockType')->one()->id;
+        $secondBlockId = $neoFieldValue->type('secondBlockType')->one()->id;
+
+        return [
+            $firstBlockId => [
+                'fields' => [
+                    'redactor' => $prefix . 'firstBlockType - redactor - Here is value of field',
+                    'lightswitch' => [
+                        'onLabel' => $prefix . 'The label text to display beside the lightswitch’s enabled state',
+                        'offLabel' => $prefix . 'The label text to display beside the lightswitch’s disabled state.',
+                    ],
+                    'matrix' => $this->getExpectedMatrixContent($firstBlock, 'neo - firstBlockType - matrix - '),
+                ],
+            ],
+            $secondBlockId => [
+                'fields' => [
+                    'plainText' => $prefix . 'secondBlockType - plainText - Here is value of field',
+                    'table' => [
+                        'content' => [
+                            0 => [
+                                'columnHeading1' => $prefix . 'secondBlockType - table - First row first value',
+                                'columnHeading2' => $prefix . 'secondBlockType - table - First row second value',
+                                'columnHeading3' => $prefix . 'secondBlockType - table - First row third value',
+                                'columnHeading4' => $prefix . 'secondBlockType - table - First row fourth value',
+                            ],
+                            1 => [
+                                'columnHeading1' => $prefix . 'secondBlockType - table - Second row first value',
+                                'columnHeading2' => $prefix . 'secondBlockType - table - Second row second value',
+                                'columnHeading3' => $prefix . 'secondBlockType - table - Second row third value',
+                                'columnHeading4' => $prefix . 'secondBlockType - table - Second row fourth value',
+                            ],
                         ],
+                    ],
+                    'supertable' => [
                     ],
                 ],
             ],
         ];
-        return $body;
     }
 }

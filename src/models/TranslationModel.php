@@ -111,10 +111,15 @@ class TranslationModel extends Model
     public function getPreviewUrl(): ?string
     {
         if ($this->translatedDraftId === null) {
-            //TODO: handle when draft is not exist yet
-            return null;
-        }
+            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
 
+            if ($element === null) {
+                //element removed, we don't have any link
+                return null;
+            }
+
+            return $element->getUrl();
+        }
         $element = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->targetSiteId);
 
         if (!$element) {

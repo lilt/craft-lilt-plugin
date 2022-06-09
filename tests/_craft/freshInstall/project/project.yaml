@@ -1,31 +1,69 @@
-dateModified: 1654433735
+dateModified: 1654618008
 email:
   fromEmail: volodymyr.hadomskyi@lilt.com
   fromName: 'Craft test'
   transportType: craft\mail\transportadapters\Sendmail
 meta:
   __names__:
+    00ab52cc-4312-4916-a501-80f56ad4e311: 'Second Field' # Second Field
+    1a8f6749-69f8-47b3-b83f-91fb9428fc6f: Neo # Neo
     1aadc7f1-a090-4e44-9556-d50c5bb012f1: 'Public Schema' # Public Schema
     1df27e7b-6036-4a18-9738-cc15a012ec7b: 'Craft test es' # Craft test es
     02bfb062-ba26-4630-a3b4-cc59961be333: matrix # matrix
     3bcf6709-d7d3-4adb-95a1-92c09ef1b99f: 'Craft test ru' # Craft test ru
     5b0ee380-fdee-46c2-a2c0-1ed3903a7a58: body # body
+    6ae551a3-6632-4397-9df4-6d25e64987df: 'Plain Text' # Plain Text
     7fd51776-ba5a-4278-86e5-11fc0f8d7a99: 'Plain text first block' # Plain text first block
+    8b121229-0e5f-4395-ad6a-01445f800e9b: 'First Field' # First Field
+    8bca2951-3496-4998-aa9c-a44aa44b7924: Supertable # Supertable
     9cdb6f52-9acf-4557-8ab5-039ae51883ea: blog # blog
+    19c06f9b-9b93-4f8d-81e3-00e266b07168: Table # Table
     83c42488-1dbd-458e-b0f6-614eeda66822: Default # Default
     88f20aaf-5201-4d58-aa48-b7537f61942e: 'Craft test de' # Craft test de
     371dcf5d-1386-49eb-8eca-73c01000fe34: secondBlock # secondBlock
     0627f912-b8df-4043-8c0d-a772390763fd: Blog # Blog
+    815a8d36-f34c-41d3-98f2-7a5f50384b3a: 'Second field' # Second field
+    3168e41f-2efc-465b-a63c-9d465724a02b: 'Color Swatches' # Color Swatches
     3386b29e-5958-4e2c-9996-d451fc003bb1: Common # Common
+    630291f7-0a20-48da-8867-ab6bb2f2571b: 'first block type' # first block type
+    83784715-05fd-40d2-8ddf-3b3993ae5d91: Lightswitch # Lightswitch
     a7a27152-dfa3-4699-9d02-c8cf41744079: 'Craft test' # Craft test
     a5335e9e-3da3-45c8-9ed3-5fcce32f85b4: 'Craft test' # Craft test
+    b81c8b94-04b9-4837-b737-fee62ce028ef: 'Category Group' # Category Group
     b86b4674-d5a4-4a4f-bd57-6ef688350b30: 'First block' # First block
     c51cb4db-02ec-4cf0-858d-6d09eb5ca6e9: 'Plain Text Second Block' # Plain Text Second Block
+    c812bff6-d1ef-4e04-a925-5f4c60f24321: Linkit # Linkit
+    cdd29903-a150-47d4-8a48-60ea1ea1dfa7: Checkboxes # Checkboxes
+    d3fc397f-fed9-4fa8-9f93-cf692f98e496: 'Third field' # Third field
+    fafb4523-85ba-45b6-9f19-5e66df429f52: 'second block type' # second block type
+    fd25d143-e28d-49a8-81d7-318a226fb7e8: 'First field' # First field
 plugins:
+  colour-swatches:
+    edition: standard
+    enabled: true
+    schemaVersion: 1.4.2
+  craft-lilt-plugin:
+    edition: standard
+    enabled: true
+    schemaVersion: 1.0.0
+  linkit:
+    edition: standard
+    enabled: true
+    licenseKey: 2ESARQYYRF4EPILNPHBJZVW3
+    schemaVersion: 1.0.8
+  neo:
+    edition: standard
+    enabled: true
+    licenseKey: YBXDZ29TKMJ6RZKX85OFKSPX
+    schemaVersion: 2.13.0
   redactor:
     edition: standard
     enabled: true
     schemaVersion: 2.3.0
+  super-table:
+    edition: standard
+    enabled: true
+    schemaVersion: 2.2.1
 system:
   edition: solo
   live: true

@@ -5,8 +5,7 @@ up:
 down:
 	docker-compose down -v --remove-orphans
 
-restart:
-	docker-compose down
+restart: down
 	docker-compose up -d
 
 cli:
@@ -36,11 +35,21 @@ codecept-build:
 coverage-xdebug:
 	docker-compose exec -T -u www-data cli-app sh -c "php -dxdebug.mode=coverage vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
 
-coverage-pcov:
-	docker-compose exec -T -u www-data cli-app sh -c "apk --no-cache add pcre-dev ${PHPIZE_DEPS} && pecl install pcov && docker-php-ext-enable pcov"
+install-pcov:
+	docker-compose exec -T -u root cli-app sh -c "apk --no-cache add pcre-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c"
+	docker-compose exec -T -u root cli-app sh -c "pecl install pcov || true"
+	docker-compose exec -T -u root cli-app sh -c "docker-php-ext-enable pcov"
+
+coverage: install-pcov
+	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
+
+tests-with-coverage: install-pcov
+	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run --coverage-xml"
 
 integration: codecept-build
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration"
 
 functional: codecept-build
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional"
+
+test: quality functional integration

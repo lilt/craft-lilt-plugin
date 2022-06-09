@@ -36,13 +36,13 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
     public function execute($queue): void
     {
         $job = Job::findOne(['id' => $this->jobId]);
-        $jobRecord = JobRecord::findOne(['id' => $job->id]);
+        $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
 
-        if (!$jobRecord) {
+        if (!$jobRecord || !$job) {
             Craft::error(
                 sprintf(
                     'Job record %d not found, looks like job was removed. Translation fetching aborted.',
-                    $job->id
+                    $this->jobId
                 )
             );
 
@@ -86,15 +86,11 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
                                 $job
                             );
                         } catch (Exception $ex) {
-                            $translationRecord = Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
+                            Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                                 $translationResponse,
                                 $job,
                                 $unprocessedTranslations
                             );
-
-                            $translationRecord->status = TranslationRecord::STATUS_FAILED;
-                            $translationRecord->lastDelivery = new DateTime();
-                            $translationRecord->save();
 
                             Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
 
@@ -103,30 +99,17 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
 
                         return TranslationRecord::STATUS_READY_FOR_REVIEW;
                     }
+
                     if (
                         $translationResponse->getStatus() === TranslationResponse::STATUS_IMPORT_FAILED
                         || $translationResponse->getStatus() === TranslationResponse::STATUS_EXPORT_FAILED
                     ) {
-                        //failed
-
-                        $translationRecord = $this->handleTranslationRecord(
+                        Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                             $translationResponse,
                             $job,
                             $unprocessedTranslations
                         );
 
-                        //TODO: on ready for review download the translation
-                        $translationRecord->status = $this->getTranslationStatus(
-                            $translationResponse->getStatus(),
-                            $job->translationWorkflow
-                        );
-
-                        if (empty($translationRecord->connectorTranslationId)) {
-                            $translationRecord->connectorTranslationId = $translationResponse->getId();
-                        }
-
-                        $translationRecord->lastDelivery = new DateTime();
-                        $translationRecord->save();
                         return TranslationRecord::STATUS_FAILED;
                     }
 
@@ -136,9 +119,8 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
             )
         );
 
-
         if (in_array(TranslationRecord::STATUS_IN_PROGRESS, $statuses, true)) {
-            //we are not done
+            // One of translations still in progress, we are waiting till all of them are done
             Queue::push(
                 (new FetchVerifiedJobTranslationsFromConnector(
                     [
@@ -150,6 +132,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
                 self::DELAY_IN_SECONDS
             );
         }
+
         if ($statuses === ['failed']) {
             $jobRecord->status = Job::STATUS_FAILED;
             $jobRecord->save();
@@ -167,25 +150,6 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
         Craft::$app->elements->invalidateCachesForElement(
             $job
         );
-    }
-
-    private function getTranslationStatus(string $translationStatusFromResponse, string $workflow): string
-    {
-        $isVerifiedTranslationWorkflow = strtolower($workflow) === strtolower(
-            SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
-        );
-
-        if ($isVerifiedTranslationWorkflow) {
-            if ($translationStatusFromResponse === TranslationResponse::STATUS_IMPORT_COMPLETE) {
-                return TranslationRecord::STATUS_IN_PROGRESS;
-            }
-
-            if ($translationStatusFromResponse === TranslationResponse::STATUS_EXPORT_COMPLETE) {
-                return TranslationRecord::STATUS_READY_FOR_REVIEW;
-            }
-        }
-
-        return TranslationRecord::STATUS_FAILED;
     }
 
     /**
