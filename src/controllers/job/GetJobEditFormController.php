@@ -31,18 +31,13 @@ class GetJobEditFormController extends AbstractJobController
      * @throws InvalidConfigException
      * @throws Exception
      */
-    public function actionInvoke(): Response
+    public function actionInvoke(string $jobId): Response
     {
-        //TODO: check why get param is not working
-        //$request->getParam('jobId')
-        $request = Craft::$app->getRequest();
-        $jobId = (int)$request->getSegment(4);
-
-        if (empty($jobId) || !$request->getIsGet()) {
-            return (new Response())->setStatusCode(405);
+        if (empty($jobId)) {
+            return (new Response())->setStatusCode(400);
         }
 
-        $job = Job::findOne(['id' => $jobId]);
+        $job = Job::findOne(['id' => (int) $jobId]);
 
         //TODO: move to separate class, maybe post request from FE
         //TODO: now it is processing by queue

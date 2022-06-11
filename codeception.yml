@@ -12,14 +12,17 @@ coverage:
     - src/*
   exclude:
     - src/etc/*
+    - src/assets/*
     - src/migrations/*
     - src/templates/*
     - src/translations/*
+    - src/elements/*
     - src/web/assets/*
     - docs/*
     - templates/*
     - tests/*
     - vendor/*
+    - services/ServiceInitializer.php
 params:
   - tests/.env
 modules:

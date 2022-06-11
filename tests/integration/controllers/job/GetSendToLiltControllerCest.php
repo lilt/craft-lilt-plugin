@@ -209,6 +209,40 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
         Assert::assertSame(Job::STATUS_FAILED, $jobActual->status);
     }
 
+    public function testSyncJobNotFound(IntegrationTester $I): void
+    {
+        $I->amLoggedInAs(
+            Craft::$app->getUsers()->getUserById(1)
+        );
+
+        $I->amOnPage(
+            sprintf(
+                '?p=admin/%s/%d',
+                CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH,
+                123123
+            )
+        );
+
+        $I->seeResponseCodeIs(404);
+    }
+
+    public function testSyncWrongMethod(IntegrationTester $I): void
+    {
+        $I->amLoggedInAs(
+            Craft::$app->getUsers()->getUserById(1)
+        );
+
+        $I->sendAjaxPostRequest(
+            sprintf(
+                '?p=admin/%s/%d',
+                CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH,
+                123123
+            )
+        );
+
+        $I->seeResponseCodeIs(404);
+    }
+
     /**
      * @throws InvalidFieldException
      */
