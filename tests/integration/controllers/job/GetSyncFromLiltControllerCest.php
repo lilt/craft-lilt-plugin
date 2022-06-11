@@ -46,7 +46,7 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
      * @throws \craft\errors\InvalidFieldException
      * @throws ModuleException
      */
-    public function testCreateJob(IntegrationTester $I): void
+    public function testSyncSuccess(IntegrationTester $I): void
     {
         $I->amLoggedInAs(
             Craft::$app->getUsers()->getUserById(1)
@@ -166,6 +166,40 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
         $I->assertI18NRecordsExist($deSiteId, ExpectedElementContent::getExpectedI18N('de-DE: '));
         $I->assertI18NRecordsExist($esSiteId, ExpectedElementContent::getExpectedI18N('es-ES: '));
         $I->assertI18NRecordsExist($ruSiteId, ExpectedElementContent::getExpectedI18N('ru-RU: '));
+    }
+
+    public function testSyncJobNotFound(IntegrationTester $I): void
+    {
+        $I->amLoggedInAs(
+            Craft::$app->getUsers()->getUserById(1)
+        );
+
+        $I->amOnPage(
+            sprintf(
+                '?p=admin/%s/%d',
+                CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH,
+                123123
+            )
+        );
+
+        $I->seeResponseCodeIs(404);
+    }
+
+    public function testSyncWrongMethod(IntegrationTester $I): void
+    {
+        $I->amLoggedInAs(
+            Craft::$app->getUsers()->getUserById(1)
+        );
+
+        $I->sendAjaxPostRequest(
+            sprintf(
+                '?p=admin/%s/%d',
+                CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH,
+                123123
+            )
+        );
+
+        $I->seeResponseCodeIs(404);
     }
 
     private function getExpectedContentDe(Entry $element, string $i18nPrefix = ''): array

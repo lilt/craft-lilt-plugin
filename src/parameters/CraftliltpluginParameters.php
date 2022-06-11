@@ -20,11 +20,14 @@ class CraftliltpluginParameters
     public const TRANSLATION_REVIEW_ACTION = 'craft-lilt-plugin/translation/post-translation-review/invoke';
     public const TRANSLATION_PUBLISH_ACTION = 'craft-lilt-plugin/translation/post-translation-publish/invoke';
     public const TRANSLATION_REVIEW_PATH = 'craft-lilt-plugin/job/translation/review';
+    public const JOB_POST_SYNC_ACTION = 'craft-lilt-plugin/job/post-sync/invoke';
 
+    public const JOB_EDIT_ACTION = 'craft-lilt-plugin/job/get-job-edit-form/invoke';
     public const JOB_EDIT_PATH = 'craft-lilt-plugin/job/edit';
     public const JOB_CREATE_PATH = 'craft-lilt-plugin/job/create';
     public const JOB_SEND_TO_LILT_PATH = 'craft-lilt-plugin/job/send-to-lilt';
     public const JOB_SYNC_FROM_LILT_PATH = 'craft-lilt-plugin/job/sync-from-lilt';
+    public const JOB_POST_SYNC_PATH = 'craft-lilt-plugin/job/sync';
 
     public const JOB_TABLE_NAME = '{{%lilt_jobs}}';
     public const TRANSLATION_TABLE_NAME = '{{%lilt_translations}}';

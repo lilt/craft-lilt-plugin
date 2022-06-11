@@ -10,15 +10,15 @@
 
 namespace Helper;
 
-use craft\queue\BaseJob;
-use \lilthq\craftliltplugin\Craftliltplugin;
 use Codeception\Module;
 use Craft;
+use craft\queue\BaseJob;
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
-use lilthq\craftliltplugin\services\job\CreateJobCommand;
+use lilthq\craftliltplugin\services\handlers\commands\CreateJobCommand;
 
 class CraftLiltPluginHelper extends Module
 {

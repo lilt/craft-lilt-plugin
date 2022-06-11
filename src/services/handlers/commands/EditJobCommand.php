@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\job;
+namespace lilthq\craftliltplugin\services\handlers\commands;
 
 class EditJobCommand
 {

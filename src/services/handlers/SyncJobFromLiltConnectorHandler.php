@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\job\lilt;
+namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
 use craft\errors\InvalidFieldException;
@@ -56,6 +56,13 @@ class SyncJobFromLiltConnectorHandler
 
         if (!empty($unprocessedTranslations)) {
             foreach ($translations->getResults() as $translationDto) {
+                if (
+                    $translationDto->getStatus() !== TranslationResponse::STATUS_EXPORT_COMPLETE
+                    && $translationDto->getStatus() !== TranslationResponse::STATUS_MT_COMPLETE
+                ) {
+                    continue;
+                }
+
                 try {
                     $this->processTranslation($translationDto, $job);
                 } catch (Exception $ex) {
@@ -82,8 +89,11 @@ class SyncJobFromLiltConnectorHandler
             return $tr->status;
         }, $translationRecords);
 
-        if (in_array('failed', $statuses, true)) {
+        if (in_array(TranslationRecord::STATUS_FAILED, $statuses, true)) {
             $jobRecord->status = Job::STATUS_FAILED;
+            $jobRecord->save();
+        } elseif (in_array(TranslationRecord::STATUS_IN_PROGRESS, $statuses, true)) {
+            $jobRecord->status = Job::STATUS_IN_PROGRESS;
             $jobRecord->save();
         } else {
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;

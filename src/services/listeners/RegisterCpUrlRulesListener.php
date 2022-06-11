@@ -51,6 +51,9 @@ class RegisterCpUrlRulesListener implements ListenerInterface
         $event->rules['POST craft-lilt-plugin/settings/lilt-configuration']
             = 'craft-lilt-plugin/post-configuration/invoke';
 
+        $event->rules['POST ' . CraftliltpluginParameters::JOB_POST_SYNC_PATH]
+            = CraftliltpluginParameters::JOB_POST_SYNC_ACTION;
+
         $event->rules['POST craft-lilt-plugin/job/translation/publish']
             = CraftliltpluginParameters::TRANSLATION_PUBLISH_ACTION;
 

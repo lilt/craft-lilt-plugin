@@ -494,7 +494,7 @@ class Job extends Element
         $this->_elements = [];
 
         //TODO: maybe other way to select, not one by one?
-        $elements = array_map(function (int $id) {
+        $elements = array_map(static function (int $id) {
             return Craft::$app->elements->getElementById($id);
         }, $this->getElementIds());
 

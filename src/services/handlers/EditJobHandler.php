@@ -7,23 +7,41 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\job;
+namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exeptions\JobNotFoundException;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\services\handlers\commands\EditJobCommand;
+use lilthq\craftliltplugin\services\repositories\JobRepository;
 use RuntimeException;
 
-class CreateJobHandler
+class EditJobHandler
 {
-    public function __invoke(CreateJobCommand $command, bool $asDraft = false): Job
+    /**
+     * @var JobRepository
+     */
+    public $jobRepository;
+
+    public function __invoke(EditJobCommand $command): Job
     {
-        $job = new Job();
-        $job->authorId = $command->getAuthorId();
+        $job = $this->jobRepository->findOneById(
+            $command->getJobId()
+        );
+        $jobRecord = JobRecord::findOne(['id' => $command->getJobId()]);
+
+        if (!$job || !$jobRecord) {
+            Craft::error(
+                sprintf('Job with id %d not found', $command->getJobId())
+            );
+
+            throw new JobNotFoundException();
+        }
+
         $job->title = $command->getTitle();
-        $job->liltJobId = null;
-        $job->status = $asDraft ? Job::STATUS_DRAFT : Job::STATUS_NEW;
+        $job->authorId = $command->getAuthorId();
         $job->sourceSiteId = $command->getSourceSiteId();
 
         $job->sourceSiteLanguage = Craftliltplugin::getInstance()
@@ -32,14 +50,15 @@ class CreateJobHandler
                 $command->getSourceSiteId()
             );
 
+        if ($command->getStatus()) {
+            $job->status = $command->getStatus();
+        }
+
         $job->targetSiteIds = $command->getTargetSitesIds();
         $job->elementIds = $command->getEntries();
-        $job->versions = $command->getVersions();
         $job->translationWorkflow = $command->getTranslationWorkflow();
-        $job->draftId = null;
-        $job->revisionId = null;
+        $job->versions = $command->getVersions();
 
-        $jobRecord = new JobRecord();
         $jobRecord->setAttributes($job->getAttributes(), false);
 
         $statusElement = Craft::$app->getElements()->saveElement(
@@ -49,20 +68,16 @@ class CreateJobHandler
             true
         );
 
-        #TODO: rethink this, what if we use separate id for elements table and separate for job record
-        $jobRecord->id = $job->id;
-
         $status = $jobRecord->save();
 
-
         if (!$status || !$statusElement) {
-            throw new RuntimeException("Cant create the job");
+            throw new RuntimeException("Cant edit the job");
         }
 
         Craftliltplugin::getInstance()->jobLogsRepository->create(
             $jobRecord->id,
             Craft::$app->getUser()->getId(),
-            'Job created'
+            'Job edited'
         );
 
         return $job;

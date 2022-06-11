@@ -27,6 +27,10 @@ class JobsFunctionalCest
         $I->seeElement('#lilt-sync-jobs');
         $I->seeElement('.btn.big.submit.icon.btn-create-new-job');
 
+        #Bread crumbs
+        $I->seeElement('div#crumbs nav', ['aria-label' => 'Breadcrumbs']);
+        $I->seeNumberOfElements('div#crumbs nav ul li a', 2);
+
         $I->seeResponseCodeIs(200);
     }
 

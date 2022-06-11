@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\job\lilt;
+namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
 use craft\errors\ElementNotFoundException;
@@ -18,7 +18,6 @@ use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
-use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use Throwable;
 use yii\base\Exception;

@@ -12,7 +12,7 @@ namespace lilthq\craftliltplugin\controllers\job;
 use Craft;
 use craft\errors\MissingComponentException;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\services\job\CreateJobCommand;
+use lilthq\craftliltplugin\services\handlers\commands\CreateJobCommand;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 

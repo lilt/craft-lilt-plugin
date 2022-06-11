@@ -12,7 +12,7 @@ namespace lilthq\craftliltplugin\controllers\job;
 use Craft;
 use craft\errors\MissingComponentException;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\services\job\EditJobCommand;
+use lilthq\craftliltplugin\services\handlers\commands\EditJobCommand;
 use yii\base\InvalidConfigException;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response;

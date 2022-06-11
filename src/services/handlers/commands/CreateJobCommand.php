@@ -7,9 +7,7 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\job;
-
-use DateTimeInterface;
+namespace lilthq\craftliltplugin\services\handlers\commands;
 
 class CreateJobCommand
 {

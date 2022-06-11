@@ -15,10 +15,6 @@ class PostSyncController extends Controller
     {
         $request = Craft::$app->getRequest();
 
-        if (!$request->getIsPost()) {
-            return $this->response->setStatusCode(405);
-        }
-
         $jobIds = $request->getBodyParam('jobIds', []);
 
         if (count($jobIds) === 0) {
@@ -29,11 +25,9 @@ class PostSyncController extends Controller
             $jobIds
         );
 
-
         foreach ($jobs as $job) {
             Craftliltplugin::getInstance()->syncJobFromLiltConnectorHandler->__invoke($job);
         }
-
 
         if (count($jobs) === 0) {
             return $this->response->setStatusCode(400, json_encode(['msg' => 'Job not found']));
