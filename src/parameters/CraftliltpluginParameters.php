@@ -28,6 +28,7 @@ class CraftliltpluginParameters
     public const JOB_SEND_TO_LILT_PATH = 'craft-lilt-plugin/job/send-to-lilt';
     public const JOB_SYNC_FROM_LILT_PATH = 'craft-lilt-plugin/job/sync-from-lilt';
     public const JOB_POST_SYNC_PATH = 'craft-lilt-plugin/job/sync';
+    public const POST_CONFIGURATION_PATH = 'craft-lilt-plugin/settings/lilt-configuration';
 
     public const JOB_TABLE_NAME = '{{%lilt_jobs}}';
     public const TRANSLATION_TABLE_NAME = '{{%lilt_translations}}';

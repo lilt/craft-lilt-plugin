@@ -31,10 +31,6 @@ class GetJobCreateFormController extends AbstractJobController
     {
         $request = Craft::$app->getRequest();
 
-        if (!$request->getIsGet()) {
-            return (new Response())->setStatusCode(405);
-        }
-
         $job = (new Job());
         $job->versions = [];
         $job->status = Job::STATUS_DRAFT;

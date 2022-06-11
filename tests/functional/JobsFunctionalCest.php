@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugintests\acceptance;
 
 use Craft;
-use craft\elements\Entry;
 use FunctionalTester;
 
 class JobsFunctionalCest
