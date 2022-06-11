@@ -12,6 +12,7 @@ namespace Helper;
 
 use Codeception\Lib\ModuleContainer;
 use Codeception\Module;
+use JsonException;
 use PHPUnit\Framework\Assert;
 use WireMock\Client\WireMock;
 
@@ -48,6 +49,51 @@ class WiremockClient extends Module
                     WireMock::aResponse()
                         ->withStatus($statusCode)
                 )
+        );
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function expectSettingsUpdateRequest(string $expectedUrl, array $expectedBody, int $statusCode): void
+    {
+        $this->wireMock->stubFor(
+            WireMock::put(
+                WireMock::urlEqualTo(
+                    $expectedUrl
+                )
+            )->withRequestBody(
+                WireMock::equalToJson(
+                    json_encode($expectedBody, JSON_THROW_ON_ERROR),
+                    true,
+                    false
+                )
+            )->willReturn(
+                WireMock::aResponse()
+                    ->withStatus($statusCode)
+            )
+        );
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function expectSettingsGetRequest(string $expectedUrl, string $apiKey, array $responseBody, int $responseStatusCode): void
+    {
+        $this->wireMock->stubFor(
+            WireMock::get(
+                WireMock::urlEqualTo(
+                    $expectedUrl
+                )
+            )->withHeader(
+                'Authorization', WireMock::equalTo('Bearer ' . $apiKey)
+            )->willReturn(
+                WireMock::aResponse()
+                    ->withStatus($responseStatusCode)
+                    ->withBody(
+                        json_encode($responseBody, JSON_THROW_ON_ERROR),
+                    )
+            )
         );
     }
 
