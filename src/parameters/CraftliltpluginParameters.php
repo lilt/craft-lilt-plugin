@@ -22,6 +22,9 @@ class CraftliltpluginParameters
     public const TRANSLATION_REVIEW_PATH = 'craft-lilt-plugin/job/translation/review';
     public const JOB_POST_SYNC_ACTION = 'craft-lilt-plugin/job/post-sync/invoke';
 
+    public const JOB_POST_RETRY_ACTION = 'craft-lilt-plugin/job/post-job-retry/invoke';
+    public const JOB_POST_RETRY_PATH = 'craft-lilt-plugin/job/retry';
+
     public const JOB_EDIT_ACTION = 'craft-lilt-plugin/job/get-job-edit-form/invoke';
     public const JOB_EDIT_PATH = 'craft-lilt-plugin/job/edit';
     public const JOB_CREATE_PATH = 'craft-lilt-plugin/job/create';

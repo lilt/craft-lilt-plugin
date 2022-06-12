@@ -33,17 +33,17 @@ class GetTranslationReviewController extends AbstractJobController
         $request = Craft::$app->getRequest();
         $translationId = $request->getParam('translationId');
 
-        if (!$request->getIsGet()) {
-            return (new Response())->setStatusCode(405);
-        }
-
         if (empty($translationId)) {
-            return (new Response())->setStatusCode(400);
+            return $this->response->setStatusCode(400);
         }
 
-        $translation = Craftliltplugin::getInstance()->translationRepository->findOneById((int) $translationId);
+        $translation = Craftliltplugin::getInstance()->translationRepository->findOneById(
+            (int) $translationId
+        );
 
-        $values = $translation->getContentValues($translation->sourceContent);
+        if ($translation === null) {
+            return $this->response->setStatusCode(404);
+        }
 
         $render = $this->renderTemplate(
             'craft-lilt-plugin/_components/translation/_overview.twig',

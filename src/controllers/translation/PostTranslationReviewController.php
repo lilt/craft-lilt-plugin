@@ -30,15 +30,15 @@ class PostTranslationReviewController extends AbstractJobController
         $request = Craft::$app->getRequest();
         $translationId = $request->getBodyParam('translationId');
 
-        if (!$request->getIsPost()) {
-            return (new Response())->setStatusCode(405);
-        }
-
         if (empty($translationId)) {
             return (new Response())->setStatusCode(400);
         }
 
         $translation = Craftliltplugin::getInstance()->translationRepository->findOneById((int) $translationId);
+
+        if ($translation === null) {
+            return (new Response())->setStatusCode(404);
+        }
 
         $updated = TranslationRecord::updateAll(
             ['status' => TranslationRecord::STATUS_READY_TO_PUBLISH],
