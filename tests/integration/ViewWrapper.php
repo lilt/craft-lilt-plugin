@@ -32,7 +32,7 @@ class ViewWrapper extends View
             'template' => $template,
             'variables' => $variables,
             'templateMode' => $templateMode
-        ], JSON_THROW_ON_ERROR);
+        ], 4194304);
 
         if($this->controllerView !== null) {
             return $this->controllerView->renderTemplate($template, $variables, $templateMode);

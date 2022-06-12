@@ -103,7 +103,7 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
         $I->sendAjaxPostRequest(
             sprintf(
                 '?p=admin/%s',
-                CraftliltpluginParameters::JOB_POST_RETRY_PATH,
+                CraftliltpluginParameters::JOB_POST_RETRY_PATH
             ),
             ['jobIds' => [$job->id]]
         );
@@ -151,7 +151,7 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
         $I->sendAjaxPostRequest(
             sprintf(
                 '?p=admin/%s',
-                CraftliltpluginParameters::JOB_POST_RETRY_PATH,
+                CraftliltpluginParameters::JOB_POST_RETRY_PATH
             ),
             ['jobIds' => [123]]
         );
@@ -168,7 +168,7 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
         $I->sendAjaxPostRequest(
             sprintf(
                 '?p=admin/%s',
-                CraftliltpluginParameters::JOB_POST_RETRY_PATH,
+                CraftliltpluginParameters::JOB_POST_RETRY_PATH
             ),
             []
         );
@@ -185,7 +185,7 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
         $I->sendAjaxGetRequest(
             sprintf(
                 '?p=admin/%s',
-                CraftliltpluginParameters::JOB_POST_RETRY_PATH,
+                CraftliltpluginParameters::JOB_POST_RETRY_PATH
             )
         );
 

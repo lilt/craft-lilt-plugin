@@ -61,7 +61,7 @@ class GetJobCreateFormControllerCest
 
         $expected = $this->getExpected();
 
-        $actual = json_decode($response->data, true, 512, JSON_THROW_ON_ERROR);
+        $actual = json_decode($response->data, true, 512, 4194304);
 
         Assert::assertEquals($expected['template'], $actual['template']);
         Assert::assertEquals(

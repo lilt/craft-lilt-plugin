@@ -72,7 +72,7 @@ class PostEditJobControllerCest extends AbstractIntegrationCest
             [
                 'csrf' => Craft::$app->getRequest()->getCsrfToken(true),
                 'jobId' => $job->id,
-                'entries' => json_encode(['1', '2', '3', '4'], JSON_THROW_ON_ERROR),
+                'entries' => json_encode(['1', '2', '3', '4'], 4194304),
                 'title' => 'Edited: Awesome test job',
                 'sourceSite' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE'),
                 'targetSiteIds' => [Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US')],

@@ -64,7 +64,7 @@ class WiremockClient extends Module
                 )
             )->withRequestBody(
                 WireMock::equalToJson(
-                    json_encode($expectedBody, JSON_THROW_ON_ERROR),
+                    json_encode($expectedBody, 4194304),
                     true,
                     false
                 )
@@ -91,7 +91,7 @@ class WiremockClient extends Module
                 WireMock::aResponse()
                     ->withStatus($responseStatusCode)
                     ->withBody(
-                        json_encode($responseBody, JSON_THROW_ON_ERROR),
+                        json_encode($responseBody, 4194304)
                     )
             )
         );

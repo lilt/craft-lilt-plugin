@@ -38,7 +38,7 @@ class PostConfigurationControllerCest extends AbstractIntegrationCest
         $I->sendAjaxPostRequest(
             sprintf(
                 '?p=admin/%s',
-                CraftliltpluginParameters::POST_CONFIGURATION_PATH,
+                CraftliltpluginParameters::POST_CONFIGURATION_PATH
             ),
             [
                 'connectorApiKey' => 'this-is-connector-api-key',

@@ -84,7 +84,7 @@ class GetTranslationReviewControllerCest
         $response = $controller->actionInvoke();
 
         $expected = $this->getExpected();
-        $actual = json_decode($view->data, true, 512, JSON_THROW_ON_ERROR);
+        $actual = json_decode($view->data, true, 512, 4194304);
 
         foreach ($expected['variables']['translation'] as $key => $value) {
             if(is_array($value)) {

@@ -22,12 +22,12 @@
     }
   ],
   "require": {
-    "craftcms/cms": "^3.0.0",
+    "craftcms/cms": "^3.7.0",
     "lilt/lilt-connector-sdk-php": "dev-main",
     "ext-json": "*"
   },
   "require-dev": {
-    "craftcms/cms": "^3.2.0 | ^4.0",
+    "craftcms/cms": "^3.7.0",
     "codeception/codeception": "^3.0 | ^4.0",
     "vlucas/phpdotenv": "^3.0",
     "squizlabs/php_codesniffer": "^3.6",
