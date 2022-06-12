@@ -23,7 +23,7 @@ use lilthq\craftliltplugin\controllers\job\GetJobEditFormController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
-use lilthq\craftliltplugintests\integration\ViewStub;
+use lilthq\craftliltplugintests\integration\ViewWrapper;
 use lilthq\tests\fixtures\EntriesFixture;
 use IntegrationTester;
 use PHPUnit\Framework\Assert;
@@ -106,7 +106,7 @@ class GetJobEditFormControllerCest
         ]);
 
         $controller = $this->getController();
-        $controller->setView(new ViewStub());
+        $controller->setView(new ViewWrapper());
 
         $response = $controller->actionInvoke((string) $job->id);
 

@@ -48,12 +48,20 @@ class TranslationModel extends Model
 
     public function getSourceContentValues(): array
     {
-        return $this->getContentValues($this->sourceContent);
+        if (!empty($this->sourceContent)) {
+            return $this->getContentValues($this->sourceContent);
+        }
+
+        return [];
     }
 
     public function getTargetContentValues(): array
     {
-        return $this->getContentValues($this->targetContent);
+        if (!empty($this->targetContent)) {
+            return $this->getContentValues($this->targetContent);
+        }
+
+        return [];
     }
 
     public function getContentValues(array $items, string $prefix = ''): array
@@ -71,7 +79,11 @@ class TranslationModel extends Model
 
     public function getElementUrl(): ?string
     {
-        $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
+        $draft = null;
+
+        if (!empty($this->translatedDraftId)) {
+            $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
+        }
 
         if (!$draft) {
             $draft = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);

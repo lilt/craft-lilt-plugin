@@ -9,7 +9,6 @@ use craft\elements\db\ElementQuery;
 use craft\errors\InvalidFieldException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
-use lilthq\craftliltplugin\services\providers\field\AbstractContentProvider;
 
 class ElementQueryContentProvider extends AbstractContentProvider
 {

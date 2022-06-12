@@ -36,6 +36,15 @@ class CreateTranslationsHandler
             return false;
         }
 
+        //DELETE Previous translations if exits
+        TranslationRecord::deleteAll([
+            'jobId' => $job->id,
+            'elementId' => $elementId,
+            'versionId' => $versionId,
+            'sourceSiteId' => $job->sourceSiteId,
+            'targetSiteId' => $job->getTargetSiteIds(),
+        ]);
+
         $result = true;
         foreach ($translationRecords as $translationRecord) {
             assert($translationRecord instanceof TranslationRecord);

@@ -54,6 +54,9 @@ class RegisterCpUrlRulesListener implements ListenerInterface
         $event->rules['POST ' . CraftliltpluginParameters::JOB_POST_SYNC_PATH]
             = CraftliltpluginParameters::JOB_POST_SYNC_ACTION;
 
+        $event->rules['POST ' . CraftliltpluginParameters::JOB_POST_RETRY_PATH]
+            = CraftliltpluginParameters::JOB_POST_RETRY_ACTION;
+
         $event->rules['POST craft-lilt-plugin/job/translation/publish']
             = CraftliltpluginParameters::TRANSLATION_PUBLISH_ACTION;
 

@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
-use craft\helpers\DateTimeHelper;
 use craft\web\Controller;
 use Exception;
 use lilthq\craftliltplugin\assets\JobFormAsset;

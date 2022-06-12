@@ -15,11 +15,7 @@ class PostJobRetryController extends Controller
     {
         $request = Craft::$app->getRequest();
 
-        if (!$request->getIsPost()) {
-            return $this->response->setStatusCode(405);
-        }
-
-        $jobIds = $request->getBodyParam('jobIds', []);
+        $jobIds = $request->getParam('jobIds', []);
 
         if (count($jobIds) === 0) {
             return $this->response->setStatusCode(400, json_encode(['msg' => 'Empty jobs']));
@@ -43,7 +39,7 @@ class PostJobRetryController extends Controller
 
 
         if (count($jobs) === 0) {
-            return $this->response->setStatusCode(400, json_encode(['msg' => 'Job not found']));
+            return $this->response->setStatusCode(404, json_encode(['msg' => 'No jobs found']));
         }
 
         return $this->response->setStatusCode(200);

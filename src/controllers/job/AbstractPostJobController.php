@@ -9,9 +9,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\controllers\job;
 
-use Craft;
 use lilthq\craftliltplugin\elements\Job;
-use RuntimeException;
 use yii\base\InvalidConfigException;
 use yii\web\MethodNotAllowedHttpException;
 

@@ -44,9 +44,13 @@ class TranslationRepository
         return $mapped;
     }
 
-    public function findOneById(int $id): TranslationModel
+    public function findOneById(int $id): ?TranslationModel
     {
         $translationRecord = TranslationRecord::findOne(['id' => $id]);
+
+        if (!$translationRecord) {
+            return null;
+        }
 
         return new TranslationModel(
             $translationRecord->toArray()
