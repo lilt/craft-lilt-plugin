@@ -6,15 +6,12 @@ namespace lilthq\craftliltplugintests\integration\controllers\job;
 
 use benf\neo\elements\Block;
 use benf\neo\elements\db\BlockQuery;
-use benf\neo\Plugin;
-use benf\neo\services\BlockTypes;
 use Codeception\Exception\ModuleException;
 use Codeception\Util\HttpCode;
 use Craft;
 use craft\base\Element;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
-use craft\elements\MatrixBlock;
 use craft\errors\InvalidFieldException;
 use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
@@ -28,7 +25,6 @@ use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\ExpectedElementContent;
 use PHPUnit\Framework\Assert;
-use verbb\supertable\SuperTable;
 use yii\base\InvalidConfigException;
 
 class GetSendToLiltControllerCest extends AbstractIntegrationCest

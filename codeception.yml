@@ -14,6 +14,7 @@ coverage:
     - src/etc/*
     - src/assets/*
     - src/migrations/*
+    - src/exceptions/*
     - src/templates/*
     - src/translations/*
     - src/elements/*
