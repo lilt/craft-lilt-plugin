@@ -12,8 +12,6 @@ namespace lilthq\craftliltplugin\controllers\translation;
 use Craft;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
 use yii\web\Response;

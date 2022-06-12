@@ -6,18 +6,11 @@ namespace lilthq\craftliltplugin\modules;
 
 use Craft;
 use craft\errors\InvalidFieldException;
-use craft\helpers\Queue;
 use craft\queue\BaseJob;
 use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
-use LiltConnectorSDK\Model\JobResponse1;
-use LiltConnectorSDK\Model\SettingsResponse;
-use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\records\JobRecord;
-use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
 
 class FetchInstantJobTranslationsFromConnector extends BaseJob

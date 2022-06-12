@@ -9,13 +9,10 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\controllers\job;
 
-use Craft;
 use craft\errors\ElementNotFoundException;
 use craft\helpers\UrlHelper;
-use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\records\JobRecord;
 use Throwable;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;

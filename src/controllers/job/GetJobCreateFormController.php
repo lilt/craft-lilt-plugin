@@ -15,7 +15,6 @@ namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
 use craft\helpers\UrlHelper;
-use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
