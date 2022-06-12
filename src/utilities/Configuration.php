@@ -7,6 +7,8 @@ namespace lilthq\craftliltplugin\utilities;
 use Craft;
 use craft\base\Utility;
 use craft\helpers\UrlHelper;
+use Exception;
+use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\records\SettingRecord;
 
@@ -30,11 +32,31 @@ class Configuration extends Utility
     public static function contentHtml(): string
     {
         //TODO: move to service settings logic
+        $liltConfigDisabled = false;
+        $settingsResult = null;
 
-        $settingsResult = Craftliltplugin::getInstance()->connectorSettingsApi->servicesApiSettingsGetSettings();
+        try {
+            $settingsResult = Craftliltplugin::getInstance()->connectorSettingsApi->servicesApiSettingsGetSettings();
+        } catch (Exception $ex) {
+            $liltConfigDisabled = true;
+        }
 
+        if (!$settingsResult) {
+            $workflowAllowableValues = [
+                SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+                SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED,
+            ];
 
-        $workflowAllowableValues = $settingsResult->getLiltTranslationWorkflowAllowableValues();
+            $projectPrefix = null;
+            $projectNameTemplate = null;
+            $liltTranslationWorkflow = null;
+        } else {
+            $workflowAllowableValues = $settingsResult->getLiltTranslationWorkflowAllowableValues();
+            $projectPrefix = $settingsResult->getProjectPrefix();
+            $projectNameTemplate = $settingsResult->getProjectNameTemplate();
+            $liltTranslationWorkflow = $settingsResult->getLiltTranslationWorkflow();
+        }
+
         $workflowAllowableOptions = [];
         foreach ($workflowAllowableValues as $workflowAllowableValue) {
             $label = ucfirst(strtolower($workflowAllowableValue));
@@ -51,13 +73,14 @@ class Configuration extends Utility
         return Craft::$app->getView()->renderTemplate(
             'craft-lilt-plugin/_components/utilities/configuration.twig',
             [
-                'projectPrefix' => $settingsResult->getProjectPrefix(),
-                'projectNameTemplate' => $settingsResult->getProjectNameTemplate(),
-                'liltTranslationWorkflow' => $settingsResult->getLiltTranslationWorkflow(),
+                'projectPrefix' => $projectPrefix,
+                'projectNameTemplate' => $projectNameTemplate,
+                'liltTranslationWorkflow' => $liltTranslationWorkflow,
                 'liltTranslationWorkflowAllowableValues' => $workflowAllowableOptions,
                 'connectorApiKey' => $connectorApiKey,
                 'connectorApiUrl' => $connectorApiUrl,
                 'formActionUrl' => UrlHelper::cpUrl('craft-lilt-plugin/settings/lilt-configuration'),
+                'liltConfigDisabled' => $liltConfigDisabled,
             ]
         );
     }

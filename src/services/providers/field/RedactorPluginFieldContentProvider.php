@@ -12,12 +12,18 @@ class RedactorPluginFieldContentProvider extends AbstractContentProvider
     /**
      * @throws InvalidFieldException
      */
-    public function provide(ProvideContentCommand $provideContentCommand): string
+    public function provide(ProvideContentCommand $provideContentCommand): ?string
     {
         $element = $provideContentCommand->getElement();
         $field = $provideContentCommand->getField();
 
-        return $element->getFieldValue($field->handle)->getRawContent();
+        $fieldValue = $element->getFieldValue($field->handle);
+
+        if (!$fieldValue) {
+            return null;
+        }
+
+        return $fieldValue->getRawContent();
     }
 
     public function support(ProvideContentCommand $command): bool

@@ -9,6 +9,9 @@ const showModal = function() {
 
   let translation = $(`#lilt-translations-table tr[data-id="${translationId}"]`);
   let translationIsReviewed = translation.data('is-reviewed');
+  let translationIsPublished = translation.data('is-published');
+
+  console.log(translationIsReviewed)
 
   let isMultiView = false;
 
@@ -80,12 +83,22 @@ const showModal = function() {
 
     translation = $(`#lilt-translations-table tr[data-id="${translationId}"]`);
     translationIsReviewed = translation.data('is-reviewed');
+    translationIsPublished = translation.data('is-published');
     translationTitle = translation.data('title');
 
+    console.log('showTranslationModal.translationIsReviewed', translationIsReviewed)
+    console.log('showTranslationModal.translationIsPublished', translationIsPublished)
+
     if (translationIsReviewed === 1) {
-      $modalFooterButtonsSubmit.hide();
+      $modalFooterButtonsSubmit.addClass('disabled');
     } else {
-      $modalFooterButtonsSubmit.show();
+      $modalFooterButtonsSubmit.removeClass('disabled');
+    }
+
+    if (translationIsPublished === 1) {
+      $modalFooterButtonsPublish.addClass('disabled');
+    } else {
+      $modalFooterButtonsPublish.removeClass('disabled');
     }
   }
 
@@ -258,6 +271,7 @@ const showModal = function() {
           $spinner.remove();
 
           Craft.cp.displayNotice(Craft.t('app', 'Review complete'));
+          $(`#lilt-translations-table tr[data-id="${translationId}"]`).data('is-reviewed', 1)
           if (!isMultiView) {
             location.reload();
           }
@@ -278,6 +292,7 @@ const showModal = function() {
         const $spinner = $('<div class="spinner"></div>');
         $(this).append($spinner);
         $(this).addClass('disabled');
+        $modalFooterButtonsSubmit.addClass('disabled');
         $(this).disable();
 
         Craft.sendActionRequest(
@@ -287,6 +302,9 @@ const showModal = function() {
         ).then(response => {
           Craft.cp.displayNotice(Craft.t('app', 'Translation published'));
           $spinner.remove();
+
+          $(`#lilt-translations-table tr[data-id="${translationId}"]`).data('is-reviewed', 1)
+          $(`#lilt-translations-table tr[data-id="${translationId}"]`).data('is-published', 1)
 
           if (!isMultiView) {
             location.reload();

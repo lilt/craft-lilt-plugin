@@ -62,13 +62,8 @@
                     </tr>
                     <tr>
                         <td data-translation-key="{{ key }}" data-source="original">{{ value }}</td>
-
-                        {% if translation.targetContentValues.key is defined %}
-                            <td data-translation-key="{{ key }}"
-                                data-source="translated">{{ translation.targetContentValues[key] }}</td>
-                        {% else %}
-                            <td data-translation-key="{{ key }}" data-source="translated">Undefined</td>
-                        {% endif %}
+                        <td data-translation-key="{{ key }}"
+                            data-source="translated">{{ translation.targetContentValues[key] ?? 'Undefined' }}</td>
                     </tr>
                 {% endfor %}
             </table>

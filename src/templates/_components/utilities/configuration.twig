@@ -34,6 +34,7 @@
             value: projectPrefix ?? '',
             maxlength: 255,
             errors: model is defined? model.getErrors('projectPrefix') : [],
+            disabled: liltConfigDisabled
         }) }}
 
         {{ forms.textField({
@@ -44,6 +45,7 @@
             value: projectNameTemplate ?? '',
             maxlength: 255,
             errors: model is defined? model.getErrors('projectNameTemplate') : [],
+            disabled: liltConfigDisabled
         }) }}
 
         {{ forms.selectField({
@@ -53,6 +55,7 @@
             id: 'liltTranslationWorkflow',
             value: liltTranslationWorkflow ?? '',
             errors: model is defined? model.getErrors('liltTranslationWorkflow') : [],
+            disabled: liltConfigDisabled
         }) }}
 
         <div class="buttons">

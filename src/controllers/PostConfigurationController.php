@@ -30,6 +30,9 @@ class PostConfigurationController extends AbstractJobController
     {
         $request = $this->request;
 
+        $connectorApiKey = $request->getBodyParam('connectorApiKey');
+        $connectorApiUrl = $request->getBodyParam('connectorApiUrl');
+
         # connectorApiKey
         $connectorApiKeyRecord = SettingRecord::findOne(['name' => 'connector_api_key']);
         if (!$connectorApiKeyRecord) {
@@ -47,24 +50,49 @@ class PostConfigurationController extends AbstractJobController
         $connectorApiUrlRecord->value = $request->getBodyParam('connectorApiUrl');
         $connectorApiUrlRecord->save();
 
-        $settingsRequest = new SettingsRequest();
-        $settingsRequest->setProjectPrefix(
-            $request->getBodyParam('projectPrefix')
-        );
-        $settingsRequest->setProjectNameTemplate(
-            $request->getBodyParam('projectNameTemplate')
-        );
-        $settingsRequest->setLiltTranslationWorkflow(
-            $request->getBodyParam('liltTranslationWorkflow')
-        );
-        Craftliltplugin::getInstance()->connectorSettingsApi->servicesApiSettingsUpdateSettings(
-            $settingsRequest
-        );
+        $liltConfigDisabled = true;
+        if (!empty($connectorApiKey) && !empty($connectorApiUrl)) {
+            //is token valid
 
-        Craft::$app->getSession()->setFlash(
-            'cp-notice',
-            'Configuration options saved successfully'
-        );
+            $settingsResult = null;
+
+            Craftliltplugin::getInstance()->connectorConfiguration->setAccessToken($connectorApiKey);
+            Craftliltplugin::getInstance()->connectorConfiguration->setHost($connectorApiUrl);
+
+            try {
+                $settingsResult = Craftliltplugin::getInstance()
+                    ->connectorSettingsApi
+                    ->servicesApiSettingsGetSettings();
+
+                $liltConfigDisabled = false;
+            } catch (\Exception $ex) {
+                Craft::$app->getSession()->setFlash(
+                    'cp-error',
+                    'Cant connect to Lilt. Looks like API Key or API URL is wrong'
+                );
+            }
+        }
+
+        if (!$liltConfigDisabled) {
+            $settingsRequest = new SettingsRequest();
+            $settingsRequest->setProjectPrefix(
+                $request->getBodyParam('projectPrefix')
+            );
+            $settingsRequest->setProjectNameTemplate(
+                $request->getBodyParam('projectNameTemplate')
+            );
+            $settingsRequest->setLiltTranslationWorkflow(
+                $request->getBodyParam('liltTranslationWorkflow')
+            );
+            Craftliltplugin::getInstance()->connectorSettingsApi->servicesApiSettingsUpdateSettings(
+                $settingsRequest
+            );
+
+            Craft::$app->getSession()->setFlash(
+                'cp-notice',
+                'Configuration options saved successfully'
+            );
+        }
 
         return $this->redirect(
             UrlHelper::cpUrl(sprintf('craft-lilt-plugin/settings/%s', Configuration::id()))
