@@ -58,8 +58,8 @@ class GetJobEditFormControllerCest
         $I->sendAjaxGetRequest(
             sprintf(
                 '?p=admin/%s/0',
-                CraftliltpluginParameters::JOB_EDIT_PATH,
-            ),
+                CraftliltpluginParameters::JOB_EDIT_PATH
+            )
         );
 
         $I->seeResponseCodeIs(400);
@@ -75,7 +75,7 @@ class GetJobEditFormControllerCest
                 '?p=admin/%s/%d',
                 CraftliltpluginParameters::JOB_EDIT_PATH,
                 123
-            ),
+            )
         );
 
         $I->seeResponseCodeIs(404);
@@ -112,7 +112,7 @@ class GetJobEditFormControllerCest
 
         $expected = $this->getExpected($job);
 
-        $actual = json_decode($response->data, true, 512, JSON_THROW_ON_ERROR);
+        $actual = json_decode($response->data, true, 512, 4194304);
 
         Assert::assertEquals($expected['template'], $actual['template']);
         Assert::assertEquals(

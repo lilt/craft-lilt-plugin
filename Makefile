@@ -1,3 +1,11 @@
+# For .env file support uncomment next line
+#include .env
+
+export
+
+PHP_VERSION?=7.2
+MYSQL_VERSION?=5.7
+
 up:
 	docker-compose up -d
 	docker-compose exec -T mysql-test sh -c 'while ! mysqladmin ping -h"mysql-test" --silent; do sleep 1; done'
@@ -21,7 +29,7 @@ composer-install:
 	docker-compose exec -T -u www-data cli-app sh -c "curl -s https://getcomposer.org/installer | php"
 	docker-compose exec -T -u www-data cli-app sh -c "php composer.phar install"
 
-quality: up
+quality:
 	docker-compose exec -T -u www-data cli-app sh -c "curl -L -s https://phar.phpunit.de/phpcpd.phar --output phpcpd.phar"
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/phpcs"
 	docker-compose exec -T -u www-data cli-app sh -c "php phpcpd.phar src"
@@ -55,4 +63,7 @@ integration: codecept-build
 functional: codecept-build
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional"
 
-test: quality functional integration
+unit: codecept-build
+	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run unit"
+
+test: functional integration unit

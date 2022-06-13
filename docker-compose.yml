@@ -2,7 +2,7 @@ version: '3'
 
 services:
   cli-app:
-    image: craftcms/cli:7.3
+    image: craftcms/cli:${PHP_VERSION}
     container_name: craft-lilt-plugin-cli-app
     working_dir: /craft-lilt-plugin
     tty: true
@@ -10,7 +10,7 @@ services:
       - ./:/craft-lilt-plugin
 
   mysql-test:
-    image: mysql:5.7
+    image: mysql:${MYSQL_VERSION}
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 1
       MYSQL_DATABASE: "craft-lilt-test"

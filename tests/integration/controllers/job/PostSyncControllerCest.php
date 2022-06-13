@@ -143,7 +143,7 @@ class PostSyncControllerCest extends AbstractIntegrationCest
         $I->sendAjaxPostRequest(
             sprintf(
                 '?p=admin/%s',
-                CraftliltpluginParameters::JOB_POST_SYNC_PATH,
+                CraftliltpluginParameters::JOB_POST_SYNC_PATH
             ),
             [
                 'jobIds' => [$job777->id, $job888->id]
