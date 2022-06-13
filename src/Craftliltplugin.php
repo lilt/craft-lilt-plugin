@@ -21,6 +21,7 @@ use LiltConnectorSDK\Api\SettingsApi;
 use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
@@ -197,7 +198,8 @@ class Craftliltplugin extends Plugin
 
         $connectorKey = getenv('CRAFT_LILT_PLUGIN_CONNECTOR_API_KEY');
 
-        if (empty($connectorKey)) {
+        $tableSchema = Craft::$app->db->schema->getTableSchema(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
+        if (empty($connectorKey) && $tableSchema !== null) {
             $connectorApiKeyRecord = SettingRecord::findOne(['name' => 'connector_api_key']);
             if ($connectorApiKeyRecord) {
                 $connectorKey = $connectorApiKeyRecord->value;
