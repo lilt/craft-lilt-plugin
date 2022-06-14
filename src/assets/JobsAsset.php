@@ -9,7 +9,7 @@ use craft\web\assets\cp\CpAsset;
 
 class JobsAsset extends AssetBundle
 {
-    public function init()
+    public function init(): void
     {
         $this->sourcePath = '@lilthq/craftliltplugin/assets/resources';
 
@@ -18,7 +18,7 @@ class JobsAsset extends AssetBundle
         ];
 
         $this->js = [
-            'jobs.js',
+            'job-sync-button.js',
         ];
 
         $this->css = [];
