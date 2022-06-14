@@ -12,6 +12,7 @@ namespace lilthq\craftliltplugin\controllers\job;
 use Craft;
 use craft\errors\MissingComponentException;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\services\handlers\commands\CreateJobCommand;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
@@ -29,6 +30,7 @@ class PostCreateJobController extends AbstractPostJobController
         $job = $this->getJob();
 
         if ($job->hasErrors()) {
+            $job->status = Job::STATUS_DRAFT;
             Craft::$app->getSession()->setFlash(
                 'cp-error',
                 'Couldn’t create job.'
