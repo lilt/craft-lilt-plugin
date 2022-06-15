@@ -152,10 +152,16 @@ class ElementTranslatableContentApplier
         #    $translationApplyCommand->getElement()->getCanonicalId()
         #) : $translationApplyCommand->getElement();
 
-        $source = $translationApplyCommand->getElement();
+        /** Element will be created from original one, we can't create draft from draft */
+        $createFrom = $translationApplyCommand->getElement()->getIsDraft() ? Craft::$app->elements->getElementById(
+            $translationApplyCommand->getElement()->getCanonicalId()
+        ) : $translationApplyCommand->getElement();
+
+        //TODO: we also can copy draft, but then we have to fetch it with related site
+        //$clonedEntry = Craft::$app->getElements()->duplicateElement
 
         $draft = $this->draftRepository->createDraft(
-            $source,
+            $createFrom,
             Craft::$app->getUser()->getId(),
             sprintf(
                 '%s [%s -> %s] ' . (new DateTime())->format('H:i:s'),

@@ -103,27 +103,27 @@ class GetJobCreateFormControllerCest
                 ],
                 'availableSites' => [
                     0 => [
-                        'value' => 4,
+                        'value' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
                         'label' => 'Craft test(en-US)',
                     ],
                     1 => [
-                        'value' => 1,
+                        'value' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE'),
                         'label' => 'Craft test de(de-DE)',
                     ],
                     2 => [
-                        'value' => 3,
+                        'value' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU'),
                         'label' => 'Craft test ru(ru-RU)',
                     ],
                     3 => [
-                        'value' => 2,
+                        'value' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('es-ES'),
                         'label' => 'Craft test es(es-ES)',
                     ],
                 ],
                 'targetSites' => [
-                    4 => 'en-US',
-                    1 => 'de-DE',
-                    3 => 'ru-RU',
-                    2 => 'es-ES',
+                    Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US') => 'en-US',
+                    Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE') => 'de-DE',
+                    Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU') => 'ru-RU',
+                    Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('es-ES') => 'es-ES',
                 ],
                 'element' => [
                     'uid' => null,
