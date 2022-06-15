@@ -160,7 +160,9 @@ class SyncJobFromLiltConnectorHandler
             $translationRecord = TranslationRecord::findOne([
                 'targetSiteId' => Craftliltplugin::getInstance()
                     ->languageMapper
-                    ->getSiteIdByLanguage($targetLanguage),
+                    ->getSiteIdByLanguage(
+                        trim($targetLanguage, '-')
+                    ),
                 'elementId' => $draft->getCanonicalId() ?? $elementId,
                 'jobId' => $job->getId()
             ]);
