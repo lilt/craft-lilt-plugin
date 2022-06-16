@@ -8,9 +8,6 @@ $(document).ready(function() {
 
   $(`#targetSiteIds-field input.checkbox[value="${sourceSiteValue}"]`).
       on('change', function() {
-
-        console.log(`#targetSiteIds-field input.checkbox[value="${sourceSiteValue}"]`, 'change')
-
         if ($('#sourceSite').val() === $(this).val()) {
           $(this).prop('disabled', true)
         }

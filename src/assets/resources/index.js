@@ -1,40 +1,47 @@
-$(document).ready(function() {
-      if (document.location.pathname.indexOf('/admin/entries') === 0) {
-        var $btngroup = $('<div>', {'class': 'btngroup left'}).
-            css('margin-right', '5px');
-        var $button = $('<button>', {'class': 'btn', 'type': 'button'});
-        $button.appendTo($btngroup);
-        $button.html('Translate');
+window.CraftliltPlugin = {
+  init: function() {
+    const isAdminEntriesPage = document.location.pathname.indexOf(
+        '/admin/entries') === 0;
 
-        $button.attr('data-icon', 'language');
-        $button.addClass('disabled');
+    if (isAdminEntriesPage) {
+      this.addTranslateButton();
+    }
+  },
+  addTranslateButton: function() {
+    var $btngroup = $('<div>', {'class': 'btngroup left'}).
+        css('margin-right', '5px');
+    var $button = $('<button>', {'class': 'btn', 'type': 'button'});
+    $button.appendTo($btngroup);
+    $button.html('Translate');
 
-        $button.on('click', function() {
-          if (!$(this).hasClass('disabled')) {
-            const selectedElements = Craft.elementIndex.getSelectedElementIds();
-            let queryParams = {};
-            selectedElements.forEach(function(value, i) {
-              queryParams['elementIds[' + i + ']'] = value;
-            });
+    $button.attr('data-icon', 'language');
+    $button.addClass('disabled');
 
-            queryParams.sourceSiteId = Craft.elementIndex.siteId;
-
-            document.location.href = Craft.getCpUrl(
-                'craft-lilt-plugin/job/create',
-                queryParams,
-            );
-          }
+    $button.on('click', function() {
+      if (!$(this).hasClass('disabled')) {
+        const selectedElements = Craft.elementIndex.getSelectedElementIds();
+        let queryParams = {};
+        selectedElements.forEach(function(value, i) {
+          queryParams['elementIds[' + i + ']'] = value;
         });
 
-        $btngroup.prependTo('#header #action-button');
+        queryParams.sourceSiteId = Craft.elementIndex.siteId;
 
-        console.log(Craft.elementIndex);
-
-        Craft.elementIndex.on('selectionChange', function(e) {
-          if (Craft.elementIndex.getSelectedElementIds().length > 0) {
-            $button.removeClass('disabled');
-          }
-        });
+        document.location.href = Craft.getCpUrl(
+            'craft-lilt-plugin/job/create',
+            queryParams,
+        );
       }
-    },
-);
+    });
+
+    $btngroup.prependTo('#header #action-button');
+
+    Craft.elementIndex.on('selectionChange', function() {
+      if (Craft.elementIndex.getSelectedElementIds().length > 0) {
+        $button.removeClass('disabled');
+      }
+    });
+  },
+};
+
+$(document).ready(function() { CraftliltPlugin.init(); });
