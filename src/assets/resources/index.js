@@ -36,8 +36,6 @@ window.CraftliltPlugin = {
 
     $btngroup.prependTo('#header #action-button');
 
-    console.log(Craft.elementIndex);
-
     Craft.elementIndex.on('selectionChange', function() {
       if (Craft.elementIndex.getSelectedElementIds().length > 0) {
         $button.removeClass('disabled');

@@ -22,7 +22,7 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
 
     this.$actionButton = $('#action-button', this.$container);
     this.$addEntryButton = $('.addAnEntry', this.$container);
-    this.$addEntryButton.on('click', this.onAddEntryClick);
+    this.$addEntryButton.on('click', () => { this.onAddEntryClick(); });
 
     this.$removeEntryButton = $('#entries-remove-action', this.$container);
     this.$removeEntryButton.on('click', () => { this.onRemoveEntry(); });
@@ -83,7 +83,7 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
           disableOnSelect: true,
           disabledElementIds: elementIds,
           onCancel: function() {},
-          onSelect: function(entries) {
+          onSelect: (entries) => {
             const entiriesSelected = entries.map((entry) => {
               return entry.id.toString();
             });
@@ -153,12 +153,9 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
     return this.$container.serializeArray();
   },
   elementIndexUpdateElements: function() {
-    console.log('elementIndexUpdateElements');
     this.onUpdateElements();
   },
   elementIndexSelectionChange: function() {
-    console.log('elementIndexSelectionChange');
-
     if (Craft.elementIndex.getSelectedElementIds().length > 0) {
       $('#entries-remove-action').css('visibility', 'visible');
     }
@@ -181,8 +178,6 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
   },
   preloadElementIndex: function() {
     const selectedEntries = this._getSelectedEntries();
-
-    console.log(selectedEntries);
 
     if (selectedEntries.length <= 0) {
       return;
@@ -243,8 +238,6 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
 
     const version = JSON.parse(this.$selectedVersions.val());
 
-    console.log('Versions: ', version);
-
     $('#entries-to-translate tbody tr').each(function() {
       const elementId = $(this).data('id');
 
@@ -279,7 +272,6 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
     this.$selectedVersions.remove();
   },
   onUpdateElements: function() {
-    console.log('onUpdateElements');
     this.preloadVersions();
 
     const elements = Craft.elementIndex.view.getAllElements().get();
@@ -330,8 +322,6 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
 
     remove = remove.map((element) => element.toString());
 
-    console.log(remove);
-
     const currentValue = this.$selectedEntries.val();
     let alreadySelected = [];
     try {
@@ -350,11 +340,9 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
       }
     });
 
-    console.log(alreadySelected);
     alreadySelected = alreadySelected.filter((el) => {
       return remove.indexOf(el.toString()) === -1;
     });
-    console.log(alreadySelected);
 
     if (alreadySelected.length === 0) {
       Craft.elementIndex = null;
@@ -376,7 +364,6 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
       Craft.elementIndex.updateElements();
     }
 
-    console.log('onRemoveEntry');
     this.preloadVersions();
   },
 });
