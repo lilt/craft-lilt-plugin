@@ -1,5 +1,7 @@
 {% import '_includes/forms' as forms %}
 
+{% set isJobInProgress = (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()) %}
+
 <div id="translations" class="flex-fields">
     <div class="heading" style="min-height: 30px">
         <h3 style="float:left;">Translations</h3>
@@ -20,7 +22,9 @@
             </th>
             <th scope="col" data-attribute="title">Title</th>
             <th scope="col" data-attribute="targetSiteIds">Target locale</th>
+            {% if not isJobInProgress %}
             <th scope="col" data-attribute="dueDate">Last delivery</th>
+            {% endif %}
             <th scope="col" data-attribute="status">Status</th>
             <th scope="col" data-attribute="link" title="Actions" aria-label="Actions">Actions</th>
         </tr>
@@ -62,7 +66,9 @@
                     <span class="source-language" data-icon="world"></span>{{ translation.targetLocale }}
                 </td>
 
+                {% if not isJobInProgress %}
                 <td data-title="Due Date" data-attr="dueDate">{{ translation.lastDelivery }}</td>
+                {% endif %}
 
                 <td data-title="Status" data-attr="status"><span style="white-space: nowrap;"><span
                                 class="status {{ translation.statusColor }}"></span>{{ translation.statusLabel }}</span>

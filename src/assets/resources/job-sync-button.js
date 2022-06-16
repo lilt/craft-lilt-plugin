@@ -61,10 +61,10 @@ CraftliltPlugin.JobSyncButton = Garnish.Base.extend({
     });
   },
   processing: function() {
-    $(this).addClass('disabled');
+    this.$container.addClass('disabled');
 
     this.$_spinner = $('<div class="spinner"></div>');
-    $(this).parent().prepend(this.$_spinner);
+    this.$container.parent().prepend(this.$_spinner);
   },
   done: function() {
     Craft.elementIndex.updateElements();
