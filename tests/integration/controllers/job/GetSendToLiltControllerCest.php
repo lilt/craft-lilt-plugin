@@ -129,11 +129,14 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             ];
         }, TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id]));
 
+        $languages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+            array_column($translations, 'targetSiteId')
+        );
+        sort($languages);
+
         Assert::assertEquals(
             ['de-DE', 'es-ES', 'ru-RU'],
-            Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
-                array_column($translations, 'targetSiteId')
-            )
+            $languages
         );
 
         Assert::assertSame(Job::STATUS_IN_PROGRESS, $jobActual->status);
