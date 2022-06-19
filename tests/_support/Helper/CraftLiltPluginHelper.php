@@ -166,7 +166,7 @@ class CraftLiltPluginHelper extends Module
 
         $translation->refresh();
 
-        $this->assertNotEmpty($translation->translatedDraftId);
+        $this->assertNotEmpty($translation->translatedDraftId, 'Translated Draft Id is null');
 
         $translatedDraft = Craft::$app->elements->getElementById(
             $translation->translatedDraftId,

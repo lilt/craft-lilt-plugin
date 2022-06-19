@@ -87,7 +87,7 @@ class PostEditJobControllerCest extends AbstractIntegrationCest
 
         $I->seeHeader(
             'x-redirect',
-            sprintf('https://localhost/index.php?p=admin/craft-lilt-plugin/job/edit/%d', $job->id)
+            sprintf('https://test.craftcms.test:80/index.php?p=admin/craft-lilt-plugin/job/edit/%d&site=default', $job->id)
         );
 
         Assert::assertSame('Edited: Awesome test job', $job->title);

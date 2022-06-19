@@ -106,13 +106,16 @@ class GetJobEditFormControllerCest
         ]);
 
         $controller = $this->getController();
-        $controller->setView(new ViewWrapper());
-
         $response = $controller->actionInvoke((string) $job->id);
 
-        $expected = $this->getExpected($job);
+        $behavior = $response->getBehavior('template');
+        $actual = [
+            'variables' => $behavior->variables ?? [],
+            'template' => $behavior->template ?? '',
+            'templateMode' => $behavior->templateMode ?? '',
+        ];
 
-        $actual = json_decode($response->data, true, 512, 4194304);
+        $expected = $this->getExpected($job);
 
         Assert::assertEquals($expected['template'], $actual['template']);
         Assert::assertEquals(
@@ -136,6 +139,9 @@ class GetJobEditFormControllerCest
             $actual['variables']['authorOptionCriteria']
         );
         Assert::assertEquals($expected['variables']['crumbs'], $actual['variables']['crumbs']);
+
+        #convert to array
+        $actual['variables']['element'] = json_decode(json_encode($actual['variables']['element']), true);
 
         foreach ($expected['variables']['element'] as $expectedKey => $expectedValue) {
             Assert::assertArrayHasKey($expectedKey, $actual['variables']['element']);
@@ -310,11 +316,11 @@ class GetJobEditFormControllerCest
                 'crumbs' => [
                     0 => [
                         'label' => 'Lilt Plugin',
-                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin',
+                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin&site=default',
                     ],
                     1 => [
                         'label' => 'Jobs',
-                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin/jobs',
+                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin/jobs&site=default',
                     ],
                 ],
             ],

@@ -75,16 +75,17 @@ class GetTranslationReviewControllerCest
         $translations[0]->save();
 
         $controller = $this->getController();
-        $view = new ViewWrapper();
-        $view->setControllerView($controller->view);
-        $controller->setView($view);
-
         $controller->request->setBodyParams(['translationId' => $translations[0]->id]);
-
         $response = $controller->actionInvoke();
 
+        $behavior = $response->getBehavior('template');
+        $actual = [
+            'variables' => $behavior->variables,
+            'template' => $behavior->template,
+            'templateMode' => $behavior->templateMode,
+        ];
+
         $expected = $this->getExpected();
-        $actual = json_decode($view->data, true, 512, 4194304);
 
         foreach ($expected['variables']['translation'] as $key => $value) {
             if(is_array($value)) {
@@ -155,8 +156,7 @@ class GetTranslationReviewControllerCest
                                             ]
                                         ],
                                         'plainText' => 'secondBlockType - plainText - Here is value of field',
-                                        'supertable' => [
-                                        ]
+                                        #'supertable' => []
                                     ]
                                 ]
                             ],
@@ -201,14 +201,14 @@ class GetTranslationReviewControllerCest
                                 'thirdCheckboxLabel' => 'Third checkbox label',
                                 'secondCheckboxLabel' => 'Second checkbox label'
                             ],
-                            'supertable' => [
-                                [
-                                    'fields' => [
-                                        'firstField' => 'firstField - Supertable text',
-                                        'secondField' => 'secondField - Supertable text'
-                                    ]
-                                ]
-                            ],
+//                            'supertable' => [
+//                                [
+//                                    'fields' => [
+//                                        'firstField' => 'firstField - Supertable text',
+//                                        'secondField' => 'secondField - Supertable text'
+//                                    ]
+//                                ]
+//                            ],
                             'lightswitch' => [
                                 'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
                                 'offLabel' => 'The label text to display beside the lightswitch’s disabled state.'

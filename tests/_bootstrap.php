@@ -13,6 +13,8 @@ define('CRAFT_TRANSLATIONS_PATH', __DIR__ . '/_craft/translations');
 define('CRAFT_TESTS_PATH', __DIR__ . '/_craft/tests');
 define('CRAFT_VENDOR_PATH', dirname(__DIR__) . '/vendor');
 
+define('TEST_SUPERTABLE_PLUGIN', false);
+
 
 $devMode = true;
 

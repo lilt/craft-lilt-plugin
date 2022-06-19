@@ -13,7 +13,8 @@ use craft\errors\InvalidFieldException;
 
 final class ExpectedElementContent
 {
-    public static function getExpectedI18N(string $prefix = ''): array {
+    public static function getExpectedI18N(string $prefix = ''): array
+    {
         return [
             'firstCheckboxLabel' => $prefix . 'First checkbox label',
             'secondCheckboxLabel' => $prefix . 'Second checkbox label',
@@ -26,6 +27,7 @@ final class ExpectedElementContent
             'columnHeading4' => $prefix . 'Column Heading 4',
         ];
     }
+
     /**
      * @throws InvalidFieldException
      */
@@ -33,9 +35,8 @@ final class ExpectedElementContent
     {
         $matrixContent = self::getExpectedMatrixContent($element, $prefix);
         $neoContent = self::getExpectedNeoContent($element, $prefix, $i18nPrefix);
-        $supertableContent = self::getExpectedSupertableValue($element, $prefix);
 
-        return [
+        $expected = [
             $element->getId() => [
                 'title' => $prefix . 'Some example title',
                 'redactor' => $prefix . '<h1>Here is some header text</h1> Here is some content',
@@ -51,7 +52,6 @@ final class ExpectedElementContent
                     'onLabel' => $i18nPrefix . 'The label text to display beside the lightswitch’s enabled state',
                     'offLabel' => $i18nPrefix . 'The label text to display beside the lightswitch’s disabled state.',
                 ],
-                'supertable' => $supertableContent,
                 'table' => [
                     'columns' => [
                         //TODO: columns heading translation is only done with i18n records
@@ -78,6 +78,13 @@ final class ExpectedElementContent
                 'neo' => $neoContent,
             ],
         ];
+
+        if (TEST_SUPERTABLE_PLUGIN) {
+            $supertableContent = self::getExpectedSupertableValue($element, $prefix);
+            $expected[$element->getId()]['supertable'] = $supertableContent;
+        }
+
+        return $expected;
     }
 
     /**
@@ -147,7 +154,7 @@ final class ExpectedElementContent
         $firstBlockId = $neoFieldValue->type('firstBlockType')->one()->id;
         $secondBlockId = $neoFieldValue->type('secondBlockType')->one()->id;
 
-        return [
+        $content = [
             $firstBlockId => [
                 'fields' => [
                     'redactor' => $prefix . 'firstBlockType - redactor - Here is value of field',
@@ -178,10 +185,14 @@ final class ExpectedElementContent
                             ],
                         ],
                     ],
-                    'supertable' => [
-                    ],
                 ],
             ],
         ];
+
+        if (TEST_SUPERTABLE_PLUGIN) {
+            $content[$secondBlockId]['fields']['supertable'] = [];
+        }
+
+        return $content;
     }
 }
