@@ -82,12 +82,6 @@ jobs:
         run: make composer-install
       - name: Quality
         run: make quality
-#      - name: Create temporary artifact downloads folder
-#        run: mkdir downloads
-#      - name: Add artifacts to publish to the temp folder
-#        run: |
-#          cp composer.json downloads/composer.json
-#          cp composer.lock downloads/composer.lock
       - name: Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2
         with:
@@ -98,4 +92,12 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v3.1.0
         with:
-          files: ./tests/_output/coverage.xml
+          files: ./tests/_output/coverage-integration.xml
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.0
+        with:
+          files: ./tests/_output/coverage-functional.xml
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.0
+        with:
+          files: ./tests/_output/coverage-unit.xml
