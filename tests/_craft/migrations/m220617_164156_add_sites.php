@@ -63,7 +63,7 @@ class m220617_164156_add_sites extends Migration
             $site->groupId = $groups[0]->id;
             $site->setBaseUrl('@web/' . explode('-',$language)[0]);
 
-            Craft::$app->sites->saveSite($site);
+            Craft::$app->sites->saveSite($site, false);
 
             $site = Craft::$app->sites->getSiteByHandle($site->handle);
 

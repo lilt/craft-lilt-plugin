@@ -5,8 +5,8 @@ declare -a arr=(
                   "3.7.0"
                   "3.7.1"
                   "3.7.2"
-                  "3.7.3.2"
                   "3.7.3.1"
+                  "3.7.3.2"
                   "3.7.3"
                   "3.7.4"
                   "3.7.5"
@@ -63,11 +63,17 @@ declare -a arr=(
 ## now loop through the above array
 for i in "${arr[@]}"
 do
-   rm -rf vendor
-   rm -rf composer.lock
+   #rm -rf vendor
+   #rm -rf composer.lock
    composer require craftcms/cms:"$i" -W
    composer dump-autoload
    php vendor/bin/codecept build
    php vendor/bin/codecept run integration
+   if [ $? -ne 0 ]; then
+         break
+   fi
    php vendor/bin/codecept run functional
+    if [ $? -ne 0 ]; then
+          break
+    fi
 done
