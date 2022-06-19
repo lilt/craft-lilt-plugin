@@ -67,3 +67,15 @@ unit: codecept-build
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run unit"
 
 test: functional integration unit
+
+prepare-container:
+	docker-compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
+	docker-compose exec -T -u root cli-app sh -c "curl -s https://getcomposer.org/installer | php"
+	docker-compose exec -T -u root cli-app sh -c "cp composer.phar /bin/composer"
+
+test-craft-versions:
+	PHP_VERSION=8.1 docker-compose up -d
+	docker-compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
+	docker-compose exec -T -u root cli-app sh -c "curl -s https://getcomposer.org/installer | php"
+	docker-compose exec -T -u root cli-app sh -c "cp composer.phar /bin/composer"
+	docker-compose exec -T -u www-data cli-app bash -c "./craft-versions.sh"

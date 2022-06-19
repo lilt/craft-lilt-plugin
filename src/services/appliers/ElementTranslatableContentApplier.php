@@ -124,7 +124,11 @@ class ElementTranslatableContentApplier
             $translationApplyCommand->getTargetSiteId()
         ); */
 
-        $draftElement->setIsFresh();
+        /** @since setIsFresh in craft only since 3.7.14 */
+        if (method_exists($draftElement, 'setIsFresh')) {
+            // TODO: It was added because of: Calling unknown method: setIsFresh()
+            $draftElement->setIsFresh();
+        }
 
         Craft::$app->elements->saveElement(
             $draftElement

@@ -46,10 +46,12 @@ class ElementTranslatableContentProviderCest extends AbstractIntegrationCest
 
         $actualElementContent = $content[$element->id];
 
+        $expectedElementContent = array_first(
+            ExpectedElementContent::getExpectedBody($element)
+        );
+
         Assert::assertSame(
-            array_first(
-                ExpectedElementContent::getExpectedBody($element)
-            ),
+            $expectedElementContent,
             $actualElementContent
         );
     }

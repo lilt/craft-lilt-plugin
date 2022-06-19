@@ -71,7 +71,12 @@ class ElementQueryContentApplier extends AbstractContentApplier implements Appli
 
                 $i18NRecords[] = $result->getI18nRecords();
             }
-            $block->setIsFresh();
+
+            /** @since setIsFresh in craft only since 3.7.14 */
+            if (method_exists($block, 'setIsFresh')) {
+                // TODO: It was added because of: Calling unknown method: setIsFresh()
+                $block->setIsFresh();
+            }
         }
 
         $i18NRecords = !empty($i18NRecords) ? array_merge(...$i18NRecords) : [];

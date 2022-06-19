@@ -224,10 +224,8 @@ class GetJobEditFormControllerCest
                     'propagateAll' => false,
                     'newSiteIds' => [
                     ],
-                    'isNewForSite' => false,
                     'resaving' => false,
                     'duplicateOf' => NULL,
-                    'firstSave' => false,
                     'mergingCanonicalChanges' => false,
                     'updatingFromDerivative' => false,
                     'previewing' => false,
