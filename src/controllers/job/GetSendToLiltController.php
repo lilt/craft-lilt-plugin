@@ -23,7 +23,7 @@ use yii\web\Response;
 
 class GetSendToLiltController extends Controller
 {
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     /**
      * @throws ElementNotFoundException

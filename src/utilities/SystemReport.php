@@ -16,7 +16,7 @@ class SystemReport extends Utility
         return Craft::t('app', 'System Report');
     }
 
-    public static function iconPath()
+    public static function iconPath(): ?string
     {
         return Craft::getAlias('@appicons/check.svg');
     }
@@ -30,19 +30,19 @@ class SystemReport extends Utility
     {
         $pluginRequirements = [
             [
-                'name' => 'PHP 7.2+',
+                'name' => 'PHP 8.0+',
                 'mandatory' => true,
                 'condition' => true,
-                'memo' => 'PHP 7.2 or later is required.',
-                'error' => !version_compare(App::phpVersion(), '7.2', '>='),
+                'memo' => 'PHP 8.0 or later is required.',
+                'error' => !version_compare(App::phpVersion(), '8.0', '>='),
                 'warning' => false
             ],
             [
-                'name' => 'Craft CMS 3.7.38+',
+                'name' => 'Craft CMS 4.0.0+',
                 'mandatory' => true,
                 'condition' => true,
-                'memo' => 'Craft CMS 3.7.38 or later is required',
-                'error' => !version_compare(Craft::$app->getVersion(), '3.7.38', '>='),
+                'memo' => 'Craft CMS 4.0.0 or later is required',
+                'error' => !version_compare(Craft::$app->getVersion(), '4.0.0', '>='),
                 'warning' => false
             ],
         ];

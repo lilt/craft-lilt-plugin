@@ -21,7 +21,7 @@ use yii\web\Response;
 
 class PostPublishDraftJobController extends AbstractPostJobController
 {
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     /**
      * @throws InvalidConfigException
