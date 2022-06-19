@@ -3,7 +3,7 @@
 
 export
 
-PHP_VERSION?=7.2
+PHP_VERSION?=8.1
 MYSQL_VERSION?=5.7
 
 up:
@@ -25,6 +25,8 @@ root:
 composer-install:
 	docker-compose exec -T -u root cli-app sh -c "apk add git"
 	docker-compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
+	docker-compose exec -T -u root cli-app sh -c "rm -f composer.lock"
+	docker-compose exec -T -u root cli-app sh -c "rm -rf vendor"
 	docker-compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
 	docker-compose exec -T -u www-data cli-app sh -c "curl -s https://getcomposer.org/installer | php"
 	docker-compose exec -T -u www-data cli-app sh -c "php composer.phar install"
