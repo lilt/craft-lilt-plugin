@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace craft\contentmigrations;
 
 use benf\neo\Field as NeoField;
-use benf\neo\models\BlockType;
-use benf\neo\Plugin as NeoPlugin;
-use benf\neo\services\BlockTypes;
 use Craft;
 use craft\db\Migration;
 use craft\db\Query;
@@ -19,7 +16,6 @@ use craft\fields\Table;
 use craft\helpers\StringHelper;
 use craft\models\FieldGroup;
 use craft\models\FieldLayout;
-use craft\models\FieldLayoutTab;
 use craft\redactor\Field as RedactorField;
 use RuntimeException;
 use verbb\supertable\fields\SuperTableField;

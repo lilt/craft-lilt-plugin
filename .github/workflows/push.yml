@@ -53,6 +53,12 @@ jobs:
       - name: Tests
         run: make test
 
+  tests-craft-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        run: make test-craft-versions
+
   tests-php-74-mysql-80:
     runs-on: ubuntu-latest
     steps:
