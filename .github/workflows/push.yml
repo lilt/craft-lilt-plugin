@@ -92,12 +92,4 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v3.1.0
         with:
-          files: ./tests/_output/coverage-integration.xml
-      - name: Codecov
-        uses: codecov/codecov-action@v3.1.0
-        with:
-          files: ./tests/_output/coverage-functional.xml
-      - name: Codecov
-        uses: codecov/codecov-action@v3.1.0
-        with:
-          files: ./tests/_output/coverage-unit.xml
+          files: ./tests/_output/*.xml
