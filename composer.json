@@ -27,7 +27,6 @@
     "ext-json": "*"
   },
   "require-dev": {
-    "craftcms/cms": "^3.7.0",
     "codeception/codeception": "^3.0 | ^4.0",
     "vlucas/phpdotenv": "^3.0",
     "squizlabs/php_codesniffer": "^3.6",
@@ -36,7 +35,7 @@
     "craftcms/redactor": "^2.10",
     "fruitstudios/linkit": "1.1.12.1",
     "percipioglobal/craft-colour-swatches": "^1.5",
-    "spicyweb/craft-neo": "^2.13",
+    "spicyweb/craft-neo": "^2.0",
     "verbb/super-table": "^2.7",
     "wiremock-php/wiremock-php": "^2.33"
   },

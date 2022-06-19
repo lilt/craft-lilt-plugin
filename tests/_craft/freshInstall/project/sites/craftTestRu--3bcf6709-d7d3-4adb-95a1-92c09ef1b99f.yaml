@@ -1,9 +1,0 @@
-baseUrl: null
-enabled: true
-handle: craftTestRu
-hasUrls: false
-language: ru-RU
-name: 'Craft test ru'
-primary: false
-siteGroup: a7a27152-dfa3-4699-9d02-c8cf41744079 # Craft test
-sortOrder: 3

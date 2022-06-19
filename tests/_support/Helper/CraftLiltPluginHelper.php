@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateJobCommand;
+use yii\base\InvalidArgumentException;
 
 class CraftLiltPluginHelper extends Module
 {
@@ -284,5 +285,30 @@ class CraftLiltPluginHelper extends Module
         $this->assertEmpty($translation->targetContent);
         $this->assertEmpty($translation->connectorTranslationId);
         $this->assertSame(TranslationRecord::STATUS_IN_PROGRESS, $translation->status);
+    }
+
+    /**
+     * We need to override craft runQueue, since there is a bug
+     *
+     * https://github.com/craftcms/cms/blob/3.7.0/src/test/Craft.php#L549
+     *
+     * Solution is to use \Craft instead of craft\test\Craft
+     *
+     * Fixed in 3.7.33
+     * https://github.com/craftcms/cms/commit/d0a2e728ce9a7540d4a3844aa6d987249a31d9c0
+     *
+     */
+    public function runQueue(string $queueItem, array $params = []): void
+    {
+        /** @var BaseJob $job */
+        $job = new $queueItem($params);
+
+        if (!$job instanceof BaseJob) {
+            throw new InvalidArgumentException('Not a job');
+        }
+
+        Craft::$app->getQueue()->push($job);
+
+        Craft::$app->getQueue()->run();
     }
 }

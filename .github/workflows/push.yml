@@ -82,9 +82,22 @@ jobs:
         run: make composer-install
       - name: Quality
         run: make quality
+      - name: Use the Upload Artifact GitHub Action
+        uses: actions/upload-artifact@v2
+        with:
+          name: assets-for-download
+          path: composer.lock
       - name: Tests
         run: make tests-with-coverage
       - name: Codecov
         uses: codecov/codecov-action@v3.1.0
         with:
-          files: ./tests/_output/coverage.xml
+          files: ./tests/_output/coverage-integration.xml
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.0
+        with:
+          files: ./tests/_output/coverage-functional.xml
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.0
+        with:
+          files: ./tests/_output/coverage-unit.xml

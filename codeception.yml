@@ -31,7 +31,7 @@ modules:
     \craft\test\Craft:
       configFile: 'tests/_craft/config/test.php'
       entryUrl: 'https://test.craftcms.test/index.php'
-      projectConfig: { folder: 'freshInstall/project', reset: false }
+      projectConfig: { reset: true }
       migrations: []
       plugins:
         craft-lilt-plugin:
@@ -42,5 +42,5 @@ modules:
           handle: redactor
       cleanup: true
       transaction: true
-      dbSetup: {clean: true, setupCraft: true}
+      dbSetup: {clean: true, setupCraft: true, applyMigrations: true}
       fullMock: false

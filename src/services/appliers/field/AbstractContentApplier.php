@@ -24,8 +24,11 @@ abstract class AbstractContentApplier
     {
         if ($this->isForceToSave($command)) {
             //TODO: check this, seems to be overcomplicated
-            $command->getElement()->setIsFresh();
-
+            if (method_exists($command->getElement(), 'setIsFresh')) {
+                // TODO: It was added because of: Calling unknown method: craft\elements\MatrixBlock::setIsFresh()
+                // @since In craft only from 3.7.14
+                $command->getElement()->setIsFresh();
+            }
             $success = Craft::$app->elements->saveElement(
                 $command->getElement()
             );
@@ -37,7 +40,11 @@ abstract class AbstractContentApplier
                 null,
                 $command->getTargetSiteId()
             );
-            $element->setIsFresh();
+            if (method_exists($element, 'setIsFresh')) {
+                // TODO: It was added because of: Calling unknown method: craft\elements\MatrixBlock::setIsFresh()
+                // @since In craft only from 3.7.14
+                $element->setIsFresh();
+            }
 
             $command->setElement(
                 Craft::$app->elements->getElementById(
