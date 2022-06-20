@@ -1,0 +1,16 @@
+name: Tests on multiple craft versions
+on:
+  push:
+    branches:
+      - 1.x #CraftCMS v3 | PHP 7.2
+      - 2.x #CraftCMS v4 | PHP 8.0.2
+  pull_request:
+    branches:
+      - "*"
+jobs:
+  tests-craft-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test craft versions
+        run: make test-craft-versions
