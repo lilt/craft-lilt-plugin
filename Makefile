@@ -76,15 +76,13 @@ unit: codecept-build
 test: functional integration unit
 
 prepare-container:
-	docker-compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
-	docker-compose exec -T -u root cli-app sh -c "curl -s https://getcomposer.org/installer | php"
-	docker-compose exec -T -u root cli-app sh -c "cp composer.phar /bin/composer"
-
-test-craft-versions:
 	PHP_VERSION=7.2 docker-compose up -d
 	docker-compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
 	docker-compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
 	docker-compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
 	docker-compose exec -T -u root cli-app sh -c "curl -s https://getcomposer.org/installer | php"
 	docker-compose exec -T -u root cli-app sh -c "cp composer.phar /bin/composer"
-	docker-compose exec -T -u www-data cli-app bash -c "./craft-versions.sh"
+
+test-craft-versions: prepare-container
+	docker-compose exec -T -u www-data cli-app bash -c \
+		"./craft-versions.sh ${CRAFT_VERSION}"
