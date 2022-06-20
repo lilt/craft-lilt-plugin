@@ -1,4 +1,5 @@
 <?php
+
 /**
  * craft-lilt-plugin plugin for Craft CMS 3.x
  *
@@ -31,5 +32,4 @@ use Codeception\Lib\Friend;
 class UnitTester extends Actor
 {
     use _generated\UnitTesterActions;
-
 }

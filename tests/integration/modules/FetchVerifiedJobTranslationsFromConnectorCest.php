@@ -595,5 +595,4 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
         ];
         return $translationsResponseBody;
     }
-
 }

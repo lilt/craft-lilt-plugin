@@ -501,7 +501,6 @@ class m220617_180419_add_fields extends Migration
                 'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
                 'offLabel' => 'The label text to display beside the lightswitch’s disabled state.',
             ]
-
         );
 
         $l->groupId = $groupId;

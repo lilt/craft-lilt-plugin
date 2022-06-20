@@ -88,7 +88,7 @@ class GetTranslationReviewControllerCest
         $expected = $this->getExpected();
 
         foreach ($expected['variables']['translation'] as $key => $value) {
-            if(is_array($value)) {
+            if (is_array($value)) {
                 Assert::assertEqualsCanonicalizing($value, $actual['variables']['translation'][$key]);
                 continue;
             }
@@ -225,7 +225,8 @@ class GetTranslationReviewControllerCest
         ];
     }
 
-    private function getTargetContent(): array {
+    private function getTargetContent(): array
+    {
         return [
             [
                 'neo' => [

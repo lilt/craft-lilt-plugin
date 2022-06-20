@@ -19,7 +19,7 @@ $value = [
     ]
 ];
 
-if(TEST_SUPERTABLE_PLUGIN) {
+if (TEST_SUPERTABLE_PLUGIN) {
     $value[0]['field:supertable'] = EntriesFixture::getSupertableContent();
 }
 
