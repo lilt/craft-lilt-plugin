@@ -38,11 +38,11 @@ class SystemReport extends Utility
                 'warning' => false
             ],
             [
-                'name' => 'Craft CMS 3.7.38+',
+                'name' => 'Craft CMS 3.7.0+',
                 'mandatory' => true,
                 'condition' => true,
-                'memo' => 'Craft CMS 3.7.38 or later is required',
-                'error' => !version_compare(Craft::$app->getVersion(), '3.7.38', '>='),
+                'memo' => 'Craft CMS 3.7.0 or later is required',
+                'error' => !version_compare(Craft::$app->getVersion(), '3.7.0', '>='),
                 'warning' => false
             ],
         ];
