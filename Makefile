@@ -86,3 +86,6 @@ prepare-container:
 test-craft-versions: prepare-container
 	docker-compose exec -T -u www-data cli-app bash -c \
 		"./craft-versions.sh ${CRAFT_VERSION}"
+
+require-guzzle-v6:
+	docker-compose exec -T -u www-data cli-app sh -c "php composer.phar require guzzlehttp/guzzle:6.5.5"
