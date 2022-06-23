@@ -51,6 +51,8 @@ class CraftliltpluginParameters
     public const CRAFT_FIELDS_CHECKBOXES        = 'craft\fields\Checkboxes';
     public const CRAFT_FIELDS_BASEOPTIONSFIELD  = 'craft\fields\BaseOptionsField';
     public const BENF_NEO_FIELD                 = 'benf\neo\Field';
+    public const LINKIT_FIELD                   = 'fruitstudios\linkit\fields\LinkitField';
+    public const COLOUR_SWATCHES_FIELD          = 'percipioglobal\colourswatches\fields\ColourSwatches';
 
     public const LISTENERS = [
         AfterDraftAppliedListener::class,
