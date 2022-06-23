@@ -23,6 +23,11 @@ class TranslationRepository
         );
     }
 
+    public function findRecordByTranslatedDraftId(int $translatedDraftId): ?TranslationRecord
+    {
+        return TranslationRecord::findOne(['translatedDraftId' => $translatedDraftId]);
+    }
+
     public function findUnprocessedByJobIdMapped(int $jobId): array
     {
         $result = TranslationRecord::findAll(
