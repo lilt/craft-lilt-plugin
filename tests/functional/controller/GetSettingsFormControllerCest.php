@@ -62,7 +62,8 @@ class GetSettingsFormControllerCest
         Db::truncateTable(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
         $I->expectAllRequestsAreMatched();
     }
-    public function _before(FunctionalTester $I): void {
+    public function _before(FunctionalTester $I): void
+    {
         WireMock::create('wiremock', 80)->reset();
     }
 }

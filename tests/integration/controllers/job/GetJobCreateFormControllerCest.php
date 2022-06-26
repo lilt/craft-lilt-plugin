@@ -50,7 +50,8 @@ class GetJobCreateFormControllerCest
      * @throws InvalidConfigException
      * @throws JsonException
      */
-    public function testSuccess(IntegrationTester $I): void {
+    public function testSuccess(IntegrationTester $I): void
+    {
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 

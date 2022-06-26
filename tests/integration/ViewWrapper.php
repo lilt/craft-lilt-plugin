@@ -34,7 +34,7 @@ class ViewWrapper extends View
             'templateMode' => $templateMode
         ], 4194304);
 
-        if($this->controllerView !== null) {
+        if ($this->controllerView !== null) {
             return $this->controllerView->renderTemplate($template, $variables, $templateMode);
         }
 
