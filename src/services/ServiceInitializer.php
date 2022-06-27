@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services;
 
 use Craft;
+use fruitstudios\linkit\fields\LinkitField;
 use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
 use LiltConnectorSDK\Api\SettingsApi;
@@ -13,9 +14,11 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\BaseOptionFieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\ColourSwatchesContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\ElementQueryContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\LightswitchContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\LinkitContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
@@ -33,9 +36,11 @@ use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\ColourSwatchesContentProvider;
 use lilthq\craftliltplugin\services\providers\field\ElementQueryContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\LightswitchContentProvider;
+use lilthq\craftliltplugin\services\providers\field\LinkitContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
 use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
@@ -120,6 +125,9 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentProvider(),
 
+                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentProvider(),
+                CraftliltpluginParameters::COLOUR_SWATCHES_FIELD => new ColourSwatchesContentProvider(),
+
                 # Options
                 CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentProvider(),
@@ -167,6 +175,9 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentApplier(),
+
+                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentApplier(),
+                CraftliltpluginParameters::COLOUR_SWATCHES_FIELD => new ColourSwatchesContentApplier(),
 
                 ### Options
                 CraftliltpluginParameters::CRAFT_FIELDS_RADIOBUTTONS => new BaseOptionFieldContentApplier(),
