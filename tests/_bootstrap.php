@@ -14,6 +14,8 @@ define('CRAFT_TESTS_PATH', __DIR__ . '/_craft/tests');
 define('CRAFT_VENDOR_PATH', dirname(__DIR__) . '/vendor');
 
 define('TEST_SUPERTABLE_PLUGIN', false);
+define('TEST_LINKIT_PLUGIN', false);
+define('TEST_COLOUR_SWATCHES_PLUGIN', false);
 
 $devMode = true;
 

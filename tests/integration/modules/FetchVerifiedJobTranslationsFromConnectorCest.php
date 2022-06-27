@@ -403,21 +403,21 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $job->id,
             $element->id,
             'es-ES'
-        //, 703695
+            //, 703695
         );
 
         $I->assertTranslationInProgress(
             $job->id,
             $element->id,
             'ru-RU'
-        //, 703697
+            //, 703697
         );
 
         $I->assertTranslationInProgress(
             $job->id,
             $element->id,
             'de-DE'
-        //, 703696
+            //, 703696
         );
 
         $I->assertJobInQueue(

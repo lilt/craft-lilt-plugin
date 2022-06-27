@@ -16,24 +16,30 @@ $value = [
         'field:redactor' => '<h1>Here is some header text</h1> Here is some content',
         'field:matrix' => EntriesFixture::getMatrixContent(),
         'field:neo' => EntriesFixture::getNeoContent(),
-        'field:colorSwatches' => new percipioglobal\colourswatches\models\ColourSwatches(
-            json_encode([
-                'label' => 'first label',
-                'color' => '#CD5C5C',
-                'class' => percipioglobal\colourswatches\models\ColourSwatches::class
-            ], 4194304)
-        ),
-        'field:linkit' => [
-            'type' => 'fruitstudios\\linkit\\models\\Email',
-            'value' => 'test@lilt.com',
-            'customText' => 'Test linkit text label',
-            'target' => null,
-        ],
     ]
 ];
 
 if (TEST_SUPERTABLE_PLUGIN) {
     $value[0]['field:supertable'] = EntriesFixture::getSupertableContent();
+}
+
+if (TEST_LINKIT_PLUGIN) {
+    $value[0]['field:linkit'] = [
+        'type' => 'fruitstudios\\linkit\\models\\Email',
+        'value' => 'test@lilt.com',
+        'customText' => 'Test linkit text label',
+        'target' => null,
+    ];
+}
+
+if (TEST_COLOUR_SWATCHES_PLUGIN) {
+    $value[0]['field:colorSwatches'] = new percipioglobal\colourswatches\models\ColourSwatches(
+        json_encode([
+            'label' => 'first label',
+            'color' => '#CD5C5C',
+            'class' => percipioglobal\colourswatches\models\ColourSwatches::class
+        ], 4194304)
+    );
 }
 
 return $value;

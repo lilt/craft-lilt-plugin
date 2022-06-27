@@ -75,8 +75,13 @@ class m220617_180419_add_fields extends Migration
         $newFields[] = $this->createTableField($groupId);
         $newFields[] = $this->createNeoField($groupId);
 
-        $newFields[] = $this->createLinkitField($groupId);
-        $newFields[] = $this->createColourSwatches($groupId);
+        if (TEST_LINKIT_PLUGIN) {
+            $newFields[] = $this->createLinkitField($groupId);
+        }
+
+        if (TEST_COLOUR_SWATCHES_PLUGIN) {
+            $newFields[] = $this->createColourSwatches($groupId);
+        }
 
         $tab = $tabs[0];
 
