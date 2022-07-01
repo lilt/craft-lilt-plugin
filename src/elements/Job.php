@@ -404,7 +404,7 @@ class Job extends Element
     {
         $html = '<ul class="target-languages-list">';
 
-        $targetSites = json_decode($this->targetSiteIds, true);
+        $targetSites = $this->getTargetSiteIds();
         if (isset($targetSites[0]) && is_array($targetSites[0]) && isset($targetSites[0]['id'])) {
             $targetSites = array_column($targetSites, 'id');
         }
