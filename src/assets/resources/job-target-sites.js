@@ -39,7 +39,7 @@ CraftliltPlugin.TargetSites = Garnish.Base.extend({
   },
   _initListeners: function() {
     this.addListener(this.$allCheckboxes, 'click', (e) => {
-      if (jQuery(e.target).parent().parent().hasClass('disabled')) {
+      if (jQuery(e.target).closest('tr').hasClass('disabled')) {
         return false;
       }
       this.updateState();
@@ -150,7 +150,7 @@ CraftliltPlugin.TargetSites = Garnish.Base.extend({
     this.$selectAllCheckbox.addClass('checked');
 
     this.$allCheckboxes.each((index, element) => {
-      if (jQuery(element).parent().parent().hasClass('disabled')) {
+      if (jQuery(element).closest('tr').hasClass('disabled')) {
         return;
       }
       jQuery(element).addClass('checked');
@@ -162,7 +162,7 @@ CraftliltPlugin.TargetSites = Garnish.Base.extend({
     this.$selectAllCheckbox.removeClass('checked');
 
     this.$allCheckboxes.each((index, element) => {
-      if (jQuery(element).parent().parent().hasClass('disabled')) {
+      if (jQuery(element).closest('tr').hasClass('disabled')) {
         return;
       }
       jQuery(element).removeClass('checked');
