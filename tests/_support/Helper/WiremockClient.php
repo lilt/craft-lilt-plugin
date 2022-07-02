@@ -1,4 +1,5 @@
 <?php
+
 /**
  * craft-lilt-plugin plugin for Craft CMS 3.x
  *
@@ -86,7 +87,8 @@ class WiremockClient extends Module
                     $expectedUrl
                 )
             )->withHeader(
-                'Authorization', WireMock::equalTo('Bearer ' . $apiKey)
+                'Authorization',
+                WireMock::equalTo('Bearer ' . $apiKey)
             )->willReturn(
                 WireMock::aResponse()
                     ->withStatus($responseStatusCode)

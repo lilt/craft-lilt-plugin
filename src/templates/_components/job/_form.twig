@@ -1,8 +1,9 @@
 {% import '_includes/forms' as forms %}
 
-{% set isFormElementsReadOnly = not (constant('STATUS_NEW', element) is same as element.getStatus()) and not (constant('STATUS_DRAFT', element) is same as element.getStatus())  %}
+{% set isFormElementsReadOnly = not (constant('STATUS_NEW', element) is same as element.getStatus()) and not (constant('STATUS_DRAFT', element) is same as element.getStatus()) %}
 
-<form method="post" id="create-job-form" class="{{ isFormElementsReadOnly ? 'submitted-job-preview' : '' }}" accept-charset="UTF-8" action="{{ formActionUrl }}">
+<form method="post" id="create-job-form" class="{{ isFormElementsReadOnly ? 'submitted-job-preview' : '' }}"
+      accept-charset="UTF-8" action="{{ formActionUrl }}">
     {{ csrfInput() }}
 
     {% if element.id is not same as null %}
@@ -48,12 +49,7 @@
                 value: element.getVersionsAsString ?? '[]',
             }) }}
         </div>
-        <div class="content-pane" id="entries-to-translate" style="display: none; margin-top: 5px">
-            <div style="display: none">
-                {% include '_elements/toolbar' with {
-                    showSiteMenu: false,
-                } %}
-            </div>
+        <div class="content-pane" id="entries-to-translate">
             <div class="main">
                 <div class="elements {{ isFormElementsReadOnly ? 'disabled' : '' }}"></div>
             </div>
@@ -62,14 +58,14 @@
         </div>
 
         {% if isDraftJob or isNewJob %}
-        <div class="flex">
-            <div class="submit">
+            <div class="flex">
+                <div class="submit">
                     <button type="button" class="btn add icon dashed addAnEntry">{{ 'Add an entry'|t }}</button>
+                </div>
+                <div id="entries-remove-action" class="btn submit">
+                    Remove
+                </div>
             </div>
-            <div id="entries-remove-action" class="btn submit" style="visibility: hidden;float:right">
-                Remove
-            </div>
-        </div>
         {% endif %}
     </div>
 
@@ -87,17 +83,55 @@
         class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
     }) }}
 
-    {{ forms.checkboxSelectField({
-        label: 'Target site(s) <span class="required"/>',
-        options: targetSites,
-        values: element.getTargetSiteIds,
-        showAllOption: true,
-        name: 'targetSiteIds',
-        id: 'targetSiteIds',
-        errors: element.getErrors('targetSiteIds'),
-        readonly: isFormElementsReadOnly,
-        class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
-    }) }}
+    <hr/>
+
+    {# Copy of vendor/craftcms/cms/src/templates/settings/sites/index.html with some adjustments #}
+    <div id="lilt-target-sites" class="field">
+        <div class="heading">
+            <label id="lilt-target-sites-table-container-label" for="lilt-target-sites-table-container">
+                Target site(s)
+                <span class="required"></span>
+            </label>
+        </div>
+        <div id="lilt-target-sites-search" class="flex-grow texticon search icon clearable">
+            <input id="search" type="text" class="text fullwidth" autocomplete="off" placeholder="Search"
+                   aria-label="Search" data-np-checked="1">
+            <div class="clear" title="Clear" aria-label="Clear"></div>
+        </div>
+        <div id="lilt-target-sites-table-container">
+            <table id="sites" class="data fullwidth">
+                <thead>
+                <th class="checkbox-cell selectallcontainer" role="checkbox" aria-checked="false" scope="col">
+                    <div class="checkbox selectallcheckbox" title="Select" aria-label="Select"></div>
+                </th>
+                <th scope="col">{{ "Name"|t('app') }}</th>
+                <th scope="col">{{ "Language"|t('app') }}</th>
+                <th scope="col">{{ "Base URL"|t('app') }}</th>
+                </thead>
+                <tbody>
+                {% for site in sites %}
+                    <tr data-id="{{ site.id }}" data-uid="{{ site.uid }}" data-language="{{ site.language }}"
+                        data-name="{{ site.name|t('site') }}">
+                        <td>
+                            {{ forms.checkbox({
+                                name: 'targetSiteIds[]',
+                                value: site.id,
+                                checked: site.id in element.targetSiteIds
+                            }) }}
+                        </td>
+                        <th scope="row" data-title="{{ 'Name'|t('app') }}">
+                            <a href="{{ url('settings/sites/' ~ site.id) }}" target="_blank">
+                                <span class="status {{ site.enabled ? 'enabled' : 'disabled' }}"></span>{{ site.name|t('site') }}
+                            </a>
+                        </th>
+                        <td data-title="{{ 'Language'|t('app') }}"><code>{{ site.language }}</code></td>
+                        <td data-title="{{ 'Base URL'|t('app') }}"><code>{{ site.baseUrl }}</code></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <hr/>
 

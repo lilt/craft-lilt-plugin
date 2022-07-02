@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace craft\contentmigrations;
 
 use benf\neo\Field as NeoField;
-use benf\neo\models\BlockType;
-use benf\neo\Plugin as NeoPlugin;
-use benf\neo\services\BlockTypes;
 use Craft;
 use craft\db\Migration;
 use craft\db\Query;
+use craft\fieldlayoutelements\CustomField;
 use craft\fields\Checkboxes;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
@@ -19,8 +17,9 @@ use craft\fields\Table;
 use craft\helpers\StringHelper;
 use craft\models\FieldGroup;
 use craft\models\FieldLayout;
-use craft\models\FieldLayoutTab;
 use craft\redactor\Field as RedactorField;
+use fruitstudios\linkit\fields\LinkitField;
+use percipioglobal\colourswatches\fields\ColourSwatches;
 use RuntimeException;
 use verbb\supertable\fields\SuperTableField;
 
@@ -61,21 +60,41 @@ class m220617_180419_add_fields extends Migration
         $groupId = (int)$group['id'];
 
         $fieldLayout = $entryType->getFieldLayout();
-        $tab = $fieldLayout->getTabs()[0];
+        $tabs = $fieldLayout->getTabs();
 
-        $newFields = [
-            $this->createPlaintextField($groupId),
-            $this->createRedactorField($groupId),
-            $this->createMatrixField($groupId),
-            $this->createCheckboxesField($groupId),
-            $this->createLightswitchField($groupId),
-            $this->createSuperTableField($groupId),
-            $this->createTableField($groupId),
-            $this->createNeoField($groupId),
-        ];
+        $newFields[] = $this->createPlaintextField($groupId);
+        $newFields[] = $this->createRedactorField($groupId);
+        $newFields[] = $this->createMatrixField($groupId);
+        $newFields[] = $this->createCheckboxesField($groupId);
+        $newFields[] = $this->createLightswitchField($groupId);
 
-        $tab->setFields(
-            array_merge($fieldLayout->getFields(), $newFields)
+        if (TEST_SUPERTABLE_PLUGIN) {
+            $newFields[] = $this->createSuperTableField($groupId);
+        }
+
+        $newFields[] = $this->createTableField($groupId);
+        $newFields[] = $this->createNeoField($groupId);
+
+        if (TEST_LINKIT_PLUGIN) {
+            $newFields[] = $this->createLinkitField($groupId);
+        }
+
+        if (TEST_COLOUR_SWATCHES_PLUGIN) {
+            $newFields[] = $this->createColourSwatches($groupId);
+        }
+
+        $tab = $tabs[0];
+
+        $customFields = [];
+        foreach ($newFields as $item) {
+            $customField = new CustomField();
+            $customField->setField($item);
+
+            $customFields[] = $customField;
+        }
+
+        $tab->setElements(
+            $customFields
         );
 
         $result = Craft::$app->fields->saveLayout($fieldLayout) && $result;
@@ -111,6 +130,7 @@ class m220617_180419_add_fields extends Migration
         $field->setBlockTypes(
             [
                 'new1' => [
+                    'description' => '',
                     'name' => 'first block type',
                     'handle' => 'firstBlockType',
                     'sortOrder' => 1,
@@ -122,6 +142,7 @@ class m220617_180419_add_fields extends Migration
                     'fieldLayoutId' => $firstBlockLayoutId
                 ],
                 'new2' => [
+                    'description' => '',
                     'name' => 'second block type',
                     'handle' => 'secondBlockType',
                     'sortOrder' => 2,
@@ -490,7 +511,6 @@ class m220617_180419_add_fields extends Migration
                 'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
                 'offLabel' => 'The label text to display beside the lightswitch’s disabled state.',
             ]
-
         );
 
         $l->groupId = $groupId;
@@ -549,6 +569,148 @@ class m220617_180419_add_fields extends Migration
         return $checkboxes;
     }
 
+    public function createLinkitField(int $groupId): LinkitField
+    {
+        $linkitField = new LinkitField([
+            'groupId' => $groupId,
+            'name' => 'linkit',
+            'handle' => 'linkit',
+            'instructions' => 'Default Instructions. Helper text to guide the author.',
+            'required' => null,
+            'searchable' => 0,
+            'translationMethod' => 'language',
+            'translationKeyFormat' => null,
+            'selectLinkText' => '',
+            'types' => [
+                'fruitstudios\\linkit\\models\\Email' => [
+                    'enabled' => 1,
+                    'customLabel' => 'Email address label',
+                    'customPlaceholder' => 'support@lilt.com',
+                ],
+                'fruitstudios\\linkit\\models\\Phone' => [
+                    'enabled' => 1,
+                    'customLabel' => 'Phone number label',
+                    'customPlaceholder' => '+44 415-992-5088',
+                ],
+                'fruitstudios\\linkit\\models\\Url' => [
+                    'enabled' => 1,
+                    'customLabel' => 'Website url label',
+                    'customPlaceholder' => 'https://lilt.com/company',
+                    'allowAlias' => 1,
+                    'allowMailto' => 1,
+                    'allowHash' => 1,
+                    'allowPaths' => 1,
+                ],
+                'fruitstudios\\linkit\\models\\Twitter' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'customPlaceholder' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Facebook' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'customPlaceholder' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Instagram' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'customPlaceholder' => '',
+                ],
+                'fruitstudios\\linkit\\models\\LinkedIn' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'customPlaceholder' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Entry' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'sources' => '*',
+                    'customSelectionLabel' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Category' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'sources' => '*',
+                    'customSelectionLabel' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Asset' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'sources' => '*',
+                    'customSelectionLabel' => '',
+                ],
+                'fruitstudios\\linkit\\models\\User' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'sources' => '*',
+                    'customSelectionLabel' => '',
+                    'userPath' => '',
+                ],
+            ],
+            'allowCustomText' => 1,
+            'defaultText' => 'Default link text',
+            'allowTarget' => '',
+        ]);
+        $linkitField->groupId = $groupId;
+
+        $created = Craft::$app->getFields()->saveField($linkitField);
+
+        if (!$created) {
+            throw new RuntimeException(
+                sprintf("Failed to run %s", __FUNCTION__)
+            );
+        }
+
+        return $linkitField;
+    }
+
+    public function createColourSwatches(int $groupId): ColourSwatches
+    {
+        $colourSwatches = new ColourSwatches(
+            [
+                'name' => 'ColorSwatches',
+                'handle' => 'colorSwatches',
+                'instructions' => 'Default Instructions
+Helper text to guide the author.',
+                'required' => null,
+                'searchable' => 0,
+                'translationMethod' => 'language',
+                'translationKeyFormat' => null,
+                'options' => [
+                    0 => [
+                        'label' => 'first label',
+                        'color' => '#CD5C5C',
+                        'default' => 1,
+                    ],
+                    1 => [
+                        'label' => 'second label',
+                        'color' => '#F08080',
+                        'default' => '',
+                    ],
+                    2 => [
+                        'label' => 'third label',
+                        'color' => '#FA8072',
+                        'default' => '',
+                    ],
+                ],
+                'useConfigFile' => '',
+                'palette' => '',
+                'default' => null,
+            ]
+        );
+        $colourSwatches->groupId = $groupId;
+
+        $created = Craft::$app->getFields()->saveField($colourSwatches);
+
+        if (!$created) {
+            throw new RuntimeException(
+                sprintf("Failed to run %s", __FUNCTION__)
+            );
+        }
+
+        return $colourSwatches;
+    }
+
     /**
      * @inheritdoc
      */
@@ -596,17 +758,17 @@ class m220617_180419_add_fields extends Migration
                 'elements' => [
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $redactor->uid
                     ],
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $lightswitch->uid
                     ],
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $matrix->uid
                     ],
                 ]
@@ -623,6 +785,7 @@ class m220617_180419_add_fields extends Migration
         $fieldLayoutId = $fieldLayoutData['id'];
         return $fieldLayoutId;
     }
+
     /**
      * @return mixed
      * @throws \yii\base\Exception
@@ -634,33 +797,38 @@ class m220617_180419_add_fields extends Migration
 
         $plainText = Craft::$app->fields->getFieldByHandle('plainText');
         $table = Craft::$app->fields->getFieldByHandle('table');
-        $supertable = Craft::$app->fields->getFieldByHandle('supertable');
 
-        $fieldLayout->setTabs([
+        $firstTab = [
             [
                 'name' => 'First Tab',
                 'elements' => [
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $plainText->uid
                     ],
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $table->uid
-                    ],
-                    [
-                        'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
-                        'fieldUid' => $supertable->uid
                     ],
                 ]
             ]
-        ]);
+        ];
+
+        if (TEST_SUPERTABLE_PLUGIN) {
+            $supertable = Craft::$app->fields->getFieldByHandle('supertable');
+            $firstTab[0]['elements'][] = [
+                'type' => 'craft\\fieldlayoutelements\\CustomField',
+                'required' => false,
+                'fieldUid' => $supertable->uid
+            ];
+        }
+
+        $fieldLayout->setTabs($firstTab);
         $fieldLayout->type = 'secondBlockType';
 
-        $saved = Craft::$app->fields->saveLayout($fieldLayout);
+        Craft::$app->fields->saveLayout($fieldLayout);
         $fieldLayoutData = (new Query())
             ->select("id")
             ->from("{{%fieldlayouts}}")

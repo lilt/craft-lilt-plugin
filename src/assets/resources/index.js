@@ -34,7 +34,7 @@ window.CraftliltPlugin = {
       }
     });
 
-    $btngroup.prependTo('#header #action-button');
+    $btngroup.prependTo('#header #action-buttons');
 
     Craft.elementIndex.on('selectionChange', function() {
       if (Craft.elementIndex.getSelectedElementIds().length > 0) {
@@ -44,4 +44,8 @@ window.CraftliltPlugin = {
   },
 };
 
-$(document).ready(function() { CraftliltPlugin.init(); });
+$(document).ready(function() {
+  if(Craft.elementIndex !== undefined) {
+    CraftliltPlugin.init();
+  }
+});

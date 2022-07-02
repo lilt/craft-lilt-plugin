@@ -21,7 +21,7 @@ use yii\web\Response;
 
 class GetJobCreateFormController extends AbstractJobController
 {
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     /**
      * @throws InvalidConfigException

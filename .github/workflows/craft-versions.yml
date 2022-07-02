@@ -1,0 +1,41 @@
+name: Tests on multiple craft versions
+on:
+  push:
+    branches:
+      - 1.x #CraftCMS v3 | PHP 7.2
+      - 2.x #CraftCMS v4 | PHP 8.0.2
+  pull_request:
+    branches:
+      - "*"
+jobs:
+  tests:
+    strategy:
+      matrix:
+        craft_version: [
+          # TODO: check this
+          # Investigation:
+          # https://github.com/craftcms/cms/issues/11083
+          #"4.0.0", contains FK bug, it tries to update field on draft (after apply draft removed, so it fails)
+          "4.0.1",
+          "4.0.2",
+          "4.0.3",
+          "4.0.4",
+          "4.0.5",
+          "4.0.5.1",
+          "4.0.5.2",
+          "4.0.6",
+          "4.0.6",
+          "4.1.0",
+          "4.1.0.1",
+          "4.1.0.2",
+        ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set the value
+        id: step_one
+        run: |
+          echo "PHP_VERSION=8.0" >> $GITHUB_ENV
+          echo "CRAFT_VERSION=${{ matrix.craft_version }}" >> $GITHUB_ENV
+      - name: Test craft versions ${{ matrix.craft_version }}
+        run: make test-craft-versions

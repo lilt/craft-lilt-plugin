@@ -50,19 +50,24 @@ class GetJobCreateFormControllerCest
      * @throws InvalidConfigException
      * @throws JsonException
      */
-    public function testSuccess(IntegrationTester $I): void {
+    public function testSuccess(IntegrationTester $I): void
+    {
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
         $controller = $this->getController();
-        $controller->setView(new ViewWrapper());
+        //$controller->setView(new ViewWrapper());
 
         $response = $controller->actionInvoke();
 
+        $behavior = $response->getBehavior('template');
+        $actual = [
+            'variables' => $behavior->variables ?? [],
+            'template' => $behavior->template ?? '',
+            'templateMode' => $behavior->templateMode ?? '',
+        ];
+
         $expected = $this->getExpected();
-
-        $actual = json_decode($response->data, true, 512, 4194304);
-
         Assert::assertEquals($expected['template'], $actual['template']);
         Assert::assertEquals(
             $expected['variables']['defaultTranslationWorkflow'],
@@ -248,11 +253,11 @@ class GetJobCreateFormControllerCest
                 'crumbs' => [
                     0 => [
                         'label' => 'Lilt Plugin',
-                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin',
+                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin&site=default',
                     ],
                     1 => [
                         'label' => 'Jobs',
-                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin/jobs',
+                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin/jobs&site=default',
                     ],
                 ],
             ],

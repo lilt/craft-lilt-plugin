@@ -86,7 +86,8 @@ class GetJobEditFormControllerCest
      * @throws InvalidConfigException
      * @throws JsonException
      */
-    public function testSuccess(IntegrationTester $I): void {
+    public function testSuccess(IntegrationTester $I): void
+    {
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
@@ -106,13 +107,16 @@ class GetJobEditFormControllerCest
         ]);
 
         $controller = $this->getController();
-        $controller->setView(new ViewWrapper());
-
         $response = $controller->actionInvoke((string) $job->id);
 
-        $expected = $this->getExpected($job);
+        $behavior = $response->getBehavior('template');
+        $actual = [
+            'variables' => $behavior->variables ?? [],
+            'template' => $behavior->template ?? '',
+            'templateMode' => $behavior->templateMode ?? '',
+        ];
 
-        $actual = json_decode($response->data, true, 512, 4194304);
+        $expected = $this->getExpected($job);
 
         Assert::assertEquals($expected['template'], $actual['template']);
         Assert::assertEquals(
@@ -136,6 +140,9 @@ class GetJobEditFormControllerCest
             $actual['variables']['authorOptionCriteria']
         );
         Assert::assertEquals($expected['variables']['crumbs'], $actual['variables']['crumbs']);
+
+        #convert to array
+        $actual['variables']['element'] = json_decode(json_encode($actual['variables']['element']), true);
 
         foreach ($expected['variables']['element'] as $expectedKey => $expectedValue) {
             Assert::assertArrayHasKey($expectedKey, $actual['variables']['element']);
@@ -185,7 +192,7 @@ class GetJobEditFormControllerCest
                 'element' => [
                     'authorId' => 1,
                     'title' => 'Awesome test job',
-                    'liltJobId' => NULL,
+                    'liltJobId' => null,
                     'status' => 'new',
                     'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
                     'sourceSiteLanguage' => 'en-US',
@@ -197,27 +204,27 @@ class GetJobEditFormControllerCest
                     ),
                     'elementIds' => sprintf('["%d"]', $job->getElementIds()[0]),
                     'versions' => '[]',
-                    'dueDate' => NULL,
+                    'dueDate' => null,
                     'translationWorkflow' => 'INSTANT',
-                    'tempId' => NULL,
-                    'draftId' => NULL,
-                    'revisionId' => NULL,
+                    'tempId' => null,
+                    'draftId' => null,
+                    'revisionId' => null,
                     'isProvisionalDraft' => false,
-                    'fieldLayoutId' => NULL,
-                    'structureId' => NULL,
-                    'contentId' => NULL,
+                    'fieldLayoutId' => null,
+                    'structureId' => null,
+                    'contentId' => null,
                     'enabled' => true,
                     'archived' => false,
                     'siteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
-                    'slug' => NULL,
-                    'uri' => NULL,
-                    'dateLastMerged' => NULL,
-                    'dateDeleted' => NULL,
-                    'root' => NULL,
-                    'lft' => NULL,
-                    'rgt' => NULL,
-                    'level' => NULL,
-                    'searchScore' => NULL,
+                    'slug' => null,
+                    'uri' => null,
+                    'dateLastMerged' => null,
+                    'dateDeleted' => null,
+                    'root' => null,
+                    'lft' => null,
+                    'rgt' => null,
+                    'level' => null,
+                    'searchScore' => null,
                     'trashed' => false,
                     'awaitingFieldValues' => false,
                     'propagating' => false,
@@ -225,7 +232,7 @@ class GetJobEditFormControllerCest
                     'newSiteIds' => [
                     ],
                     'resaving' => false,
-                    'duplicateOf' => NULL,
+                    'duplicateOf' => null,
                     'mergingCanonicalChanges' => false,
                     'updatingFromDerivative' => false,
                     'previewing' => false,
@@ -239,52 +246,52 @@ class GetJobEditFormControllerCest
                 ],
                 'author' => [
                     'username' => 'craftcms',
-                    'photoId' => NULL,
-                    'firstName' => NULL,
-                    'lastName' => NULL,
+                    'photoId' => null,
+                    'firstName' => null,
+                    'lastName' => null,
                     'email' => 'support@craftcms.com',
-                    'password' => NULL,
+                    'password' => null,
                     'admin' => '1',
                     'locked' => '0',
                     'suspended' => '0',
                     'pending' => '0',
-                    'invalidLoginCount' => NULL,
-                    'lastInvalidLoginDate' => NULL,
-                    'lockoutDate' => NULL,
+                    'invalidLoginCount' => null,
+                    'lastInvalidLoginDate' => null,
+                    'lockoutDate' => null,
                     'hasDashboard' => '0',
                     'passwordResetRequired' => false,
-                    'lastPasswordChangeDate' => NULL,
-                    'unverifiedEmail' => NULL,
-                    'newPassword' => NULL,
-                    'currentPassword' => NULL,
-                    'verificationCodeIssuedDate' => NULL,
-                    'verificationCode' => NULL,
-                    'lastLoginAttemptIp' => NULL,
-                    'authError' => NULL,
-                    'inheritorOnDelete' => NULL,
+                    'lastPasswordChangeDate' => null,
+                    'unverifiedEmail' => null,
+                    'newPassword' => null,
+                    'currentPassword' => null,
+                    'verificationCodeIssuedDate' => null,
+                    'verificationCode' => null,
+                    'lastLoginAttemptIp' => null,
+                    'authError' => null,
+                    'inheritorOnDelete' => null,
                     'id' => 1,
-                    'tempId' => NULL,
-                    'draftId' => NULL,
-                    'revisionId' => NULL,
+                    'tempId' => null,
+                    'draftId' => null,
+                    'revisionId' => null,
                     'isProvisionalDraft' => false,
                     'uid' => 'b75f3305-0381-4ab7-8c4d-236757944948',
                     'siteSettingsId' => 1,
-                    'fieldLayoutId' => NULL,
-                    'structureId' => NULL,
+                    'fieldLayoutId' => null,
+                    'structureId' => null,
                     'contentId' => 1,
                     'enabled' => true,
                     'archived' => false,
                     'siteId' => 4,
-                    'title' => NULL,
-                    'slug' => NULL,
-                    'uri' => NULL,
-                    'dateLastMerged' => NULL,
-                    'dateDeleted' => NULL,
-                    'root' => NULL,
-                    'lft' => NULL,
-                    'rgt' => NULL,
-                    'level' => NULL,
-                    'searchScore' => NULL,
+                    'title' => null,
+                    'slug' => null,
+                    'uri' => null,
+                    'dateLastMerged' => null,
+                    'dateDeleted' => null,
+                    'root' => null,
+                    'lft' => null,
+                    'rgt' => null,
+                    'level' => null,
+                    'searchScore' => null,
                     'trashed' => false,
                     'awaitingFieldValues' => false,
                     'propagating' => false,
@@ -293,7 +300,7 @@ class GetJobEditFormControllerCest
                     ],
                     'isNewForSite' => false,
                     'resaving' => false,
-                    'duplicateOf' => NULL,
+                    'duplicateOf' => null,
                     'firstSave' => false,
                     'mergingCanonicalChanges' => false,
                     'updatingFromDerivative' => false,
@@ -310,15 +317,15 @@ class GetJobEditFormControllerCest
                 'crumbs' => [
                     0 => [
                         'label' => 'Lilt Plugin',
-                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin',
+                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin&site=default',
                     ],
                     1 => [
                         'label' => 'Jobs',
-                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin/jobs',
+                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin/jobs&site=default',
                     ],
                 ],
             ],
-            'templateMode' => NULL,
+            'templateMode' => null,
         ];
         return $expected;
     }

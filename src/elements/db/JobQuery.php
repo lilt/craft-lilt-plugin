@@ -16,11 +16,12 @@ use lilthq\craftliltplugin\elements\Job;
 class JobQuery extends ElementQuery
 {
     public $liltJobId;
-    public $status;
+    public string|array|null $status = null;
     public $sourceSite;
     public $dueDate;
-    public $dateCreated;
-    public $dateUpdated;
+
+    public mixed $dateCreated = null;
+    public mixed $dateUpdated = null;
 
     public function status($value): self
     {

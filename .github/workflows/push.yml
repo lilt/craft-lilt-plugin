@@ -1,21 +1,20 @@
-name: Test
+name: Tests
 on:
   push:
     branches:
-      - 1.x #CraftCMS v3 | PHP 7.2
       - 2.x #CraftCMS v4 | PHP 8.0.2
   pull_request:
     branches:
       - "*"
 jobs:
-  tests-php-72:
+  tests-php-80:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set the value
         id: step_one
         run: |
-          echo "PHP_VERSION=7.2" >> $GITHUB_ENV
+          echo "PHP_VERSION=8.0" >> $GITHUB_ENV
       - name: Build containers
         run: make up
       - name: Composer install
@@ -23,37 +22,7 @@ jobs:
       - name: Tests
         run: make test
 
-  tests-php-73:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        id: step_one
-        run: |
-          echo "PHP_VERSION=7.3" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Tests
-        run: make test
-
-  tests-php-74:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        id: step_one
-        run: |
-          echo "PHP_VERSION=7.4" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Tests
-        run: make test
-
-  tests-php-74-mysql-80:
+  tests-php-80-mysql-80:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -69,7 +38,7 @@ jobs:
       - name: Tests
         run: make test
 
-  tests-php-latest:
+  tests-php-81:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

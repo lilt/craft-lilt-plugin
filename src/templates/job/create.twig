@@ -15,9 +15,6 @@
 {% set elementType = 'craft\\elements\\Entry' %}
 {% set userElementType = 'craft\\elements\\User' %}
 
-{% set sources = craft.app.elementIndexes.getSources('craft\\elements\\Entry', 'index') %}
-{% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
-
 {% set fullPageForm = true %}
 
 {% set formActions = [] %}

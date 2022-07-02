@@ -21,7 +21,7 @@ use LiltConnectorSDK\Model\SettingsResponse1 as SettingsRequest;
 
 class PostConfigurationController extends AbstractJobController
 {
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     /**
      * @throws Throwable

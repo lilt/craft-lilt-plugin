@@ -18,7 +18,7 @@ use yii\web\Response;
 
 class PostTranslationPublishController extends AbstractJobController
 {
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     /**
      * @throws Throwable

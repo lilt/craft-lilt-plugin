@@ -23,7 +23,7 @@ class m220617_164156_add_sites extends Migration
     public function safeUp()
     {
         $section = Craft::$app->sections->getSectionByHandle('blog');
-        if($section) {
+        if ($section) {
             $this->safeDown();
         }
 
@@ -37,7 +37,7 @@ class m220617_164156_add_sites extends Migration
 
         $siteEnUS = Craft::$app->sites->getSiteByHandle('default');
 
-        if($siteEnUS === null) {
+        if ($siteEnUS === null) {
             throw new \Exception('Cant get default website');
         }
 
@@ -57,13 +57,14 @@ class m220617_164156_add_sites extends Migration
             $site = new Site();
             $site->language = $language;
             $site->handle = $handle;
+
             $site->setName(
-                sprintf('Craft test %s', explode('-',$language)[0])
+                sprintf('Craft test %s', explode('-', $language)[0])
             );
             $site->groupId = $groups[0]->id;
-            $site->setBaseUrl('@web/' . explode('-',$language)[0]);
+            $site->setBaseUrl('@web/' . explode('-', $language)[0]);
 
-            Craft::$app->sites->saveSite($site);
+            Craft::$app->sites->saveSite($site, false);
 
             $site = Craft::$app->sites->getSiteByHandle($site->handle);
 
@@ -72,7 +73,7 @@ class m220617_164156_add_sites extends Migration
             $siteSetting->enabledByDefault = true;
 
             #$siteSetting->uriFormat = sprintf('/blog/%s', explode('-',$language)[0]);
-            $siteSetting->uriFormat = sprintf('/blog/%s/{slug}', explode('-',$language)[0]);
+            $siteSetting->uriFormat = sprintf('/blog/%s/{slug}', explode('-', $language)[0]);
             $siteSetting->hasUrls = true;
 
             $siteSettings[] = $siteSetting;
@@ -101,10 +102,12 @@ class m220617_164156_add_sites extends Migration
         Craft::$app->sections->saveSection($section);
 
         Craft::$app->plugins->installPlugin('colour-swatches');
-        Craft::$app->plugins->installPlugin('linkit');
         Craft::$app->plugins->installPlugin('neo');
         Craft::$app->plugins->installPlugin('redactor');
-        Craft::$app->plugins->installPlugin('super-table');
+
+        if (TEST_SUPERTABLE_PLUGIN) {
+            Craft::$app->plugins->installPlugin('super-table');
+        }
     }
 
     /**
@@ -113,14 +116,14 @@ class m220617_164156_add_sites extends Migration
     public function safeDown()
     {
         $section = Craft::$app->sections->getSectionByHandle('blog');
-        if($section) {
+        if ($section) {
             Craft::$app->getSections()->deleteSectionById((int) $section->id);
         }
 
         $sitesToCreate = ['esES' => 'es-ES', 'deDE' => 'de-DE', 'ruRU' => 'ru-RU'];
         foreach ($sitesToCreate as $handle => $language) {
             $site = Craft::$app->getSites()->getSiteByHandle($handle);
-            if($site) {
+            if ($site) {
                 Craft::$app->getSites()->deleteSiteById($site->id);
             }
         }

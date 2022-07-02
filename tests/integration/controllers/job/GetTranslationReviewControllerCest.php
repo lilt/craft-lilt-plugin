@@ -75,19 +75,20 @@ class GetTranslationReviewControllerCest
         $translations[0]->save();
 
         $controller = $this->getController();
-        $view = new ViewWrapper();
-        $view->setControllerView($controller->view);
-        $controller->setView($view);
-
         $controller->request->setBodyParams(['translationId' => $translations[0]->id]);
-
         $response = $controller->actionInvoke();
 
+        $behavior = $response->getBehavior('template');
+        $actual = [
+            'variables' => $behavior->variables,
+            'template' => $behavior->template,
+            'templateMode' => $behavior->templateMode,
+        ];
+
         $expected = $this->getExpected();
-        $actual = json_decode($view->data, true, 512, 4194304);
 
         foreach ($expected['variables']['translation'] as $key => $value) {
-            if(is_array($value)) {
+            if (is_array($value)) {
                 Assert::assertEqualsCanonicalizing($value, $actual['variables']['translation'][$key]);
                 continue;
             }
@@ -112,121 +113,20 @@ class GetTranslationReviewControllerCest
                 'originalUrl' => 'http://$PRIMARY_SITE_URL/index.php?p=blog/first-entry-user-1',
                 'translation' => [
                     'translatedDraftId' => null,
-                    'sourceContent' => [
-                        [
-                            'neo' => [
-                                [
-                                    'fields' => [
-                                        'matrix' => [
-                                            [
-                                                'fields' => [
-                                                    'plainTextFirstBlock' => 'neo - firstBlockType - matrix - Plain text first block'
-                                                ]
-                                            ],
-                                            [
-                                                'fields' => [
-                                                    'plainTextSecondBlock' => 'neo - firstBlockType - matrix - Plain text second block'
-                                                ]
-                                            ]
-                                        ],
-                                        'redactor' => 'firstBlockType - redactor - Here is value of field',
-                                        'lightswitch' => [
-                                            'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
-                                            'offLabel' => 'The label text to display beside the lightswitch’s disabled state.'
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'fields' => [
-                                        'table' => [
-                                            'content' => [
-                                                [
-                                                    'columnHeading1' => 'secondBlockType - table - First row first value',
-                                                    'columnHeading2' => 'secondBlockType - table - First row second value',
-                                                    'columnHeading3' => 'secondBlockType - table - First row third value',
-                                                    'columnHeading4' => 'secondBlockType - table - First row fourth value'
-                                                ],
-                                                [
-                                                    'columnHeading1' => 'secondBlockType - table - Second row first value',
-                                                    'columnHeading2' => 'secondBlockType - table - Second row second value',
-                                                    'columnHeading3' => 'secondBlockType - table - Second row third value',
-                                                    'columnHeading4' => 'secondBlockType - table - Second row fourth value'
-                                                ]
-                                            ]
-                                        ],
-                                        'plainText' => 'secondBlockType - plainText - Here is value of field',
-                                        'supertable' => [
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            'table' => [
-                                'columns' => [
-                                    'columnHeading1' => 'Column Heading 1',
-                                    'columnHeading2' => 'Column Heading 2',
-                                    'columnHeading3' => 'Column Heading 3',
-                                    'columnHeading4' => 'Column Heading 4'
-                                ],
-                                'content' => [
-                                    [
-                                        'columnHeading1' => 'First row first value',
-                                        'columnHeading2' => 'First row second value',
-                                        'columnHeading3' => 'First row third value',
-                                        'columnHeading4' => 'First row fourth value'
-                                    ],
-                                    [
-                                        'columnHeading1' => 'Second row first value',
-                                        'columnHeading2' => 'Second row second value',
-                                        'columnHeading3' => 'Second row third value',
-                                        'columnHeading4' => 'Second row fourth value'
-                                    ]
-                                ]
-                            ],
-                            'title' => 'Some example title',
-                            'matrix' => [
-                                [
-                                    'fields' => [
-                                        'plainTextFirstBlock' => 'Plain text first block'
-                                    ]
-                                ],
-                                [
-                                    'fields' => [
-                                        'plainTextSecondBlock' => 'Plain text second block'
-                                    ]
-                                ]
-                            ],
-                            'redactor' => '<h1>Here is some header text</h1> Here is some content',
-                            'checkboxes' => [
-                                'firstCheckboxLabel' => 'First checkbox label',
-                                'thirdCheckboxLabel' => 'Third checkbox label',
-                                'secondCheckboxLabel' => 'Second checkbox label'
-                            ],
-                            'supertable' => [
-                                [
-                                    'fields' => [
-                                        'firstField' => 'firstField - Supertable text',
-                                        'secondField' => 'secondField - Supertable text'
-                                    ]
-                                ]
-                            ],
-                            'lightswitch' => [
-                                'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
-                                'offLabel' => 'The label text to display beside the lightswitch’s disabled state.'
-                            ]
-                        ]
-                    ],
+                    'sourceContent' => $this->getSourceContent(),
                     'targetContent' => $this->getTargetContent(),
                     'lastDelivery' => null,
                     'status' => 'in-progress',
                     'connectorTranslationId' => null,
                 ]
             ],
-            'templateMode' => null
+            'templateMode' => null,
         ];
     }
 
-    private function getTargetContent(): array {
-        return [
+    private function getTargetContent(): array
+    {
+        $targetContent = [
             [
                 'neo' => [
                     [
@@ -315,19 +215,203 @@ class GetTranslationReviewControllerCest
                     'thirdCheckboxLabel' => 'es-ES: Third checkbox label',
                     'secondCheckboxLabel' => 'es-ES: Second checkbox label'
                 ],
-                'supertable' => [
-                    [
-                        'fields' => [
-                            'firstField' => 'es-ES: firstField - Supertable text',
-                            'secondField' => 'es-ES: secondField - Supertable text'
-                        ]
-                    ]
-                ],
                 'lightswitch' => [
                     'onLabel' => 'es-ES: The label text to display beside the lightswitch’s enabled state',
                     'offLabel' => 'es-ES: The label text to display beside the lightswitch’s disabled state.'
-                ]
+                ],
             ]
         ];
+
+
+        if (TEST_COLOUR_SWATCHES_PLUGIN) {
+            $targetContent[0]['colorSwatches'] = [
+                'labels' =>
+                    [
+                        'a5e0af2bdf434712fd71358f5a2415b1' => 'ES: first label',
+                        'e7c9c88325b2a6a2476e2516094b6ba4' => 'ES: second label',
+                        'f13b85cdf5fdd245b03675f94d964946' => 'ES: third label',
+                    ],
+            ];
+        }
+
+        if (TEST_LINKIT_PLUGIN) {
+            $targetContent[0]['linkit'] =
+                [
+                    'value' =>
+                        [
+                            'fruitstudios\\linkit\\models\\Email' =>
+                                [
+                                    'value' => 'es@lilt.com',
+                                    'customText' => 'es-ES: Test linkit text label',
+                                ],
+                        ],
+                    'defaultText' => 'Default link text',
+                    'customLabels' =>
+                        [
+                            'fruitstudios\\linkit\\models\\Url' => 'ES: Website url label',
+                            'fruitstudios\\linkit\\models\\Email' => 'ES: Email address label',
+                            'fruitstudios\\linkit\\models\\Phone' => 'ES: Phone number label',
+                        ],
+                ];
+        }
+
+        if (TEST_SUPERTABLE_PLUGIN) {
+            $targetContent[0]['supertable'] = [
+                [
+                    'fields' => [
+                        'firstField' => 'es-ES: firstField - Supertable text',
+                        'secondField' => 'es-ES: secondField - Supertable text'
+                    ]
+                ]
+            ];
+        }
+
+        return $targetContent;
+    }
+
+    /**
+     * @return array|array[]
+     */
+    private function getSourceContent(): array
+    {
+        $sourceContent = [
+            [
+                'neo' => [
+                    [
+                        'fields' => [
+                            'matrix' => [
+                                [
+                                    'fields' => [
+                                        'plainTextFirstBlock' => 'neo - firstBlockType - matrix - Plain text first block'
+                                    ]
+                                ],
+                                [
+                                    'fields' => [
+                                        'plainTextSecondBlock' => 'neo - firstBlockType - matrix - Plain text second block'
+                                    ]
+                                ]
+                            ],
+                            'redactor' => 'firstBlockType - redactor - Here is value of field',
+                            'lightswitch' => [
+                                'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
+                                'offLabel' => 'The label text to display beside the lightswitch’s disabled state.'
+                            ]
+                        ]
+                    ],
+                    [
+                        'fields' => [
+                            'table' => [
+                                'content' => [
+                                    [
+                                        'columnHeading1' => 'secondBlockType - table - First row first value',
+                                        'columnHeading2' => 'secondBlockType - table - First row second value',
+                                        'columnHeading3' => 'secondBlockType - table - First row third value',
+                                        'columnHeading4' => 'secondBlockType - table - First row fourth value'
+                                    ],
+                                    [
+                                        'columnHeading1' => 'secondBlockType - table - Second row first value',
+                                        'columnHeading2' => 'secondBlockType - table - Second row second value',
+                                        'columnHeading3' => 'secondBlockType - table - Second row third value',
+                                        'columnHeading4' => 'secondBlockType - table - Second row fourth value'
+                                    ]
+                                ]
+                            ],
+                            'plainText' => 'secondBlockType - plainText - Here is value of field',
+                            #'supertable' => []
+                        ]
+                    ]
+                ],
+                'table' => [
+                    'columns' => [
+                        'columnHeading1' => 'Column Heading 1',
+                        'columnHeading2' => 'Column Heading 2',
+                        'columnHeading3' => 'Column Heading 3',
+                        'columnHeading4' => 'Column Heading 4'
+                    ],
+                    'content' => [
+                        [
+                            'columnHeading1' => 'First row first value',
+                            'columnHeading2' => 'First row second value',
+                            'columnHeading3' => 'First row third value',
+                            'columnHeading4' => 'First row fourth value'
+                        ],
+                        [
+                            'columnHeading1' => 'Second row first value',
+                            'columnHeading2' => 'Second row second value',
+                            'columnHeading3' => 'Second row third value',
+                            'columnHeading4' => 'Second row fourth value'
+                        ]
+                    ]
+                ],
+                'title' => 'Some example title',
+                'matrix' => [
+                    [
+                        'fields' => [
+                            'plainTextFirstBlock' => 'Plain text first block'
+                        ]
+                    ],
+                    [
+                        'fields' => [
+                            'plainTextSecondBlock' => 'Plain text second block'
+                        ]
+                    ]
+                ],
+                'redactor' => '<h1>Here is some header text</h1> Here is some content',
+                'checkboxes' => [
+                    'firstCheckboxLabel' => 'First checkbox label',
+                    'thirdCheckboxLabel' => 'Third checkbox label',
+                    'secondCheckboxLabel' => 'Second checkbox label'
+                ],
+                'lightswitch' => [
+                    'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
+                    'offLabel' => 'The label text to display beside the lightswitch’s disabled state.'
+                ],
+            ]
+        ];
+
+        if (TEST_COLOUR_SWATCHES_PLUGIN) {
+            $sourceContent[0]['colorSwatches'] = [
+                'labels' =>
+                    [
+                        'a5e0af2bdf434712fd71358f5a2415b1' => 'first label',
+                        'e7c9c88325b2a6a2476e2516094b6ba4' => 'second label',
+                        'f13b85cdf5fdd245b03675f94d964946' => 'third label',
+                    ],
+            ];
+        }
+
+        if (TEST_LINKIT_PLUGIN) {
+            $sourceContent[0]['linkit'] = [
+                'value' => [
+                    [
+                        'fruitstudios\\linkit\\models\\Email' =>
+                            [
+                                'value' => 'test@lilt.com',
+                                'customText' => 'Test linkit text label',
+                            ],
+                    ],
+                    'defaultText' => 'Default link text',
+                    'customLabels' =>
+                        [
+                            'fruitstudios\\linkit\\models\\Url' => 'Website url label',
+                            'fruitstudios\\linkit\\models\\Email' => 'Email address label',
+                            'fruitstudios\\linkit\\models\\Phone' => 'Phone number label',
+                        ]
+                ]
+            ];
+        }
+
+        if (TEST_SUPERTABLE_PLUGIN) {
+            $sourceContent[0]['supertable'] = [
+                [
+                    'fields' => [
+                        'firstField' => 'firstField - Supertable text',
+                        'secondField' => 'secondField - Supertable text'
+                    ]
+                ]
+            ];
+        }
+
+        return $sourceContent;
     }
 }

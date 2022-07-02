@@ -18,11 +18,11 @@ class JobsFunctionalCest
 
         $I->see('Jobs');
 
-        # We have elements index on page 
+        # We have elements index on page
         $I->seeElement('#content .elements');
 
         # All actions are there
-        $I->seeElement('#action-button');
+        $I->seeElement('#action-buttons');
         $I->seeElement('#lilt-sync-jobs');
         $I->seeElement('.btn.big.submit.icon.btn-create-new-job');
 
@@ -39,6 +39,10 @@ class JobsFunctionalCest
 
         $I->amLoggedInAs($user);
         $I->amOnPage('?p=admin/craft-lilt-plugin/jobs');
+
+        //TODO: check where it should be set gracefully!
+        $urlManager = Craft::$app->urlManager;
+        $urlManager->setHostInfo('https://test.craftcms.test');
 
         $I->click('.btn.big.submit.icon.btn-create-new-job');
 
