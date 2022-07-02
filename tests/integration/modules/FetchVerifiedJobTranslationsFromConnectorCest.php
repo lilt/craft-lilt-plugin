@@ -6,9 +6,7 @@ namespace lilthq\craftliltplugintests\integration\modules;
 
 use Codeception\Util\HttpCode;
 use Craft;
-use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
-use craft\elements\MatrixBlock;
 use craft\helpers\Db;
 use IntegrationTester;
 use LiltConnectorSDK\Model\JobResponse;
@@ -208,7 +206,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
          * @var Job $job
          * @var TranslationRecord[] $translations
          */
-        [$element, $job, $translations] = $this->prepareTestData($I);
+        [$element, $job,] = $this->prepareTestData($I);
 
         $translationsResponseBody = $this->getTranslationsResponseBodyOneFailed(
             $element->getId()
@@ -221,8 +219,6 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             HttpCode::OK,
             $translationsResponseBody
         );
-
-        $expectedContent = $this->getExpectedContent($element);
 
         $I->expectTranslationDownloadRequest(
             703695,
@@ -292,7 +288,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
          * @var Job $job
          * @var TranslationRecord[] $translations
          */
-        [$element, $job, $translations] = $this->prepareTestData($I);
+        [$element, $job,] = $this->prepareTestData($I);
 
         $translationsResponseBody = $this->getTranslationsResponseBody(
             $element->getId(),
@@ -306,8 +302,6 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             HttpCode::OK,
             $translationsResponseBody
         );
-
-        $expectedContent = $this->getExpectedContent($element);
 
         $I->expectTranslationDownloadRequest(
             703695,
@@ -376,7 +370,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
          * @var Job $job
          * @var TranslationRecord[] $translations
          */
-        [$element, $job, $translations] = $this->prepareTestData($I);
+        [$element, $job,] = $this->prepareTestData($I);
 
         $translationsResponseBody = $this->getTranslationsResponseBody(
             $element->getId(),
@@ -403,21 +397,18 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $job->id,
             $element->id,
             'es-ES'
-        //, 703695
         );
 
         $I->assertTranslationInProgress(
             $job->id,
             $element->id,
             'ru-RU'
-        //, 703697
         );
 
         $I->assertTranslationInProgress(
             $job->id,
             $element->id,
             'de-DE'
-        //, 703696
         );
 
         $I->assertJobInQueue(
@@ -433,79 +424,6 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             Job::STATUS_IN_PROGRESS,
             $jobRecord->status
         );
-    }
-
-    private function getExpectedContent(Entry $element): array
-    {
-        /**
-         * @var MatrixBlockQuery $matrixField
-         */
-        $matrixField = $element->getFieldValue('matrix');
-        /**
-         * @var MatrixBlock[] $blockElements
-         */
-        $blocks = $matrixField->all();
-        $blocksMap = [];
-        foreach ($blocks as $block) {
-            $blocksMap[$block->type->handle] = $block->id;
-        }
-
-        return [
-            'de-DE' => [
-                $element->getId() => [
-                    'title' => 'de-DE: Some example title',
-                    'redactor' => 'de-DE: <h1>Here is some header text</h1> Here is some content',
-                    'matrix' => [
-                        $blocksMap['firstBlock'] => [
-                            'fields' => [
-                                'plainTextFirstBlock' => 'de-DE: Some text',
-                            ],
-                        ],
-                        $blocksMap['secondblock'] => [
-                            'fields' => [
-                                'plainTextSecondBlock' => 'de-DE: Some text',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            'es-ES' => [
-                $element->getId() => [
-                    'title' => 'es-ES: Some example title',
-                    'redactor' => 'es-ES: <h1>Here is some header text</h1> Here is some content',
-                    'matrix' => [
-                        $blocksMap['firstBlock'] => [
-                            'fields' => [
-                                'plainTextFirstBlock' => 'es-ES: Some text',
-                            ],
-                        ],
-                        $blocksMap['secondblock'] => [
-                            'fields' => [
-                                'plainTextSecondBlock' => 'es-ES: Some text',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            'ru-RU' => [
-                $element->getId() => [
-                    'title' => 'ru-RU: Some example title',
-                    'redactor' => 'ru-RU: <h1>Here is some header text</h1> Here is some content',
-                    'matrix' => [
-                        $blocksMap['firstBlock'] => [
-                            'fields' => [
-                                'plainTextFirstBlock' => 'ru-RU: Some text',
-                            ],
-                        ],
-                        $blocksMap['secondblock'] => [
-                            'fields' => [
-                                'plainTextSecondBlock' => 'ru-RU: Some text',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ];
     }
 
     private function getTranslationsResponseBody(
@@ -557,7 +475,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
     {
         $fileName = sprintf('497058_element_%d.json+html', $elementId);
 
-        $translationsResponseBody = [
+        return [
             'limit' => 25,
             'results' => [
                 0 => [
@@ -593,6 +511,5 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             ],
             'start' => 0,
         ];
-        return $translationsResponseBody;
     }
 }

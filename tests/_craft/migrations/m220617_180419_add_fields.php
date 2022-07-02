@@ -554,8 +554,7 @@ class m220617_180419_add_fields extends Migration
             'groupId' => $groupId,
             'name' => 'linkit',
             'handle' => 'linkit',
-            'instructions' => 'Default Instructions
-Helper text to guide the author.',
+            'instructions' => 'Default Instructions. Helper text to guide the author.',
             'required' => null,
             'searchable' => 0,
             'translationMethod' => 'language',
