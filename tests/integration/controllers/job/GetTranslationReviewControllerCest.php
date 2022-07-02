@@ -87,7 +87,7 @@ class GetTranslationReviewControllerCest
         $actual = json_decode($view->data, true, 512, 4194304);
 
         foreach ($expected['variables']['translation'] as $key => $value) {
-            if(is_array($value)) {
+            if (is_array($value)) {
                 Assert::assertEqualsCanonicalizing($value, $actual['variables']['translation'][$key]);
                 continue;
             }
@@ -183,6 +183,23 @@ class GetTranslationReviewControllerCest
                                 ]
                             ],
                             'title' => 'Some example title',
+                            'linkit' => [
+                                'value' =>
+                                    [
+                                        'fruitstudios\\linkit\\models\\Email' =>
+                                            [
+                                                'value' => 'test@lilt.com',
+                                                'customText' => 'Test linkit text label',
+                                            ],
+                                    ],
+                                'defaultText' => 'Default link text',
+                                'customLabels' =>
+                                    [
+                                        'fruitstudios\\linkit\\models\\Url' => 'Website url label',
+                                        'fruitstudios\\linkit\\models\\Email' => 'Email address label',
+                                        'fruitstudios\\linkit\\models\\Phone' => 'Phone number label',
+                                    ],
+                            ],
                             'matrix' => [
                                 [
                                     'fields' => [
@@ -212,7 +229,15 @@ class GetTranslationReviewControllerCest
                             'lightswitch' => [
                                 'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
                                 'offLabel' => 'The label text to display beside the lightswitch’s disabled state.'
-                            ]
+                            ],
+                            'colorSwatches' => [
+                                    'labels' =>
+                                        [
+                                            'a5e0af2bdf434712fd71358f5a2415b1' => 'first label',
+                                            'e7c9c88325b2a6a2476e2516094b6ba4' => 'second label',
+                                            'f13b85cdf5fdd245b03675f94d964946' => 'third label',
+                                        ],
+                                ],
                         ]
                     ],
                     'targetContent' => $this->getTargetContent(),
@@ -221,11 +246,12 @@ class GetTranslationReviewControllerCest
                     'connectorTranslationId' => null,
                 ]
             ],
-            'templateMode' => null
+            'templateMode' => null,
         ];
     }
 
-    private function getTargetContent(): array {
+    private function getTargetContent(): array
+    {
         return [
             [
                 'neo' => [
@@ -297,6 +323,24 @@ class GetTranslationReviewControllerCest
                     ]
                 ],
                 'title' => 'es-ES: Some example title',
+                'linkit' =>
+                    [
+                        'value' =>
+                            [
+                                'fruitstudios\\linkit\\models\\Email' =>
+                                    [
+                                        'value' => 'es@lilt.com',
+                                        'customText' => 'es-ES: Test linkit text label',
+                                    ],
+                            ],
+                        'defaultText' => 'Default link text',
+                        'customLabels' =>
+                            [
+                                'fruitstudios\\linkit\\models\\Url' => 'ES: Website url label',
+                                'fruitstudios\\linkit\\models\\Email' => 'ES: Email address label',
+                                'fruitstudios\\linkit\\models\\Phone' => 'ES: Phone number label',
+                            ],
+                    ],
                 'matrix' => [
                     [
                         'fields' => [
@@ -326,7 +370,16 @@ class GetTranslationReviewControllerCest
                 'lightswitch' => [
                     'onLabel' => 'es-ES: The label text to display beside the lightswitch’s enabled state',
                     'offLabel' => 'es-ES: The label text to display beside the lightswitch’s disabled state.'
-                ]
+                ],
+                'colorSwatches' =>
+                    [
+                        'labels' =>
+                            [
+                                'a5e0af2bdf434712fd71358f5a2415b1' => 'ES: first label',
+                                'e7c9c88325b2a6a2476e2516094b6ba4' => 'ES: second label',
+                                'f13b85cdf5fdd245b03675f94d964946' => 'ES: third label',
+                            ],
+                    ],
             ]
         ];
     }

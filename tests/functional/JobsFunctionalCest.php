@@ -18,7 +18,7 @@ class JobsFunctionalCest
 
         $I->see('Jobs');
 
-        # We have elements index on page 
+        # We have elements index on page
         $I->seeElement('#content .elements');
 
         # All actions are there

@@ -55,7 +55,8 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
 
 
         $draft = Craftliltplugin::getInstance()->elementTranslatableContentApplier->createDraftElement(
-            new TranslationApplyCommand($element, $job, [], 'ru-RU'), []
+            new TranslationApplyCommand($element, $job, [], 'ru-RU'),
+            []
         );
         $draft->title = 'This is draft, and it was applied from PostTranslationPublishControllerCest';
         Craft::$app->elements->saveElement($draft);
@@ -134,7 +135,8 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
         $jobRecord->save();
 
         $draft = Craftliltplugin::getInstance()->elementTranslatableContentApplier->createDraftElement(
-            new TranslationApplyCommand($element, $job, [], 'ru-RU'), []
+            new TranslationApplyCommand($element, $job, [], 'ru-RU'),
+            []
         );
         $draft->title = 'This is draft, and it was applied from PostTranslationPublishControllerCest';
         Craft::$app->elements->saveElement($draft);

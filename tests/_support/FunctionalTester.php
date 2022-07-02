@@ -1,4 +1,5 @@
 <?php
+
 /**
  * craft-lilt-plugin plugin for Craft CMS 3.x
  *
@@ -31,6 +32,4 @@ use Codeception\Lib\Friend;
 class FunctionalTester extends Actor
 {
     use _generated\FunctionalTesterActions;
-
-
 }

@@ -8,6 +8,7 @@ use benf\neo\elements\Block;
 use Craft;
 use craft\base\FieldInterface;
 use craft\elements\MatrixBlock;
+use craft\errors\InvalidFieldException;
 use lilthq\craftliltplugin\records\I18NRecord;
 use verbb\supertable\elements\SuperTableBlockElement;
 
@@ -76,5 +77,43 @@ abstract class AbstractContentApplier
         $record->hash = $data['hash'];
 
         return $record;
+    }
+
+    /**
+     * @throws InvalidFieldException
+     *
+     * @return mixed
+     */
+    protected function getOriginalFieldSerializedValue(ApplyContentCommand $command)
+    {
+        if (empty($command->getField()->handle)) {
+            return [];
+        }
+
+        $element = Craft::$app->elements->getElementById(
+            $command->getElement()->getId(),
+            get_class($command->getElement()),
+            $command->getSourceSiteId()
+        );
+
+        if ($element === null) {
+            throw new \RuntimeException(
+                sprintf(
+                    "Can't find element for source site id. ElementId: %d SiteId: %d",
+                    $command->getElement()->id,
+                    $command->getSourceSiteId()
+                )
+            );
+        }
+
+        $fieldValue = $element->getFieldValue($command->getField()->handle);
+        if (empty($fieldValue)) {
+            return [];
+        }
+
+        return $command->getField()->serializeValue(
+            $fieldValue,
+            $element
+        );
     }
 }

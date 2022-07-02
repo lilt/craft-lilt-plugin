@@ -1,4 +1,5 @@
 <?php
+
 /**
  * craft-lilt-plugin plugin for Craft CMS 3.x
  *
@@ -21,5 +22,4 @@ use Codeception\Module;
  */
 class Unit extends Module
 {
-
 }

@@ -17,6 +17,8 @@ use craft\helpers\StringHelper;
 use craft\models\FieldGroup;
 use craft\models\FieldLayout;
 use craft\redactor\Field as RedactorField;
+use fruitstudios\linkit\fields\LinkitField;
+use percipioglobal\colourswatches\fields\ColourSwatches;
 use RuntimeException;
 use verbb\supertable\fields\SuperTableField;
 
@@ -68,6 +70,8 @@ class m220617_180419_add_fields extends Migration
             $this->createSuperTableField($groupId),
             $this->createTableField($groupId),
             $this->createNeoField($groupId),
+            $this->createLinkitField($groupId),
+            $this->createColourSwatches($groupId),
         ];
 
         $tab->setFields(
@@ -486,7 +490,6 @@ class m220617_180419_add_fields extends Migration
                 'onLabel' => 'The label text to display beside the lightswitch’s enabled state',
                 'offLabel' => 'The label text to display beside the lightswitch’s disabled state.',
             ]
-
         );
 
         $l->groupId = $groupId;
@@ -543,6 +546,148 @@ class m220617_180419_add_fields extends Migration
         }
 
         return $checkboxes;
+    }
+
+    public function createLinkitField(int $groupId): LinkitField
+    {
+        $linkitField = new LinkitField([
+            'groupId' => $groupId,
+            'name' => 'linkit',
+            'handle' => 'linkit',
+            'instructions' => 'Default Instructions. Helper text to guide the author.',
+            'required' => null,
+            'searchable' => 0,
+            'translationMethod' => 'language',
+            'translationKeyFormat' => null,
+            'selectLinkText' => '',
+            'types' => [
+                'fruitstudios\\linkit\\models\\Email' => [
+                    'enabled' => 1,
+                    'customLabel' => 'Email address label',
+                    'customPlaceholder' => 'support@lilt.com',
+                ],
+                'fruitstudios\\linkit\\models\\Phone' => [
+                    'enabled' => 1,
+                    'customLabel' => 'Phone number label',
+                    'customPlaceholder' => '+44 415-992-5088',
+                ],
+                'fruitstudios\\linkit\\models\\Url' => [
+                    'enabled' => 1,
+                    'customLabel' => 'Website url label',
+                    'customPlaceholder' => 'https://lilt.com/company',
+                    'allowAlias' => 1,
+                    'allowMailto' => 1,
+                    'allowHash' => 1,
+                    'allowPaths' => 1,
+                ],
+                'fruitstudios\\linkit\\models\\Twitter' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'customPlaceholder' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Facebook' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'customPlaceholder' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Instagram' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'customPlaceholder' => '',
+                ],
+                'fruitstudios\\linkit\\models\\LinkedIn' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'customPlaceholder' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Entry' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'sources' => '*',
+                    'customSelectionLabel' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Category' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'sources' => '*',
+                    'customSelectionLabel' => '',
+                ],
+                'fruitstudios\\linkit\\models\\Asset' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'sources' => '*',
+                    'customSelectionLabel' => '',
+                ],
+                'fruitstudios\\linkit\\models\\User' => [
+                    'enabled' => '',
+                    'customLabel' => '',
+                    'sources' => '*',
+                    'customSelectionLabel' => '',
+                    'userPath' => '',
+                ],
+            ],
+            'allowCustomText' => 1,
+            'defaultText' => 'Default link text',
+            'allowTarget' => '',
+        ]);
+        $linkitField->groupId = $groupId;
+
+        $created = Craft::$app->getFields()->saveField($linkitField);
+
+        if (!$created) {
+            throw new RuntimeException(
+                sprintf("Failed to run %s", __FUNCTION__)
+            );
+        }
+
+        return $linkitField;
+    }
+
+    public function createColourSwatches(int $groupId): ColourSwatches
+    {
+        $colourSwatches = new ColourSwatches(
+            [
+                'name' => 'ColorSwatches',
+                'handle' => 'colorSwatches',
+                'instructions' => 'Default Instructions
+Helper text to guide the author.',
+                'required' => null,
+                'searchable' => 0,
+                'translationMethod' => 'language',
+                'translationKeyFormat' => null,
+                'options' => [
+                    0 => [
+                        'label' => 'first label',
+                        'color' => '#CD5C5C',
+                        'default' => 1,
+                    ],
+                    1 => [
+                        'label' => 'second label',
+                        'color' => '#F08080',
+                        'default' => '',
+                    ],
+                    2 => [
+                        'label' => 'third label',
+                        'color' => '#FA8072',
+                        'default' => '',
+                    ],
+                ],
+                'useConfigFile' => '',
+                'palette' => '',
+                'default' => null,
+            ]
+        );
+        $colourSwatches->groupId = $groupId;
+
+        $created = Craft::$app->getFields()->saveField($colourSwatches);
+
+        if (!$created) {
+            throw new RuntimeException(
+                sprintf("Failed to run %s", __FUNCTION__)
+            );
+        }
+
+        return $colourSwatches;
     }
 
     /**
@@ -619,6 +764,7 @@ class m220617_180419_add_fields extends Migration
         $fieldLayoutId = $fieldLayoutData['id'];
         return $fieldLayoutId;
     }
+
     /**
      * @return mixed
      * @throws \yii\base\Exception

@@ -10,7 +10,6 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\ExpectedElementContent;
-use lilthq\tests\fixtures\FieldsFixture;
 use PHPUnit\Framework\Assert;
 
 use function Arrayy\array_first;
@@ -23,9 +22,6 @@ class ElementTranslatableContentProviderCest extends AbstractIntegrationCest
             'entries' => [
                 'class' => EntriesFixture::class,
             ],
-            //'fields' => [
-            //    'class' => FieldsFixture::class,
-            //],
         ];
     }
 

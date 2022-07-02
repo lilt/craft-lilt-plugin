@@ -13,7 +13,8 @@ use craft\errors\InvalidFieldException;
 
 final class ExpectedElementContent
 {
-    public static function getExpectedI18N(string $prefix = ''): array {
+    public static function getExpectedI18N(string $prefix = ''): array
+    {
         return [
             'firstCheckboxLabel' => $prefix . 'First checkbox label',
             'secondCheckboxLabel' => $prefix . 'Second checkbox label',
@@ -26,6 +27,7 @@ final class ExpectedElementContent
             'columnHeading4' => $prefix . 'Column Heading 4',
         ];
     }
+
     /**
      * @throws InvalidFieldException
      */
@@ -76,6 +78,31 @@ final class ExpectedElementContent
                     ],
                 ],
                 'neo' => $neoContent,
+                'linkit' => [
+                    'defaultText' => 'Default link text',
+                    'customLabels' =>
+                        [
+                            'fruitstudios\\linkit\\models\\Email' => 'Email address label',
+                            'fruitstudios\\linkit\\models\\Phone' => 'Phone number label',
+                            'fruitstudios\\linkit\\models\\Url' => 'Website url label',
+                        ],
+                    'value' =>
+                        [
+                            'fruitstudios\\linkit\\models\\Email' =>
+                                [
+                                    'value' => 'test@lilt.com',
+                                    'customText' => 'Test linkit text label',
+                                ],
+                        ],
+                ],
+                'colorSwatches' => [
+                    'labels' =>
+                        [
+                            'a5e0af2bdf434712fd71358f5a2415b1' => 'first label',
+                            'e7c9c88325b2a6a2476e2516094b6ba4' => 'second label',
+                            'f13b85cdf5fdd245b03675f94d964946' => 'third label',
+                        ],
+                ],
             ],
         ];
     }
