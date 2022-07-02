@@ -20,9 +20,9 @@ class JobFormAsset extends AssetBundle
         $this->js = [
             'elements/LiltElementIndex.js',
             'job-form.js',
-            'job-select-target-sites.js',
             'job-translation-review.js',
             'job-try-again-button.js',
+            'job-target-sites.js',
         ];
 
         $this->css = [

@@ -31,6 +31,32 @@
 
 #entries-to-translate-field #entries-to-translate {
     box-shadow: none;
+    display: none;
+    margin-top: 5px;
+}
+
+#entries-remove-action {
+    visibility: hidden;
+    float:right;
+}
+
+#lilt-target-sites .heading,
+#title-field .heading,
+#sourceSite-field .heading
+{
+    margin-bottom: 10px;
+}
+#lilt-target-sites {
+    margin-top: 0;
+}
+
+#lilt-target-sites #lilt-target-sites-table-container {
+    max-height: 240px;
+    overflow: scroll;
+}
+
+#lilt-target-sites #lilt-target-sites-search {
+    margin-bottom: 15px
 }
 
 #create-job-form div.elements.disabled,

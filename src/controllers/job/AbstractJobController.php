@@ -29,20 +29,24 @@ class AbstractJobController extends Controller
         $bodyParams = $this->request->getBodyParams();
 
         $job = new Job();
-        $job->id = (int) ($bodyParams['jobId'] ?? null);
+        $job->id = (int)($bodyParams['jobId'] ?? null);
         $job->title = $bodyParams['title'];
         $job->sourceSiteId = (int)$bodyParams['sourceSite'];
         $job->versions = $bodyParams['versions'] ?? [];
-        $job->authorId = !empty($bodyParams['author'][0]) ? (int) $bodyParams['author'][0] : null;
+        $job->authorId = !empty($bodyParams['author'][0]) ? (int)$bodyParams['author'][0] : null;
         $job->translationWorkflow = $bodyParams['translationWorkflow'];
         $job->elementIds = json_decode($bodyParams['entries'], false) ?? [];
 
         //TODO: due date not using right now
         //$job->dueDate = DateTimeHelper::toDateTime($this->request->getBodyParam('dueDate')) ?: null;
 
-        $job->targetSiteIds = $bodyParams['targetSiteIds'] === '*' ?
-            Craftliltplugin::getInstance()->languageMapper->getLanguageToSiteId()
-            : $bodyParams['targetSiteIds'];
+        if (empty($bodyParams['targetSiteIds'])) {
+            $job->targetSiteIds = [];
+        } else {
+            $job->targetSiteIds = $bodyParams['targetSiteIds'] === '*' ?
+                Craftliltplugin::getInstance()->languageMapper->getLanguageToSiteId()
+                : $bodyParams['targetSiteIds'];
+        }
 
         return $job;
     }
@@ -63,7 +67,7 @@ class AbstractJobController extends Controller
 
             'translationWorkflowsOptions' => ['instant' => 'Instant', 'verified' => 'Verified'],
             'availableSites' => Craftliltplugin::getInstance()->languageMapper->getAvailableSitesForFormField(),
-            'targetSites' =>  Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
+            'targetSites' => Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
             'element' => $job,
             'showLiltTranslateButton' => false,
             'isUnpublishedDraft' => true,
@@ -72,6 +76,7 @@ class AbstractJobController extends Controller
                 'can' => 'editEntries:edit-lilt-jobs'
             ],
             'author' => (!empty($job->authorId)) ? Craft::$app->users->getUserById($job->authorId) : null,
+            'sites' => Craft::$app->sites->getAllSites()
         ];
 
         return $this->renderTemplate(
