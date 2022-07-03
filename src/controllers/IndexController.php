@@ -20,9 +20,23 @@ class IndexController extends Controller
     {
         $this->getView()->registerAssetBundle(JobsAsset::class);
 
+        $elementIds = $this->request->getQueryParam('elementIds', []);
+        $statuses = $this->request->getQueryParam('statuses', []);
+
+        $criteria = [];
+
+        if (!empty($elementIds)) {
+            $criteria['where']['elements.id'] = $elementIds;
+        }
+
+        if (!empty($statuses)) {
+            $criteria['where']['lilt_jobs.status'] = $statuses;
+        }
+
         return $this->renderTemplate(
             'craft-lilt-plugin/jobs.twig',
             [
+                'criteria' => $criteria,
                 'crumbs' => [
                     [
                         'label' => 'Lilt Plugin',

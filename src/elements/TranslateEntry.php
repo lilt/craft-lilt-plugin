@@ -11,6 +11,9 @@ namespace lilthq\craftliltplugin\elements;
 
 use craft\elements\Entry;
 use craft\helpers\Cp;
+use craft\helpers\UrlHelper;
+use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\models\TranslationModel;
 
 /**
  * Customization of entry, to show the versions multi select
@@ -58,5 +61,29 @@ class TranslateEntry extends Entry
         }
 
         return parent::tableAttributeHtml($attribute);
+    }
+
+    public function getHtmlAttributes(string $context): array
+    {
+        $attributes = parent::getHtmlAttributes($context);
+        $translations = Craftliltplugin::getInstance()->translationRepository->findInProgressByElementId($this->id);
+
+        if (!empty($translations)) {
+            $jobIds = array_map(
+                static function (TranslationModel $translation) {
+                    return $translation->jobId;
+                },
+                $translations
+            );
+
+            $attributes['data-has-active-lilt-job'] = true;
+            $attributes['data-active-lilt-job-ids'] = json_encode(array_unique($jobIds));
+            $attributes['data-active-lilt-job-url'] = UrlHelper::cpUrl('/admin/craft-lilt-plugin/jobs', [
+                'statuses' => ['failed', 'in-progress', 'ready-for-review', 'ready-to-publish'],
+                'elementIds' => array_unique($jobIds)
+            ]);
+        }
+
+        return $attributes;
     }
 }

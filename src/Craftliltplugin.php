@@ -15,12 +15,16 @@ namespace lilthq\craftliltplugin;
 
 use Craft;
 use craft\base\Plugin;
+use craft\controllers\EntriesController;
 use craft\helpers\UrlHelper;
 use LiltConnectorSDK\Api\JobsApi;
 use LiltConnectorSDK\Api\SettingsApi;
 use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
+use lilthq\craftliltplugin\assets\EditEntryAsset;
+use lilthq\craftliltplugin\assets\JobsAsset;
+use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
@@ -47,6 +51,9 @@ use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use lilthq\craftliltplugin\services\ServiceInitializer;
+use yii\base\ActionEvent;
+use yii\base\Controller;
+use yii\base\Event;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
@@ -224,6 +231,48 @@ class Craftliltplugin extends Plugin
                 ['name' => $this->name]
             ),
             __METHOD__
+        );
+
+        Event::on(
+            EntriesController::class,
+            Controller::EVENT_BEFORE_ACTION,
+            static function (ActionEvent $event) {
+                if ($event->action->id !== 'edit-entry') {
+                    return $event;
+                }
+
+                $params = Craft::$app->request->resolve();
+                if (!isset($params[1]['entryId'])) {
+                    return $event;
+                }
+
+                $entryId = (int)$params[1]['entryId'];
+
+                $translations = Craftliltplugin::getInstance()->translationRepository->findInProgressByElementId(
+                    $entryId
+                );
+
+                if (!empty($translations)) {
+                    Craft::$app->getView()->registerAssetBundle(EditEntryAsset::class);
+
+                    $jobIds = array_map(static function (TranslationModel $translation) {
+                        return $translation->jobId;
+                    }, $translations);
+
+                    Craft::$app->view->registerJs(
+                        sprintf(
+                            'new CraftliltPlugin.EntryEditWarning(%s);',
+                            json_encode([
+                                'translationInProgress' => true,
+                                'entry' => $entryId,
+                                'jobs' => array_unique($jobIds)
+                            ], 4194304)
+                        )
+                    );
+                }
+
+                return $event;
+            }
         );
     }
 
