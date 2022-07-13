@@ -210,7 +210,9 @@ class Craftliltplugin extends Plugin
             $this->connectorKey = $connectorKey;
         }
 
-        Craft::$app->getView()->registerAssetBundle(CraftLiltPluginAsset::class);
+        if (Craft::$app->request->isCpRequest) {
+            Craft::$app->getView()->registerAssetBundle(CraftLiltPluginAsset::class);
+        }
 
         $this->setComponents([
             'serviceInitializer' => ServiceInitializer::class
