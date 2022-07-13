@@ -127,11 +127,8 @@ class SyncJobFromLiltConnectorHandler
 
         $translationId = $translationResponse->getId();
 
-        $targetLanguage = sprintf(
-            '%s-%s',
-            $translationResponse->getTrgLang(),
-            $translationResponse->getTrgLocale()
-        );
+
+        $targetLanguage = $this->getTargetLanguage($translationResponse);
 
         foreach ($content as $elementId => $elementContent) {
             $element = Craft::$app->elements->getElementById(
@@ -185,5 +182,18 @@ class SyncJobFromLiltConnectorHandler
 
             $translationRecord->save();
         }
+    }
+
+    private function getTargetLanguage(TranslationResponse $translationResponse): string
+    {
+        if (empty($translationResponse->getTrgLocale())) {
+            return $translationResponse->getTrgLang();
+        }
+
+        return sprintf(
+            '%s-%s',
+            $translationResponse->getTrgLang(),
+            $translationResponse->getTrgLocale()
+        );
     }
 }
