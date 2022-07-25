@@ -44,4 +44,8 @@ window.CraftliltPlugin = {
   },
 };
 
-$(document).ready(function() { CraftliltPlugin.init(); });
+$(document).ready(function() {
+  if(Craft.elementIndex !== undefined) {
+    CraftliltPlugin.init();
+  }
+});

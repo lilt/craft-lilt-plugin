@@ -271,14 +271,62 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
 
     this.$selectedVersions.remove();
   },
+  displayWarning: function(message) {
+    const container = jQuery('<div />').
+        addClass('meta').
+        addClass('read-only').
+        addClass('warning');
+
+    const label = jQuery('<label />').
+        html(message);
+
+    container.append(label);
+
+    jQuery('#details-container #details').prepend(container);
+  },
   onUpdateElements: function() {
     this.preloadVersions();
 
     const elements = Craft.elementIndex.view.getAllElements().get();
 
+    let warningDisplayed = false;
     elements.forEach((element) => {
-      const elementId = $(element).data('id');
+      const elementId = jQuery(element).data('id');
       let hiddenInput = $(`#hidden-input-element-draft-${elementId}`);
+
+      if(
+          this.$container.data('job-status') === 'new'
+          || this.$container.data('job-status') === 'draft'
+      ) {
+        const title = jQuery(element).find('th');
+        const titleDiv = jQuery(element).find('th div');
+
+        const hasWarning = (titleDiv.length > 0 && titleDiv.data('has-active-lilt-job') === 1);
+
+        if (hasWarning) {
+          if (!warningDisplayed) {
+            this.displayWarning(
+                'Some of entries are already in other translation job. Possible unexpected behaviour here. <br /><br /> ' +
+                'Please check all entries with <span class="info warning"></span> sign before submit');
+            warningDisplayed = true;
+          }
+
+          const url = titleDiv.data('active-lilt-job-url');
+
+          const span = jQuery(
+              '<span style="padding: 7px" class="info warning"></span>');
+
+          span.on('click', function() {
+            new Garnish.HUD(span,
+                `This entry already in translation. See <a href="${url}" target="_blank">list of jobs</a>`,
+                {
+                  orientations: ['top', 'bottom', 'right', 'left'],
+                });
+          });
+
+          title.append(span);
+        }
+      }
 
       if (hiddenInput.length > 0) {
         const value = {

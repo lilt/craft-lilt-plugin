@@ -23,6 +23,29 @@ class TranslationRepository
         );
     }
 
+    public function findInProgressByElementId(int $elementId): array
+    {
+        $translationRecords = TranslationRecord::findAll([
+            'elementId' => $elementId,
+            'status' => [
+                TranslationRecord::STATUS_IN_PROGRESS,
+                TranslationRecord::STATUS_NEW,
+                TranslationRecord::STATUS_READY_TO_PUBLISH,
+                TranslationRecord::STATUS_READY_FOR_REVIEW,
+                TranslationRecord::STATUS_FAILED,
+            ]
+        ]);
+
+        return array_map(
+            static function (TranslationRecord $translationRecord) {
+                return new TranslationModel(
+                    $translationRecord->toArray()
+                );
+            },
+            $translationRecords
+        );
+    }
+
     public function findRecordByTranslatedDraftId(int $translatedDraftId): ?TranslationRecord
     {
         return TranslationRecord::findOne(['translatedDraftId' => $translatedDraftId]);
