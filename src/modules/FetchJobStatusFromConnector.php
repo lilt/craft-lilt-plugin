@@ -73,6 +73,8 @@ class FetchJobStatusFromConnector extends BaseJob
 
             if ($liltJob->getStatus() === JobResponse::STATUS_FAILED) {
                 $jobRecord->status = Job::STATUS_FAILED;
+            } elseif ($liltJob->getStatus() === JobResponse::STATUS_CANCELED) {
+                $jobRecord->status = Job::STATUS_FAILED;
             }
 
             Queue::push(

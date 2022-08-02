@@ -86,7 +86,7 @@
     <hr/>
 
     {# Copy of vendor/craftcms/cms/src/templates/settings/sites/index.html with some adjustments #}
-    <div id="lilt-target-sites" class="field">
+    <div id="lilt-target-sites" class="field {{ isFormElementsReadOnly ? 'disabled no-opacity' : '' }}">
         <div class="heading">
             <label id="lilt-target-sites-table-container-label" for="lilt-target-sites-table-container">
                 Target site(s)
@@ -94,15 +94,15 @@
             </label>
         </div>
         <div id="lilt-target-sites-search" class="flex-grow texticon search icon clearable">
-            <input id="search" type="text" class="text fullwidth" autocomplete="off" placeholder="Search"
-                   aria-label="Search" data-np-checked="1">
+            <input id="search" type="text" class="text fullwidth {{isFormElementsReadOnly ? 'disabled no-opacity' : ''}}" autocomplete="off" placeholder="Search"
+                   aria-label="Search" data-np-checked="1" {{isFormElementsReadOnly ? 'disabled="true"' : ''}}">
             <div class="clear" title="Clear" aria-label="Clear"></div>
         </div>
         <div id="lilt-target-sites-table-container">
             <table id="sites" class="data fullwidth">
                 <thead>
-                <th class="checkbox-cell selectallcontainer" role="checkbox" aria-checked="false" scope="col">
-                    <div class="checkbox selectallcheckbox" title="Select" aria-label="Select"></div>
+                <th class="checkbox-cell selectallcontainer {{ isFormElementsReadOnly ? 'disabled no-opacity' : '' }}" role="checkbox" aria-checked="false" scope="col">
+                    <div class="checkbox selectallcheckbox {{ isFormElementsReadOnly ? 'disabled no-opacity' : '' }}" title="Select" aria-label="Select"></div>
                 </th>
                 <th scope="col">{{ "Name"|t('app') }}</th>
                 <th scope="col">{{ "Language"|t('app') }}</th>
@@ -116,7 +116,9 @@
                             {{ forms.checkbox({
                                 name: 'targetSiteIds[]',
                                 value: site.id,
-                                checked: site.id in element.targetSiteIds
+                                checked: site.id in element.targetSiteIds,
+                                readonly: isFormElementsReadOnly,
+                                class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
                             }) }}
                         </td>
                         <th scope="row" data-title="{{ 'Name'|t('app') }}">

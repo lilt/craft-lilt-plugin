@@ -34,3 +34,6 @@
 #lilt-preview-modal-body #lilt-modal-preview-tabs {
     height: calc(100% - 86px);
 }
+#lilt-modal-preview-tabs #content {
+    overflow: scroll;
+}

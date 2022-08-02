@@ -44,7 +44,15 @@ class ElementTranslatableContentApplier
 
         $content = $translationApplyCommand->getContent();
 
-        $draftElement = $this->createDraftElement($translationApplyCommand, $newAttributes);
+        $draftElement = Craft::$app->elements->getElementById(
+            $translationApplyCommand->getJob()->getElementVersionId(
+                $translationApplyCommand->getElement()->getId()
+            ),
+            'craft\elements\Entry',
+            Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage(
+                $translationApplyCommand->getTargetLanguage()
+            )
+        );
 
         if (!$draftElement) {
             //TODO: handle?

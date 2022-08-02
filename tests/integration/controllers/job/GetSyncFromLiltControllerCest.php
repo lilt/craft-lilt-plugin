@@ -45,6 +45,8 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
     /**
      * @throws \craft\errors\InvalidFieldException
      * @throws ModuleException
+     *
+     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
      */
     public function testSyncSuccess(IntegrationTester $I): void
     {

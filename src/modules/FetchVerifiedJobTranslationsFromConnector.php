@@ -131,7 +131,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
             );
         }
 
-        if ($statuses === ['failed']) {
+        if ($statuses === ['failed', 'canceled']) {
             $jobRecord->status = Job::STATUS_FAILED;
             $jobRecord->save();
             $this->markAsDone($queue);
@@ -140,6 +140,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
             $jobRecord->save();
             $this->markAsDone($queue);
         } else {
+            //TODO: can't be default, we need to reach all translations to status ready for review!
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
             $jobRecord->save();
             $this->markAsDone($queue);
