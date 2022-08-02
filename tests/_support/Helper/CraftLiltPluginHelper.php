@@ -34,13 +34,25 @@ class CraftLiltPluginHelper extends Module
 
         //TODO: DRY here?
         $elementIdsToTranslate = $job->getElementIds();
+
         foreach ($elementIdsToTranslate as $elementId) {
             $versionId = $job->getElementVersionId($elementId);
 
             $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
-            $content = Craftliltplugin::getInstance()
-                ->elementTranslatableContentProvider
-                ->provide($element);
+            $drafts = [];
+
+            foreach ($job->getTargetSiteIds() as $targetSiteId) {
+                $content = Craftliltplugin::getInstance()
+                    ->elementTranslatableContentProvider
+                    ->provide($element);
+                //Create draft with & update all values to source element
+                $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
+                    $element,
+                    $job->title,
+                    $job->sourceSiteId,
+                    $targetSiteId
+                );
+            }
 
             $createTranslationsResult = Craftliltplugin::getInstance()
                 ->createTranslationsHandler
@@ -48,7 +60,8 @@ class CraftLiltPluginHelper extends Module
                     $job,
                     $content,
                     $elementId,
-                    $versionId
+                    $versionId,
+                    $drafts
                 );
 
             if (!$createTranslationsResult) {
