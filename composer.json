@@ -1,5 +1,5 @@
 {
-  "name": "lilthq/craft-lilt-plugin",
+  "name": "lilt/craft-lilt-plugin",
   "description": "The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.",
   "type": "craft-plugin",
   "version": "1.0.0",

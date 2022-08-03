@@ -23,12 +23,12 @@ use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\assets\CraftLiltPluginAsset;
 use lilthq\craftliltplugin\assets\EditEntryAsset;
-use lilthq\craftliltplugin\assets\JobsAsset;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
+use lilthq\craftliltplugin\services\handlers\CreateDraftHandler;
 use lilthq\craftliltplugin\services\handlers\CreateJobHandler;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\EditJobHandler;
@@ -98,6 +98,7 @@ use yii\web\Response;
  * @property TranslationFailedHandler $translationFailedHandler
  * @property CreateTranslationsHandler $createTranslationsHandler
  * @property RefreshJobStatusHandler $refreshJobStatusHandler
+ * @property CreateDraftHandler $createDraftHandler
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin
