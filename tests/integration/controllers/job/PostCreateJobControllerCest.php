@@ -58,7 +58,7 @@ class PostCreateJobControllerCest extends AbstractIntegrationCest
                 'entries' => json_encode([$element->id]),
                 'title' => 'Awesome test job',
                 'sourceSite' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
-                'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+                'translationWorkflow' => strtolower(SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT),
                 'targetSiteIds' => '*',
             ]
         );
@@ -75,7 +75,7 @@ class PostCreateJobControllerCest extends AbstractIntegrationCest
 
         Assert::assertSame('Awesome test job', $job->title);
         Assert::assertSame([$element->id], $job->getElementIds());
-        Assert::assertSame(SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT, $job->translationWorkflow);
+        Assert::assertSame('instant', $job->translationWorkflow);
         Assert::assertSame(
             Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
             $job->sourceSiteId

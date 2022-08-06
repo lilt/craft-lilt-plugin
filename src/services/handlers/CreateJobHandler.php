@@ -36,7 +36,7 @@ class CreateJobHandler
         $job->targetSiteIds = $command->getTargetSitesIds();
         $job->elementIds = $command->getEntries();
         $job->versions = $command->getVersions();
-        $job->translationWorkflow = $command->getTranslationWorkflow();
+        $job->translationWorkflow = strtolower($command->getTranslationWorkflow());
         $job->draftId = null;
         $job->revisionId = null;
 

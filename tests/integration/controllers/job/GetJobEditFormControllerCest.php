@@ -158,6 +158,7 @@ class GetJobEditFormControllerCest
                 'translationWorkflowsOptions' => [
                     'instant' => 'Instant',
                     'verified' => 'Verified',
+                    'copy_source_text' => 'Copy source text'
                 ],
                 'availableSites' => [
                     0 => [
@@ -199,7 +200,7 @@ class GetJobEditFormControllerCest
                     'elementIds' => sprintf('["%d"]', $job->getElementIds()[0]),
                     'versions' => '[]',
                     'dueDate' => null,
-                    'translationWorkflow' => 'INSTANT',
+                    'translationWorkflow' => 'instant',
                     'tempId' => null,
                     'draftId' => null,
                     'revisionId' => null,
