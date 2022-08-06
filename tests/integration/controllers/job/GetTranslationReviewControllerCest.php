@@ -104,10 +104,18 @@ class GetTranslationReviewControllerCest
 
         Assert::assertSame($expected['template'], $actual['template']);
 
-        Assert::assertMatchesRegularExpression(
-            "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
-            $actual['variables']['previewUrl']
-        );
+        if(method_exists(Assert::class, 'assertMatchesRegularExpression')) {
+            Assert::assertMatchesRegularExpression(
+                "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                $actual['variables']['previewUrl']
+            );
+        }
+        else {
+            Assert::assertRegExp(
+                "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                $actual['variables']['previewUrl']
+            );
+        }
 
         Assert::assertSame($expected['variables']['originalUrl'], $actual['variables']['originalUrl']);
         Assert::assertNull($actual['templateMode']);
