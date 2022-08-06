@@ -140,7 +140,7 @@ class CraftLiltPluginHelper extends Module
 
             //TODO: maybe we can write our own assertion to be sure that ids are correct
             //we definitely can't ignore keys
-            $this->assertEqualsCanonicalizing(
+            $this->assertSame(
                 $expectedContent[$translationTargetLanguage],
                 $appliedContent
             );
@@ -226,7 +226,7 @@ class CraftLiltPluginHelper extends Module
 
         $translation->refresh();
 
-        $this->assertEmpty($translation->translatedDraftId);
+        $this->assertNotEmpty($translation->translatedDraftId);
         $this->assertEmpty($translation->targetContent);
         $this->assertSame($connectorTranslationId, $translation->connectorTranslationId);
         $this->assertSame(TranslationRecord::STATUS_FAILED, $translation->status);
@@ -295,7 +295,7 @@ class CraftLiltPluginHelper extends Module
 
         $translation->refresh();
 
-        $this->assertEmpty($translation->translatedDraftId);
+        $this->assertNotEmpty($translation->translatedDraftId);
         $this->assertEmpty($translation->targetContent);
         $this->assertEmpty($translation->connectorTranslationId);
         $this->assertSame(TranslationRecord::STATUS_IN_PROGRESS, $translation->status);

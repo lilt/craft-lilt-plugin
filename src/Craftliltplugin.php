@@ -44,7 +44,7 @@ use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
-use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
+use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
@@ -74,7 +74,7 @@ use yii\web\Response;
  *
  * @property ConnectorJobRepository $connectorJobRepository
  * @property ConnectorTranslationRepository $connectorTranslationRepository
- * @property ConnectorJobFileRepository $connectorJobsFileRepository
+ * @property ConnectorFileRepository $connectorJobsFileRepository
  * @property JobRepository $jobRepository
  * @property TranslationRepository $translationRepository
  * @property ConnectorConfigurationProvider $connectorConfigurationProvider

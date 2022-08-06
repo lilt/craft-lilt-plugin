@@ -47,8 +47,6 @@ class GetTranslationReviewControllerCest
      * @throws InvalidConfigException
      * @throws \Codeception\Exception\ModuleException
      * @throws \JsonException
-     *
-     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
      */
     public function testSuccess(IntegrationTester $I): void
     {
@@ -75,7 +73,6 @@ class GetTranslationReviewControllerCest
         ]);
         $translations[0]->targetContent = $this->getTargetContent();
         $translations[0]->save();
-
         $controller = $this->getController();
         $view = new ViewWrapper();
         $view->setControllerView($controller->view);
@@ -88,17 +85,30 @@ class GetTranslationReviewControllerCest
         $expected = $this->getExpected();
         $actual = json_decode($view->data, true, 512, 4194304);
 
+        $translations[0]->refresh();
+        $expectedTranslatedDraftId = $translations[0]->translatedDraftId;
+        Assert::assertNotNull($expectedTranslatedDraftId);
+
         foreach ($expected['variables']['translation'] as $key => $value) {
             if (is_array($value)) {
                 Assert::assertEqualsCanonicalizing($value, $actual['variables']['translation'][$key]);
                 continue;
             }
 
+            if ($key === 'translatedDraftId') {
+                Assert::assertSame($expectedTranslatedDraftId, $value);
+            }
+
             Assert::assertSame($value, $actual['variables']['translation'][$key]);
         }
 
         Assert::assertSame($expected['template'], $actual['template']);
-        Assert::assertSame($expected['variables']['previewUrl'], $actual['variables']['previewUrl']);
+
+        Assert::assertMatchesRegularExpression(
+            "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+            $actual['variables']['previewUrl']
+        );
+
         Assert::assertSame($expected['variables']['originalUrl'], $actual['variables']['originalUrl']);
         Assert::assertNull($actual['templateMode']);
 
@@ -110,10 +120,8 @@ class GetTranslationReviewControllerCest
         return [
             'template' => 'craft-lilt-plugin/_components/translation/_overview.twig',
             'variables' => [
-                'previewUrl' => 'http://test.craftcms.test:80/index.php?p=blog/es/first-entry-user-1',
                 'originalUrl' => 'http://$PRIMARY_SITE_URL/index.php?p=blog/first-entry-user-1',
                 'translation' => [
-                    'translatedDraftId' => null,
                     'sourceContent' => [
                         [
                             'neo' => [
@@ -233,13 +241,13 @@ class GetTranslationReviewControllerCest
                                 'offLabel' => 'The label text to display beside the lightswitch’s disabled state.'
                             ],
                             'colorSwatches' => [
-                                    'labels' =>
-                                        [
-                                            'a5e0af2bdf434712fd71358f5a2415b1' => 'first label',
-                                            'e7c9c88325b2a6a2476e2516094b6ba4' => 'second label',
-                                            'f13b85cdf5fdd245b03675f94d964946' => 'third label',
-                                        ],
-                                ],
+                                'labels' =>
+                                    [
+                                        'a5e0af2bdf434712fd71358f5a2415b1' => 'first label',
+                                        'e7c9c88325b2a6a2476e2516094b6ba4' => 'second label',
+                                        'f13b85cdf5fdd245b03675f94d964946' => 'third label',
+                                    ],
+                            ],
                         ]
                     ],
                     'targetContent' => $this->getTargetContent(),

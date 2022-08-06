@@ -46,7 +46,7 @@ use lilthq\craftliltplugin\services\providers\field\LinkitContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
 use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
-use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
+use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
@@ -228,7 +228,7 @@ class ServiceInitializer
                 ],
             'connectorJobsFileRepository' =>
                 [
-                    'class' => ConnectorJobFileRepository::class,
+                    'class' => ConnectorFileRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
                 ],
             'editJobHandler' =>

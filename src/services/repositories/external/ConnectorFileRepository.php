@@ -13,7 +13,7 @@ use Craft;
 use DateTimeInterface;
 use Exception;
 
-class ConnectorJobFileRepository extends AbstractConnectorExternalRepository
+class ConnectorFileRepository extends AbstractConnectorExternalRepository implements ConnectorFileRepositoryInterface
 {
     public function addFileToJob(
         int $jobId,

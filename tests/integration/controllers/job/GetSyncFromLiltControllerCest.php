@@ -45,8 +45,6 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
     /**
      * @throws \craft\errors\InvalidFieldException
      * @throws ModuleException
-     *
-     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
      */
     public function testSyncSuccess(IntegrationTester $I): void
     {
@@ -126,24 +124,29 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
             $responseBody
         );
 
+        $expectedSpanishBody = $this->getTranslatedContent($translations, $element->getId(), 'es-ES', 'es-ES: ');
+        $expectedGermanBody = $this->getTranslatedContent($translations, $element->getId(), 'de-DE', 'de-DE: ');
+        $expectedRussianBody = $this->getTranslatedContent($translations, $element->getId(), 'ru-RU', 'ru-RU: ');
+
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            $this->getExpectedContentEs($element, 'es-ES: ')
+            $expectedSpanishBody
         );
 
         $I->expectTranslationDownloadRequest(
             703696,
             HttpCode::OK,
-            $this->getExpectedContentDe($element, 'de-DE: ')
+            $expectedGermanBody
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            $this->getExpectedContentRu($element, 'ru-RU: ')
+            $expectedRussianBody
         );
 
+        $I->stopFollowingRedirects();
         $I->amOnPage(
             sprintf(
                 '?p=admin/%s/%d',
@@ -155,9 +158,10 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
         $I->assertTranslationsContentMatch(
             $translations,
             [
-                'es-ES' => $this->getExpectedContentEs($element),
-                'de-DE' => $this->getExpectedContentDe($element),
-                'ru-RU' => $this->getExpectedContentRu($element),
+                /** I18N functionality doesn't present in content body  */
+                'es-ES' => $this->getTranslatedContent($translations, $element->getId(), 'es-ES'),
+                'de-DE' => $this->getTranslatedContent($translations, $element->getId(), 'de-DE'),
+                'ru-RU' =>  $this->getTranslatedContent($translations, $element->getId(), 'ru-RU'),
             ]
         );
 
@@ -204,18 +208,25 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
         $I->seeResponseCodeIs(404);
     }
 
-    private function getExpectedContentDe(Entry $element, string $i18nPrefix = ''): array
+    private function getTranslatedContent(array $translations, int $elementId, string $target, string $i18n = ''): array
     {
-        return ExpectedElementContent::getExpectedBody($element, 'de-DE: ', $i18nPrefix);
-    }
+        /**
+         * @var TranslationRecord[][]
+         */
+        $translationsMapped = [];
+        foreach ($translations as $translation) {
+            $translationsMapped[$translation->elementId][Craftliltplugin::getInstance(
+            )->languageMapper->getLanguageBySiteId($translation->targetSiteId)] = $translation;
+        }
 
-    private function getExpectedContentEs(Entry $element, string $i18nPrefix = ''): array
-    {
-        return ExpectedElementContent::getExpectedBody($element, 'es-ES: ', $i18nPrefix);
-    }
-
-    private function getExpectedContentRu(Entry $element, string $i18nPrefix = ''): array
-    {
-        return ExpectedElementContent::getExpectedBody($element, 'ru-RU: ', $i18nPrefix);
+        return ExpectedElementContent::getExpectedBody(
+            Craft::$app->elements->getElementById(
+                $translationsMapped[$elementId][$target]->translatedDraftId,
+                null,
+                $translationsMapped[$elementId][$target]->targetSiteId
+            ),
+            $target . ': ',
+            $i18n
+        );
     }
 }

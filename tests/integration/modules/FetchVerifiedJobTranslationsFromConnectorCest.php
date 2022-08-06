@@ -7,6 +7,7 @@ namespace lilthq\craftliltplugintests\integration\modules;
 use Codeception\Util\HttpCode;
 use Craft;
 use craft\elements\Entry;
+use craft\errors\InvalidFieldException;
 use craft\helpers\Db;
 use IntegrationTester;
 use LiltConnectorSDK\Model\JobResponse;
@@ -127,8 +128,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
     /**
      * @param IntegrationTester $I
      * @return void
-     * @throws \craft\errors\InvalidFieldException
-     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
+     * @throws InvalidFieldException
      */
     public function testExecuteSuccess(IntegrationTester $I): void
     {
@@ -144,6 +144,15 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             TranslationResponse::STATUS_EXPORT_COMPLETE
         );
 
+        /**
+         * @var TranslationRecord[][]
+         */
+        $translationsMapped = [];
+        foreach ($translations as $translation) {
+            $translationsMapped[$translation->elementId][Craftliltplugin::getInstance(
+            )->languageMapper->getLanguageBySiteId($translation->targetSiteId)] = $translation;
+        }
+
         $I->expectTranslationsGetRequest(
             777,
             0,
@@ -155,19 +164,40 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody($element, 'es-ES')
+            ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationsMapped[$element->getId()]['es-ES']->translatedDraftId,
+                    null,
+                    $translationsMapped[$element->getId()]['es-ES']->targetSiteId
+                ),
+                'es-ES'
+            )
         );
 
         $I->expectTranslationDownloadRequest(
             703696,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody($element, 'de-DE')
+            ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationsMapped[$element->getId()]['de-DE']->translatedDraftId,
+                    null,
+                    $translationsMapped[$element->getId()]['de-DE']->targetSiteId
+                ),
+                'de-DE'
+            )
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody($element, 'ru-RU')
+            ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationsMapped[$element->getId()]['ru-RU']->translatedDraftId,
+                    null,
+                    $translationsMapped[$element->getId()]['ru-RU']->targetSiteId
+                ),
+                'ru-RU'
+            )
         );
 
         $I->runQueue(
@@ -179,9 +209,30 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
         );
 
         $I->assertTranslationsContentMatch($translations, [
-            'es-ES' => ExpectedElementContent::getExpectedBody($element, 'es-ES'),
-            'de-DE' => ExpectedElementContent::getExpectedBody($element, 'de-DE'),
-            'ru-RU' => ExpectedElementContent::getExpectedBody($element, 'ru-RU'),
+            'es-ES' => ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationsMapped[$element->getId()]['es-ES']->translatedDraftId,
+                    null,
+                    $translationsMapped[$element->getId()]['es-ES']->targetSiteId
+                ),
+                'es-ES'
+            ),
+            'de-DE' => ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationsMapped[$element->getId()]['de-DE']->translatedDraftId,
+                    null,
+                    $translationsMapped[$element->getId()]['de-DE']->targetSiteId
+                ),
+                'de-DE'
+            ),
+            'ru-RU' => ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationsMapped[$element->getId()]['ru-RU']->translatedDraftId,
+                    null,
+                    $translationsMapped[$element->getId()]['ru-RU']->targetSiteId
+                ),
+                'ru-RU'
+            ),
         ]);
 
         Assert::assertEmpty(
@@ -206,10 +257,33 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
     }
 
     /**
+     * @throws InvalidFieldException
+     */
+    private function getTranslatedContent(array $translations, int $elementId, string $target): array
+    {
+        /**
+         * @var TranslationRecord[][]
+         */
+        $translationsMapped = [];
+        foreach ($translations as $translation) {
+            $translationsMapped[$translation->elementId][Craftliltplugin::getInstance(
+            )->languageMapper->getLanguageBySiteId($translation->targetSiteId)] = $translation;
+        }
+
+        return ExpectedElementContent::getExpectedBody(
+            Craft::$app->elements->getElementById(
+                $translationsMapped[$elementId][$target]->translatedDraftId,
+                null,
+                $translationsMapped[$elementId][$target]->targetSiteId
+            ),
+            $target
+        );
+    }
+
+    /**
      * @param IntegrationTester $I
      * @return void
-     * @throws \craft\errors\InvalidFieldException
-     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
+     * @throws InvalidFieldException
      */
     public function testExecuteOneTranslationFailed(IntegrationTester $I): void
     {
@@ -218,7 +292,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
          * @var Job $job
          * @var TranslationRecord[] $translations
          */
-        [$element, $job,] = $this->prepareTestData($I);
+        [$element, $job, $translations] = $this->prepareTestData($I);
 
         $translationsResponseBody = $this->getTranslationsResponseBodyOneFailed(
             $element->getId()
@@ -232,22 +306,26 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $translationsResponseBody
         );
 
+        $expectedSpanishBody = $this->getTranslatedContent($translations, $element->getId(), 'es-ES');
+        $expectedGermanBody = $this->getTranslatedContent($translations, $element->getId(), 'de-DE');
+        $expectedRussianBody = $this->getTranslatedContent($translations, $element->getId(), 'ru-RU');
+
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody($element, 'es-ES')
+            $expectedSpanishBody
         );
 
         $I->expectTranslationDownloadRequest(
             703696,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody($element, 'de-DE')
+            $expectedGermanBody
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody($element, 'ru-RU')
+            $expectedRussianBody
         );
 
         $I->runQueue(
@@ -296,8 +374,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
     /**
      * @param IntegrationTester $I
      * @return void
-     * @throws \craft\errors\InvalidFieldException
-     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
+     * @throws InvalidFieldException
      */
     public function testExecuteOneTranslationUnexpectedResponse(IntegrationTester $I): void
     {
@@ -306,12 +383,15 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
          * @var Job $job
          * @var TranslationRecord[] $translations
          */
-        [$element, $job,] = $this->prepareTestData($I);
+        [$element, $job, $translations] = $this->prepareTestData($I);
 
         $translationsResponseBody = $this->getTranslationsResponseBody(
             $element->getId(),
             TranslationResponse::STATUS_EXPORT_COMPLETE
         );
+
+        $expectedSpanishBody = $this->getTranslatedContent($translations, $element->getId(), 'es-ES');
+        $expectedRussianBody = $this->getTranslatedContent($translations, $element->getId(), 'ru-RU');
 
         $I->expectTranslationsGetRequest(
             777,
@@ -324,13 +404,13 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody($element, 'es-ES')
+            $expectedSpanishBody
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody($element, 'ru-RU')
+            $expectedRussianBody
         );
 
         $I->expectTranslationDownloadRequest(
@@ -350,7 +430,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $job->id,
             $element->id,
             'es-ES',
-            ExpectedElementContent::getExpectedBody($element, 'es-ES'),
+            $expectedSpanishBody,
             703695
         );
 
@@ -358,7 +438,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
             $job->id,
             $element->id,
             'ru-RU',
-            ExpectedElementContent::getExpectedBody($element, 'ru-RU'),
+            $expectedRussianBody,
             703697
         );
 
@@ -384,7 +464,6 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
     /**
      * @param IntegrationTester $I
      * @return void
-     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
      */
     public function testExecuteInProgress(IntegrationTester $I): void
     {
