@@ -6,6 +6,7 @@ namespace lilthq\craftliltplugintests\acceptance;
 
 use Craft;
 use FunctionalTester;
+use PHPUnit\Framework\Assert;
 
 class JobsFunctionalCest
 {
@@ -51,7 +52,16 @@ class JobsFunctionalCest
         $I->see('Add an entry');
         $I->see('Source site');
         $I->see('Target site(s)');
-        $I->see('Translation(s) Workflow');
+
+        Assert::assertSame(
+            'Translation(s) Workflow',
+            $I->grabTextFrom('#translationWorkflow-label')
+        );
+
+        Assert::assertSame(
+            'Instant Verified Copy source text',
+            $I->grabTextFrom('select#translationWorkflow')
+        );
 
         $I->seeResponseCodeIs(200);
     }
