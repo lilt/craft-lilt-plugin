@@ -185,14 +185,21 @@ class Job extends Element
     public function isInstantFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(
-            SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
+            CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT
         );
     }
 
     public function isVerifiedFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(
-            SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
+            CraftliltpluginParameters::TRANSLATION_WORKFLOW_VERIFIED
+        );
+    }
+
+    public function isCopySourceTextFlow(): bool
+    {
+        return strtolower($this->translationWorkflow) === strtolower(
+            CraftliltpluginParameters::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT
         );
     }
 
@@ -456,9 +463,11 @@ class Job extends Element
         return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
     }
 
-    /**
-     * @return TranslationModel[]
-     */
+    public function getTranslationWorkflowLabel(): string
+    {
+        return Craft::t('craft-lilt-plugin', strtolower($this->translationWorkflow));
+    }
+
     public function getTranslations(): array
     {
         if (!empty($this->_elements)) {
@@ -522,8 +531,6 @@ class Job extends Element
         $actions[] = [
             'type' => Delete::class,
         ];
-
-        #$actions[] = LiltJobSetStatus::class;
 
         return $actions;
     }

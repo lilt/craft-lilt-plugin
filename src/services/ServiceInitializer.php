@@ -22,6 +22,7 @@ use lilthq\craftliltplugin\services\appliers\field\LinkitContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
+use lilthq\craftliltplugin\services\handlers\CopySourceTextHandler;
 use lilthq\craftliltplugin\services\handlers\CreateDraftHandler;
 use lilthq\craftliltplugin\services\handlers\CreateJobHandler;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
@@ -66,6 +67,7 @@ class ServiceInitializer
         $pluginInstance->setComponents([
             'createJobHandler' => CreateJobHandler::class,
             'sendJobToLiltConnectorHandler' => SendJobToLiltConnectorHandler::class,
+            'copySourceTextHandler' => CopySourceTextHandler::class,
             'syncJobFromLiltConnectorHandler' => SyncJobFromLiltConnectorHandler::class,
             'connectorConfigurationProvider' => ConnectorConfigurationProvider::class,
             'elementTranslatableContentProvider' => ElementTranslatableContentProvider::class,

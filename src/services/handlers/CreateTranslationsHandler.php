@@ -20,21 +20,21 @@ class CreateTranslationsHandler
      */
     public function __invoke(
         Job $job,
-        array $sourceContent,
+        array $sourceContents,
         int $elementId,
         int $versionId,
         array $drafts
     ): bool {
         $translationRecords = array_values(
             array_map(
-                static function (int $targetSiteId) use ($job, $sourceContent, $elementId, $versionId, $drafts) {
+                static function (int $targetSiteId) use ($job, $sourceContents, $elementId, $versionId, $drafts) {
                     return new TranslationRecord([
                         'jobId' => $job->id,
                         'elementId' => $elementId,
                         'versionId' => $versionId,
                         'sourceSiteId' => $job->sourceSiteId,
                         'targetSiteId' => $targetSiteId,
-                        'sourceContent' => $sourceContent,
+                        'sourceContent' => $sourceContents[$targetSiteId],
                         'status' => TranslationRecord::STATUS_IN_PROGRESS,
                         'translatedDraftId' => $drafts[$targetSiteId]->getId()
                     ]);

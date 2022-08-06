@@ -40,9 +40,9 @@ class CraftLiltPluginHelper extends Module
 
             $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
             $drafts = [];
-
+            $contents = [];
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
-                $content = Craftliltplugin::getInstance()
+                $contents[$targetSiteId] = Craftliltplugin::getInstance()
                     ->elementTranslatableContentProvider
                     ->provide($element);
                 //Create draft with & update all values to source element
@@ -58,7 +58,7 @@ class CraftLiltPluginHelper extends Module
                 ->createTranslationsHandler
                 ->__invoke(
                     $job,
-                    $content,
+                    $contents,
                     $elementId,
                     $versionId,
                     $drafts

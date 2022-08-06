@@ -28,6 +28,7 @@ use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\appliers\ElementTranslatableContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
+use lilthq\craftliltplugin\services\handlers\CopySourceTextHandler;
 use lilthq\craftliltplugin\services\handlers\CreateDraftHandler;
 use lilthq\craftliltplugin\services\handlers\CreateJobHandler;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
@@ -99,6 +100,7 @@ use yii\web\Response;
  * @property CreateTranslationsHandler $createTranslationsHandler
  * @property RefreshJobStatusHandler $refreshJobStatusHandler
  * @property CreateDraftHandler $createDraftHandler
+ * @property CopySourceTextHandler $copySourceTextHandler
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin

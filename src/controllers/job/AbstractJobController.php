@@ -15,6 +15,7 @@ use Exception;
 use lilthq\craftliltplugin\assets\JobFormAsset;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
@@ -61,11 +62,16 @@ class AbstractJobController extends Controller
     ): Response {
         Craft::$app->getView()->registerAssetBundle(JobFormAsset::class);
 
-        $variables = [
-            //TODO: default from lilt api
-            'defaultTranslationWorkflow' => 'instant',
+        try {
+            $settingsResult = Craftliltplugin::getInstance()->connectorSettingsApi->servicesApiSettingsGetSettings();
+            $translationWorkflow = strtolower($settingsResult->getLiltTranslationWorkflow());
+        } catch (Exception $ex) {
+            $translationWorkflow = CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT;
+        }
 
-            'translationWorkflowsOptions' => ['instant' => 'Instant', 'verified' => 'Verified'],
+        $variables = [
+            'defaultTranslationWorkflow' => $translationWorkflow,
+            'translationWorkflowsOptions' => CraftliltpluginParameters::getTranslationWorkflows(),
             'availableSites' => Craftliltplugin::getInstance()->languageMapper->getAvailableSitesForFormField(),
             'targetSites' => Craftliltplugin::getInstance()->languageMapper->getSiteIdToLanguage(),
             'element' => $job,

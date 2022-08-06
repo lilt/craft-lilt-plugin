@@ -143,9 +143,10 @@ class SendJobToLiltConnectorHandler
     }
 
     /**
-     * @param JobResponse $jobLilt
      * @param Job $job
-     * @return JobRecord|null
+     * @param int $jobLiltId
+     * @param string $status
+     * @return void
      * @throws ElementNotFoundException
      * @throws Exception
      * @throws StaleObjectException
