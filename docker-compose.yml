@@ -8,6 +8,7 @@ services:
     tty: true
     volumes:
       - ./:/craft-lilt-plugin
+      - ./coverage:/opt/phpstorm-coverage
 
   mysql-test:
     image: mysql:${MYSQL_VERSION}

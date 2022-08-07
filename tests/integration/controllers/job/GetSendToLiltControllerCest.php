@@ -28,6 +28,9 @@ use lilthq\tests\fixtures\ExpectedElementContent;
 use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
 
+use function Arrayy\array_first;
+use function PHPUnit\Framework\assertEqualsCanonicalizing;
+
 class GetSendToLiltControllerCest extends AbstractIntegrationCest
 {
     public function _fixtures(): array
@@ -155,6 +158,123 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
         Assert::assertSame(Job::STATUS_IN_PROGRESS, $jobActual->status);
 
         $I->assertJobInQueue($expectQueueJob);
+    }
+
+    public function testSendCopySourceFlow(IntegrationTester $I): void
+    {
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $elementToTranslate = Entry::find()
+            ->where(['authorId' => 1])
+            ->orderBy(['id' => SORT_DESC])
+            ->one();
+
+        $targetSiteId = Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE');
+
+        $job = $I->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [(string)$elementToTranslate->id], //string to check type conversion
+            'targetSiteIds' => [$targetSiteId],
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => CraftliltpluginParameters::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT,
+            'versions' => [],
+            'authorId' => 1,
+        ]);
+
+        $I->stopFollowingRedirects();
+        $I->amOnPage(
+            sprintf(
+                '?p=admin/%s/%d',
+                CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH,
+                $job->id
+            )
+        );
+
+        $jobActual = Job::findOne(['id' => $job->id]);
+
+        $translations = array_map(static function (TranslationRecord $translationRecord) use ($elementToTranslate) {
+            $element = Craft::$app->elements->getElementById(
+                $translationRecord->translatedDraftId,
+                null,
+                $translationRecord->targetSiteId
+            );
+
+            $expectedBody = ExpectedElementContent::getExpectedBody($element);
+
+            Assert::assertSame(Job::STATUS_READY_FOR_REVIEW, $translationRecord->status);
+            Assert::assertSame($elementToTranslate->id, $translationRecord->versionId);
+            Assert::assertSame($elementToTranslate->id, $translationRecord->elementId);
+            Assert::assertEquals($expectedBody, $translationRecord->sourceContent);
+            Assert::assertSame(
+                Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+                $translationRecord->sourceSiteId
+            );
+
+            return [
+                'versionId' => $translationRecord->versionId,
+                'translatedDraftId' => $translationRecord->translatedDraftId,
+                'sourceSiteId' => $translationRecord->sourceSiteId,
+                'targetSiteId' => $translationRecord->targetSiteId,
+                'sourceContent' => $translationRecord->sourceContent,
+                'targetContent' => $translationRecord->targetContent,
+                'status' => $translationRecord->status,
+                'connectorTranslationId' => $translationRecord->connectorTranslationId,
+            ];
+        }, TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $elementToTranslate->id]));
+
+        $languages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+            array_column($translations, 'targetSiteId')
+        );
+        sort($languages);
+
+        Assert::assertEquals(
+            ['de-DE'],
+            $languages
+        );
+
+        Assert::assertSame(Job::STATUS_READY_FOR_REVIEW, $jobActual->status);
+
+        $I->assertNotPushedToQueue(Craft::t('app', 'Lilt translations'));
+        $I->assertNotPushedToQueue(Craft::t('app', 'Updating lilt job'));
+
+
+        $sourceElement = Craft::$app->elements->getElementById($elementToTranslate->id, null, $targetSiteId);
+        $targetElement = Craft::$app->elements->getElementById(
+            $translations[0]['translatedDraftId'],
+            null,
+            $targetSiteId
+        );
+
+        $expectedSourceBody = array_first(ExpectedElementContent::getExpectedBody($sourceElement));
+        $expectedTargetBody = array_first(ExpectedElementContent::getExpectedBody($targetElement));
+
+        $this->ksort_recursive($expectedSourceBody);
+        $this->ksort_recursive($expectedTargetBody);
+
+        $actual = array_first($translations[0]['targetContent']);
+        $this->ksort_recursive($actual);
+
+        Assert::assertEquals($expectedTargetBody, $actual);
+        Assert::assertEqualsCanonicalizing($expectedSourceBody, $actual);
+    }
+
+    /**
+     * @param mixed $array
+     * @return bool
+     */
+    private function ksort_recursive(&$array): bool
+    {
+        if (!is_array($array)) {
+            return false;
+        }
+
+        ksort($array);
+
+        foreach ($array as $index => $value) {
+            $this->ksort_recursive($array[$index]);
+        }
+        return true;
     }
 
     /**
