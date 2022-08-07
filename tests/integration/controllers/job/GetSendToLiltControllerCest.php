@@ -10,9 +10,12 @@ use Codeception\Exception\ModuleException;
 use Codeception\Util\HttpCode;
 use Craft;
 use craft\base\Element;
+use craft\db\Query;
+use craft\db\Table;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
+use craft\queue\Queue;
 use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
@@ -235,8 +238,24 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
 
         Assert::assertSame(Job::STATUS_READY_FOR_REVIEW, $jobActual->status);
 
-        $I->assertNotPushedToQueue(Craft::t('app', 'Lilt translations'));
-        $I->assertNotPushedToQueue(Craft::t('app', 'Updating lilt job'));
+        // TODO: check when craft\test\Craft::assertNotPushedToQueue was added
+        // [RuntimeException] Call to undefined method IntegrationTester::assertNotPushedToQueue
+        if (\Craft::$app->getQueue() instanceof Queue) {
+            Assert::assertFalse(
+                (new Query())
+                    ->select(['id'])
+                    ->where(['description' => Craft::t('app', 'Lilt translations')])
+                    ->from([Table::QUEUE])
+                    ->exists()
+            );
+            Assert::assertFalse(
+                (new Query())
+                    ->select(['id'])
+                    ->where(['description' => Craft::t('app', 'Updating lilt job')])
+                    ->from([Table::QUEUE])
+                    ->exists()
+            );
+        }
 
 
         $sourceElement = Craft::$app->elements->getElementById($elementToTranslate->id, null, $targetSiteId);
