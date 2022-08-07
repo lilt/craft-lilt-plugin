@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class TableContentApplier extends AbstractContentApplier implements ApplierInterface
@@ -36,15 +37,14 @@ class TableContentApplier extends AbstractContentApplier implements ApplierInter
         if (isset($content[$field->handle]['columns'])) {
             $columns = $content[$field->handle]['columns'];
             foreach ($field->columns as $column) {
-                $translation = [
-                    'target' => $columns[$column['handle']],
-                    'source' => $column['heading'],
-                    'sourceSiteId' => $command->getSourceSiteId(),
-                    'targetSiteId' => $command->getTargetSiteId(),
-                ];
+                $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
+                    $command->getSourceSiteId(),
+                    $command->getTargetSiteId(),
+                    $column['heading'],
+                    $columns[$column['handle']]
+                );
 
-                $translation['hash'] = md5(json_encode($translation));
-                $i18NRecords[$translation['hash']] = $this->createI18NRecord($translation);
+                $i18NRecords[$i18NRecord->generateHash()] = $i18NRecord;
             }
         }
 
