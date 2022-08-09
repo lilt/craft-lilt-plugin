@@ -46,7 +46,8 @@
                     </td>
                 </tr>
                 {% for key,value in translation.sourceContentValues %}
-                    {% if value is empty and translation.targetContentValues[key] is empty %}
+                    {% set targetTranslationValue = translation.targetContentValues[key] ?? null %}
+                    {% if value is empty and targetTranslationValue %}
                     {% else %}
                         <tr style="font-size: 10px;padding: 0px">
                             <td style="color: grey">
