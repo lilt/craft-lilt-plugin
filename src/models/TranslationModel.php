@@ -79,29 +79,23 @@ class TranslationModel extends Model
 
     public function getElementUrl(): ?string
     {
-        $draft = null;
-
-        if (!empty($this->translatedDraftId)) {
-            $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
-        }
-
-        if (!$draft) {
-            $draft = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
-        }
-
-        return $draft->getUrl();
-
-        /* TODO: not working for default site? We can't preview disabled entries for default site?
-        $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
-        $element = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
+        $element = null;
 
         $preview = [
-            'elementType' => get_class($element),
-            'sourceId' => $element->getId(),
-            'draftId' => $draft->draftId,
+            'elementType' => 'craft\elements\Entry',
+            'sourceId' => $this->elementId,
             'siteId' => $this->targetSiteId,
-            'template' => 'blog/_entry',
         ];
+
+        if (!empty($this->versionId)) {
+            $preview['draftId'] = $this->versionId;
+            $element = Craft::$app->elements->getElementById($this->versionId, null, $this->sourceSiteId);
+        }
+
+        if (!$element) {
+            //Let's try to get original if draft not found
+            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
+        }
 
         $token = Craft::$app->tokens->createToken([
             "preview/preview",
@@ -112,7 +106,6 @@ class TranslationModel extends Model
             $element->getUrl(),
             ['token' => $token]
         );
-        */
     }
 
     public function getLastDeliveryFormatted(): ?string

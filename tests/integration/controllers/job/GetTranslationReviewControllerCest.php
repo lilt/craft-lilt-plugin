@@ -106,18 +106,25 @@ class GetTranslationReviewControllerCest
 
         if(method_exists(Assert::class, 'assertMatchesRegularExpression')) {
             Assert::assertMatchesRegularExpression(
+                "/^http:\/\/\\\$PRIMARY_SITE_URL\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                $actual['variables']['originalUrl']
+            );
+            Assert::assertMatchesRegularExpression(
                 "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
                 $actual['variables']['previewUrl']
             );
         }
         else {
             Assert::assertRegExp(
+                "/^http:\/\/\\\$PRIMARY_SITE_URL\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                $actual['variables']['originalUrl']
+            );
+            Assert::assertRegExp(
                 "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
                 $actual['variables']['previewUrl']
             );
         }
 
-        Assert::assertSame($expected['variables']['originalUrl'], $actual['variables']['originalUrl']);
         Assert::assertNull($actual['templateMode']);
 
         Assert::assertSame(HttpCode::OK, $response->getStatusCode());
@@ -128,7 +135,6 @@ class GetTranslationReviewControllerCest
         return [
             'template' => 'craft-lilt-plugin/_components/translation/_overview.twig',
             'variables' => [
-                'originalUrl' => 'http://$PRIMARY_SITE_URL/index.php?p=blog/first-entry-user-1',
                 'translation' => [
                     'sourceContent' => [
                         [
