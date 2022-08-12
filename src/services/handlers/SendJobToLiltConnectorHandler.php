@@ -79,7 +79,9 @@ class SendJobToLiltConnectorHandler
                     $versionId,
                     $jobLilt->getId(),
                     Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
-                    $targetLanguages,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+                        [$targetSiteId]
+                    ),
                     null //TODO: $job->dueDate is not in use
                 );
 

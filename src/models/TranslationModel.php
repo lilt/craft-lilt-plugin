@@ -79,28 +79,31 @@ class TranslationModel extends Model
 
     public function getElementUrl(): ?string
     {
-        $element = null;
-
-        $preview = [
-            'elementType' => 'craft\elements\Entry',
-            'sourceId' => $this->elementId,
-            'siteId' => $this->targetSiteId,
-        ];
-
-        if (!empty($this->versionId)) {
-            $preview['draftId'] = $this->versionId;
-            $element = Craft::$app->elements->getElementById($this->versionId, null, $this->sourceSiteId);
-        }
-
-        if (!$element) {
-            //Let's try to get original if draft not found
+        if ($this->versionId === null) {
             $element = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
+
+            if ($element === null) {
+                //element removed, we don't have any link
+                return null;
+            }
+
+            return $element->getUrl();
         }
+
+        $element = Craft::$app->elements->getElementById($this->versionId, null, $this->sourceSiteId);
 
         $token = Craft::$app->tokens->createToken([
             "preview/preview",
-            $preview
+            [
+                'elementType' => get_class($element),
+                'sourceId' => $element->getCanonicalId(),
+                'draftId' => $element->draftId,
+                'siteId' => $this->sourceSiteId,
+            ]
         ]);
+        if ($element->getUrl() === null) {
+            return null;
+        }
 
         return UrlHelper::urlWithParams(
             $element->getUrl(),

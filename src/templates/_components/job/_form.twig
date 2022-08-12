@@ -93,6 +93,24 @@
                 <span class="required"></span>
             </label>
         </div>
+        {% if element is defined and element.getErrors('targetSiteIds') | length %}
+            <div class="input ltr errors" style="margin-bottom: 5px">
+                {% tag 'ul' with {
+                    id: id ?? false,
+                    class: 'errors',
+                } %}
+                    {% for error in element.getErrors('targetSiteIds') %}
+                        <li>
+                            {{ tag('span', {
+                                class: 'visually-hidden',
+                                text: 'Error:'|t('app'),
+                            }) }}
+                            {{ error|e|md(inlineOnly=true)|replace('/&amp;(\\w+);/', '&$1;')|raw }}
+                        </li>
+                    {% endfor %}
+                {% endtag %}
+            </div>
+        {% endif %}
         <div id="lilt-target-sites-search" class="flex-grow texticon search icon clearable">
             <input id="search" type="text" class="text fullwidth {{isFormElementsReadOnly ? 'disabled no-opacity' : ''}}" autocomplete="off" placeholder="Search"
                    aria-label="Search" data-np-checked="1" {{isFormElementsReadOnly ? 'disabled="true"' : ''}}">

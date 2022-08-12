@@ -83,18 +83,6 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             'jobId' => $job->id
         ]);
 
-        $expectedUrl = sprintf(
-            '/api/v1.0/jobs/1000/files?name=%s'
-            . '&srclang=en-US'
-            . '&trglang=de-DE'
-            . '&trglang=es-ES'
-            . '&trglang=ru-RU' .
-            '&due=',
-            urlencode(
-                sprintf('element_%d.json+html', $elementToTranslate->getId())
-            )
-        );
-
         $I->expectJobCreateRequest(
             [
                 'project_prefix' => 'Awesome test job',
@@ -104,7 +92,38 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             ['id' => 1000,]
         );
 
-        $I->expectJobTranslationsRequest($expectedUrl, [], HttpCode::OK);
+        $expectedUrlDe = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=de-DE'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $elementToTranslate->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlDe, [], HttpCode::OK);
+
+        $expectedUrlRu = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=ru-RU'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $elementToTranslate->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlRu, [], HttpCode::OK);
+
+        $expectedUrlEs = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=es-ES'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $elementToTranslate->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlEs, [], HttpCode::OK);
 
         $I->expectJobStartRequest(1000, HttpCode::OK);
 
@@ -315,19 +334,39 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             ['id' => 1000,]
         );
 
-        $expectedUrl = sprintf(
+
+        $expectedUrlDe = sprintf(
             '/api/v1.0/jobs/1000/files?name=%s'
             . '&srclang=en-US'
             . '&trglang=de-DE'
-            . '&trglang=es-ES'
-            . '&trglang=ru-RU' .
-            '&due=',
+            . '&due=',
             urlencode(
                 sprintf('element_%d.json+html', $element->getId())
             )
         );
+        $I->expectJobTranslationsRequest($expectedUrlDe, [], HttpCode::INTERNAL_SERVER_ERROR);
 
-        $I->expectJobTranslationsRequest($expectedUrl, [], HttpCode::INTERNAL_SERVER_ERROR);
+        $expectedUrlRu = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=ru-RU'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $element->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlRu, [], HttpCode::INTERNAL_SERVER_ERROR);
+
+        $expectedUrlEs = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=es-ES'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $element->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlEs, [], HttpCode::INTERNAL_SERVER_ERROR);
 
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
