@@ -23,6 +23,10 @@ class LightswitchContentApplier extends AbstractContentApplier implements Applie
         }
 
         foreach ($content[$fieldKey] as $attribute => $translation) {
+            if (empty($field->$attribute) || empty($translation)) {
+                continue;
+            }
+
             $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
                 $command->getSourceSiteId(),
                 $command->getTargetSiteId(),

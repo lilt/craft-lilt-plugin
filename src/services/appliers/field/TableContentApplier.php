@@ -37,6 +37,10 @@ class TableContentApplier extends AbstractContentApplier implements ApplierInter
         if (isset($content[$field->handle]['columns'])) {
             $columns = $content[$field->handle]['columns'];
             foreach ($field->columns as $column) {
+                if (empty($column['heading']) || empty($columns[$column['handle']])) {
+                    continue;
+                }
+
                 $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
                     $command->getSourceSiteId(),
                     $command->getTargetSiteId(),

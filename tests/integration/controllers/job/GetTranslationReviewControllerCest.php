@@ -91,7 +91,10 @@ class GetTranslationReviewControllerCest
 
         foreach ($expected['variables']['translation'] as $key => $value) {
             if (is_array($value)) {
-                Assert::assertEqualsCanonicalizing($value, $actual['variables']['translation'][$key]);
+                $expectedVariableValue = $this->ksort_recursive($value);
+                $actualVariableValue = $this->ksort_recursive($actual['variables']['translation'][$key]);
+
+                Assert::assertEqualsCanonicalizing($expectedVariableValue, $actualVariableValue);
                 continue;
             }
 
@@ -104,7 +107,7 @@ class GetTranslationReviewControllerCest
 
         Assert::assertSame($expected['template'], $actual['template']);
 
-        if(method_exists(Assert::class, 'assertMatchesRegularExpression')) {
+        if (method_exists(Assert::class, 'assertMatchesRegularExpression')) {
             Assert::assertMatchesRegularExpression(
                 "/^http:\/\/\\\$PRIMARY_SITE_URL\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
                 $actual['variables']['originalUrl']
@@ -113,8 +116,7 @@ class GetTranslationReviewControllerCest
                 "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
                 $actual['variables']['previewUrl']
             );
-        }
-        else {
+        } else {
             Assert::assertRegExp(
                 "/^http:\/\/\\\$PRIMARY_SITE_URL\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
                 $actual['variables']['originalUrl']
@@ -128,6 +130,24 @@ class GetTranslationReviewControllerCest
         Assert::assertNull($actual['templateMode']);
 
         Assert::assertSame(HttpCode::OK, $response->getStatusCode());
+    }
+
+    /**
+     * @param mixed $array
+     * @return bool
+     */
+    private function ksort_recursive(&$array): bool
+    {
+        if (!is_array($array)) {
+            return false;
+        }
+
+        ksort($array);
+
+        foreach ($array as $index => $value) {
+            $this->ksort_recursive($array[$index]);
+        }
+        return true;
     }
 
     private function getExpected(): array

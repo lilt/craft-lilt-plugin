@@ -33,6 +33,10 @@ class BaseOptionFieldContentApplier extends AbstractContentApplier implements Ap
         $optionsTranslated = $content[$field->handle];
 
         foreach ($options as $option) {
+            if (empty($option->label) || empty($optionsTranslated[$option->value])) {
+                continue;
+            }
+
             $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
                 $command->getSourceSiteId(),
                 $command->getTargetSiteId(),

@@ -15,11 +15,17 @@ class LightswitchContentProvider extends AbstractContentProvider
     public function provide(ProvideContentCommand $provideContentCommand): array
     {
         $field = $provideContentCommand->getField();
+        $content = [];
 
-        return [
-            'onLabel' => $field->onLabel,
-            'offLabel' => $field->offLabel,
-        ];
+        if (!empty($field->onLabel)) {
+            $content['onLabel'] = $field->onLabel;
+        }
+
+        if (!empty($field->offLabel)) {
+            $content['offLabel'] = $field->offLabel;
+        }
+
+        return $content;
     }
 
     public function support(ProvideContentCommand $command): bool

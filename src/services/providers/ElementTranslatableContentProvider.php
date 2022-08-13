@@ -68,7 +68,7 @@ class ElementTranslatableContentProvider
                 $provideContentCommand
             );
 
-            if ($content[$fieldDataKey] === null) {
+            if (empty($content[$fieldDataKey])) {
                 unset($content[$fieldDataKey]);
             }
         }

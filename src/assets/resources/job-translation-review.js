@@ -148,7 +148,7 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
         'craft-lilt-plugin/job/get-translation-review/invoke',
         {params: {translationId: translationId}}).then(response => {
       this.$modalElementSpinner.hide();
-      this.$modalElementBody.append($(response.data.html));
+      this.$modalElementBody.append($(response.data));
 
       $('#lilt-modal-preview-tabs nav ul li a').on('click', function() {
         const idToShow = $(this).data('id');

@@ -47,6 +47,10 @@ class LinkitContentApplier extends AbstractContentApplier implements ApplierInte
 
         # Custom labels
         foreach ($fieldContent['customLabels'] as $key => $customLabel) {
+            if (empty($customLabel) || empty($command->getField()->types[$key]['customLabel'])) {
+                continue;
+            }
+
             $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
                 $command->getSourceSiteId(),
                 $command->getTargetSiteId(),
@@ -57,7 +61,7 @@ class LinkitContentApplier extends AbstractContentApplier implements ApplierInte
             $i18NRecords[$i18NRecord->generateHash()] = $i18NRecord;
         }
 
-        if (!empty($fieldContent['defaultText'])) {
+        if (!empty($fieldContent['defaultText']) && !empty($command->getField()->defaultText)) {
             # Default text
             $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
                 $command->getSourceSiteId(),

@@ -206,8 +206,6 @@ final class ExpectedElementContent
                             ],
                         ],
                     ],
-                    'supertable' => [
-                    ],
                 ],
             ],
         ];
