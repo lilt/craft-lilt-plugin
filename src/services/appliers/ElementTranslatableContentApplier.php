@@ -147,12 +147,14 @@ class ElementTranslatableContentApplier
 
     /**
      *
-     * TODO: move to single handler
+     * TODO: remove this
      *
      * @param TranslationApplyCommand $translationApplyCommand
      * @param array $newAttributes
      * @return ElementInterface|null
      * @throws Throwable
+     *
+     * @deprecated use \lilthq\craftliltplugin\services\handlers\CreateDraftHandler instead
      */
     public function createDraftElement(
         TranslationApplyCommand $translationApplyCommand,
@@ -171,6 +173,8 @@ class ElementTranslatableContentApplier
 
         //TODO: we also can copy draft, but then we have to fetch it with related site
         //$clonedEntry = Craft::$app->getElements()->duplicateElement
+
+//        $translationApplyCommand->getJob()->getAuthor()->getId()
 
         $draft = $this->draftRepository->createDraft(
             $createFrom,

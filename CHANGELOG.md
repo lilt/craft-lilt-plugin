@@ -9,8 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Remove entry translation drafts on job removal
 - Empty content now excluded from translation source body
 - Warning for job entries, when translation in progress (on job creation) 
-- Fixed empty I18N entry creation
-- Fixed translation preview issue (error while encoding of json)
+- Fixed: Empty I18N entry creation
+- Fixed: Translation preview issue (error while encoding of json)
+- Fixed: Hide warning when element index not exist
+- Fixed: Argument 2 passed to craft\services\Drafts::createDraft() must be of the type int, null given
 
 ## 0.3.1 - 2022-08-03
 ### Added
