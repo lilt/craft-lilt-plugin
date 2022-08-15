@@ -60,6 +60,7 @@ class SendJobToLiltConnectorHandler
                 continue;
             }
             $drafts = [];
+            $contents = [];
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
                 //Create draft with & update all values to source element
                 $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
@@ -69,16 +70,18 @@ class SendJobToLiltConnectorHandler
                     (int) $targetSiteId
                 );
 
-                $content = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
+                $contents[$targetSiteId] = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
                     $drafts[$targetSiteId]
                 );
 
                 $result = $this->createJobFile(
-                    $content,
+                    $contents[$targetSiteId],
                     $versionId,
                     $jobLilt->getId(),
                     Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
-                    $targetLanguages,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+                        [$targetSiteId]
+                    ),
                     null //TODO: $job->dueDate is not in use
                 );
 
@@ -91,7 +94,7 @@ class SendJobToLiltConnectorHandler
 
             $createTranslationsResult = Craftliltplugin::getInstance()->createTranslationsHandler->__invoke(
                 $job,
-                $content,
+                $contents,
                 $elementId,
                 $versionId,
                 $drafts
@@ -143,9 +146,10 @@ class SendJobToLiltConnectorHandler
     }
 
     /**
-     * @param JobResponse $jobLilt
      * @param Job $job
-     * @return JobRecord|null
+     * @param int $jobLiltId
+     * @param string $status
+     * @return void
      * @throws ElementNotFoundException
      * @throws Exception
      * @throws StaleObjectException

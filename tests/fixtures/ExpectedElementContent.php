@@ -10,6 +10,7 @@ use craft\base\Element;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
+use craft\feedme\base\ElementInterface;
 
 final class ExpectedElementContent
 {
@@ -31,7 +32,7 @@ final class ExpectedElementContent
     /**
      * @throws InvalidFieldException
      */
-    public static function getExpectedBody(Entry $element, string $prefix = '', string $i18nPrefix = ''): array
+    public static function getExpectedBody(\craft\base\ElementInterface $element, string $prefix = '', string $i18nPrefix = ''): array
     {
         $matrixContent = self::getExpectedMatrixContent($element, $prefix);
         $neoContent = self::getExpectedNeoContent($element, $prefix, $i18nPrefix);
@@ -204,8 +205,6 @@ final class ExpectedElementContent
                                 'columnHeading4' => $prefix . 'secondBlockType - table - Second row fourth value',
                             ],
                         ],
-                    ],
-                    'supertable' => [
                     ],
                 ],
             ],

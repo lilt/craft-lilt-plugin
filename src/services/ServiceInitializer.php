@@ -22,6 +22,7 @@ use lilthq\craftliltplugin\services\appliers\field\LinkitContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\RedactorPluginFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\TableContentApplier;
+use lilthq\craftliltplugin\services\handlers\CopySourceTextHandler;
 use lilthq\craftliltplugin\services\handlers\CreateDraftHandler;
 use lilthq\craftliltplugin\services\handlers\CreateJobHandler;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
@@ -45,7 +46,7 @@ use lilthq\craftliltplugin\services\providers\field\LinkitContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
 use lilthq\craftliltplugin\services\providers\field\RedactorPluginFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
-use lilthq\craftliltplugin\services\repositories\external\ConnectorJobFileRepository;
+use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
@@ -66,6 +67,7 @@ class ServiceInitializer
         $pluginInstance->setComponents([
             'createJobHandler' => CreateJobHandler::class,
             'sendJobToLiltConnectorHandler' => SendJobToLiltConnectorHandler::class,
+            'copySourceTextHandler' => CopySourceTextHandler::class,
             'syncJobFromLiltConnectorHandler' => SyncJobFromLiltConnectorHandler::class,
             'connectorConfigurationProvider' => ConnectorConfigurationProvider::class,
             'elementTranslatableContentProvider' => ElementTranslatableContentProvider::class,
@@ -226,7 +228,7 @@ class ServiceInitializer
                 ],
             'connectorJobsFileRepository' =>
                 [
-                    'class' => ConnectorJobFileRepository::class,
+                    'class' => ConnectorFileRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
                 ],
             'editJobHandler' =>

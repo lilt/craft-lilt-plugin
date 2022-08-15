@@ -79,40 +79,36 @@ class TranslationModel extends Model
 
     public function getElementUrl(): ?string
     {
-        $draft = null;
+        if ($this->versionId === null) {
+            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
 
-        if (!empty($this->translatedDraftId)) {
-            $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
+            if ($element === null) {
+                //element removed, we don't have any link
+                return null;
+            }
+
+            return $element->getUrl();
         }
 
-        if (!$draft) {
-            $draft = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
-        }
-
-        return $draft->getUrl();
-
-        /* TODO: not working for default site? We can't preview disabled entries for default site?
-        $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
-        $element = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
-
-        $preview = [
-            'elementType' => get_class($element),
-            'sourceId' => $element->getId(),
-            'draftId' => $draft->draftId,
-            'siteId' => $this->targetSiteId,
-            'template' => 'blog/_entry',
-        ];
+        $element = Craft::$app->elements->getElementById($this->versionId, null, $this->sourceSiteId);
 
         $token = Craft::$app->tokens->createToken([
             "preview/preview",
-            $preview
+            [
+                'elementType' => get_class($element),
+                'sourceId' => $element->getCanonicalId(),
+                'draftId' => $element->draftId,
+                'siteId' => $this->sourceSiteId,
+            ]
         ]);
+        if ($element->getUrl() === null) {
+            return null;
+        }
 
         return UrlHelper::urlWithParams(
             $element->getUrl(),
             ['token' => $token]
         );
-        */
     }
 
     public function getLastDeliveryFormatted(): ?string

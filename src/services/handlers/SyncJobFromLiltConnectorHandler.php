@@ -127,7 +127,6 @@ class SyncJobFromLiltConnectorHandler
 
         $translationId = $translationResponse->getId();
 
-
         $targetLanguage = $this->getTargetLanguage($translationResponse);
 
         foreach ($content as $elementId => $elementContent) {

@@ -6,6 +6,8 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
   $selectedVersions: null,
   $selectedEntries: null,
 
+  translationInProgressWarning: null,
+
   init: function(container, settings) {
     this.$container = $(container);
     this.setSettings(settings, Craft.Grid.defaults);
@@ -18,6 +20,7 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
       console.warn('Double-instantiating a job-form on an element');
       this.$container.data('job-form').destroy();
     }
+    this.createTranslationInProgressWarning();
     this.$container.data('job-form', this);
 
     this.$actionButton = $('#action-button', this.$container);
@@ -72,8 +75,8 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
         ? JSON.parse(alreadySelected)
         : [];
 
-    Craft.liltPluginModal = Craft.createElementSelectorModal(
-        'craft\\elements\\Entry', {
+    Craft.liltPluginModal = Craft.createLiltElementSelectorModal(
+        'lilthq\\craftliltplugin\\elements\\TranslateEntry', {
           storageKey: null,
           sources: null,
           elementIndex: null,
@@ -82,6 +85,7 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
           multiSelect: 1,
           disableOnSelect: true,
           disabledElementIds: elementIds,
+          showEntryVersions: false,
           onCancel: function() {},
           onSelect: (entries) => {
             const entiriesSelected = entries.map((entry) => {
@@ -125,6 +129,7 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
                   },
                   canHaveDrafts: true,
                   hideSidebar: true,
+                  showEntryVersions: true,
                   onSelectionChange: function() {
                     if (Craft.elementIndex.getSelectedElementIds().length > 0) {
                       $('#entries-remove-action').css('visibility', 'visible');
@@ -195,6 +200,7 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
           },
         },
         canHaveDrafts: true,
+        showEntryVersions: true,
         sources: '*',
         disabledElementIds: $(
             '#create-job-form #entries-to-translate .elements').
@@ -271,8 +277,12 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
 
     this.$selectedVersions.remove();
   },
-  displayWarning: function(message) {
-    const container = jQuery('<div />').
+  createTranslationInProgressWarning: function() {
+    const message =
+        'Some of entries are already in other translation job. Possible unexpected behaviour here. <br /><br /> ' +
+        'Please check all entries with <span class="info warning"></span> sign before submit';
+
+    this.translationInProgressWarning = jQuery('<div />').
         addClass('meta').
         addClass('read-only').
         addClass('warning');
@@ -280,41 +290,47 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
     const label = jQuery('<label />').
         html(message);
 
-    container.append(label);
+    this.translationInProgressWarning.append(label);
+    this.translationInProgressWarning.hide();
 
-    jQuery('#details-container #details').prepend(container);
+    jQuery('#details-container #details').
+        prepend(this.translationInProgressWarning);
   },
   onUpdateElements: function() {
     this.preloadVersions();
 
+    if (Craft.elementIndex === null) {
+      this.translationInProgressWarning.hide();
+
+      return;
+    }
+
+    if(Craft.elementIndex.view === null) {
+      return;
+    }
+
     const elements = Craft.elementIndex.view.getAllElements().get();
 
-    let warningDisplayed = false;
+    let hasActiveJobAttributeValues = [];
+
     elements.forEach((element) => {
       const elementId = jQuery(element).data('id');
       let hiddenInput = $(`#hidden-input-element-draft-${elementId}`);
 
-      if(
-          this.$container.data('job-status') === 'new'
-          || this.$container.data('job-status') === 'draft'
-      ) {
+      if (this.$container.data('job-status') === 'new' ||
+          this.$container.data('job-status') === 'draft') {
         const title = jQuery(element).find('th');
         const titleDiv = jQuery(element).find('th div');
 
-        const hasWarning = (titleDiv.length > 0 && titleDiv.data('has-active-lilt-job') === 1);
+        const hasWarning = (titleDiv.length > 0 &&
+            titleDiv.data('has-active-lilt-job') === 1);
+        hasActiveJobAttributeValues[jQuery(element).data('id')] = hasWarning;
 
         if (hasWarning) {
-          if (!warningDisplayed) {
-            this.displayWarning(
-                'Some of entries are already in other translation job. Possible unexpected behaviour here. <br /><br /> ' +
-                'Please check all entries with <span class="info warning"></span> sign before submit');
-            warningDisplayed = true;
-          }
-
           const url = titleDiv.data('active-lilt-job-url');
 
           const span = jQuery(
-              '<span style="padding: 7px" class="info warning"></span>');
+              '<span class="info warning lilt-warning-span-centred"></span>');
 
           span.on('click', function() {
             new Garnish.HUD(span,
@@ -337,6 +353,12 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
             val(btoa(JSON.stringify(value)));
       }
     });
+
+    if (hasActiveJobAttributeValues.indexOf(true) !== -1) {
+      this.translationInProgressWarning.show();
+    } else {
+      this.translationInProgressWarning.hide();
+    }
 
     // UPDATE VERSIONS
     $('#entries-to-translate .select-element-version').
@@ -413,6 +435,7 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
     }
 
     this.preloadVersions();
+    this.onUpdateElements();
   },
 });
 

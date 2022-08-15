@@ -10,9 +10,12 @@ use Codeception\Exception\ModuleException;
 use Codeception\Util\HttpCode;
 use Craft;
 use craft\base\Element;
+use craft\db\Query;
+use craft\db\Table;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
 use craft\errors\InvalidFieldException;
+use craft\queue\Queue;
 use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
@@ -22,10 +25,14 @@ use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
+use lilthq\craftliltplugintests\integration\stubs\ConnectorFileRepositoryStub;
 use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\ExpectedElementContent;
 use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
+
+use function Arrayy\array_first;
+use function PHPUnit\Framework\assertEqualsCanonicalizing;
 
 class GetSendToLiltControllerCest extends AbstractIntegrationCest
 {
@@ -49,21 +56,21 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
 
     /**
      * @throws ModuleException
-     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
+     * @throws InvalidConfigException
      */
     public function testCreateJob(IntegrationTester $I): void
     {
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
-        $element = Entry::find()
+        $elementToTranslate = Entry::find()
             ->where(['authorId' => 1])
             ->orderBy(['id' => SORT_DESC])
             ->one();
 
         $job = $I->createJob([
             'title' => 'Awesome test job',
-            'elementIds' => [(string)$element->id], //string to check type conversion
+            'elementIds' => [(string)$elementToTranslate->id], //string to check type conversion
             'targetSiteIds' => '*',
             'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
             'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
@@ -76,19 +83,6 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             'jobId' => $job->id
         ]);
 
-        $expectedUrl = sprintf(
-            '/api/v1.0/jobs/1000/files?name=%s'
-            . '&srclang=en-US'
-            . '&trglang=de-DE'
-            . '&trglang=es-ES'
-            . '&trglang=ru-RU' .
-            '&due=',
-            urlencode(
-                sprintf('element_%d.json+html', $element->getId())
-            )
-        );
-        $expectedBody = ExpectedElementContent::getExpectedBody($element);
-
         $I->expectJobCreateRequest(
             [
                 'project_prefix' => 'Awesome test job',
@@ -97,9 +91,43 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             200,
             ['id' => 1000,]
         );
-        $I->expectJobTranslationsRequest($expectedUrl, $expectedBody, HttpCode::OK);
+
+        $expectedUrlDe = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=de-DE'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $elementToTranslate->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlDe, [], HttpCode::OK);
+
+        $expectedUrlRu = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=ru-RU'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $elementToTranslate->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlRu, [], HttpCode::OK);
+
+        $expectedUrlEs = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=es-ES'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $elementToTranslate->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlEs, [], HttpCode::OK);
+
         $I->expectJobStartRequest(1000, HttpCode::OK);
 
+        $I->stopFollowingRedirects();
         $I->amOnPage(
             sprintf(
                 '?p=admin/%s/%d',
@@ -109,15 +137,24 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
         );
 
         $jobActual = Job::findOne(['id' => $job->id]);
-        $translations = array_map(function (TranslationRecord $translationRecord) use ($element, $expectedBody) {
+
+        $translations = array_map(static function (TranslationRecord $translationRecord) use ($elementToTranslate) {
+            $element = Craft::$app->elements->getElementById(
+                $translationRecord->translatedDraftId,
+                null,
+                $translationRecord->targetSiteId
+            );
+
+            $expectedBody = ExpectedElementContent::getExpectedBody($element);
+
             Assert::assertSame(Job::STATUS_IN_PROGRESS, $translationRecord->status);
-            Assert::assertSame($element->id, $translationRecord->versionId);
+            Assert::assertSame($elementToTranslate->id, $translationRecord->versionId);
+            Assert::assertSame($elementToTranslate->id, $translationRecord->elementId);
             Assert::assertEquals($expectedBody, $translationRecord->sourceContent);
             Assert::assertSame(
                 Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
                 $translationRecord->sourceSiteId
             );
-            Assert::assertNull($translationRecord->translatedDraftId);
 
             return [
                 'versionId' => $translationRecord->versionId,
@@ -128,7 +165,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
                 'status' => $translationRecord->status,
                 'connectorTranslationId' => $translationRecord->connectorTranslationId,
             ];
-        }, TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id]));
+        }, TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $elementToTranslate->id]));
 
         $languages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
             array_column($translations, 'targetSiteId')
@@ -145,13 +182,144 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
         $I->assertJobInQueue($expectQueueJob);
     }
 
+    public function testSendCopySourceFlow(IntegrationTester $I): void
+    {
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $elementToTranslate = Entry::find()
+            ->where(['authorId' => 1])
+            ->orderBy(['id' => SORT_DESC])
+            ->one();
+
+        $targetSiteId = Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE');
+
+        $job = $I->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [(string)$elementToTranslate->id], //string to check type conversion
+            'targetSiteIds' => [$targetSiteId],
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => CraftliltpluginParameters::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT,
+            'versions' => [],
+            'authorId' => 1,
+        ]);
+
+        $I->stopFollowingRedirects();
+        $I->amOnPage(
+            sprintf(
+                '?p=admin/%s/%d',
+                CraftliltpluginParameters::JOB_SEND_TO_LILT_PATH,
+                $job->id
+            )
+        );
+
+        $jobActual = Job::findOne(['id' => $job->id]);
+
+        $translations = array_map(static function (TranslationRecord $translationRecord) use ($elementToTranslate) {
+            $element = Craft::$app->elements->getElementById(
+                $translationRecord->translatedDraftId,
+                null,
+                $translationRecord->targetSiteId
+            );
+
+            $expectedBody = ExpectedElementContent::getExpectedBody($element);
+
+            Assert::assertSame(Job::STATUS_READY_FOR_REVIEW, $translationRecord->status);
+            Assert::assertSame($elementToTranslate->id, $translationRecord->versionId);
+            Assert::assertSame($elementToTranslate->id, $translationRecord->elementId);
+            Assert::assertEquals($expectedBody, $translationRecord->sourceContent);
+            Assert::assertSame(
+                Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+                $translationRecord->sourceSiteId
+            );
+
+            return [
+                'versionId' => $translationRecord->versionId,
+                'translatedDraftId' => $translationRecord->translatedDraftId,
+                'sourceSiteId' => $translationRecord->sourceSiteId,
+                'targetSiteId' => $translationRecord->targetSiteId,
+                'sourceContent' => $translationRecord->sourceContent,
+                'targetContent' => $translationRecord->targetContent,
+                'status' => $translationRecord->status,
+                'connectorTranslationId' => $translationRecord->connectorTranslationId,
+            ];
+        }, TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $elementToTranslate->id]));
+
+        $languages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+            array_column($translations, 'targetSiteId')
+        );
+        sort($languages);
+
+        Assert::assertEquals(
+            ['de-DE'],
+            $languages
+        );
+
+        Assert::assertSame(Job::STATUS_READY_FOR_REVIEW, $jobActual->status);
+
+        // TODO: check when craft\test\Craft::assertNotPushedToQueue was added
+        // [RuntimeException] Call to undefined method IntegrationTester::assertNotPushedToQueue
+        if (\Craft::$app->getQueue() instanceof Queue) {
+            Assert::assertFalse(
+                (new Query())
+                    ->select(['id'])
+                    ->where(['description' => Craft::t('app', 'Lilt translations')])
+                    ->from([Table::QUEUE])
+                    ->exists()
+            );
+            Assert::assertFalse(
+                (new Query())
+                    ->select(['id'])
+                    ->where(['description' => Craft::t('app', 'Updating lilt job')])
+                    ->from([Table::QUEUE])
+                    ->exists()
+            );
+        }
+
+
+        $sourceElement = Craft::$app->elements->getElementById($elementToTranslate->id, null, $targetSiteId);
+        $targetElement = Craft::$app->elements->getElementById(
+            $translations[0]['translatedDraftId'],
+            null,
+            $targetSiteId
+        );
+
+        $expectedSourceBody = array_first(ExpectedElementContent::getExpectedBody($sourceElement));
+        $expectedTargetBody = array_first(ExpectedElementContent::getExpectedBody($targetElement));
+
+        $this->ksort_recursive($expectedSourceBody);
+        $this->ksort_recursive($expectedTargetBody);
+
+        $actual = array_first($translations[0]['targetContent']);
+        $this->ksort_recursive($actual);
+
+        Assert::assertEquals($expectedTargetBody, $actual);
+        Assert::assertEqualsCanonicalizing($expectedSourceBody, $actual);
+    }
+
+    /**
+     * @param mixed $array
+     * @return bool
+     */
+    private function ksort_recursive(&$array): bool
+    {
+        if (!is_array($array)) {
+            return false;
+        }
+
+        ksort($array);
+
+        foreach ($array as $index => $value) {
+            $this->ksort_recursive($array[$index]);
+        }
+        return true;
+    }
+
     /**
      * @throws ModuleException
-     * @skip TODO: We can't assert body since we don't know draft id. We need the way to know draft id!
      */
     public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I): void
     {
-        $I->
         $element = Entry::find()
             ->where(['authorId' => 1])
             ->orderBy(['id' => SORT_DESC])
@@ -166,20 +334,39 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             ['id' => 1000,]
         );
 
-        $expectedUrl = sprintf(
+
+        $expectedUrlDe = sprintf(
             '/api/v1.0/jobs/1000/files?name=%s'
             . '&srclang=en-US'
             . '&trglang=de-DE'
-            . '&trglang=es-ES'
-            . '&trglang=ru-RU' .
-            '&due=',
+            . '&due=',
             urlencode(
                 sprintf('element_%d.json+html', $element->getId())
             )
         );
-        $expectedBody = ExpectedElementContent::getExpectedBody($element);
+        $I->expectJobTranslationsRequest($expectedUrlDe, [], HttpCode::INTERNAL_SERVER_ERROR);
 
-        $I->expectJobTranslationsRequest($expectedUrl, $expectedBody, HttpCode::INTERNAL_SERVER_ERROR);
+        $expectedUrlRu = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=ru-RU'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $element->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlRu, [], HttpCode::INTERNAL_SERVER_ERROR);
+
+        $expectedUrlEs = sprintf(
+            '/api/v1.0/jobs/1000/files?name=%s'
+            . '&srclang=en-US'
+            . '&trglang=es-ES'
+            . '&due=',
+            urlencode(
+                sprintf('element_%d.json+html', $element->getId())
+            )
+        );
+        $I->expectJobTranslationsRequest($expectedUrlEs, [], HttpCode::INTERNAL_SERVER_ERROR);
 
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
@@ -194,6 +381,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             'authorId' => 1,
         ]);
 
+        $I->stopFollowingRedirects();
         $I->amOnPage(
             sprintf(
                 '?p=admin/%s/%d',
@@ -295,6 +483,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
             ],
         ];
     }
+
     private function getExpectedMatrixContent(Element $element, string $prefix = ''): array
     {
         /**
@@ -320,6 +509,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
 
         return $content;
     }
+
     private function getExpectedSupertableValue(Entry $element, string $prefix = ''): array
     {
         $content = [];
@@ -337,6 +527,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
 
         return $content;
     }
+
     private function getExpectedNeoContent(Entry $element, string $prefix = ''): array
     {
         /**

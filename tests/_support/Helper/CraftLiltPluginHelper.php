@@ -40,9 +40,9 @@ class CraftLiltPluginHelper extends Module
 
             $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
             $drafts = [];
-
+            $contents = [];
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
-                $content = Craftliltplugin::getInstance()
+                $contents[$targetSiteId] = Craftliltplugin::getInstance()
                     ->elementTranslatableContentProvider
                     ->provide($element);
                 //Create draft with & update all values to source element
@@ -58,7 +58,7 @@ class CraftLiltPluginHelper extends Module
                 ->createTranslationsHandler
                 ->__invoke(
                     $job,
-                    $content,
+                    $contents,
                     $elementId,
                     $versionId,
                     $drafts
@@ -140,7 +140,7 @@ class CraftLiltPluginHelper extends Module
 
             //TODO: maybe we can write our own assertion to be sure that ids are correct
             //we definitely can't ignore keys
-            $this->assertEqualsCanonicalizing(
+            $this->assertSame(
                 $expectedContent[$translationTargetLanguage],
                 $appliedContent
             );
@@ -226,7 +226,7 @@ class CraftLiltPluginHelper extends Module
 
         $translation->refresh();
 
-        $this->assertEmpty($translation->translatedDraftId);
+        $this->assertNotEmpty($translation->translatedDraftId);
         $this->assertEmpty($translation->targetContent);
         $this->assertSame($connectorTranslationId, $translation->connectorTranslationId);
         $this->assertSame(TranslationRecord::STATUS_FAILED, $translation->status);
@@ -295,7 +295,7 @@ class CraftLiltPluginHelper extends Module
 
         $translation->refresh();
 
-        $this->assertEmpty($translation->translatedDraftId);
+        $this->assertNotEmpty($translation->translatedDraftId);
         $this->assertEmpty($translation->targetContent);
         $this->assertEmpty($translation->connectorTranslationId);
         $this->assertSame(TranslationRecord::STATUS_IN_PROGRESS, $translation->status);

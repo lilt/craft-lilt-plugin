@@ -6,10 +6,10 @@ namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
 use craft\base\ElementInterface;
+use craft\elements\Entry;
 use craft\errors\ElementNotFoundException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
-use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use Throwable;
 use yii\base\Exception;
 
@@ -26,15 +26,27 @@ class CreateDraftHandler
         int $sourceSiteId,
         int $targetSiteId
     ): ElementInterface {
-
-        /** Element will be created from original one, we can't create draft from draft */
+        /**
+         * Element will be created from original one, we can't create draft from draft
+         * @var Entry $createFrom
+         */
         $createFrom = $element ? Craft::$app->elements->getElementById(
             $element->getCanonicalId()
         ) : $element;
 
+        $creatorId = Craft::$app->user->getId();
+        if ($creatorId === null) {
+            //TODO: it is not expected to reach, but it is possible. Investigation herer, why user id is null?
+            Craft::error(
+                "Can't get user from current session with Craft::\$app->user->getId(),"
+                . "please check you app configuration!"
+            );
+            $creatorId = $createFrom->authorId;
+        }
+
         $draft = Craft::$app->drafts->createDraft(
             $createFrom,
-            Craft::$app->user->getId(),
+            $creatorId ?? 0, //TODO: not best but one of the ways. Need to check why user can have nullable id?
             sprintf(
                 '%s [%s -> %s] ' . (new DateTime())->format('H:i:s'),
                 $jobTitle,

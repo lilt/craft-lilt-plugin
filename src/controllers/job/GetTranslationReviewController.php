@@ -47,8 +47,6 @@ class GetTranslationReviewController extends AbstractJobController
             ]
         );
 
-        return $this->asJson([
-            'html' => $render->data
-        ]);
+        return $this->asRaw($render->data);
     }
 }
