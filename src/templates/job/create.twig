@@ -23,6 +23,9 @@
 {% set formActions = [] %}
 {% set mainFormAttributes = {
     id: 'create-job-form',
+    data: {
+        'job-status': element.getStatus(),
+    },
 } %}
 
 {% set isUnpublishedDraft = true %}

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\elements;
 
+use Craft;
 use craft\elements\Entry;
 use craft\helpers\Cp;
 use craft\helpers\UrlHelper;
@@ -22,49 +23,52 @@ class TranslateEntry extends Entry
 {
     protected function tableAttributeHtml(string $attribute): string
     {
-        if ($attribute === 'drafts') {
-            if (!$this->hasEagerLoadedElements('drafts')) {
-                return '';
-            }
+        $showEntryVersions = Craft::$app->getRequest()->getParam('showEntryVersions', false);
 
-            $drafts = $this->getEagerLoadedElements('drafts');
-            $options = [
-                [
-                    'value' => base64_encode(json_encode(['elementId' => $this->id, 'draftId' => null])),
-                    'label' => 'Current',
-                    'data' => [
-                        'draft-id' => null,
-                        'draft-element-id' => $this->id
-                    ]
-                ]
-            ];
-
-            foreach ($drafts as $draft) {
-                $option = [];
-                $option['value'] = base64_encode(json_encode(['elementId' => $this->id, 'draftId' => $draft->id]));
-                $option['label'] = $draft->draftName;
-                $option['data'] = [
-                    'draft-id' => $draft->draftId,
-                    'draft-element-id' => $this->id
-                ];
-
-                $options[] = $option;
-            }
-
-            return Cp::selectFieldHtml([
-                'options' => $options,
-                'class' => 'select-element-version',
-                'data' => [
-                    'element-id' => $this->id,
-                ]
-            ]);
+        if (!$showEntryVersions || $attribute !== 'drafts') {
+            return parent::tableAttributeHtml($attribute);
         }
 
-        return parent::tableAttributeHtml($attribute);
+        if (!$this->hasEagerLoadedElements('drafts')) {
+            return '';
+        }
+
+        $drafts = $this->getEagerLoadedElements('drafts');
+        $options = [
+            [
+                'value' => base64_encode(json_encode(['elementId' => $this->id, 'draftId' => null])),
+                'label' => 'Current',
+                'data' => [
+                    'draft-id' => null,
+                    'draft-element-id' => $this->id
+                ]
+            ]
+        ];
+
+        foreach ($drafts as $draft) {
+            $option = [];
+            $option['value'] = base64_encode(json_encode(['elementId' => $this->id, 'draftId' => $draft->id]));
+            $option['label'] = $draft->draftName;
+            $option['data'] = [
+                'draft-id' => $draft->draftId,
+                'draft-element-id' => $this->id
+            ];
+
+            $options[] = $option;
+        }
+
+        return Cp::selectFieldHtml([
+            'options' => $options,
+            'class' => 'select-element-version',
+            'data' => [
+                'element-id' => $this->id,
+            ]
+        ]);
     }
 
-    public function getHtmlAttributes(string $context): array
-    {
+    public function getHtmlAttributes(
+        string $context
+    ): array {
         $attributes = parent::getHtmlAttributes($context);
         $translations = Craftliltplugin::getInstance()->translationRepository->findInProgressByElementId($this->id);
 
