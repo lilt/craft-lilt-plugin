@@ -300,6 +300,12 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
     this.preloadVersions();
 
     if (Craft.elementIndex === null) {
+      this.translationInProgressWarning.hide();
+
+      return;
+    }
+
+    if(Craft.elementIndex.view === null) {
       return;
     }
 
