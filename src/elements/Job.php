@@ -70,6 +70,14 @@ class Job extends Element
 
     public function beforeDelete(): bool
     {
+        $translationRecords = TranslationRecord::findAll(['jobId' => $this->id]);
+
+        array_map(static function (TranslationRecord $t) {
+            Craft::$app->elements->deleteElementById(
+                $t->translatedDraftId
+            );
+        }, $translationRecords);
+
         JobRecord::deleteAll(['id' => $this->id]);
         return parent::beforeDelete();
     }

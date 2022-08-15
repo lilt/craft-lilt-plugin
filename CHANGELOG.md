@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## 0.4.0 - 2022-08-03
 ### Added
+- Remove entry translation drafts on job removal
 - Empty content now excluded from translation source body
 - Warning for job entries, when translation in progress (on job creation) 
 - Fixed empty I18N entry creation
