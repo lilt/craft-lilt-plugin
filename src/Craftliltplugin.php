@@ -56,6 +56,7 @@ use yii\base\ActionEvent;
 use yii\base\Controller;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
+use yii\log\Logger;
 use yii\web\Response;
 
 /**

@@ -32,11 +32,13 @@ class ConnectorFileRepository extends AbstractConnectorExternalRepository implem
                 $dueDate,
                 $filePath
             );
-        } catch (Exception $e) {
-            Craft::error(
-                sprintf('Exception when calling JobsApi->servicesApiJobsAddFile: %s', $e->getMessage()),
-                __METHOD__
-            );
+        } catch (Exception $ex) {
+            Craft::error([
+                'message' => sprintf('Exception when calling JobsApi->servicesApiJobsAddFile: %s', $ex->getMessage()),
+                'exception_message' => $ex->getMessage(),
+                'exception_trace' => $ex->getTrace(),
+                'exception' => $ex,
+            ]);
 
             return false;
         }
