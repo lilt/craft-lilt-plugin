@@ -21,7 +21,7 @@ class TranslationFailedHandler
         TranslationResponse $translationResponse,
         Job $job,
         array $unprocessedTranslations
-    ): TranslationRecord {
+    ): ?TranslationRecord {
         $translationTargetLanguage = sprintf(
             '%s-%s',
             $translationResponse->getTrgLang(),
@@ -39,8 +39,16 @@ class TranslationFailedHandler
         );
 
         if (!$element) {
-            //TODO: handle when element not found?
-            throw new ElementNotFoundException();
+            Craft::error([
+                'message' => "Can't find element!",
+                'target_language' => $translationTargetLanguage,
+                'element_id' => $elementId,
+                'source_site_id' => $job->sourceSiteId,
+                'unprocessed_translations' => $unprocessedTranslations,
+                'translation_response' => $translationResponse->jsonSerialize(),
+            ]);
+
+            return null;
         }
 
         $targetSiteId = Craftliltplugin::getInstance()
@@ -49,16 +57,20 @@ class TranslationFailedHandler
         $parentElementId = $element->getCanonicalId() ?? $elementId;
 
         if (!isset($unprocessedTranslations[$parentElementId][$targetSiteId])) {
-            //TODO: handle when element not found?
-            throw new ElementNotFoundException();
+            Craft::error([
+                'message' => "Can't find translation!",
+                'target_language' => $translationTargetLanguage,
+                'parent_elementId' => $parentElementId,
+                'target_site_id' => $targetSiteId,
+                'unprocessed_translations' => $unprocessedTranslations,
+                'translation_response' => $translationResponse->jsonSerialize(),
+            ]);
+
+            return null;
         }
 
         //TODO: get rid of it, we can use repository here
         $translationRecord = $unprocessedTranslations[$parentElementId][$targetSiteId];
-
-//        if (empty($translationRecord->translatedDraftId)) {
-//            $translationRecord->translatedDraftId = $element->getId();
-//        }
 
         if (empty($translationRecord->connectorTranslationId)) {
             $translationRecord->connectorTranslationId = $translationResponse->getId();

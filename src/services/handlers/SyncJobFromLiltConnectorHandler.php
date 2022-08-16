@@ -66,17 +66,18 @@ class SyncJobFromLiltConnectorHandler
                 try {
                     $this->processTranslation($translationDto, $job);
                 } catch (Exception $ex) {
-                    $translationRecord = Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
+                    Craft::error([
+                        'message' => "Can't process translation!",
+                        'exception_message' => $ex->getMessage(),
+                        'exception_trace' => $ex->getTrace(),
+                        'exception' => $ex,
+                    ]);
+
+                    Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                         $translationDto,
                         $job,
                         $unprocessedTranslations
                     );
-
-                    $translationRecord->status = TranslationRecord::STATUS_FAILED;
-                    $translationRecord->lastDelivery = new DateTime();
-                    $translationRecord->save();
-
-                    Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
                 }
             }
         }

@@ -66,6 +66,13 @@ class AbstractJobController extends Controller
             $settingsResult = Craftliltplugin::getInstance()->connectorSettingsApi->servicesApiSettingsGetSettings();
             $translationWorkflow = strtolower($settingsResult->getLiltTranslationWorkflow());
         } catch (Exception $ex) {
+            Craft::error([
+                'message' => "Can't fetch translation workflow",
+                'exception_message' => $ex->getMessage(),
+                'exception_trace' => $ex->getTrace(),
+                'exception' => $ex,
+            ]);
+
             $translationWorkflow = strtolower(CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT);
         }
 

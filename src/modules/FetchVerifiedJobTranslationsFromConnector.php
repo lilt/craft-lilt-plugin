@@ -84,13 +84,18 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
                                 $job
                             );
                         } catch (Exception $ex) {
+                            Craft::error([
+                                'message' => "Can't fetch process translation!",
+                                'exception_message' => $ex->getMessage(),
+                                'exception_trace' => $ex->getTrace(),
+                                'exception' => $ex,
+                            ]);
+
                             Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                                 $translationResponse,
                                 $job,
                                 $unprocessedTranslations
                             );
-
-                            Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
 
                             return TranslationRecord::STATUS_FAILED;
                         }
