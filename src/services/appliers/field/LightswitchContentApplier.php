@@ -37,13 +37,7 @@ class LightswitchContentApplier extends AbstractContentApplier implements Applie
             $i18NRecords[$i18NRecord->generateHash()] = $i18NRecord;
         }
 
-        $originalElement = Craft::$app->elements->getElementById(
-            $command->getElement()->getCanonicalId(),
-            null,
-            $command->getSourceSiteId()
-        );
-
-        return ApplyContentResult::applied($i18NRecords, $originalElement->getFieldValue($field->handle));
+        return ApplyContentResult::applied($i18NRecords);
     }
 
     public function support(ApplyContentCommand $command): bool
