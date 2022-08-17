@@ -61,8 +61,7 @@ class ApplyContentCommand
      */
     public function setElement(ElementInterface $element): self
     {
-        //TODO: in use?
-        $element = $this->element;
+        $this->element = $element;
 
         return $this;
     }
