@@ -22,11 +22,7 @@ class TranslationFailedHandler
         Job $job,
         array $unprocessedTranslations
     ): ?TranslationRecord {
-        $translationTargetLanguage = sprintf(
-            '%s-%s',
-            $translationResponse->getTrgLang(),
-            $translationResponse->getTrgLocale()
-        );
+        $translationTargetLanguage = $this->getTargetLanguage($translationResponse);
 
         $elementId = Craftliltplugin::getInstance()
             ->connectorTranslationRepository
@@ -81,5 +77,18 @@ class TranslationFailedHandler
         $translationRecord->save();
 
         return $translationRecord;
+    }
+
+    private function getTargetLanguage(TranslationResponse $translationResponse): string
+    {
+        if (empty($translationResponse->getTrgLocale())) {
+            return $translationResponse->getTrgLang();
+        }
+
+        return sprintf(
+            '%s-%s',
+            $translationResponse->getTrgLang(),
+            $translationResponse->getTrgLocale()
+        );
     }
 }
