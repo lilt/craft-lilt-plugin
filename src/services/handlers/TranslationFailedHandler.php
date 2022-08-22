@@ -21,12 +21,8 @@ class TranslationFailedHandler
         TranslationResponse $translationResponse,
         Job $job,
         array $unprocessedTranslations
-    ): TranslationRecord {
-        $translationTargetLanguage = sprintf(
-            '%s-%s',
-            $translationResponse->getTrgLang(),
-            $translationResponse->getTrgLocale()
-        );
+    ): ?TranslationRecord {
+        $translationTargetLanguage = $this->getTargetLanguage($translationResponse);
 
         $elementId = Craftliltplugin::getInstance()
             ->connectorTranslationRepository
@@ -39,8 +35,16 @@ class TranslationFailedHandler
         );
 
         if (!$element) {
-            //TODO: handle when element not found?
-            throw new ElementNotFoundException();
+            Craft::error([
+                'message' => "Can't find element!",
+                'target_language' => $translationTargetLanguage,
+                'element_id' => $elementId,
+                'source_site_id' => $job->sourceSiteId,
+                'unprocessed_translations' => $unprocessedTranslations,
+                'translation_response' => $translationResponse->jsonSerialize(),
+            ]);
+
+            return null;
         }
 
         $targetSiteId = Craftliltplugin::getInstance()
@@ -49,16 +53,20 @@ class TranslationFailedHandler
         $parentElementId = $element->getCanonicalId() ?? $elementId;
 
         if (!isset($unprocessedTranslations[$parentElementId][$targetSiteId])) {
-            //TODO: handle when element not found?
-            throw new ElementNotFoundException();
+            Craft::error([
+                'message' => "Can't find translation!",
+                'target_language' => $translationTargetLanguage,
+                'parent_elementId' => $parentElementId,
+                'target_site_id' => $targetSiteId,
+                'unprocessed_translations' => $unprocessedTranslations,
+                'translation_response' => $translationResponse->jsonSerialize(),
+            ]);
+
+            return null;
         }
 
         //TODO: get rid of it, we can use repository here
         $translationRecord = $unprocessedTranslations[$parentElementId][$targetSiteId];
-
-//        if (empty($translationRecord->translatedDraftId)) {
-//            $translationRecord->translatedDraftId = $element->getId();
-//        }
 
         if (empty($translationRecord->connectorTranslationId)) {
             $translationRecord->connectorTranslationId = $translationResponse->getId();
@@ -69,5 +77,18 @@ class TranslationFailedHandler
         $translationRecord->save();
 
         return $translationRecord;
+    }
+
+    private function getTargetLanguage(TranslationResponse $translationResponse): string
+    {
+        if (empty($translationResponse->getTrgLocale())) {
+            return $translationResponse->getTrgLang();
+        }
+
+        return sprintf(
+            '%s-%s',
+            $translationResponse->getTrgLang(),
+            $translationResponse->getTrgLocale()
+        );
     }
 }

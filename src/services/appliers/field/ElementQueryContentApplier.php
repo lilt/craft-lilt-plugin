@@ -41,8 +41,11 @@ class ElementQueryContentApplier extends AbstractContentApplier implements Appli
 
         foreach ($blockElements as $block) {
             foreach ($block->getFieldLayout()->getCustomFields() as $blockField) {
-                $blockId = $block->getCanonicalId();
+                $blockId = $block->getId();
 
+//                $originalSiteBlock = clone $block;
+//                $originalSiteBlock->siteId = $command->getSourceSiteId();
+//                $originalSiteBlockId = $originalSiteBlock->getCanonical()->id;
                 if (
                     !isset(
                         $content[$field->handle][$blockId]['fields'][$blockField->handle]

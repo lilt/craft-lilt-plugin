@@ -105,6 +105,7 @@ class GetJobCreateFormControllerCest
                 'translationWorkflowsOptions' => [
                     'instant' => 'Instant',
                     'verified' => 'Verified',
+                    'copy_source_text' => 'Copy source text'
                 ],
                 'availableSites' => [
                     0 => [

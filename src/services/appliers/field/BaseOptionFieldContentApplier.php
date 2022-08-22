@@ -7,6 +7,7 @@ namespace lilthq\craftliltplugin\services\appliers\field;
 use Craft;
 use craft\fields\data\MultiOptionsFieldData;
 use craft\fields\data\SingleOptionFieldData;
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class BaseOptionFieldContentApplier extends AbstractContentApplier implements ApplierInterface
@@ -32,24 +33,21 @@ class BaseOptionFieldContentApplier extends AbstractContentApplier implements Ap
         $optionsTranslated = $content[$field->handle];
 
         foreach ($options as $option) {
-            $translation = [
-                'target' => $optionsTranslated[$option->value],
-                'source' => $option->label,
-                'sourceSiteId' => $command->getSourceSiteId(),
-                'targetSiteId' => $command->getTargetSiteId(),
-            ];
+            if (empty($option->label) || empty($optionsTranslated[$option->value])) {
+                continue;
+            }
 
-            $translation['hash'] = md5(json_encode($translation));
-            $i18NRecords[$translation['hash']] = $this->createI18NRecord($translation);
+            $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
+                $command->getSourceSiteId(),
+                $command->getTargetSiteId(),
+                $option->label,
+                $optionsTranslated[$option->value]
+            );
+
+            $i18NRecords[$i18NRecord->generateHash()] = $i18NRecord;
         }
 
-        $originalElement = Craft::$app->elements->getElementById(
-            $command->getElement()->getCanonicalId(),
-            null,
-            $command->getSourceSiteId()
-        );
-
-        return ApplyContentResult::applied($i18NRecords, $originalElement->getFieldValue($field->handle));
+        return ApplyContentResult::applied($i18NRecords);
     }
 
     public function support(ApplyContentCommand $command): bool

@@ -7,7 +7,7 @@ namespace lilthq\craftliltplugin\assets;
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;
 
-class JobFormAsset extends AssetBundle
+class EditEntryAsset extends AssetBundle
 {
     public function init(): void
     {
@@ -18,18 +18,10 @@ class JobFormAsset extends AssetBundle
         ];
 
         $this->js = [
-            'elements/LiltElementIndex.js',
-            'elements/LiltBaseElementSelectorModal.js',
-            'job-form.js',
-            'job-translation-review.js',
-            'job-try-again-button.js',
-            'job-target-sites.js',
+            'entry-edit.js',
         ];
 
-        $this->css = [
-            'job/create.css',
-            'job/overview.css',
-        ];
+        $this->css = [];
 
         parent::init();
     }

@@ -2,6 +2,11 @@
     content: "time";
 }
 
+.lilt-warning-span-centred {
+    top: 14px;
+    float: right;
+    position: absolute;
+}
 .lilt-job-activity-log span.info {
     float: right;
 }

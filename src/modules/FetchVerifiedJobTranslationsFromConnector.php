@@ -84,13 +84,18 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
                                 $job
                             );
                         } catch (Exception $ex) {
+                            Craft::error([
+                                'message' => "Can't fetch process translation!",
+                                'exception_message' => $ex->getMessage(),
+                                'exception_trace' => $ex->getTrace(),
+                                'exception' => $ex,
+                            ]);
+
                             Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                                 $translationResponse,
                                 $job,
                                 $unprocessedTranslations
                             );
-
-                            Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
 
                             return TranslationRecord::STATUS_FAILED;
                         }
@@ -131,7 +136,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
             );
         }
 
-        if ($statuses === ['failed']) {
+        if ($statuses === ['failed', 'canceled']) {
             $jobRecord->status = Job::STATUS_FAILED;
             $jobRecord->save();
             $this->markAsDone($queue);
@@ -140,6 +145,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
             $jobRecord->save();
             $this->markAsDone($queue);
         } else {
+            //TODO: can't be default, we need to reach all translations to status ready for review!
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
             $jobRecord->save();
             $this->markAsDone($queue);

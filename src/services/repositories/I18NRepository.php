@@ -12,4 +12,16 @@ class I18NRepository
     {
         return I18NRecord::findAll(['targetSiteId' => $targetSiteId]);
     }
+
+    public function new(int $sourceSiteId, int $targetSiteId, string $sourceValue, string $targetValue): I18NRecord
+    {
+        $record = new I18NRecord();
+
+        $record->target = $targetValue;
+        $record->source = $sourceValue;
+        $record->sourceSiteId = $sourceSiteId;
+        $record->targetSiteId = $targetSiteId;
+
+        return $record;
+    }
 }

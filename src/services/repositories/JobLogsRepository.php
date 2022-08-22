@@ -15,7 +15,8 @@ class JobLogsRepository
             ->orderBy(['id' => SORT_DESC])
             ->all();
     }
-    public function create(int $jobId, int $userId, string $summary): bool
+
+    public function create(int $jobId, ?int $userId, string $summary): bool
     {
         $jobLogRecord = new JobLogRecord();
 

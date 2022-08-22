@@ -24,9 +24,11 @@ class RegisterDefaultTableAttributesListener implements ListenerInterface
             return $event;
         }
 
-        $params = Craft::$app->getRequest()->getBodyParams();
+        $elementType = Craft::$app->getRequest()->getParam('elementType');
+        $showEntryVersions = Craft::$app->getRequest()->getParam('showEntryVersions', false);
 
-        if ($params['elementType'] === 'lilthq\craftliltplugin\elements\TranslateEntry') {
+
+        if ($elementType === 'lilthq\craftliltplugin\elements\TranslateEntry' && $showEntryVersions === true) {
             $expiryDateKey = array_search('expiryDate', $event->tableAttributes, true);
 
             if ($expiryDateKey !== false) {

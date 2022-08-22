@@ -16,8 +16,14 @@ class PhpMessageSource extends CraftPhpMessageSource
     {
         $messages = [];
 
+        $siteId = Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($language);
+
+        if ($siteId === null) {
+            return [];
+        }
+
         $i18NRecords = Craftliltplugin::getInstance()->i18NRepository->findAllByTargetSiteId(
-            Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($language)
+            $siteId
         );
 
         foreach ($i18NRecords as $i18NRecord) {

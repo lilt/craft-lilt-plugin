@@ -38,6 +38,13 @@ class Configuration extends Utility
         try {
             $settingsResult = Craftliltplugin::getInstance()->connectorSettingsApi->servicesApiSettingsGetSettings();
         } catch (Exception $ex) {
+            Craft::error([
+                'message' => "Can't fetch setting from connector api!",
+                'exception_message' => $ex->getMessage(),
+                'exception_trace' => $ex->getTrace(),
+                'exception' => $ex,
+            ]);
+
             $liltConfigDisabled = true;
         }
 

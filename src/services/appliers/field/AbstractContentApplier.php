@@ -41,19 +41,12 @@ abstract class AbstractContentApplier
                 null,
                 $command->getTargetSiteId()
             );
+
             if (method_exists($element, 'setIsFresh')) {
                 // TODO: It was added because of: Calling unknown method: craft\elements\MatrixBlock::setIsFresh()
                 // @since In craft only from 3.7.14
                 $element->setIsFresh();
             }
-
-            $command->setElement(
-                Craft::$app->elements->getElementById(
-                    $command->getElement()->id,
-                    null,
-                    $command->getTargetSiteId()
-                )
-            );
 
             return $success;
         }
@@ -66,19 +59,6 @@ abstract class AbstractContentApplier
         return $field->handle;
     }
 
-    protected function createI18NRecord(array $data): I18NRecord
-    {
-        $record = new I18NRecord();
-
-        $record->target = $data['target'];
-        $record->source = $data['source'];
-        $record->sourceSiteId = $data['sourceSiteId'];
-        $record->targetSiteId = $data['targetSiteId'];
-        $record->hash = $data['hash'];
-
-        return $record;
-    }
-
     /**
      * @throws InvalidFieldException
      *
@@ -87,33 +67,32 @@ abstract class AbstractContentApplier
     protected function getOriginalFieldSerializedValue(ApplyContentCommand $command)
     {
         if (empty($command->getField()->handle)) {
+            Craft::warning([
+                'message' => 'Handle for field is empty, please check CraftCMS configuration',
+                'field' => $command->getField()->toArray()
+            ]);
+
             return [];
         }
 
-        $element = Craft::$app->elements->getElementById(
-            $command->getElement()->getId(),
-            get_class($command->getElement()),
-            $command->getSourceSiteId()
+        $fieldValue = $command->getElement()->getFieldValue(
+            $command->getField()->handle
         );
 
-        if ($element === null) {
-            throw new \RuntimeException(
-                sprintf(
-                    "Can't find element for source site id. ElementId: %d SiteId: %d",
-                    $command->getElement()->id,
-                    $command->getSourceSiteId()
-                )
-            );
-        }
-
-        $fieldValue = $element->getFieldValue($command->getField()->handle);
         if (empty($fieldValue)) {
+            Craft::warning([
+                'message' => 'Field value is empty, please configure it for proper translation',
+                'field' => $command->getField()->toArray(),
+                'fieldValue' => $fieldValue,
+                'element' => $command->getElement()->toArray(),
+            ]);
+
             return [];
         }
 
         return $command->getField()->serializeValue(
             $fieldValue,
-            $element
+            $command->getElement()
         );
     }
 }
