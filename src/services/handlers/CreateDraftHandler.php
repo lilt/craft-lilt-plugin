@@ -67,7 +67,7 @@ class CreateDraftHandler
         );
 
         $fieldLayout = $element->getFieldLayout();
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
 
         foreach ($fields as $field) {
             $field->copyValue($element, $draft);
@@ -87,7 +87,15 @@ class CreateDraftHandler
 
         $draft->duplicateOf = $element;
         $draft->mergingCanonicalChanges = true;
+
+        /**
+         * TODO: for some reason we have duplicate error here.
+         *  Craft tries to create same block. Need investigation here.
+         */
+        $draftId = $draft->draftId;
+        $draft->draftId = null;
         $draft->afterPropagate(false);
+        $draft->draftId = $draftId;
 
         Craft::$app->elements->saveElement($draft);
 

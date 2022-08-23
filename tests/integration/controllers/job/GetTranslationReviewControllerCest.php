@@ -16,11 +16,14 @@ use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\GetTranslationReviewController;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\ViewWrapper;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
+
+use function PHPUnit\Framework\assertInstanceOf;
 
 class GetTranslationReviewControllerCest
 {
@@ -84,10 +87,15 @@ class GetTranslationReviewControllerCest
             'templateMode' => $behavior->templateMode,
         ];
 
-        $expected = $this->getExpected();
+        //make translation value as array
+        $translation = $actual['variables']['translation'];
+        assertInstanceOf(TranslationModel::class, $translation);
+        $actual['variables']['translation'] = $translation->toArray();
 
         $translations[0]->refresh();
         $expectedTranslatedDraftId = $translations[0]->translatedDraftId;
+        $expected = $this->getExpected($expectedTranslatedDraftId);
+
         Assert::assertNotNull($expectedTranslatedDraftId);
 
         foreach ($expected['variables']['translation'] as $key => $value) {
@@ -151,13 +159,13 @@ class GetTranslationReviewControllerCest
         return true;
     }
 
-    private function getExpected(): array
+    private function getExpected($translatedDraftId): array
     {
         return [
             'template' => 'craft-lilt-plugin/_components/translation/_overview.twig',
             'variables' => [
                 'translation' => [
-                    'translatedDraftId' => null,
+                    'translatedDraftId' => $translatedDraftId,
                     'sourceContent' => $this->getSourceContent(),
                     'targetContent' => $this->getTargetContent(),
                     'lastDelivery' => null,
