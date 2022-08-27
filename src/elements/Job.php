@@ -39,7 +39,6 @@ class Job extends Element
 {
     public const STATUS_NEW = 'new';
     public const STATUS_DRAFT = 'draft';
-    #public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_IN_PROGRESS = 'in-progress';
     public const STATUS_READY_FOR_REVIEW = 'ready-for-review';
     public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
@@ -67,7 +66,6 @@ class Job extends Element
     private $_author;
     private $_elements;
     private $_translations;
-
     // @codingStandardsIgnoreEnd
 
     public function beforeDelete(): bool
@@ -279,16 +277,6 @@ class Job extends Element
                 ],
                 'defaultSort' => ['dateCreated', 'desc']
             ],
-            /* [
-                'key' => 'submitted',
-                'label' => 'Submitted',
-                'criteria' => [
-                    'status' => [
-                        self::STATUS_SUBMITTED
-                    ]
-                ],
-                'defaultSort' => ['dateCreated', 'desc']
-            ], */
             [
                 'key' => 'in-progress',
                 'label' => 'In progress',
@@ -483,7 +471,9 @@ class Job extends Element
             return $this->_elements;
         }
 
-        $this->_translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($this->id);
+        $this->_translations = Craftliltplugin::getInstance()->translationRepository->findByJobIdSortByStatus(
+            $this->id
+        );
 
         //TODO: it should be not here, it is a logic
         $readyToPublish = true;
@@ -549,11 +539,6 @@ class Job extends Element
         #return \Craft::$app->user->checkPermission('edit-product:'.$this->getType()->id);
         return true;
     }
-
-    #public function getFieldLayout()
-    #{
-    #    return \Craft::$app->fields->getLayoutByType(Job::class);
-    #}
 
     public function getAuthor()
     {
