@@ -454,6 +454,17 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
       resizable: true,
       desiredHeight: $(window).height(),
       desiredWidth: $(window).width(),
+      onHide: function() {
+        $('#content-container #content #lilt-translations-table').
+            addClass('disabled');
+        $('#content-container #content').
+            append(
+                $('<div style="position: absolute; top: 50%; left: 50%; margin: -24px 0 0 -24px;"/>').
+                    addClass('spinner').
+                    addClass('big').show());
+
+        location.reload();
+      }
     });
 
     this.$modal.desiredHeight = $(window).height();
