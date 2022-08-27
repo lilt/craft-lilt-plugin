@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5.1 - 2022-08-17
+### Fixed
+- Translation preview page: modal not opening issue 
+
 ## 0.5.0 - 2022-08-17
 ### Added
 - Default sorting for translations
