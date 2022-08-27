@@ -12,6 +12,7 @@ namespace lilthq\craftliltplugin\models;
 use Craft;
 use craft\base\Model;
 use craft\helpers\UrlHelper;
+use Exception;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -97,6 +98,7 @@ class TranslationModel extends Model
             [
                 'elementType' => get_class($element),
                 'sourceId' => $element->getCanonicalId(),
+                'canonicalId' => $element->getCanonicalId(),
                 'draftId' => $element->draftId,
                 'siteId' => $this->sourceSiteId,
             ]
@@ -111,9 +113,14 @@ class TranslationModel extends Model
         );
     }
 
+    /**
+     * @throws Exception
+     */
     public function getLastDeliveryFormatted(): ?string
     {
-        return (new DateTime($this->lastDelivery))->format(Craft::$app->locale->getDateFormat('short', 'php'));
+        return (new DateTime($this->lastDelivery))->format(
+            Craft::$app->locale->getDateFormat('short', 'php')
+        );
     }
 
     public function getPreviewUrl(): ?string
@@ -142,14 +149,15 @@ class TranslationModel extends Model
         }
 
         $token = Craft::$app->tokens->createToken([
-                "preview/preview",
-                [
-                    'elementType' => get_class($element),
-                    'sourceId' => $element->getCanonicalId(),
-                    'draftId' => $element->draftId,
-                    'siteId' => $this->targetSiteId,
-                ]
-            ]);
+            "preview/preview",
+            [
+                'elementType' => get_class($element),
+                'sourceId' => $element->getCanonicalId(),
+                'draftId' => $element->draftId,
+                'siteId' => $this->targetSiteId,
+                'canonicalId' => $element->getCanonicalId(),
+            ]
+        ]);
         //TODO: Argument 1 passed to craft\helpers\UrlHelper::urlWithParams() must be of the type string, null given,
         // called in /craft-lilt-plugin/src/models/TranslationModel.php on line 143   ?????
         if ($element->getUrl() === null) {

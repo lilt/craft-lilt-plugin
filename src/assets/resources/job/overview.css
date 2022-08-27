@@ -25,10 +25,9 @@
 }
 
 /* Make content fill full modal */
-#lilt-preview-modal-body #lilt-modal-preview-tabs #content{
-    height: calc(100% - 48px);
-}
-#lilt-preview-modal-body #lilt-modal-preview-tabs #content #preview{
+#lilt-preview-modal-body #lilt-modal-preview-tabs .content-pane,
+#lilt-preview-modal-body #lilt-modal-preview-tabs .content-pane #preview
+{
     height: calc(100% - 48px);
 }
 #lilt-preview-modal-body #lilt-modal-preview-tabs {

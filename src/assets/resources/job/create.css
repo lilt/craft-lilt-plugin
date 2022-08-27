@@ -181,7 +181,7 @@ OVERVIEW
 }
 #lilt-preview-modal .iframe-box {
     display: inline-block;
-    width: calc(50% - 2px);
+    width: calc(50% - 10px);
     height: 100%;
     min-height: 800px;
 }

@@ -150,9 +150,9 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
       this.$modalElementSpinner.hide();
       this.$modalElementBody.append($(response.data));
 
-      $('#lilt-modal-preview-tabs nav ul li a').on('click', function() {
+      $('#lilt-modal-preview-tabs header a').on('click', function() {
         const idToShow = $(this).data('id');
-        $('#lilt-modal-preview-tabs nav ul li a').each(function() {
+        $('#lilt-modal-preview-tabs header a').each(function() {
           const currentId = $(this).data('id');
           if (currentId !== idToShow) {
             $(this).removeClass('sel');

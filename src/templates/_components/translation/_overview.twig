@@ -1,41 +1,27 @@
 <div id="lilt-modal-preview-tabs">
-    <div id="content" class="content-pane">
-        <header id="content-header" class="pane-header">
-            <nav id="tabs" class="pane-tabs">
-                <ul class="">
-                    <li data-id="preview">
-                        <a id="tab-preview" class="sel" data-id="preview">
-                            {{ 'Preview'|t('craft-lilt-plugin') }}
-                        </a></li>
-                    <li data-id="translation">
-                        <a id="tab-translation" data-id="translation">
-                            {{ 'Text'|t('craft-lilt-plugin') }}
-                        </a></li>
-                </ul>
-            </nav>
+    <div class="content-pane">
+        <header class="pane-header">
+            <div class="pane-tabs">
+                <div class="" role="tablist" aria-label="Primary fields">
+                    <a id="tab-preview" class="sel"
+                       tabindex="0"
+                       role="tab"
+                       data-id="preview"
+                       aria-controls="preview"
+                       aria-selected="true">
+                        {{ 'Preview'|t('craft-lilt-plugin') }}
+                    </a>
+                    <a id="tab-text-preview"
+                       tabindex="-1"
+                       role="tab"
+                       data-id="text-preview"
+                       aria-controls="text-preview"
+                       aria-selected="false"> Submited job
+                    </a>
+                </div>
+            </div>
         </header>
-
-        <div id="translation" class="flex-fields hidden">
-            <!-- <div class="flex-container">
-
-                <div class="flex-child magenta">
-                    {% for key,value in translation.sourceContentValues %}
-                        <div>
-                            <span>{{ value }}</span><span data-icon="copy"></span>
-                        </div>
-                        <hr />
-                    {% endfor %}
-                </div>
-
-                <div class="flex-child green">
-                    {% for key,value in translation.targetContentValues %}
-                        <div>
-                            <span>{{ value }}</span><span data-icon="copy"></span>
-                        </div>
-                        <hr />
-                    {% endfor %}
-                </div>
-            </div>-->
+        <div id="text-preview" class="flex-fields hidden">
             <table style="height: 100%;width: 100%; margin-top: -24px">
                 <tr style="text-align: center;padding: 0">
                     <td style="text-align: center;padding: 0;padding-top: 10px"><span data-icon="world"
@@ -49,7 +35,7 @@
                     {% set targetTranslationValue = translation.targetContentValues[key] ?? null %}
                     {% if value is empty and targetTranslationValue %}
                     {% else %}
-                        <tr style="font-size: 10px;padding: 0px">
+                        <tr style="font-size: 10px;padding: 0">
                             <td style="color: grey">
                                 <div>
                                     <div class="translation-text" style="float: left;">{{ key }}</div>
@@ -72,7 +58,6 @@
                 {% endfor %}
             </table>
         </div>
-
         <div id="preview" class="flex-fields">
             <div class="iframe-box">
                 <div class="locale">

@@ -80,7 +80,7 @@
                     <span class='lilt-review-translation {{ translation.status is same as 'published' or translation.status is same as 'failed'  or translation.status is same as 'new' or translation.status is same as 'in-progress' ? 'disabled' : '' }}'
                           title="Review" data-id="{{ translation.id }}"
                           data-title="{{ element.elementsMappedById[translation.elementId].title }}" data-icon="view"
-                          style="margin-right: 5px;color: #0b69a3;cursor: pointer;"></span>
+                          style="margin-right: 5px;color: var(--link-color);cursor: pointer;"></span>
                         <a href="{{ translation.previewUrl }}" title="Visit webpage" rel="noopener" target="_blank"
                            data-icon="world"></a>
                     </td>
