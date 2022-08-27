@@ -76,16 +76,17 @@ class GetTranslationReviewControllerCest
         ]);
         $translations[0]->targetContent = $this->getTargetContent();
         $translations[0]->save();
+
         $controller = $this->getController();
+
+        $view = new ViewWrapper();
+        $view->setControllerView($controller->getView());
+
+        $controller->setView($view);
         $controller->request->setBodyParams(['translationId' => $translations[0]->id]);
         $response = $controller->actionInvoke();
 
-        $behavior = $response->getBehavior('template');
-        $actual = [
-            'variables' => $behavior->variables,
-            'template' => $behavior->template,
-            'templateMode' => $behavior->templateMode,
-        ];
+        $actual = $view->data;
 
         //make translation value as array
         $translation = $actual['variables']['translation'];
