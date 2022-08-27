@@ -2,7 +2,7 @@
   "name": "lilt/craft-lilt-plugin",
   "description": "The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.",
   "type": "craft-plugin",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "keywords": [
     "craft",
     "cms",
@@ -23,6 +23,7 @@
   ],
   "require": {
     "craftcms/cms": "^3.7.0",
+    "php": ">=7.2.5",
     "lilt/lilt-connector-sdk-php": "0.1.0",
     "ext-json": "*"
   },
