@@ -116,6 +116,11 @@ class TranslationModel extends Model
         return (new DateTime($this->lastDelivery))->format(Craft::$app->locale->getDateFormat('short', 'php'));
     }
 
+    /**
+     * @return string|null
+     *
+     * @deprecated Use element for it
+     */
     public function getPreviewUrl(): ?string
     {
         if ($this->translatedDraftId === null) {
@@ -150,8 +155,7 @@ class TranslationModel extends Model
                     'siteId' => $this->targetSiteId,
                 ]
             ]);
-        //TODO: Argument 1 passed to craft\helpers\UrlHelper::urlWithParams() must be of the type string, null given,
-        // called in /craft-lilt-plugin/src/models/TranslationModel.php on line 143   ?????
+
         if ($element->getUrl() === null) {
             return null;
         }
