@@ -14,10 +14,10 @@ use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
-use craft\helpers\UrlHelper;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\TranslationQuery;
+use lilthq\craftliltplugin\models\TranslationModelTrait;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 /**
@@ -31,6 +31,8 @@ use lilthq\craftliltplugin\records\TranslationRecord;
  */
 class Translation extends Element
 {
+    use TranslationModelTrait;
+
     public $id;
     public $uid;
     public $title;
@@ -171,51 +173,6 @@ class Translation extends Element
             'dateUpdated',
             'actions',
         ];
-    }
-
-    public function getPreviewUrl(): ?string
-    {
-        if ($this->translatedDraftId === null) {
-            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
-
-            if ($element === null) {
-                //element removed, we don't have any link
-                return null;
-            }
-
-            return $element->getUrl();
-        }
-        $element = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->targetSiteId);
-
-        if (!$element) {
-            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
-
-            if ($element === null) {
-                //TODO: handle
-                return null;
-            }
-
-            return $element->getUrl();
-        }
-
-        $token = Craft::$app->tokens->createToken([
-            "preview/preview",
-            [
-                'elementType' => get_class($element),
-                'sourceId' => $element->getCanonicalId(),
-                'draftId' => $element->draftId,
-                'siteId' => $this->targetSiteId,
-            ]
-        ]);
-
-        if ($element->getUrl() === null) {
-            return null;
-        }
-
-        return UrlHelper::urlWithParams(
-            $element->getUrl(),
-            ['token' => $token]
-        );
     }
 
     public function getActionsHtml(): string

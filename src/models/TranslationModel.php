@@ -18,6 +18,8 @@ use lilthq\craftliltplugin\records\TranslationRecord;
 
 class TranslationModel extends Model
 {
+    use TranslationModelTrait;
+
     public $id;
     public $uid;
     public $jobId;
@@ -114,56 +116,6 @@ class TranslationModel extends Model
     public function getLastDeliveryFormatted(): ?string
     {
         return (new DateTime($this->lastDelivery))->format(Craft::$app->locale->getDateFormat('short', 'php'));
-    }
-
-    /**
-     * @return string|null
-     *
-     * @deprecated Use element for it
-     */
-    public function getPreviewUrl(): ?string
-    {
-        if ($this->translatedDraftId === null) {
-            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
-
-            if ($element === null) {
-                //element removed, we don't have any link
-                return null;
-            }
-
-            return $element->getUrl();
-        }
-        $element = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->targetSiteId);
-
-        if (!$element) {
-            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
-
-            if ($element === null) {
-                //TODO: handle
-                return null;
-            }
-
-            return $element->getUrl();
-        }
-
-        $token = Craft::$app->tokens->createToken([
-                "preview/preview",
-                [
-                    'elementType' => get_class($element),
-                    'sourceId' => $element->getCanonicalId(),
-                    'draftId' => $element->draftId,
-                    'siteId' => $this->targetSiteId,
-                ]
-            ]);
-
-        if ($element->getUrl() === null) {
-            return null;
-        }
-
-        return UrlHelper::urlWithParams(
-            $element->getUrl(),
-            ['token' => $token]
-        );
     }
 
     public function getDraftEditUrl(): ?string
