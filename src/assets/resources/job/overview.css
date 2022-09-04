@@ -6,7 +6,7 @@
 }
 
 #details .meta.error {
-    border: 2px solid rgba(207,17,36,.5);
+    border: 2px solid rgba(207, 17, 36, .5);
     padding: 19px 22px;
     background: #fff;
     color: #3f4d5a !important;
@@ -16,8 +16,7 @@
     cursor: pointer;
 }
 
-#lilt-modal-preview-tabs #translation table
-{
+#lilt-modal-preview-tabs #translation table {
     -webkit-user-select: text;
     -moz-user-select: text;
     -ms-user-select: text;
@@ -39,6 +38,7 @@
 #lilt-preview-modal-body #lilt-modal-preview-tabs {
     height: calc(100% - 86px);
 }
+
 #lilt-modal-preview-tabs #content {
     overflow: scroll;
 }
@@ -111,4 +111,17 @@
     background-clip: padding-box;
     padding: 24px;
     word-wrap: break-word;
+}
+
+#translations-element-index .tablepane {
+    margin: 0;
+    overflow-x: auto;
+}
+
+#translations-list .content-pane {
+    padding: 0;
+}
+
+#translations-list #translations-element-index {
+    box-shadow: none !important;
 }
