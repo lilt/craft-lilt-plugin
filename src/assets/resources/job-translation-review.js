@@ -386,7 +386,9 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
                 data('is-reviewed', 1);
             if (!this.isMultiView) {
               //location.reload();
-              jQuery('#translations-element-index').addClass('busy').addClass('elements')
+              jQuery('#translations-element-index').
+                  addClass('busy').
+                  addClass('elements');
               CraftliltPlugin.elementIndexTranslation.updateElements();
 
             }
@@ -424,10 +426,11 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
                 data('is-published', 1);
 
             if (!this.isMultiView) {
-              //location.reload();
               CraftliltPlugin.elementIndexTranslation.setIndexBusy();
-              
-              jQuery('#translations-element-index').addClass('busy').addClass('elements')
+
+              jQuery('#translations-element-index').
+                  addClass('busy').
+                  addClass('elements');
               CraftliltPlugin.elementIndexTranslation.updateElements();
             }
           }).
@@ -477,19 +480,12 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
       desiredHeight: $(window).height(),
       desiredWidth: $(window).width(),
       onHide: function() {
-        // $('#content-container #content #lilt-translations-table').
-        //     addClass('disabled');
-        // $('#content-container #content').
-        //     append(
-        //         $('<div style="position: absolute; top: 50%; left: 50%; margin: -24px 0 0 -24px;"/>').
-        //             addClass('spinner').
-        //             addClass('big').show());
-
-        //location.reload();
         CraftliltPlugin.elementIndexTranslation.setIndexBusy();
-              
-              jQuery('#translations-element-index').addClass('busy').addClass('elements')
-              CraftliltPlugin.elementIndexTranslation.updateElements();
+
+        jQuery('#translations-element-index').
+            addClass('busy').
+            addClass('elements');
+        CraftliltPlugin.elementIndexTranslation.updateElements();
       },
     });
 
@@ -502,35 +498,27 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
 
     this.translationId = translationId;
 
-    //if (this.$modal === null) {
     this.createModal();
-    //}
 
     this.loadTranslationData(translationId);
 
     $('#lilt-preview-modal .close-modal').on('click', () => {
-      // $('#content-container #content #lilt-translations-table').
-      //     addClass('disabled');
-      // $('#content-container #content').
-      //     append(
-      //         $('<div style="position: absolute; top: 50%; left: 50%; margin: -24px 0 0 -24px;"/>').
-      //             addClass('spinner').
-      //             addClass('big').show());
-
-      //location.reload();
       CraftliltPlugin.elementIndexTranslation.setIndexBusy();
-              
-              jQuery('#translations-element-index').addClass('busy').addClass('elements')
-              CraftliltPlugin.elementIndexTranslation.updateElements();
+
+      jQuery('#translations-element-index').
+          addClass('busy').
+          addClass('elements');
+      CraftliltPlugin.elementIndexTranslation.updateElements();
       this.$modal.hide();
     });
 
     this.$modalFooterButtonsCancel.on('click', () => {
       CraftliltPlugin.elementIndexTranslation.setIndexBusy();
-              
-              jQuery('#translations-element-index').addClass('busy').addClass('elements')
-              CraftliltPlugin.elementIndexTranslation.updateElements();
-      //location.reload();
+
+      jQuery('#translations-element-index').
+          addClass('busy').
+          addClass('elements');
+      CraftliltPlugin.elementIndexTranslation.updateElements();
       this.$modal.hide();
     });
   },
@@ -565,29 +553,21 @@ $(document).ready(function() {
                 modal: $('#translations-element-index'),
                 storageKey: 'elementindex.lilthq\\craftliltplugin\\elements\\Translation',
                 criteria: {
-                  jobId: jQuery('#create-job-form').data('job-id')
+                  jobId: jQuery('#create-job-form').data('job-id'),
                 },
                 selectable: true,
                 multiSelect: true,
                 checkboxMode: true,
-                // storageKey: this.settings.storageKey,
-                // criteria: this.settings.criteria,
-                // disabledElementIds: this.settings.disabledElementIds,
-                // selectable: true,
-                // multiSelect: this.settings.multiSelect,
-                // buttonContainer: this.$secondaryButtons,
-                // hideSidebar: this.settings.hideSidebar,
-                // defaultSiteId: this.settings.defaultSiteId,
-                // defaultSource: this.settings.defaultSource
 
                 onUpdateElements: function() {
-                  jQuery('#translations-element-index')
-                  .removeClass('elements')
-                  .removeClass('busy')
+                  jQuery('#translations-element-index').
+                      removeClass('elements').
+                      removeClass('busy');
 
                   $('.lilt-review-translation').on('click', function() {
-                    CraftliltPlugin.translationReview.showModal($(this).data('id'))
-                  })
+                    CraftliltPlugin.translationReview.showModal(
+                        $(this).data('id'));
+                  });
                 },
                 onSelectionChange: function() {
                 },
@@ -601,29 +581,6 @@ $(document).ready(function() {
                       selectedElements);
                 },
               });
-
-          // // Double-clicking or double-tapping should select the elements
-          // this.addListener(this.elementIndex.$elements, 'doubletap',
-          //     function(ev, touchData) {
-          //       // Make sure the touch targets are the same
-          //       // (they may be different if Command/Ctrl/Shift-clicking on multiple elements quickly)
-          //       if (touchData.firstTap.target === touchData.secondTap.target) {
-          //         this.selectElements();
-          //       }
-          //     });
         }
       });
-
-  // CraftliltPlugin.elementIndexTranslation = Craft.createElementIndex(
-  //     'lilthq\\craftliltplugin\\elements\\Translation',
-  //     $('#translations-element-index'), {
-  //       elementTypeName: 'Translation',
-  //       elementTypePluralName: 'Translations',
-  //       context: 'index',
-  //       storageKey: 'elementindex.lilthq\\craftliltplugin\\elements\\Translation',
-  //       criteria: {},
-  //       toolbarSelector: '#translations-element-index-toolbar',
-  //       canHaveDrafts: true,
-  //       showEntryVersions: true,
-  //     });
 });
