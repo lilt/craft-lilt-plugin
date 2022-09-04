@@ -4,11 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.5.1 - 2022-08-17
+## 2.0.0 - 2022-09-04
+### Added
+- Craft V4 support 
+
+## 0.6.0 - 2022-09-04
+### Added
+- New translations element index on the preview page
+
+## 0.5.1 - 2022-08-27
 ### Fixed
 - Translation preview page: modal not opening issue 
 
-## 0.5.0 - 2022-08-17
+## 0.5.0 - 2022-08-27
 ### Added
 - Default sorting for translations
  
