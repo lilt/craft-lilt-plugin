@@ -540,7 +540,7 @@ $(document).ready(function() {
     showStatusMenu: true,
   };
 
-  Craft.postActionRequest('elements/get-modal-body', data,
+  Craft.postActionRequest('element-selector-modals/body', data,
       (response, textStatus) => {
         if (textStatus === 'success') {
           $('#translations-element-index').html(response.html);
