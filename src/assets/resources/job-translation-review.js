@@ -220,6 +220,21 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
     }
   },
   showMultiModal: function(translationIds) {
+    if (translationIds.length === 1) {
+      this.next = null;
+      this.previous = null;
+      this.current = 0;
+      this.translationId = null;
+      this.isMultiView = false;
+      this.selectedValues = [];
+      this.modalForPreview = null;
+      this.$headerTitle = null;
+
+      this.showModal(translationIds.pop());
+
+      return;
+    }
+
     this.isMultiView = false;
     this.next = null;
     this.previous = null;
@@ -370,7 +385,12 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
             $(`#lilt-translations-table tr[data-id="${this.translationId}"]`).
                 data('is-reviewed', 1);
             if (!this.isMultiView) {
-              location.reload();
+              //location.reload();
+              jQuery('#translations-element-index').
+                  addClass('busy').
+                  addClass('elements');
+              CraftliltPlugin.elementIndexTranslation.updateElements();
+
             }
           }).
           catch(exception => {
@@ -406,7 +426,12 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
                 data('is-published', 1);
 
             if (!this.isMultiView) {
-              location.reload();
+              CraftliltPlugin.elementIndexTranslation.setIndexBusy();
+
+              jQuery('#translations-element-index').
+                  addClass('busy').
+                  addClass('elements');
+              CraftliltPlugin.elementIndexTranslation.updateElements();
             }
           }).
           catch(exception => {
@@ -455,16 +480,13 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
       desiredHeight: $(window).height(),
       desiredWidth: $(window).width(),
       onHide: function() {
-        $('#content-container #content #lilt-translations-table').
-            addClass('disabled');
-        $('#content-container #content').
-            append(
-                $('<div style="position: absolute; top: 50%; left: 50%; margin: -24px 0 0 -24px;"/>').
-                    addClass('spinner').
-                    addClass('big').show());
+        CraftliltPlugin.elementIndexTranslation.setIndexBusy();
 
-        location.reload();
-      }
+        jQuery('#translations-element-index').
+            addClass('busy').
+            addClass('elements');
+        CraftliltPlugin.elementIndexTranslation.updateElements();
+      },
     });
 
     this.$modal.desiredHeight = $(window).height();
@@ -476,27 +498,27 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
 
     this.translationId = translationId;
 
-    if (this.$modal === null) {
-      this.createModal();
-    }
+    this.createModal();
 
     this.loadTranslationData(translationId);
 
     $('#lilt-preview-modal .close-modal').on('click', () => {
-      $('#content-container #content #lilt-translations-table').
-          addClass('disabled');
-      $('#content-container #content').
-          append(
-              $('<div style="position: absolute; top: 50%; left: 50%; margin: -24px 0 0 -24px;"/>').
-                  addClass('spinner').
-                  addClass('big').show());
+      CraftliltPlugin.elementIndexTranslation.setIndexBusy();
 
-      location.reload();
+      jQuery('#translations-element-index').
+          addClass('busy').
+          addClass('elements');
+      CraftliltPlugin.elementIndexTranslation.updateElements();
       this.$modal.hide();
     });
 
     this.$modalFooterButtonsCancel.on('click', () => {
-      location.reload();
+      CraftliltPlugin.elementIndexTranslation.setIndexBusy();
+
+      jQuery('#translations-element-index').
+          addClass('busy').
+          addClass('elements');
+      CraftliltPlugin.elementIndexTranslation.updateElements();
       this.$modal.hide();
     });
   },
@@ -508,5 +530,57 @@ $(document).ready(function() {
       '#translations', {
         translationsReviewSelector: '#translations-review-action',
         translationReviewSelector: '.lilt-review-translation:not(.disabled)',
+      });
+
+  // Get the modal body HTML based on the settings
+  var data = {
+    context: 'modal',
+    elementType: 'lilthq\\craftliltplugin\\elements\\Translation',
+    sources: null,
+    showStatusMenu: true,
+  };
+
+  Craft.postActionRequest('elements/get-modal-body', data,
+      (response, textStatus) => {
+        if (textStatus === 'success') {
+          $('#translations-element-index').html(response.html);
+
+          // Initialize the element index
+          CraftliltPlugin.elementIndexTranslation = new CraftliltPlugin.PreviewTranslationsIndex(
+              'lilthq\\craftliltplugin\\elements\\Translation',
+              $('#translations-element-index'), {
+                context: 'index',
+                modal: $('#translations-element-index'),
+                storageKey: 'elementindex.lilthq\\craftliltplugin\\elements\\Translation',
+                criteria: {
+                  jobId: jQuery('#create-job-form').data('job-id'),
+                },
+                selectable: true,
+                multiSelect: true,
+                checkboxMode: true,
+
+                onUpdateElements: function() {
+                  jQuery('#translations-element-index').
+                      removeClass('elements').
+                      removeClass('busy');
+
+                  $('.lilt-review-translation').on('click', function() {
+                    CraftliltPlugin.translationReview.showModal(
+                        $(this).data('id'));
+                  });
+                },
+                onSelectionChange: function() {
+                },
+                onReviewTriggered: function() {
+                  const selectedElements = CraftliltPlugin.elementIndexTranslation.getSelectedElementIds();
+                  if (selectedElements.length === 0) {
+                    return;
+                  }
+
+                  CraftliltPlugin.translationReview.showMultiModal(
+                      selectedElements);
+                },
+              });
+        }
       });
 });
