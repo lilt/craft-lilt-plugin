@@ -11,10 +11,9 @@ use craft\records\Element;
 use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
-/**
- * m220830_181943_create_translation_elements migration.
- */
+// @codingStandardsIgnoreStart
 class m220830_181943_create_translation_elements extends Migration
+// @codingStandardsIgnoreEnd
 {
     /**
      * @inheritdoc
