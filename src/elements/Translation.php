@@ -180,11 +180,11 @@ class Translation extends Element
     {
         return '
                 <span 
-                    class="lilt-review-translation " 
+                    class="lilt-review-translation" 
                     title="Review" 
                     data-id="' . $this->id . '" data-title="' . $this->title . '" 
                     data-icon="view" 
-                    style="margin-right: 5px;color: #0b69a3;cursor: pointer;font-size: 14pt;">
+                    style="margin-right: 5px;color: #2563eb; cursor: pointer;font-size: 14pt;">
                 </span>
                 <a 
                     href="' . $this->getPreviewUrl() . '" 
