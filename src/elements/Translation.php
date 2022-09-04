@@ -155,7 +155,6 @@ class Translation extends Element
     protected static function defineTableAttributes(): array
     {
         return [
-            'title' => 'Title',
             'status' => 'Status',
             'targetSiteLanguage' => 'Target source',
             'actions' => 'Actions',
