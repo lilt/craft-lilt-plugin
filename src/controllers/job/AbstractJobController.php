@@ -73,7 +73,7 @@ class AbstractJobController extends Controller
                 'exception' => $ex,
             ]);
 
-            $translationWorkflow = strtolower(CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT);
+            $translationWorkflow = strtolower(CraftliltpluginParameters::TRANSLATION_WORKFLOW_VERIFIED);
         }
 
         $variables = [
