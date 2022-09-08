@@ -76,7 +76,7 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
         : [];
 
     Craft.liltPluginModal = Craft.createLiltElementSelectorModal(
-        'lilthq\\craftliltplugin\\elements\\TranslateEntry', {
+        'craft\\elements\\Entry', {
           storageKey: null,
           sources: null,
           elementIndex: null,
