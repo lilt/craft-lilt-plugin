@@ -518,8 +518,8 @@ $(document).ready(function() {
                     return;
                   }
                   CraftliltPlugin.elementIndexTranslation.setIndexBusy();
-                  this.$publishTrigger.addClass('disabled')
-                  this.$reviewTrigger.addClass('disabled')
+                  CraftliltPlugin.elementIndexTranslation.$publishTrigger.addClass('disabled')
+                  CraftliltPlugin.elementIndexTranslation.$reviewTrigger.addClass('disabled')
 
                   Craft.sendActionRequest('POST',
                       'craft-lilt-plugin/translation/post-translation-publish/invoke',
@@ -532,8 +532,8 @@ $(document).ready(function() {
                       then(response => {
                         Craft.cp.displayNotice('Translation published');
                         CraftliltPlugin.elementIndexTranslation.updateElements();
-                        this.$publishTrigger.removeClass('disabled')
-                        this.$reviewTrigger.removeClass('disabled')
+                        CraftliltPlugin.elementIndexTranslation.$publishTrigger.removeClass('disabled')
+                        CraftliltPlugin.elementIndexTranslation.$reviewTrigger.removeClass('disabled')
                       }).
                       catch(exception => {
                         Craft.cp.displayError(Craft.t('app',
