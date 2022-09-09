@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7.0 - 2022-09-08
+### Added
+- Added new button to publish changes without review
+
+### Fixed
+- Element index behaviour 
+- New job status color
+- Custom sources for element index modal
+
 ## 0.6.0 - 2022-09-04
 ### Added
 - New translations element index on the preview page

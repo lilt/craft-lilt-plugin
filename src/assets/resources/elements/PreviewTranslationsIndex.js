@@ -74,6 +74,9 @@ CraftliltPlugin.PreviewTranslationsIndex = Garnish.Base.extend({
   _$detachedToolbarItems: null,
   _$triggers: null,
 
+  $publishTrigger: null,
+  $reviewTrigger: null,
+
   _ignoreFailedRequest: false,
   _cancelToken: null,
 
@@ -704,12 +707,24 @@ CraftliltPlugin.PreviewTranslationsIndex = Garnish.Base.extend({
     this._$detachedToolbarItems = this.$toolbar.children();
     this._$detachedToolbarItems.detach();
 
-    this._$triggers = jQuery('<div id="translations-review-action" data-icon="view" class="btn submit" style="float:right">\n' +
-        '            Review changes\n' +
-        '        </div>');
+    this._$triggers = jQuery('<div id="translations-review-triggers" class="toolbar flex flex-nowrap"></div>');
 
-    this._$triggers.on('click', () => {
+    this.$reviewTrigger = jQuery('<div id="translations-review-action" data-icon="view" class="btn" style="float:right">' +
+        '            Review changes' +
+        '        </div>');
+    this.$publishTrigger = jQuery('<div id="translations-publish-action" data-icon="check" class="btn submit" style="float:right">' +
+        'Publish' +
+        '</div>');
+
+    this.$reviewTrigger.appendTo(this._$triggers)
+    this.$publishTrigger.appendTo(this._$triggers)
+
+    this.$reviewTrigger.on('click', () => {
       this.onReviewTriggered()
+    })
+
+    this.$publishTrigger.on('click', () => {
+      this.onPublishTriggered()
     })
 
     this._$triggers.appendTo(this.$toolbar)
@@ -1347,6 +1362,10 @@ CraftliltPlugin.PreviewTranslationsIndex = Garnish.Base.extend({
   onReviewTriggered: function() {
     this.settings.onReviewTriggered();
     this.trigger('onReviewTriggered');
+  },
+  onPublishTriggered: function() {
+    this.settings.onPublishTriggered();
+    this.trigger('onPublishTriggered');
   },
 
   onEnableElements: function($elements) {

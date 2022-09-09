@@ -14,11 +14,9 @@ use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\UrlHelper;
-use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\JobQuery;
-use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -215,9 +213,8 @@ class Job extends Element
     public static function statuses(): array
     {
         return [
-            self::STATUS_NEW => ['label' => 'New', 'color' => 'turquoise'],
+            self::STATUS_NEW => ['label' => 'New', 'color' => 'orange'],
             self::STATUS_DRAFT => ['label' => 'Draft', 'color' => ''],
-            #self::STATUS_SUBMITTED => ['label' => 'Submitted', 'color' => 'purple'],
             self::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
             self::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
             self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
