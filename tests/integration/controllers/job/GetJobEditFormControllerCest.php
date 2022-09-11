@@ -107,6 +107,18 @@ class GetJobEditFormControllerCest
         ]);
 
         $controller = $this->getController();
+
+        $I->expectSettingsGetRequest(
+            '/api/v1.0/settings',
+            'SECURE_API_KEY_FOR_LILT_CONNECTOR',
+            [
+                'project_prefix' => 'this-is-connector-project-prefix',
+                'project_name_template' => 'this-is-connector-project-name-template',
+                'lilt_translation_workflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            ],
+            200
+        );
+
         $response = $controller->actionInvoke((string) $job->id);
 
         $behavior = $response->getBehavior('template');

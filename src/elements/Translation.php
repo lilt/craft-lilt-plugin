@@ -102,12 +102,35 @@ class Translation extends Element
         ];
     }
 
+    public function getIsPublished(): bool
+    {
+        return $this->status === TranslationRecord::STATUS_PUBLISHED;
+    }
+
+    public function getIsInProgress(): bool
+    {
+        return $this->status === TranslationRecord::STATUS_IN_PROGRESS;
+    }
+
+    public function getIsReviewed(): bool
+    {
+        return $this->getIsPublished() || $this->status === TranslationRecord::STATUS_READY_TO_PUBLISH;
+    }
+
     public function getStatusHtml(): string
     {
         $label = self::statuses()[$this->status]['label'] ?? self::statuses()[$this->status];
         $color = self::statuses()[$this->status]['color'] ?? '';
 
-        return "<span class='status {$color}'></span>" . $label;
+        return "<span 
+                    class='status translation-status {$color}'
+                    data-id='{$this->id}' 
+                    data-status='{$this->status}'
+                    data-is-published='{$this->getIsPublished()}'
+                    data-is-reviewed='{$this->getIsReviewed()}'
+                    data-is-in-progress='{$this->getIsInProgress()}'
+                    data-title='{$this->title}'>
+                </span>" . $label;
     }
 
     public static function find(): ElementQueryInterface

@@ -16,6 +16,7 @@ namespace lilthq\craftliltplugintests\integration\controllers\job;
 use Codeception\Exception\ModuleException;
 use Craft;
 use JsonException;
+use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\GetJobCreateFormController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
@@ -57,6 +58,17 @@ class GetJobCreateFormControllerCest
 
         $controller = $this->getController();
         //$controller->setView(new ViewWrapper());
+
+        $I->expectSettingsGetRequest(
+            '/api/v1.0/settings',
+            'SECURE_API_KEY_FOR_LILT_CONNECTOR',
+            [
+                'project_prefix' => 'this-is-connector-project-prefix',
+                'project_name_template' => 'this-is-connector-project-name-template',
+                'lilt_translation_workflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            ],
+            200
+        );
 
         $response = $controller->actionInvoke();
 

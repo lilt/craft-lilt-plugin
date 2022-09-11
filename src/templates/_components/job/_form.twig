@@ -122,8 +122,8 @@
                 <th class="checkbox-cell selectallcontainer {{ isFormElementsReadOnly ? 'disabled no-opacity' : '' }}" role="checkbox" aria-checked="false" scope="col">
                     <div class="checkbox selectallcheckbox {{ isFormElementsReadOnly ? 'disabled no-opacity' : '' }}" title="Select" aria-label="Select"></div>
                 </th>
-                <th scope="col">{{ "Name"|t('app') }}</th>
                 <th scope="col">{{ "Language"|t('app') }}</th>
+                <th scope="col">{{ "Name"|t('app') }}</th>
                 <th scope="col">{{ "Base URL"|t('app') }}</th>
                 </thead>
                 <tbody>
@@ -139,12 +139,12 @@
                                 class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
                             }) }}
                         </td>
-                        <th scope="row" data-title="{{ 'Name'|t('app') }}">
+                        <th scope="row" data-title="{{ 'Language'|t('app') }}"><code>{{ site.language }}</code></th>
+                        <td data-title="{{ 'Name'|t('app') }}">
                             <a href="{{ url('settings/sites/' ~ site.id) }}" target="_blank">
                                 <span class="status {{ site.enabled ? 'enabled' : 'disabled' }}"></span>{{ site.name|t('site') }}
                             </a>
-                        </th>
-                        <td data-title="{{ 'Language'|t('app') }}"><code>{{ site.language }}</code></td>
+                        </td>
                         <td data-title="{{ 'Base URL'|t('app') }}"><code>{{ site.baseUrl }}</code></td>
                     </tr>
                 {% endfor %}
