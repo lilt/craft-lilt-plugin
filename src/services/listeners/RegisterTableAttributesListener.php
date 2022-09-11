@@ -24,12 +24,14 @@ class RegisterTableAttributesListener implements ListenerInterface
             return $event;
         }
 
-        $params = Craft::$app->getRequest()->getBodyParams();
+        $elementType = Craft::$app->getRequest()->getParam('elementType');
+        $showEntryVersions = Craft::$app->getRequest()->getParam('showEntryVersions', false);
 
         if (
             !empty($params['elementType'])
             && isset($event->tableAttributes['drafts']['label'])
-            && $params['elementType'] === 'lilthq\craftliltplugin\elements\TranslateEntry'
+            && $elementType === 'lilthq\craftliltplugin\elements\TranslateEntry'
+            && $showEntryVersions === true
         ) {
             $event->tableAttributes['drafts']['label'] = 'Version';
         }

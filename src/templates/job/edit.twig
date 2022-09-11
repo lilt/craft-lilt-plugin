@@ -24,14 +24,16 @@
     id: 'create-job-form',
     data: {
         'confirm-unload': isDraftJob or isNewJob,
+        'job-status': element.getStatus(),
+        'job-id': element.getId(),
     },
 } %}
 
 {% if not isDraftJob and not isNewJob %}
 {% set tabs = {
-    translations: {
+    translationsList: {
         label: 'Translations'|t('app'),
-        url: "#translations",
+        url: "#translations-list",
     },
     overview: {
         label: 'Submited job'|t('app'),

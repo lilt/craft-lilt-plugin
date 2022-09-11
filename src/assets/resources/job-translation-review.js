@@ -33,99 +33,10 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
     this.translationReviewSelector = settings.translationReviewSelector;
 
     this.$container = $(container);
-
-    this._disableReviewed();
-
-    this._initActions();
-    this._initCheckBoxes();
   },
 
-  _disableReviewed: function() {
-    $('#translations-review-action').
-        addClass('disabled').
-        attr('disabled', true);
-
-    $('#lilt-translations-table tr').each(function() {
-      const status = $(this).data('status');
-      if (status === 'published' || status === 'failed' || status === 'new' ||
-          status === 'in-progress') {
-        $(this).find('.checkbox-cell').addClass('disabled').disable();
-        $(this).
-            find('.checkbox-cell').
-            on('click', function() {return false;});
-      }
-    });
-  },
-  _initActions: function() {
-    this.addListener($(this.translationsReviewSelector), 'click', () => {
-      const selectedElements = this.getSelectedElements();
-      if (selectedElements.length === 0) {
-        return;
-      }
-      this.showMultiModal(selectedElements);
-    });
-
-    this.addListener($(this.translationReviewSelector), 'click', (e) => {
-      let translationId = $(e.target).data('id');
-      CraftliltPlugin.translationReview.showModal(translationId);
-    });
-  },
-  _getEnabledCheckBoxes: function() {
-    const checkBoxSelector = '#lilt-translations-table tr td:not(.disabled) input.checkbox';
-    return $(checkBoxSelector);
-  },
-  _initCheckBoxes: function() {
-    const $elements = this._getEnabledCheckBoxes();
-    const selector = '#lilt-translations-table th.checkbox-cell.selectallcontainer .checkbox';
-
-    if ($elements.length === 0) {
-      $(selector).attr('disabled', true);
-      return;
-    }
-
-    $(selector, this.$container).on('click', function() {
-      const allChecked = $(this).prop('checked');
-
-      const checkBoxSelector = '#lilt-translations-table tr td:not(.disabled) input.checkbox';
-      const $elements = $(checkBoxSelector);
-
-      if ($elements.length === 0) {
-        return;
-      }
-
-      $elements.each(function() {
-        $(this).prop('checked', allChecked);
-      });
-    });
-
-    $('#lilt-translations-table .checkbox').on('click', () => {
-      const selectedElements = this.getSelectedElements();
-      if (selectedElements.length > 0) {
-        $(this.translationsReviewSelector).
-            removeClass('disabled').
-            attr('disabled', false);
-
-        return;
-      }
-
-      $(this.translationsReviewSelector).
-          addClass('disabled').
-          attr('disabled', true);
-    });
-  },
-
-  getSelectedElements: function() {
-    let selectedValues = [];
-    $('#lilt-translations-table tr td input.checkbox').each(function() {
-      if ($(this).prop('checked') === true) {
-        selectedValues.push($(this).val());
-      }
-    });
-
-    return selectedValues;
-  },
   getTranslationData: function(translationId) {
-    const selector = `#lilt-translations-table tr[data-id="${translationId}"]`;
+    const selector = `#translations-element-index span.translation-status[data-id="${translationId}"]`;
 
     const translationRow = $(selector);
 
@@ -141,14 +52,13 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
     };
   },
   loadTranslationData: function(translationId) {
-
     this.translationId = translationId;
 
     Craft.sendActionRequest('GET',
         'craft-lilt-plugin/job/get-translation-review/invoke',
         {params: {translationId: translationId}}).then(response => {
       this.$modalElementSpinner.hide();
-      this.$modalElementBody.append($(response.data.html));
+      this.$modalElementBody.append($(response.data));
 
       $('#lilt-modal-preview-tabs nav ul li a').on('click', function() {
         const idToShow = $(this).data('id');
@@ -220,6 +130,21 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
     }
   },
   showMultiModal: function(translationIds) {
+    if (translationIds.length === 1) {
+      this.next = null;
+      this.previous = null;
+      this.current = 0;
+      this.translationId = null;
+      this.isMultiView = false;
+      this.selectedValues = [];
+      this.modalForPreview = null;
+      this.$headerTitle = null;
+
+      this.showModal(translationIds.pop());
+
+      return;
+    }
+
     this.isMultiView = false;
     this.next = null;
     this.previous = null;
@@ -289,7 +214,14 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
       this.current = this.next;
       this.next = this.current + 1;
 
-      let {translationTitle} = this.getTranslationData(this.translationId);
+      let {translationTitle, translationIsReviewed} = this.getTranslationData(
+          this.translationId);
+      if (translationIsReviewed === 1) {
+        this.$modalFooterButtonsSubmit.addClass('disabled');
+      } else {
+        this.$modalFooterButtonsSubmit.removeClass('disabled');
+      }
+
       this.$headerTitle.html(
           '<h1 style="float: left">Review: ' + translationTitle + '</h1>');
 
@@ -345,7 +277,7 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
 
     this.$modalFooterButtonsSubmit = $(
         '<button type="button" data-translation-id="' + this.translationId +
-        '" class="btn">Submit review</button>\n');
+        '" class="btn">Mark reviewed</button>\n');
 
     this.$modalFooterButtonsPublish = $(
         '<button type="button" data-translation-id="' + this.translationId +
@@ -367,15 +299,20 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
             $spinner.remove();
 
             Craft.cp.displayNotice('Review complete');
-            $(`#lilt-translations-table tr[data-id="${this.translationId}"]`).
+            $(`#translations-element-index span.translation-status[data-id="${this.translationId}"]`).
                 data('is-reviewed', 1);
             if (!this.isMultiView) {
-              location.reload();
+              //location.reload();
+              jQuery('#translations-element-index').
+                  addClass('busy').
+                  addClass('elements');
+              CraftliltPlugin.elementIndexTranslation.updateElements();
+
             }
           }).
           catch(exception => {
             Craft.cp.displayError(Craft.t('app',
-                'Can\'t submit review, unexpected issue occurred'));
+                'Can\'t mark reviewed, unexpected issue occurred'));
             this.$modalFooterButtonsSubmit.enable();
             this.$modalActionsSpinner.addClass('hidden');
           });
@@ -393,12 +330,12 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
 
       Craft.sendActionRequest('POST',
           'craft-lilt-plugin/translation/post-translation-publish/invoke',
-          {data: {translationId: this.translationId, published: true}}).
+          {data: {translationIds: [this.translationId], published: true}}).
           then(response => {
             Craft.cp.displayNotice('Translation published');
             $spinner.remove();
 
-            const $translation = $(`#lilt-translations-table tr[data-id="${this.translationId}"]`);
+            const $translation = $(`#translations-element-index span.translation-status[data-id="${this.translationId}"]`);
 
             $translation.
                 data('is-reviewed', 1);
@@ -406,7 +343,12 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
                 data('is-published', 1);
 
             if (!this.isMultiView) {
-              location.reload();
+              CraftliltPlugin.elementIndexTranslation.setIndexBusy();
+
+              jQuery('#translations-element-index').
+                  addClass('busy').
+                  addClass('elements');
+              CraftliltPlugin.elementIndexTranslation.updateElements();
             }
           }).
           catch(exception => {
@@ -420,7 +362,9 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
     const {translationIsReviewed} = this.getTranslationData(this.translationId);
 
     if (translationIsReviewed === 1) {
-      this.$modalFooterButtonsSubmit.hide();
+      this.$modalFooterButtonsSubmit.addClass('disabled');
+    } else {
+      this.$modalFooterButtonsSubmit.removeClass('disabled');
     }
 
     this.$modalActionButtons.append(this.$modalFooterButtonsSubmit);
@@ -454,6 +398,14 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
       resizable: true,
       desiredHeight: $(window).height(),
       desiredWidth: $(window).width(),
+      onHide: function() {
+        CraftliltPlugin.elementIndexTranslation.setIndexBusy();
+
+        jQuery('#translations-element-index').
+            addClass('busy').
+            addClass('elements');
+        CraftliltPlugin.elementIndexTranslation.updateElements();
+      },
     });
 
     this.$modal.desiredHeight = $(window).height();
@@ -465,27 +417,27 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
 
     this.translationId = translationId;
 
-    if (this.$modal === null) {
-      this.createModal();
-    }
+    this.createModal();
 
     this.loadTranslationData(translationId);
 
     $('#lilt-preview-modal .close-modal').on('click', () => {
-      $('#content-container #content #lilt-translations-table').
-          addClass('disabled');
-      $('#content-container #content').
-          append(
-              $('<div style="position: absolute; top: 50%; left: 50%; margin: -24px 0 0 -24px;"/>').
-                  addClass('spinner').
-                  addClass('big').show());
+      CraftliltPlugin.elementIndexTranslation.setIndexBusy();
 
-      location.reload();
+      jQuery('#translations-element-index').
+          addClass('busy').
+          addClass('elements');
+      CraftliltPlugin.elementIndexTranslation.updateElements();
       this.$modal.hide();
     });
 
     this.$modalFooterButtonsCancel.on('click', () => {
-      location.reload();
+      CraftliltPlugin.elementIndexTranslation.setIndexBusy();
+
+      jQuery('#translations-element-index').
+          addClass('busy').
+          addClass('elements');
+      CraftliltPlugin.elementIndexTranslation.updateElements();
       this.$modal.hide();
     });
   },
@@ -497,5 +449,100 @@ $(document).ready(function() {
       '#translations', {
         translationsReviewSelector: '#translations-review-action',
         translationReviewSelector: '.lilt-review-translation:not(.disabled)',
+      });
+
+  // Get the modal body HTML based on the settings
+  var data = {
+    context: 'modal',
+    elementType: 'lilthq\\craftliltplugin\\elements\\Translation',
+    sources: null,
+    showStatusMenu: true,
+  };
+
+  Craft.postActionRequest('elements/get-modal-body', data,
+      (response, textStatus) => {
+        if (textStatus === 'success') {
+          $('#translations-element-index').html(response.html);
+
+          // Initialize the element index
+          CraftliltPlugin.elementIndexTranslation = new CraftliltPlugin.PreviewTranslationsIndex(
+              'lilthq\\craftliltplugin\\elements\\Translation',
+              $('#translations-element-index'), {
+                context: 'index',
+                modal: $('#translations-element-index'),
+                storageKey: 'elementindex.lilthq\\craftliltplugin\\elements\\Translation',
+                criteria: {
+                  jobId: jQuery('#create-job-form').data('job-id'),
+                },
+                selectable: true,
+                multiSelect: true,
+                checkboxMode: true,
+
+                onUpdateElements: function() {
+                  jQuery('#translations-element-index').
+                      removeClass('elements').
+                      removeClass('busy');
+
+                  $('.lilt-review-translation').on('click', function() {
+                    CraftliltPlugin.translationReview.showMultiModal(
+                        [$(this).data('id')]);
+                  });
+
+                  let disabledIds = [];
+                  $('#translations-element-index tr span.translation-status').
+                      each(function() {
+                        const status = $(this).data('status');
+                        if (status === 'published' || status === 'failed' ||
+                            status === 'new' ||
+                            status === 'in-progress') {
+                          disabledIds.push($(this).data('id'));
+                        }
+                      });
+                  CraftliltPlugin.elementIndexTranslation.disableElementsById(
+                      disabledIds);
+                },
+                onSelectionChange: function() {
+                },
+                onReviewTriggered: function() {
+                  const selectedElements = CraftliltPlugin.elementIndexTranslation.getSelectedElementIds();
+                  if (selectedElements.length === 0) {
+                    return;
+                  }
+
+                  CraftliltPlugin.translationReview.showMultiModal(
+                      selectedElements);
+                },
+                onPublishTriggered: function() {
+                  const selectedElements = CraftliltPlugin.elementIndexTranslation.getSelectedElementIds();
+                  if (selectedElements.length === 0) {
+                    return;
+                  }
+                  CraftliltPlugin.elementIndexTranslation.setIndexBusy();
+                  CraftliltPlugin.elementIndexTranslation.$publishTrigger.addClass('disabled')
+                  CraftliltPlugin.elementIndexTranslation.$reviewTrigger.addClass('disabled')
+
+                  Craft.sendActionRequest('POST',
+                      'craft-lilt-plugin/translation/post-translation-publish/invoke',
+                      {
+                        data: {
+                          translationIds: selectedElements,
+                          published: true,
+                        },
+                      }).
+                      then(response => {
+                        Craft.cp.displayNotice('Translation published');
+                        CraftliltPlugin.elementIndexTranslation.updateElements();
+                        CraftliltPlugin.elementIndexTranslation.$publishTrigger.removeClass('disabled')
+                        CraftliltPlugin.elementIndexTranslation.$reviewTrigger.removeClass('disabled')
+                      }).
+                      catch(exception => {
+                        Craft.cp.displayError(Craft.t('app',
+                            'Can\'t publish translation, unexpected issue occurred'));
+                        this.$modalFooterButtonsPublish.enable();
+                        this.$modalActionsSpinner.addClass('hidden');
+                      });
+                },
+              });
+        }
       });
 });

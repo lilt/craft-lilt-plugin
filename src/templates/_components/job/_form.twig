@@ -86,26 +86,44 @@
     <hr/>
 
     {# Copy of vendor/craftcms/cms/src/templates/settings/sites/index.html with some adjustments #}
-    <div id="lilt-target-sites" class="field">
+    <div id="lilt-target-sites" class="field {{ isFormElementsReadOnly ? 'disabled no-opacity' : '' }}">
         <div class="heading">
             <label id="lilt-target-sites-table-container-label" for="lilt-target-sites-table-container">
                 Target site(s)
                 <span class="required"></span>
             </label>
         </div>
+        {% if element is defined and element.getErrors('targetSiteIds') | length %}
+            <div class="input ltr errors" style="margin-bottom: 5px">
+                {% tag 'ul' with {
+                    id: id ?? false,
+                    class: 'errors',
+                } %}
+                    {% for error in element.getErrors('targetSiteIds') %}
+                        <li>
+                            {{ tag('span', {
+                                class: 'visually-hidden',
+                                text: 'Error:'|t('app'),
+                            }) }}
+                            {{ error|e|md(inlineOnly=true)|replace('/&amp;(\\w+);/', '&$1;')|raw }}
+                        </li>
+                    {% endfor %}
+                {% endtag %}
+            </div>
+        {% endif %}
         <div id="lilt-target-sites-search" class="flex-grow texticon search icon clearable">
-            <input id="search" type="text" class="text fullwidth" autocomplete="off" placeholder="Search"
-                   aria-label="Search" data-np-checked="1">
+            <input id="search" type="text" class="text fullwidth {{isFormElementsReadOnly ? 'disabled no-opacity' : ''}}" autocomplete="off" placeholder="Search"
+                   aria-label="Search" data-np-checked="1" {{isFormElementsReadOnly ? 'disabled="true"' : ''}}">
             <div class="clear" title="Clear" aria-label="Clear"></div>
         </div>
         <div id="lilt-target-sites-table-container">
             <table id="sites" class="data fullwidth">
                 <thead>
-                <th class="checkbox-cell selectallcontainer" role="checkbox" aria-checked="false" scope="col">
-                    <div class="checkbox selectallcheckbox" title="Select" aria-label="Select"></div>
+                <th class="checkbox-cell selectallcontainer {{ isFormElementsReadOnly ? 'disabled no-opacity' : '' }}" role="checkbox" aria-checked="false" scope="col">
+                    <div class="checkbox selectallcheckbox {{ isFormElementsReadOnly ? 'disabled no-opacity' : '' }}" title="Select" aria-label="Select"></div>
                 </th>
-                <th scope="col">{{ "Name"|t('app') }}</th>
                 <th scope="col">{{ "Language"|t('app') }}</th>
+                <th scope="col">{{ "Name"|t('app') }}</th>
                 <th scope="col">{{ "Base URL"|t('app') }}</th>
                 </thead>
                 <tbody>
@@ -116,15 +134,17 @@
                             {{ forms.checkbox({
                                 name: 'targetSiteIds[]',
                                 value: site.id,
-                                checked: site.id in element.targetSiteIds
+                                checked: site.id in element.targetSiteIds,
+                                readonly: isFormElementsReadOnly,
+                                class: (isFormElementsReadOnly ? 'disabled no-opacity' : '')
                             }) }}
                         </td>
-                        <th scope="row" data-title="{{ 'Name'|t('app') }}">
+                        <th scope="row" data-title="{{ 'Language'|t('app') }}"><code>{{ site.language }}</code></th>
+                        <td data-title="{{ 'Name'|t('app') }}">
                             <a href="{{ url('settings/sites/' ~ site.id) }}" target="_blank">
                                 <span class="status {{ site.enabled ? 'enabled' : 'disabled' }}"></span>{{ site.name|t('site') }}
                             </a>
-                        </th>
-                        <td data-title="{{ 'Language'|t('app') }}"><code>{{ site.language }}</code></td>
+                        </td>
                         <td data-title="{{ 'Base URL'|t('app') }}"><code>{{ site.baseUrl }}</code></td>
                     </tr>
                 {% endfor %}

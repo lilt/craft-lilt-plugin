@@ -26,4 +26,7 @@ return [
     'Text'      => 'Text',
     'Preview'   => 'Preview',
     'The job was transferred successfully'   => 'The job was transferred successfully',
+    'instant'   => 'Instant',
+    'verified'   => 'Verified',
+    'copy_source_text'   => 'Copy source text',
 ];

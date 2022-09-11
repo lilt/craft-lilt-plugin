@@ -19,7 +19,7 @@ class LinkitContentProvider extends AbstractContentProvider
         $field = $provideContentCommand->getField();
 
         $fieldValue = $field->serializeValue(
-            $provideContentCommand->getElement()->linkit,
+            $provideContentCommand->getElement()->getFieldValue($field->handle),
             $provideContentCommand->getElement()
         );
 

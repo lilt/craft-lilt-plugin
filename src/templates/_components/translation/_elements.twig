@@ -1,98 +1,16 @@
 {% import '_includes/forms' as forms %}
 
 {% set isJobInProgress = (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()) %}
-
-<div id="translations">
-    <div class="heading" style="min-height: 30px">
-        <h2 style="float:left;">Translations</h2>
-        <div id="translations-review-action" data-icon="view" class="btn submit" style="float:right">
-            Review changes
+<div id="translations-list">
+    <div class="content-pane" id="translations-element-index">
+        <div class="main">
+            <div class="elements"></div>
         </div>
-    </div>
 
-    <div style="box-shadow: none;">
-        <div class="field">
-        <table id="lilt-translations-table" class="elements data fullwidth" style="margin-top: 20px">
-            <thead>
-            <tr>
-                <th class="checkbox-cell selectallcontainer orderable" role="checkbox" tabindex="0" aria-checked="false"
-                    aria-label="Select all" style="padding: 7px 12px">
-                    {{ forms.checkbox({
-                        name: 'translationIdsSelectAll',
-                        value: 'all'
-                    }) }}
-                </th>
-                <th scope="col" data-attribute="title">Title</th>
-                <th scope="col" data-attribute="targetSiteIds">Target locale</th>
-                {% if not isJobInProgress %}
-                    <th scope="col" data-attribute="dueDate">Last delivery</th>
-                {% endif %}
-                <th scope="col" data-attribute="status">Status</th>
-                <th scope="col" data-attribute="link" title="Actions" aria-label="Actions">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for translation in element.translations %}
-
-                {% set isTranslationPublished = constant('lilthq\\craftliltplugin\\records\\TranslationRecord::STATUS_PUBLISHED') is same as translation.status %}
-                {% set isTranslationInProgress = constant('lilthq\\craftliltplugin\\records\\TranslationRecord::STATUS_IN_PROGRESS') is same as translation.status %}
-                {% set isTranslationReviewed = isTranslationPublished or constant('lilthq\\craftliltplugin\\records\\TranslationRecord::STATUS_READY_TO_PUBLISH') is same as translation.status %}
-
-                <tr data-id="{{ translation.id }}" data-status="{{ translation.status }}"
-                    data-is-published="{{ isTranslationPublished }}"
-                    data-is-reviewed="{{ isTranslationReviewed }}"
-                    data-is-in-progress="{{ isTranslationInProgress }}"
-                    data-title="{{ element.elementsMappedById[translation.elementId].title }}" tabindex="0">
-                    <td class="checkbox-cell">
-                        {{ forms.checkbox({
-                            name: 'translationIds[]',
-                            value: translation.id
-                        }) }}
-                    </td>
-                    <th data-title="Title" data-titlecell="">
-                        <div class="element small"
-                             data-id="{{ translation.id }}"
-                             data-draft-id="{{ translation.translatedDraftId }}"
-                             data-element-id="{{ translation.elementId }}"
-                        >
-                            <div class="label">
-                    <span class="title">
-                        <a href="{{ translation.getDraftEditUrl }}"
-                           target="_blank">{{ element.elementsMappedById[translation.elementId].title }}</a>
-                    </span>
-                            </div>
-                        </div>
-                    </th>
-
-                    <td data-title="Target source" data-attr="targetLocale">
-                        <span class="source-language" data-icon="world"></span>{{ translation.targetLocale }}
-                    </td>
-
-                    {% if not isJobInProgress %}
-                        <td data-title="Due Date" data-attr="dueDate">{{ translation.lastDelivery }}</td>
-                    {% endif %}
-
-                    <td data-title="Status" data-attr="status"><span style="white-space: nowrap;"><span
-                                    class="status {{ translation.statusColor }}"></span>{{ translation.statusLabel }}</span>
-                    </td>
-
-                    <td data-title="Action" data-attr="preview" style="font-size: 14pt">
-                    <span class='lilt-review-translation {{ translation.status is same as 'published' or translation.status is same as 'failed'  or translation.status is same as 'new' or translation.status is same as 'in-progress' ? 'disabled' : '' }}'
-                          title="Review" data-id="{{ translation.id }}"
-                          data-title="{{ element.elementsMappedById[translation.elementId].title }}" data-icon="view"
-                          style="margin-right: 5px;color: #0b69a3;cursor: pointer;"></span>
-                        <a href="{{ translation.previewUrl }}" title="Visit webpage" rel="noopener" target="_blank"
-                           data-icon="world"></a>
-                    </td>
-
-                </tr>
-
-            {% endfor %}
-            </tbody>
-        </table>
-        </div>
+        <div id="translations-element-index-toolbar"></div>
     </div>
 </div>
+
 <div id="overview" class="flex-fields hidden">
     {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
 </div>

@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\controllers;
 
 use Craft;
 use craft\helpers\UrlHelper;
+use Exception;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\records\SettingRecord;
@@ -65,7 +66,14 @@ class PostConfigurationController extends AbstractJobController
                     ->servicesApiSettingsGetSettings();
 
                 $liltConfigDisabled = false;
-            } catch (\Exception $ex) {
+            } catch (Exception $ex) {
+                Craft::error([
+                    'message' => "Can't connect to Lilt",
+                    'exception_message' => $ex->getMessage(),
+                    'exception_trace' => $ex->getTrace(),
+                    'exception' => $ex,
+                ]);
+
                 Craft::$app->getSession()->setFlash(
                     'cp-error',
                     'Cant connect to Lilt. Looks like API Key or API URL is wrong'

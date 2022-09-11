@@ -30,4 +30,26 @@ class I18NRecord extends ActiveRecord
     {
         return CraftliltpluginParameters::I18N_TABLE_NAME;
     }
+
+    public function save($runValidation = true, $attributeNames = null)
+    {
+        $this->hash = $this->generateHash();
+
+        return parent::save($runValidation, $attributeNames);
+    }
+
+    /**
+     * @return void
+     */
+    public function generateHash(): string
+    {
+        $translation = [
+            'target' => $this->target,
+            'source' => $this->source,
+            'sourceSiteId' => $this->sourceSiteId,
+            'targetSiteId' => $this->targetSiteId,
+        ];
+
+        return md5(json_encode($translation));
+    }
 }

@@ -39,7 +39,7 @@ class RegisterCpUrlRulesListener implements ListenerInterface
         $event->rules['GET ' . CraftliltpluginParameters::JOB_SYNC_FROM_LILT_PATH . '/<jobId:\d+>']
             = 'craft-lilt-plugin/job/get-sync-from-lilt/invoke';
         $event->rules['GET craft-lilt-plugin']
-            = 'craft-lilt-plugin/index/index';
+            = 'craft-lilt-plugin/jobs/index';
         $event->rules['GET craft-lilt-plugin/jobs']
             = 'craft-lilt-plugin/jobs/index';
         $event->rules['GET craft-lilt-plugin/job/translation-review']

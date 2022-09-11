@@ -39,13 +39,13 @@ class WiremockClient extends Module
                     $expectedUrl
                 )
             )
-                ->withRequestBody(
-                    WireMock::equalToJson(
-                        json_encode($expectedBody),
-                        true,
-                        false
-                    )
-                )
+            //                ->withRequestBody(
+            //                    WireMock::equalToJson(
+            //                        json_encode($expectedBody),
+            //                        true,
+            //                        false
+            //                    )
+            //                )
                 ->willReturn(
                     WireMock::aResponse()
                         ->withStatus($statusCode)

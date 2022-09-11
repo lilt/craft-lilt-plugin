@@ -66,17 +66,18 @@ class SyncJobFromLiltConnectorHandler
                 try {
                     $this->processTranslation($translationDto, $job);
                 } catch (Exception $ex) {
-                    $translationRecord = Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
+                    Craft::error([
+                        'message' => "Can't process translation!",
+                        'exception_message' => $ex->getMessage(),
+                        'exception_trace' => $ex->getTrace(),
+                        'exception' => $ex,
+                    ]);
+
+                    Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                         $translationDto,
                         $job,
                         $unprocessedTranslations
                     );
-
-                    $translationRecord->status = TranslationRecord::STATUS_FAILED;
-                    $translationRecord->lastDelivery = new DateTime();
-                    $translationRecord->save();
-
-                    Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
                 }
             }
         }
@@ -127,11 +128,7 @@ class SyncJobFromLiltConnectorHandler
 
         $translationId = $translationResponse->getId();
 
-        $targetLanguage = sprintf(
-            '%s-%s',
-            $translationResponse->getTrgLang(),
-            $translationResponse->getTrgLocale()
-        );
+        $targetLanguage = $this->getTargetLanguage($translationResponse);
 
         foreach ($content as $elementId => $elementContent) {
             $element = Craft::$app->elements->getElementById(
@@ -185,5 +182,18 @@ class SyncJobFromLiltConnectorHandler
 
             $translationRecord->save();
         }
+    }
+
+    private function getTargetLanguage(TranslationResponse $translationResponse): string
+    {
+        if (empty($translationResponse->getTrgLocale())) {
+            return $translationResponse->getTrgLang();
+        }
+
+        return sprintf(
+            '%s-%s',
+            $translationResponse->getTrgLang(),
+            $translationResponse->getTrgLocale()
+        );
     }
 }

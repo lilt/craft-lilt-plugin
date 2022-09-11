@@ -59,31 +59,45 @@ class SendJobToLiltConnectorHandler
                 //TODO: handle
                 continue;
             }
+            $drafts = [];
+            $contents = [];
+            foreach ($job->getTargetSiteIds() as $targetSiteId) {
+                //Create draft with & update all values to source element
+                $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
+                    $element,
+                    $job->title,
+                    (int) $job->sourceSiteId,
+                    (int) $targetSiteId
+                );
 
-            $content = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
-                $element
-            );
+                $contents[$targetSiteId] = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
+                    $drafts[$targetSiteId]
+                );
 
-            $result = $this->createJobFile(
-                $content,
-                $versionId,
-                $jobLilt->getId(),
-                Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
-                $targetLanguages,
-                null //TODO: $job->dueDate is not in use
-            );
+                $result = $this->createJobFile(
+                    $contents[$targetSiteId],
+                    $versionId,
+                    $jobLilt->getId(),
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
+                    Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+                        [$targetSiteId]
+                    ),
+                    null //TODO: $job->dueDate is not in use
+                );
 
-            if (!$result) {
-                //TODO: set job failed and exit
-                $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
-                return;
+                if (!$result) {
+                    //TODO: set job failed and exit
+                    $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
+                    return;
+                }
             }
 
             $createTranslationsResult = Craftliltplugin::getInstance()->createTranslationsHandler->__invoke(
                 $job,
-                $content,
+                $contents,
                 $elementId,
-                $versionId
+                $versionId,
+                $drafts
             );
 
             if (!$createTranslationsResult) {
@@ -132,9 +146,10 @@ class SendJobToLiltConnectorHandler
     }
 
     /**
-     * @param JobResponse $jobLilt
      * @param Job $job
-     * @return JobRecord|null
+     * @param int $jobLiltId
+     * @param string $status
+     * @return void
      * @throws ElementNotFoundException
      * @throws Exception
      * @throws StaleObjectException

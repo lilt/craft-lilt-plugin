@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services\appliers\field;
 
 use Craft;
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class LightswitchContentApplier extends AbstractContentApplier implements ApplierInterface
@@ -22,24 +23,21 @@ class LightswitchContentApplier extends AbstractContentApplier implements Applie
         }
 
         foreach ($content[$fieldKey] as $attribute => $translation) {
-            $translation = [
-                'target' => $translation,
-                'source' => $field->$attribute,
-                'sourceSiteId' => $command->getSourceSiteId(),
-                'targetSiteId' => $command->getTargetSiteId(),
-            ];
+            if (empty($field->$attribute) || empty($translation)) {
+                continue;
+            }
 
-            $translation['hash'] = md5(json_encode($translation));
-            $i18NRecords[$translation['hash']] = $this->createI18NRecord($translation);
+            $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
+                $command->getSourceSiteId(),
+                $command->getTargetSiteId(),
+                $field->$attribute,
+                $translation
+            );
+
+            $i18NRecords[$i18NRecord->generateHash()] = $i18NRecord;
         }
 
-        $originalElement = Craft::$app->elements->getElementById(
-            $command->getElement()->getCanonicalId(),
-            null,
-            $command->getSourceSiteId()
-        );
-
-        return ApplyContentResult::applied($i18NRecords, $originalElement->getFieldValue($field->handle));
+        return ApplyContentResult::applied($i18NRecords);
     }
 
     public function support(ApplyContentCommand $command): bool

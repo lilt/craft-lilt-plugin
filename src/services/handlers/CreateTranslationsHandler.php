@@ -4,33 +4,56 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\handlers;
 
+use Craft;
+use craft\base\ElementInterface;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 class CreateTranslationsHandler
 {
+    /**
+     * @param Job $job
+     * @param array $sourceContent
+     * @param int $elementId
+     * @param int $versionId
+     * @param ElementInterface[] $drafts
+     * @return bool
+     */
     public function __invoke(
         Job $job,
-        array $sourceContent,
+        array $sourceContents,
         int $elementId,
-        int $versionId
+        int $versionId,
+        array $drafts
     ): bool {
-        $translationRecords = array_values(
-            array_map(
-                static function (int $targetSiteId) use ($job, $sourceContent, $elementId, $versionId) {
-                    return new TranslationRecord([
-                        'jobId' => $job->id,
-                        'elementId' => $elementId,
-                        'versionId' => $versionId,
-                        'sourceSiteId' => $job->sourceSiteId,
-                        'targetSiteId' => $targetSiteId,
-                        'sourceContent' => $sourceContent,
-                        'status' => TranslationRecord::STATUS_IN_PROGRESS,
-                    ]);
-                },
-                $job->getTargetSiteIds()
-            )
-        );
+        $translationRecords = [];
+
+        foreach ($job->getTargetSiteIds() as $targetSiteId) {
+            $config = [
+                'jobId' => $job->id,
+                'elementId' => $elementId,
+                'versionId' => $versionId,
+                'sourceSiteId' => $job->sourceSiteId,
+                'targetSiteId' => $targetSiteId,
+                'sourceContent' => $sourceContents[$targetSiteId],
+                'status' => TranslationRecord::STATUS_IN_PROGRESS,
+                'translatedDraftId' => $drafts[$targetSiteId]->getId()
+            ];
+
+            $translation = new Translation($config);
+            Craft::$app->getElements()->saveElement($translation);
+
+            $translationRecords[] = new TranslationRecord(
+                array_merge(
+                    [
+                        'id' => $translation->id,
+                        'uid' => $translation->uid
+                    ],
+                    $config
+                )
+            );
+        }
 
         if (!$translationRecords) {
             return false;

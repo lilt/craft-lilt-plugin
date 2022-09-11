@@ -19,7 +19,6 @@ use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\JobQuery;
-use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -39,7 +38,6 @@ class Job extends Element
 {
     public const STATUS_NEW = 'new';
     public const STATUS_DRAFT = 'draft';
-    #public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_IN_PROGRESS = 'in-progress';
     public const STATUS_READY_FOR_REVIEW = 'ready-for-review';
     public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
@@ -67,11 +65,18 @@ class Job extends Element
     private $_author;
     private $_elements;
     private $_translations;
-
     // @codingStandardsIgnoreEnd
 
     public function beforeDelete(): bool
     {
+        $translationRecords = TranslationRecord::findAll(['jobId' => $this->id]);
+
+        array_map(static function (TranslationRecord $t) {
+            Craft::$app->elements->deleteElementById(
+                $t->translatedDraftId
+            );
+        }, $translationRecords);
+
         JobRecord::deleteAll(['id' => $this->id]);
         return parent::beforeDelete();
     }
@@ -186,14 +191,21 @@ class Job extends Element
     public function isInstantFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(
-            SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
+            CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT
         );
     }
 
     public function isVerifiedFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(
-            SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED
+            CraftliltpluginParameters::TRANSLATION_WORKFLOW_VERIFIED
+        );
+    }
+
+    public function isCopySourceTextFlow(): bool
+    {
+        return strtolower($this->translationWorkflow) === strtolower(
+            CraftliltpluginParameters::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT
         );
     }
 
@@ -203,9 +215,8 @@ class Job extends Element
     public static function statuses(): array
     {
         return [
-            self::STATUS_NEW => ['label' => 'New', 'color' => 'turquoise'],
+            self::STATUS_NEW => ['label' => 'New', 'color' => 'orange'],
             self::STATUS_DRAFT => ['label' => 'Draft', 'color' => ''],
-            #self::STATUS_SUBMITTED => ['label' => 'Submitted', 'color' => 'purple'],
             self::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
             self::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
             self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
@@ -264,16 +275,6 @@ class Job extends Element
                 ],
                 'defaultSort' => ['dateCreated', 'desc']
             ],
-            /* [
-                'key' => 'submitted',
-                'label' => 'Submitted',
-                'criteria' => [
-                    'status' => [
-                        self::STATUS_SUBMITTED
-                    ]
-                ],
-                'defaultSort' => ['dateCreated', 'desc']
-            ], */
             [
                 'key' => 'in-progress',
                 'label' => 'In progress',
@@ -457,16 +458,20 @@ class Job extends Element
         return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
     }
 
-    /**
-     * @return TranslationModel[]
-     */
+    public function getTranslationWorkflowLabel(): string
+    {
+        return Craft::t('craft-lilt-plugin', strtolower($this->translationWorkflow));
+    }
+
     public function getTranslations(): array
     {
         if (!empty($this->_elements)) {
             return $this->_elements;
         }
 
-        $this->_translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($this->id);
+        $this->_translations = Craftliltplugin::getInstance()->translationRepository->findByJobIdSortByStatus(
+            $this->id
+        );
 
         //TODO: it should be not here, it is a logic
         $readyToPublish = true;
@@ -524,8 +529,6 @@ class Job extends Element
             'type' => Delete::class,
         ];
 
-        #$actions[] = LiltJobSetStatus::class;
-
         return $actions;
     }
 
@@ -534,11 +537,6 @@ class Job extends Element
         #return \Craft::$app->user->checkPermission('edit-product:'.$this->getType()->id);
         return true;
     }
-
-    #public function getFieldLayout()
-    #{
-    #    return \Craft::$app->fields->getLayoutByType(Job::class);
-    #}
 
     public function getAuthor()
     {

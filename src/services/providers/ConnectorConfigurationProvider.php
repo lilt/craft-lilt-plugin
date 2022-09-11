@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\providers;
 
+use Craft;
 use Exception;
 use LiltConnectorSDK\Configuration;
 use lilthq\craftliltplugin\Craftliltplugin;
@@ -27,6 +28,13 @@ class ConnectorConfigurationProvider
         try {
             $connectorApiUrlRecord = SettingRecord::findOne(['name' => 'connector_api_url']);
         } catch (Exception $ex) {
+            Craft::error([
+                'message' => "Can't find connector_api_url record!",
+                'exception_message' => $ex->getMessage(),
+                'exception_trace' => $ex->getTrace(),
+                'exception' => $ex,
+            ]);
+
             //TODO: Can be called before migrations? Table not found from tests, research needed here
             $connectorApiUrlRecord = null;
         }

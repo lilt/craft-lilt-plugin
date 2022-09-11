@@ -23,6 +23,61 @@ class TranslationRepository
         );
     }
 
+    public function findByJobIdSortByStatus(int $jobId): array
+    {
+        $translationRecords = TranslationRecord::find()
+            ->where(['jobId' => $jobId])
+            ->all();
+
+        $sort = [
+            TranslationRecord::STATUS_READY_FOR_REVIEW => 1,
+            TranslationRecord::STATUS_READY_TO_PUBLISH => 2,
+            TranslationRecord::STATUS_PUBLISHED => 3,
+        ];
+
+        $translations = [];
+        foreach ($translationRecords as $translationRecord) {
+            $translationModel = new TranslationModel(
+                $translationRecord->toArray()
+            );
+
+            if (isset($sort[$translationModel->status])) {
+                $translations[$sort[$translationModel->status]][] = $translationModel;
+
+                continue;
+            }
+
+            $translations[0][] = $translationModel;
+        }
+
+        ksort($translations);
+
+        return array_merge(...$translations);
+    }
+
+    public function findInProgressByElementId(int $elementId): array
+    {
+        $translationRecords = TranslationRecord::findAll([
+            'elementId' => $elementId,
+            'status' => [
+                TranslationRecord::STATUS_IN_PROGRESS,
+                TranslationRecord::STATUS_NEW,
+                TranslationRecord::STATUS_READY_TO_PUBLISH,
+                TranslationRecord::STATUS_READY_FOR_REVIEW,
+                TranslationRecord::STATUS_FAILED,
+            ]
+        ]);
+
+        return array_map(
+            static function (TranslationRecord $translationRecord) {
+                return new TranslationModel(
+                    $translationRecord->toArray()
+                );
+            },
+            $translationRecords
+        );
+    }
+
     public function findRecordByTranslatedDraftId(int $translatedDraftId): ?TranslationRecord
     {
         return TranslationRecord::findOne(['translatedDraftId' => $translatedDraftId]);

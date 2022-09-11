@@ -48,11 +48,31 @@ class GetSendToLiltController extends Controller
             return (new Response())->setStatusCode(404);
         }
 
-        Craftliltplugin::getInstance()->sendJobToLiltConnectorHandler->__invoke($job);
+        if ($job->isVerifiedFlow() || $job->isInstantFlow()) {
+            Craftliltplugin::getInstance()->sendJobToLiltConnectorHandler->__invoke($job);
+
+            Craft::$app->getSession()->setFlash(
+                'cp-notice',
+                Craft::t('craft-lilt-plugin', 'The job was transferred successfully.')
+            );
+
+            return $this->redirect($job->getCpEditUrl());
+        }
+
+        if ($job->isCopySourceTextFlow()) {
+            Craftliltplugin::getInstance()->copySourceTextHandler->__invoke($job);
+
+            Craft::$app->getSession()->setFlash(
+                'cp-notice',
+                Craft::t('craft-lilt-plugin', 'Copied source text successfully.')
+            );
+
+            return $this->redirect($job->getCpEditUrl());
+        }
 
         Craft::$app->getSession()->setFlash(
-            'cp-notice',
-            Craft::t('craft-lilt-plugin', 'The job was transferred successfully')
+            'cp-error',
+            Craft::t('craft-lilt-plugin', 'Translation workflow not found, please check advanced settings.')
         );
 
         return $this->redirect($job->getCpEditUrl());

@@ -16,26 +16,6 @@
         </header>
 
         <div id="translation" class="flex-fields hidden">
-            <!-- <div class="flex-container">
-
-                <div class="flex-child magenta">
-                    {% for key,value in translation.sourceContentValues %}
-                        <div>
-                            <span>{{ value }}</span><span data-icon="copy"></span>
-                        </div>
-                        <hr />
-                    {% endfor %}
-                </div>
-
-                <div class="flex-child green">
-                    {% for key,value in translation.targetContentValues %}
-                        <div>
-                            <span>{{ value }}</span><span data-icon="copy"></span>
-                        </div>
-                        <hr />
-                    {% endfor %}
-                </div>
-            </div>-->
             <table style="height: 100%;width: 100%; margin-top: -24px">
                 <tr style="text-align: center;padding: 0">
                     <td style="text-align: center;padding: 0;padding-top: 10px"><span data-icon="world"
@@ -46,25 +26,29 @@
                     </td>
                 </tr>
                 {% for key,value in translation.sourceContentValues %}
-                    <tr style="font-size: 10px;padding: 0px">
-                        <td style="color: grey">
-                            <div>
-                                <div class="translation-text" style="float: left;">{{ key }}</div>
-                                <span class="lilt-text-copy-to-clipboard" data-icon="clipboard"
-                                      style="float:right"></span></div>
-                        </td>
-                        <td style="color: grey">
-                            <div>
-                                <div class="translation-text" style="float: left;">{{ key }}</div>
-                                <span class="lilt-text-copy-to-clipboard" data-icon="clipboard"
-                                      style="float:right"></span></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td data-translation-key="{{ key }}" data-source="original">{{ value }}</td>
-                        <td data-translation-key="{{ key }}"
-                            data-source="translated">{{ translation.targetContentValues[key] ?? 'Undefined' }}</td>
-                    </tr>
+                    {% set targetTranslationValue = translation.targetContentValues[key] ?? null %}
+                    {% if value is empty and targetTranslationValue %}
+                    {% else %}
+                        <tr style="font-size: 10px;padding: 0px">
+                            <td style="color: grey">
+                                <div>
+                                    <div class="translation-text" style="float: left;">{{ key }}</div>
+                                    <span class="lilt-text-copy-to-clipboard" data-icon="clipboard"
+                                          style="float:right"></span></div>
+                            </td>
+                            <td style="color: grey">
+                                <div>
+                                    <div class="translation-text" style="float: left;">{{ key }}</div>
+                                    <span class="lilt-text-copy-to-clipboard" data-icon="clipboard"
+                                          style="float:right"></span></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td data-translation-key="{{ key }}" data-source="original">{{ value }}</td>
+                            <td data-translation-key="{{ key }}"
+                                data-source="translated">{{ translation.targetContentValues[key] ?? 'Undefined' }}</td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
             </table>
         </div>
