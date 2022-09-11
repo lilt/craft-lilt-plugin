@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.0.0 - 2022-09-04
+### Added
+- Craft V4 support
+
 ## 0.7.0 - 2022-09-08
 ### Added
 - Added new button to publish changes without review

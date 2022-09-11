@@ -155,7 +155,7 @@
 
 {% block content %}
     {% if not isDraftJob and not isNewJob %}
-    {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
+        {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
     {% else %}
         {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
     {% endif %}

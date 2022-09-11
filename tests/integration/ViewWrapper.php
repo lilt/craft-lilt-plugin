@@ -10,7 +10,7 @@ use JsonException;
 class ViewWrapper extends View
 {
     /**
-     * @var string|null
+     * @var array|null
      */
     public $data = null;
 
@@ -28,11 +28,11 @@ class ViewWrapper extends View
      */
     public function renderTemplate(string $template, array $variables = [], string $templateMode = null): string
     {
-        $this->data = json_encode([
+        $this->data = [
             'template' => $template,
             'variables' => $variables,
             'templateMode' => $templateMode
-        ], 4194304);
+        ];
 
         if ($this->controllerView !== null) {
             return $this->controllerView->renderTemplate($template, $variables, $templateMode);

@@ -10,15 +10,16 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\elements\db;
 
 use Craft;
+use craft\db\Query;
 use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 use lilthq\craftliltplugin\elements\Translation;
 
 class TranslationQuery extends ElementQuery
 {
-    public $status;
-    public $dateCreated;
-    public $dateUpdated;
+    public string|array|null $status;
+    public mixed $dateCreated = null;
+    public mixed $dateUpdated = null;
 
     public $jobId;
 
@@ -124,7 +125,7 @@ class TranslationQuery extends ElementQuery
         return parent::beforePrepare();
     }
 
-    public function prepare($builder)
+    public function prepare($builder): Query
     {
         parent::prepare($builder);
 
