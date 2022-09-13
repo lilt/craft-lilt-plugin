@@ -111,14 +111,14 @@ class TranslationQuery extends ElementQuery
 
         if ($this->status) {
             if (is_array($this->status)) {
-                $this->subQuery->andWhere(['in', 'lilt_translations.status', $this->status]);
+                $this->subQuery->andWhere(['in', '[[lilt_translations.status]]', $this->status]);
             } elseif ($this->status !== '*') {
-                $this->subQuery->andWhere('lilt_translations.status = :status', [':status' => $this->status]);
+                $this->subQuery->andWhere('[[lilt_translations.status]] = :status', [':status' => $this->status]);
             }
         }
 
         if ($this->jobId) {
-            $this->subQuery->andWhere('lilt_translations.jobId = :jobId', [':jobId' => $this->jobId]);
+            $this->subQuery->andWhere('[[lilt_translations.jobId]] = :jobId', [':jobId' => $this->jobId]);
         }
 
         return parent::beforePrepare();
