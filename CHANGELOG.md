@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Craft V4 support
 
+## 0.7.2 - 2022-09-08
+### Added
+- Spinner for not loaded element index on translation preview page
+
+### Fixed
+- Joins for translations search query
+
+## 0.7.1 - 2022-09-08
+### Fixed
+- Column name mask for translation query
+
 ## 0.7.0 - 2022-09-08
 ### Added
 - Added new button to publish changes without review
