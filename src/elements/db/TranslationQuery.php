@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\elements\db;
 
 use Craft;
+use craft\db\Table;
 use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 use lilthq\craftliltplugin\elements\Translation;
@@ -80,12 +81,13 @@ class TranslationQuery extends ElementQuery
         $this->joinElementTable('lilt_translations');
 
         /** GET TITLE */
-        $this->query->innerJoin('content', [
+        $this->query->innerJoin(Table::CONTENT . ' content', [
             'and',
             '[[content.elementId]] = [[lilt_translations.elementId]]',
             '[[content.siteId]] = [[lilt_translations.sourceSiteId]]'
         ]);
-        $this->query->innerJoin('sites', [
+
+        $this->query->innerJoin(Table::SITES . ' sites', [
             'and',
             '[[sites.id]] = [[lilt_translations.targetSiteId]]'
         ]);
