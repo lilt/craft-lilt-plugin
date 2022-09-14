@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\elements\db;
 
 use Craft;
 use craft\db\Query;
+use craft\db\Table;
 use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 use lilthq\craftliltplugin\elements\Translation;
@@ -81,12 +82,13 @@ class TranslationQuery extends ElementQuery
         $this->joinElementTable('lilt_translations');
 
         /** GET TITLE */
-        $this->query->innerJoin('content', [
+        $this->query->innerJoin(Table::CONTENT . ' content', [
             'and',
             '[[content.elementId]] = [[lilt_translations.elementId]]',
             '[[content.siteId]] = [[lilt_translations.sourceSiteId]]'
         ]);
-        $this->query->innerJoin('sites', [
+
+        $this->query->innerJoin(Table::SITES . ' sites', [
             'and',
             '[[sites.id]] = [[lilt_translations.targetSiteId]]'
         ]);
@@ -112,14 +114,14 @@ class TranslationQuery extends ElementQuery
 
         if ($this->status) {
             if (is_array($this->status)) {
-                $this->subQuery->andWhere(['in', 'lilt_translations.status', $this->status]);
+                $this->subQuery->andWhere(['in', '[[lilt_translations.status]]', $this->status]);
             } elseif ($this->status !== '*') {
-                $this->subQuery->andWhere('lilt_translations.status = :status', [':status' => $this->status]);
+                $this->subQuery->andWhere('[[lilt_translations.status]] = :status', [':status' => $this->status]);
             }
         }
 
         if ($this->jobId) {
-            $this->subQuery->andWhere('lilt_translations.jobId = :jobId', [':jobId' => $this->jobId]);
+            $this->subQuery->andWhere('[[lilt_translations.jobId]] = :jobId', [':jobId' => $this->jobId]);
         }
 
         return parent::beforePrepare();

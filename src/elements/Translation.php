@@ -62,6 +62,16 @@ class Translation extends Element
      */
     public $targetDraft;
 
+    public static function hasContent(): bool
+    {
+        return false;
+    }
+
+    public static function hasTitles(): bool
+    {
+        return false;
+    }
+
     /**
      * @inheritdoc
      */
