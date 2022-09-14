@@ -47,14 +47,15 @@ trait TranslationModelTrait
         }
 
         $token = Craft::$app->tokens->createToken([
-                "preview/preview",
-                [
-                    'elementType' => get_class($element),
-                    'sourceId' => $element->getCanonicalId(),
-                    'draftId' => $element->draftId,
-                    'siteId' => $this->targetSiteId,
-                ]
-            ]);
+            "preview/preview",
+            [
+                'elementType' => get_class($element),
+                'sourceId' => $element->getCanonicalId(),
+                'canonicalId' => $element->getCanonicalId(),
+                'draftId' => $element->draftId,
+                'siteId' => $this->targetSiteId,
+            ]
+        ]);
 
         if ($element->getUrl() === null) {
             return null;
