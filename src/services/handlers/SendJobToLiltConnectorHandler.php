@@ -66,8 +66,8 @@ class SendJobToLiltConnectorHandler
                 $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
                     $element,
                     $job->title,
-                    (int) $job->sourceSiteId,
-                    (int) $targetSiteId
+                    (int)$job->sourceSiteId,
+                    (int)$targetSiteId
                 );
 
                 $contents[$targetSiteId] = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
@@ -121,7 +121,9 @@ class SendJobToLiltConnectorHandler
             (new FetchJobStatusFromConnector([
                 'jobId' => $job->id,
                 'liltJobId' => $jobLilt->getId(),
-            ]))
+            ])),
+            FetchJobStatusFromConnector::PRIORITY,
+            FetchJobStatusFromConnector::DELAY_IN_SECONDS
         );
     }
 

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
+
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\modules;
@@ -14,7 +19,12 @@ use lilthq\craftliltplugin\records\JobRecord;
 
 class FetchJobStatusFromConnector extends BaseJob
 {
-    private const DELAY_IN_SECONDS = 10;
+    public const DELAY_IN_SECONDS = 10;
+    public const PRIORITY = null;
+    public const TTR = null;
+
+    private const RETRY_COUNT = 0;
+
     /**
      * @var int $jobId
      */
@@ -42,7 +52,7 @@ class FetchJobStatusFromConnector extends BaseJob
                         'liltJobId' => $this->liltJobId,
                     ]
                 )),
-                null,
+                self::DELAY_IN_SECONDS,
                 self::DELAY_IN_SECONDS
             );
 
@@ -50,6 +60,11 @@ class FetchJobStatusFromConnector extends BaseJob
         }
 
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
+
+        if(!$jobRecord) {
+            // job was removed, we are done here
+            return;
+        }
 
         if ($jobRecord->isVerifiedFlow()) {
             #LILT_TRANSLATION_WORKFLOW_VERIFIED
@@ -63,8 +78,8 @@ class FetchJobStatusFromConnector extends BaseJob
                         'liltJobId' => $this->liltJobId,
                     ]
                 ),
-                null,
-                self::DELAY_IN_SECONDS
+                FetchVerifiedJobTranslationsFromConnector::PRIORITY,
+                FetchVerifiedJobTranslationsFromConnector::DELAY_IN_SECONDS
             );
         }
 
@@ -84,8 +99,8 @@ class FetchJobStatusFromConnector extends BaseJob
                         'liltJobId' => $this->liltJobId,
                     ]
                 ),
-                null,
-                self::DELAY_IN_SECONDS
+                FetchInstantJobTranslationsFromConnector::PRIORITY,
+                FetchInstantJobTranslationsFromConnector::DELAY_IN_SECONDS
             );
         }
 

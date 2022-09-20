@@ -12,18 +12,18 @@ namespace lilthq\craftliltplugin\modules;
 use Craft;
 use craft\errors\InvalidFieldException;
 use craft\queue\BaseJob;
+use Exception;
 use LiltConnectorSDK\ApiException;
-use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\records\JobRecord;
 use Throwable;
-use yii\queue\RetryableJobInterface;
 
-class FetchInstantJobTranslationsFromConnector extends BaseJob implements RetryableJobInterface
+class SendJobToConnector extends BaseJob
 {
     public const DELAY_IN_SECONDS = 10;
     public const PRIORITY = null;
-    public const TTR = 10 * 60;
+    public const TTR = null;
 
     private const RETRY_COUNT = 0;
 
@@ -31,11 +31,6 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob implements Retrya
      * @var int $jobId
      */
     public $jobId;
-
-    /**
-     * @var int $liltJobId
-     */
-    public $liltJobId;
 
     /**
      * @inheritdoc
@@ -46,28 +41,45 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob implements Retrya
      */
     public function execute($queue): void
     {
-        $job = Job::findOne(['id' => $this->jobId]);
-        if (!$job || !$job->isInstantFlow()) {
-            $this->markAsDone($queue);
+        //TODO: seems to be same for all jobs, let's move it to abstract class
+        $jobId = $this->jobId;
+        $job = Job::findOne(['id' => $jobId]);
+
+        if (!$job) {
+            //TODO: how it is possible?
+            return;
+        }
+
+        $jobRecord = JobRecord::findOne(['id' => $jobId]);
+
+        if (!$jobRecord) {
+            Craft::error(sprintf("Can't find JobRecord for job id: %d", $jobId));
 
             return;
         }
 
         $mutex = Craft::$app->getMutex();
         $mutexKey = __CLASS__ . '_' . __FUNCTION__ . '_' . $this->jobId;
+
         if (!$mutex->acquire($mutexKey)) {
             Craft::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
 
             return;
         }
 
-        Craftliltplugin::$plugin->syncJobFromLiltConnectorHandler->__invoke($job);
+        try {
+            if ($job->isVerifiedFlow() || $job->isInstantFlow()) {
+                Craftliltplugin::getInstance()->sendJobToLiltConnectorHandler->__invoke($job);
+            }
 
-        $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
-        if ($liltJob->getStatus() === JobResponse::STATUS_COMPLETE) {
-            Craft::$app->elements->invalidateCachesForElementType(
-                Job::class
-            );
+            if ($job->isCopySourceTextFlow()) {
+                Craftliltplugin::getInstance()->copySourceTextHandler->__invoke($job);
+            }
+        } catch (Exception $ex) {
+            $jobRecord->status = Job::STATUS_FAILED;
+            $jobRecord->save();
+
+            Craft::$app->elements->invalidateCachesForElement($job);
         }
 
         $this->markAsDone($queue);
@@ -93,22 +105,11 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob implements Retrya
             1,
             Craft::t(
                 'app',
-                'Fetching of translations for jobId: {jobId} liltJobId: {liltJobId} is done',
+                'Sending translations for jobId: {jobId} to lilt platform done',
                 [
                     'jobId' => $this->jobId,
-                    'liltJobId' => $this->liltJobId,
                 ]
             )
         );
-    }
-
-    public function getTtr()
-    {
-        return self::TTR;
-    }
-
-    public function canRetry($attempt, $error)
-    {
-        return $attempt < self::RETRY_COUNT;
     }
 }

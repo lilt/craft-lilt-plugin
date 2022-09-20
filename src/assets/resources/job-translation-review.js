@@ -468,6 +468,7 @@ $(document).ready(function() {
           CraftliltPlugin.elementIndexTranslation = new CraftliltPlugin.PreviewTranslationsIndex(
               'lilthq\\craftliltplugin\\elements\\Translation',
               $('#translations-element-index'), {
+                _ignoreFailedRequest: false,
                 context: 'index',
                 modal: $('#translations-element-index'),
                 storageKey: 'elementindex.lilthq\\craftliltplugin\\elements\\Translation',
@@ -479,6 +480,43 @@ $(document).ready(function() {
                 checkboxMode: true,
 
                 onUpdateElements: function() {
+
+                  if (CraftliltPlugin.elementIndexTranslation !== undefined &&
+                      CraftliltPlugin.elementIndexTranslation.view !==
+                      undefined) {
+                    const elementsCount = CraftliltPlugin.elementIndexTranslation.view.getAllElements().length;
+                    console.log('Elements count: ', elementsCount);
+
+                    if (elementsCount === 0) {
+                      CraftliltPlugin.elementIndexTranslation.notFoundMessage = $(
+                          '<div style="padding: 50px;text-align: center;"></div>');
+
+                      CraftliltPlugin.elementIndexTranslation.notFoundMessage.append(
+                          '<h2 style="text-align: center;font-weight: inherit; padding-right: 15px"><span class="warning" title="Passed with warning" aria-label="Passed with warning" data-icon="alert"></span>Translations not found</h2>',
+                      );
+
+                      const refreshButton = jQuery(
+                          '<button class="btn" data-icon="refresh">Refresh</button>');
+                      refreshButton.on('click', function() {
+                        CraftliltPlugin.elementIndexTranslation.updateElements();
+                        return false;
+                      });
+
+                      CraftliltPlugin.elementIndexTranslation.notFoundMessage.append(
+                          refreshButton,
+                      );
+
+                      jQuery('#translations-element-index .elements').append(
+                          CraftliltPlugin.elementIndexTranslation.notFoundMessage,
+                      );
+                    } else if (
+                        CraftliltPlugin.elementIndexTranslation.notFoundMessage !== undefined &&
+                        CraftliltPlugin.elementIndexTranslation.notFoundMessage !== null
+                    ) {
+                      CraftliltPlugin.elementIndexTranslation.notFoundMessage.remove();
+                    }
+                  }
+
                   jQuery('#translations-element-index').
                       removeClass('elements').
                       removeClass('busy');
@@ -489,6 +527,7 @@ $(document).ready(function() {
                   });
 
                   let disabledIds = [];
+                  let enabledIds = [];
                   $('#translations-element-index tr span.translation-status').
                       each(function() {
                         const status = $(this).data('status');
@@ -496,10 +535,15 @@ $(document).ready(function() {
                             status === 'new' ||
                             status === 'in-progress') {
                           disabledIds.push($(this).data('id'));
+                        } else if (CraftliltPlugin.elementIndexTranslation.settings.disabledElementIds.indexOf(jQuery(this).data('id'))) {
+                          enabledIds.push($(this).data('id'))
                         }
                       });
+                  CraftliltPlugin.elementIndexTranslation.settings.disabledElementIds = []
                   CraftliltPlugin.elementIndexTranslation.disableElementsById(
                       disabledIds);
+                  CraftliltPlugin.elementIndexTranslation.enableElementsById(
+                      enabledIds);
                 },
                 onSelectionChange: function() {
                 },
@@ -518,8 +562,10 @@ $(document).ready(function() {
                     return;
                   }
                   CraftliltPlugin.elementIndexTranslation.setIndexBusy();
-                  CraftliltPlugin.elementIndexTranslation.$publishTrigger.addClass('disabled')
-                  CraftliltPlugin.elementIndexTranslation.$reviewTrigger.addClass('disabled')
+                  CraftliltPlugin.elementIndexTranslation.$publishTrigger.addClass(
+                      'disabled');
+                  CraftliltPlugin.elementIndexTranslation.$reviewTrigger.addClass(
+                      'disabled');
 
                   Craft.sendActionRequest('POST',
                       'craft-lilt-plugin/translation/post-translation-publish/invoke',
@@ -532,8 +578,10 @@ $(document).ready(function() {
                       then(response => {
                         Craft.cp.displayNotice('Translation published');
                         CraftliltPlugin.elementIndexTranslation.updateElements();
-                        CraftliltPlugin.elementIndexTranslation.$publishTrigger.removeClass('disabled')
-                        CraftliltPlugin.elementIndexTranslation.$reviewTrigger.removeClass('disabled')
+                        CraftliltPlugin.elementIndexTranslation.$publishTrigger.removeClass(
+                            'disabled');
+                        CraftliltPlugin.elementIndexTranslation.$reviewTrigger.removeClass(
+                            'disabled');
                       }).
                       catch(exception => {
                         Craft.cp.displayError(Craft.t('app',

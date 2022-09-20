@@ -17,6 +17,7 @@ use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
@@ -51,7 +52,8 @@ class PostSyncControllerCest extends AbstractIntegrationCest
             ->one();
 
         /**
-         * @var TranslationRecord[] $translations
+         * @var Job $job777
+         * @var TranslationRecord[] $translations777
          */
         [$job777, $translations777] = $I->createJobWithTranslations([
             'title' => 'Awesome test job',
@@ -62,8 +64,13 @@ class PostSyncControllerCest extends AbstractIntegrationCest
             'versions' => [],
             'authorId' => 1,
             'liltJobId' => 777,
+            'status' => Job::STATUS_FAILED
         ]);
 
+        /**
+         * @var Job $job888
+         * @var TranslationRecord[] $translations888
+         */
         [$job888, $translations888] = $I->createJobWithTranslations([
             'title' => 'Awesome test job',
             'elementIds' => [$element->id],
@@ -73,72 +80,8 @@ class PostSyncControllerCest extends AbstractIntegrationCest
             'versions' => [],
             'authorId' => 1,
             'liltJobId' => 888,
+            'status' => Job::STATUS_READY_FOR_REVIEW
         ]);
-
-        $I->expectJobGetRequest(
-            777,
-            200,
-            [
-                'status' => JobResponse::STATUS_COMPLETE
-            ]
-        );
-
-        $I->expectJobGetRequest(
-            888,
-            200,
-            [
-                'status' => JobResponse::STATUS_COMPLETE
-            ]
-        );
-
-        $responseBody777 = [
-            'limit' => 25,
-            'start' => 0,
-            'results' => [
-                0 => [
-                    'createdAt' => '2022-05-29T11:31:58',
-                    'errorMsg' => null,
-                    'id' => 703695,
-                    'name' => '497058_element_505.json+html',
-                    'status' => TranslationResponse::STATUS_IMPORT_COMPLETE,
-                    'trgLang' => 'es',
-                    'trgLocale' => 'ES',
-                    'updatedAt' => '2022-06-02T23:01:42',
-                ],
-            ]
-        ];
-        $I->expectTranslationsGetRequest(
-            777,
-            0,
-            100,
-            HttpCode::OK,
-            $responseBody777
-        );
-
-        $responseBody888 = [
-            'limit' => 25,
-            'start' => 0,
-            'results' => [
-                0 => [
-                    'createdAt' => '2022-05-29T11:31:58',
-                    'errorMsg' => null,
-                    'id' => 703696,
-                    'name' => '497058_element_505.json+html',
-                    'status' => TranslationResponse::STATUS_IMPORT_COMPLETE,
-                    'trgLang' => 'de',
-                    'trgLocale' => 'DE',
-                    'updatedAt' => '2022-06-02T23:01:42',
-                ],
-            ],
-        ];
-
-        $I->expectTranslationsGetRequest(
-            888,
-            0,
-            100,
-            HttpCode::OK,
-            $responseBody888
-        );
 
         $I->sendAjaxPostRequest(
             sprintf(
@@ -152,11 +95,29 @@ class PostSyncControllerCest extends AbstractIntegrationCest
 
         $I->seeResponseCodeIs(200);
 
-        $I->assertJobStatus($job777->id, Job::STATUS_IN_PROGRESS);
-        $I->assertJobStatus($job888->id, Job::STATUS_IN_PROGRESS);
+        $I->assertJobStatus($job777->id, Job::STATUS_FAILED);
+        $I->assertJobStatus($job888->id, Job::STATUS_READY_FOR_REVIEW);
 
         $I->assertTranslationStatus($translations777[0]->id, Job::STATUS_IN_PROGRESS);
         $I->assertTranslationStatus($translations888[0]->id, Job::STATUS_IN_PROGRESS);
+
+        $I->assertJobInQueue(
+            (new FetchJobStatusFromConnector(
+                [
+                    'jobId' => $job888->id,
+                    'liltJobId' => $job888->liltJobId,
+                ]
+            ))
+        );
+
+        $I->assertJobInQueue(
+            (new FetchJobStatusFromConnector(
+                [
+                    'jobId' => $job777->id,
+                    'liltJobId' => $job777->liltJobId,
+                ]
+            ))
+        );
     }
 
     public function testSyncJobNotFound(IntegrationTester $I): void
