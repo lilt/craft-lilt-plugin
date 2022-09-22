@@ -61,7 +61,7 @@ class FetchJobStatusFromConnector extends BaseJob
 
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
 
-        if(!$jobRecord) {
+        if (!$jobRecord) {
             // job was removed, we are done here
             return;
         }
