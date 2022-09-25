@@ -13,6 +13,7 @@ use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -99,13 +100,15 @@ class SyncJobFromLiltConnectorHandler
         } else {
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
             $jobRecord->save();
-        }
 
-        Craftliltplugin::getInstance()->jobLogsRepository->create(
-            $jobRecord->id,
-            Craft::$app->getUser()->getId(),
-            'Translations downloaded'
-        );
+            Craft::$app->elements->invalidateCachesForElementType(Translation::class);
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $jobRecord->id,
+                Craft::$app->getUser()->getId(),
+                'Translations downloaded'
+            );
+        }
 
         Craft::$app->elements->invalidateCachesForElement($job);
     }

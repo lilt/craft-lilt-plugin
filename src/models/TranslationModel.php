@@ -164,8 +164,6 @@ class TranslationModel extends Model
         switch ($this->status) {
             case TranslationRecord::STATUS_READY_TO_PUBLISH:
                 return 'Ready to publish';
-            case TranslationRecord::STATUS_NEW:
-                return 'New';
             case TranslationRecord::STATUS_IN_PROGRESS:
                 return 'In progress';
             case TranslationRecord::STATUS_READY_FOR_REVIEW:
@@ -192,7 +190,6 @@ class TranslationModel extends Model
                 return 'green';
             case TranslationRecord::STATUS_FAILED:
                 return 'red';
-            case TranslationRecord::STATUS_NEW:
             default:
                 return '';
         }

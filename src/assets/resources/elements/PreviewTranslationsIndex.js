@@ -1,3 +1,4 @@
+//src/web/assets/cp/src/js/BaseElementIndex.js:3.7.0
 CraftliltPlugin.PreviewTranslationsIndex = Garnish.Base.extend({
   initialized: false,
   elementType: null,
@@ -378,7 +379,8 @@ CraftliltPlugin.PreviewTranslationsIndex = Garnish.Base.extend({
       this.getSourceContainer().replaceWith(response.data.html);
       this.initSources();
       this.selectDefaultSource();
-    }).catch(() => {
+    }).catch((e) => {
+      console.log(e)
       this.setIndexAvailable();
       if (!this._ignoreFailedRequest) {
         Craft.cp.displayError(Craft.t('app', 'A server error occurred.'));
@@ -680,6 +682,7 @@ CraftliltPlugin.PreviewTranslationsIndex = Garnish.Base.extend({
       (this.settings.context === 'index' ? Garnish.$scrollContainer : this.$main).scrollTop(0);
       this._updateView(params, response.data);
     }).catch(e => {
+      console.log(e)
       this.setIndexAvailable();
       if (!this._ignoreFailedRequest) {
         Craft.cp.displayError(Craft.t('app', 'A server error occurred.'));
@@ -2023,7 +2026,8 @@ CraftliltPlugin.PreviewTranslationsIndex = Garnish.Base.extend({
         submitting = false;
         $spinner.addClass('hidden');
       })
-      .catch(function() {
+      .catch(function(e) {
+        console.log(e)
         submitting = false;
         $spinner.addClass('hidden');
         if (!this._ignoreFailedRequest) {

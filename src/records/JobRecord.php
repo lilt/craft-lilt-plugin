@@ -57,6 +57,7 @@ class JobRecord extends ActiveRecord
             SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT
         );
     }
+
     public function isVerifiedFlow(): bool
     {
         return strtolower($this->translationWorkflow) === strtolower(

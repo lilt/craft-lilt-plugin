@@ -6,19 +6,24 @@ namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
 use craft\base\ElementInterface;
+use craft\errors\ElementNotFoundException;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use yii\base\Exception;
 
 class CreateTranslationsHandler
 {
     /**
      * @param Job $job
-     * @param array $sourceContent
+     * @param array $sourceContents
      * @param int $elementId
      * @param int $versionId
      * @param ElementInterface[] $drafts
      * @return bool
+     * @throws \Throwable
+     * @throws ElementNotFoundException
+     * @throws Exception
      */
     public function __invoke(
         Job $job,
@@ -36,7 +41,7 @@ class CreateTranslationsHandler
                 'versionId' => $versionId,
                 'sourceSiteId' => $job->sourceSiteId,
                 'targetSiteId' => $targetSiteId,
-                'sourceContent' => $sourceContents[$targetSiteId],
+                'sourceContent' => $sourceContents[$targetSiteId] ?? null,
                 'status' => TranslationRecord::STATUS_IN_PROGRESS,
                 'translatedDraftId' => $drafts[$targetSiteId]->getId()
             ];

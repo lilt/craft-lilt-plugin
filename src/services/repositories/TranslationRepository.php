@@ -4,11 +4,64 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\repositories;
 
+use Craft;
+use Throwable;
+use craft\errors\ElementNotFoundException;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use yii\base\Exception;
 
 class TranslationRepository
 {
+    /**
+     * @throws Throwable
+     * @throws ElementNotFoundException
+     * @throws Exception
+     */
+    public function create(
+        int $jobId,
+        int $elementId,
+        int $versionId,
+        int $sourceSiteId,
+        int $targetSiteId,
+        string $status,
+        ?string $sourceContent = null,
+        ?int $translatedDraftId = null
+    ): TranslationRecord {
+        $config = [
+            'jobId'             => $jobId,
+            'elementId'         => $elementId,
+            'versionId'         => $versionId,
+            'sourceSiteId'      => $sourceSiteId,
+            'targetSiteId'      => $targetSiteId,
+            'sourceContent'     => $sourceContent,
+            'status'            => $status,
+            'translatedDraftId' => $translatedDraftId
+        ];
+
+        $translation = new Translation($config);
+        Craft::$app->getElements()->saveElement($translation);
+
+        $translationRecord =  new TranslationRecord(
+            array_merge(
+                [
+                    'id' => $translation->id,
+                    'uid' => $translation->uid
+                ],
+                $config
+            )
+        );
+
+        $translationRecord->save();
+
+        return $translationRecord;
+    }
+
+    /**
+     * @param int $jobId
+     * @return TranslationModel[]
+     */
     public function findByJobId(int $jobId): array
     {
         $translationRecords = TranslationRecord::findAll(['jobId' => $jobId]);
@@ -21,6 +74,31 @@ class TranslationRepository
             },
             $translationRecords
         );
+    }
+
+    /**
+     * @param int $jobId
+     * @return TranslationModel[]
+     */
+    public function findRecordsByJobId(int $jobId): array
+    {
+        return TranslationRecord::findAll(['jobId' => $jobId]);
+    }
+
+    /**
+     * @param int $jobId
+     * @param int $elementId
+     *
+     * @return TranslationRecord[]
+     */
+    public function findByJobIdAndElement(
+        int $jobId,
+        int $elementId
+    ): array {
+        return TranslationRecord::findAll([
+            'jobId' => $jobId,
+            'elementId' => $elementId,
+        ]);
     }
 
     public function findByJobIdSortByStatus(int $jobId): array
@@ -61,7 +139,6 @@ class TranslationRepository
             'elementId' => $elementId,
             'status' => [
                 TranslationRecord::STATUS_IN_PROGRESS,
-                TranslationRecord::STATUS_NEW,
                 TranslationRecord::STATUS_READY_TO_PUBLISH,
                 TranslationRecord::STATUS_READY_FOR_REVIEW,
                 TranslationRecord::STATUS_FAILED,
@@ -90,7 +167,6 @@ class TranslationRepository
                 'jobId' => $jobId,
                 'status' => [
                     TranslationRecord::STATUS_IN_PROGRESS,
-                    TranslationRecord::STATUS_NEW,
                     TranslationRecord::STATUS_FAILED,
                 ]
             ]

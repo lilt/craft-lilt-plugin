@@ -37,15 +37,19 @@ class TranslationQuery extends ElementQuery
     public function afterPopulate(array $elements): array
     {
         //TODO: move to repository
-        $translatedDraftIds = array_map(function (Translation $element) {
-            return $element->translatedDraftId;
+        $translatedDrafts = array_map(function (Translation $element) {
+            return ['id' => (int) $element->translatedDraftId, 'siteId' => (int) $element->targetSiteId];
         }, $elements);
         /**
          * @var Entry[] $translatedDraftsMapped
          */
         $translatedDraftsMapped = [];
-        foreach ($translatedDraftIds as $draftId) {
-            $translatedDraftsMapped[$draftId] = Craft::$app->elements->getElementById((int)$translatedDraftIds[0]);
+        foreach ($translatedDrafts as $translatedDraft) {
+            $translatedDraftsMapped[$translatedDraft['id']] = Craft::$app->elements->getElementById(
+                $translatedDraft['id'],
+                null,
+                $translatedDraft['siteId']
+            );
         }
 
         return array_map(
