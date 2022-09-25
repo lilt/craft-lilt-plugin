@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Craft V4 support
 
+## 0.8.1 - 2022-09-08
+### Fixed
+- Invalidate cache for translations on publish & review
+
 ## 0.8.0 - 2022-09-08
 ### Added
 - Asynchronous job transfer to lilt platform

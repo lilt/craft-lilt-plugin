@@ -12,6 +12,7 @@ namespace lilthq\craftliltplugin\controllers\translation;
 use Craft;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
 use yii\web\Response;
@@ -69,6 +70,8 @@ class PostTranslationPublishController extends AbstractJobController
                 $translations[0]->jobId
             );
         }
+
+        Craft::$app->elements->invalidateCachesForElementType(Translation::class);
 
         return $this->asJson([
             'success' => $updated === 1
