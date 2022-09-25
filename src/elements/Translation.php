@@ -102,7 +102,6 @@ class Translation extends Element
     public static function statuses(): array
     {
         return [
-            TranslationRecord::STATUS_NEW => ['label' => 'New', 'color' => 'turquoise'],
             TranslationRecord::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
             TranslationRecord::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
             TranslationRecord::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],

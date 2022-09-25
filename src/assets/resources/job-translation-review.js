@@ -485,15 +485,38 @@ $(document).ready(function() {
                       CraftliltPlugin.elementIndexTranslation.view !==
                       undefined) {
                     const elementsCount = CraftliltPlugin.elementIndexTranslation.view.getAllElements().length;
-                    console.log('Elements count: ', elementsCount);
 
                     if (elementsCount === 0) {
-                      CraftliltPlugin.elementIndexTranslation.notFoundMessage = $(
-                          '<div style="padding: 50px;text-align: center;"></div>');
+                      CraftliltPlugin.elementIndexTranslation.notFoundMessage = $('<div class="not-found-message-container"></div>');
 
-                      CraftliltPlugin.elementIndexTranslation.notFoundMessage.append(
-                          '<h2 style="text-align: center;font-weight: inherit; padding-right: 15px"><span class="warning" title="Passed with warning" aria-label="Passed with warning" data-icon="alert"></span>Translations not found</h2>',
-                      );
+                      if($('#create-job-form').data('job-status') === 'in-progress') {
+                        CraftliltPlugin.elementIndexTranslation.notFoundMessage.append(
+                            '<h2>Translation in progress...</h2>',
+                        );
+                      } else {
+                        let selectedOption = null;
+                        CraftliltPlugin.elementIndexTranslation.statusMenu.$options.each(function(index, option) {
+                          if(jQuery(option).hasClass('sel')) {
+                            selectedOption = jQuery(option);
+                          }
+                        })
+
+                        const statusHtml = jQuery('<div>' + jQuery(selectedOption).html().toLowerCase() + '</div>');
+                        const statusSpan = statusHtml.find('span.status')
+                        if(statusSpan !== undefined) {
+                          statusSpan.remove()
+                        }
+
+                        const boldStatus = jQuery('<b></b>')
+                        boldStatus.append(statusHtml.html())
+
+                        const statusHeader = jQuery('<h2>No translations are </h2>');
+                        statusHeader.append(boldStatus);
+
+                        CraftliltPlugin.elementIndexTranslation.notFoundMessage.append(
+                            statusHeader,
+                        );
+                      }
 
                       const refreshButton = jQuery(
                           '<button class="btn" data-icon="refresh">Refresh</button>');
@@ -522,26 +545,34 @@ $(document).ready(function() {
                       removeClass('busy');
 
                   $('.lilt-review-translation').on('click', function() {
+                    const parent = jQuery(this).closest('tr');
+
+                    if(parent !== undefined && parent.hasClass('disabled')) {
+                      return
+                    }
+
                     CraftliltPlugin.translationReview.showMultiModal(
-                        [$(this).data('id')]);
+                        [jQuery(this).data('id')]);
                   });
 
                   let disabledIds = [];
                   let enabledIds = [];
-                  $('#translations-element-index tr span.translation-status').
-                      each(function() {
-                        const status = $(this).data('status');
+                  CraftliltPlugin.elementIndexTranslation.view.getAllElements().
+                      each(function(i) {
+                        const status = $(this).find('span.translation-status').data('status');
                         if (status === 'published' || status === 'failed' ||
                             status === 'new' ||
                             status === 'in-progress') {
                           disabledIds.push($(this).data('id'));
-                        } else if (CraftliltPlugin.elementIndexTranslation.settings.disabledElementIds.indexOf(jQuery(this).data('id'))) {
+                        } else {
                           enabledIds.push($(this).data('id'))
                         }
                       });
                   CraftliltPlugin.elementIndexTranslation.settings.disabledElementIds = []
+
                   CraftliltPlugin.elementIndexTranslation.disableElementsById(
                       disabledIds);
+
                   CraftliltPlugin.elementIndexTranslation.enableElementsById(
                       enabledIds);
                 },

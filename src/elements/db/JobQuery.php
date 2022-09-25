@@ -48,6 +48,20 @@ class JobQuery extends ElementQuery
                 if (!empty($element->sourceSiteId)) {
                     $element->sourceSiteId = (int)$element->sourceSiteId;
                 }
+
+                if (!empty($element->targetSiteIds)) {
+                    $targetSiteIds = json_decode($element->targetSiteIds, true);
+                    $element->targetSiteIds = [];
+
+                    if (is_array($targetSiteIds) && count($targetSiteIds) > 0) {
+                        foreach ($targetSiteIds as $targetSiteId) {
+                            $element->targetSiteIds[] = (int)$targetSiteId;
+                        }
+                    }
+                } else {
+                    $element->targetSiteIds = [];
+                }
+
                 return $element;
             },
             $elements

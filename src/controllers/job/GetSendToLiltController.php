@@ -15,9 +15,11 @@ use craft\errors\MissingComponentException;
 use craft\helpers\Queue;
 use craft\web\Controller;
 use LiltConnectorSDK\ApiException;
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
@@ -60,9 +62,22 @@ class GetSendToLiltController extends Controller
             return $this->redirect($job->getCpEditUrl());
         }
 
-        if ($job->status === Job::STATUS_IN_PROGRESS) {
-            //TODO: check if job exist
+        if ($job->status !== Job::STATUS_NEW) {
+            //TODO: check if queue job exist
             return $this->redirect($job->getCpEditUrl());
+        }
+
+        foreach ($job->getElementIds() as $elementId) {
+            foreach ($job->getTargetSiteIds() as $targetSiteId) {
+                Craftliltplugin::getInstance()->translationRepository->create(
+                    $job->id,
+                    $elementId,
+                    $job->getElementVersionId($elementId),
+                    $job->sourceSiteId,
+                    $targetSiteId,
+                    TranslationRecord::STATUS_IN_PROGRESS
+                );
+            }
         }
 
         Queue::push(

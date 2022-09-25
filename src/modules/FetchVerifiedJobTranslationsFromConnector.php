@@ -16,6 +16,7 @@ use Exception;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
@@ -163,6 +164,14 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
             //TODO: can't be default, we need to reach all translations to status ready for review!
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
             $jobRecord->save();
+
+            Craft::$app->elements->invalidateCachesForElementType(Translation::class);
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $jobRecord->id,
+                Craft::$app->getUser()->getId(),
+                'Translations downloaded'
+            );
         }
 
         Craft::$app->elements->invalidateCachesForElement(

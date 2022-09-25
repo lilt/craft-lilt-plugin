@@ -40,9 +40,46 @@ class FetchJobStatusFromConnector extends BaseJob
      */
     public function execute($queue): void
     {
+        $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
+
+        if (!$jobRecord) {
+            // job was removed, we are done here
+            return;
+        }
+
+        if (empty($this->liltJobId)) {
+            //looks like job is
+            Queue::push(
+                new SendJobToConnector(['jobId' => $this->jobId]),
+                SendJobToConnector::PRIORITY,
+                SendJobToConnector::DELAY_IN_SECONDS
+            );
+
+            $this->markAsDone($queue);
+
+            return;
+        }
+
         $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
         $isTranslationFinished = $liltJob->getStatus() !== JobResponse::STATUS_PROCESSING
             && $liltJob->getStatus() !== JobResponse::STATUS_QUEUED;
+
+        $isTranslationFailed = $liltJob->getStatus() === JobResponse::STATUS_CANCELED
+            || $liltJob->getStatus() === JobResponse::STATUS_FAILED;
+
+        if ($isTranslationFailed) {
+            $jobRecord->status = Job::STATUS_FAILED;
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $jobRecord->id,
+                Craft::$app->getUser()->getId(),
+                sprintf('Job failed, received status: %s', $liltJob->getStatus())
+            );
+
+            $jobRecord->save();
+            $this->markAsDone($queue);
+            return;
+        }
 
         if (!$isTranslationFinished) {
             Queue::push(
@@ -56,13 +93,6 @@ class FetchJobStatusFromConnector extends BaseJob
                 self::DELAY_IN_SECONDS
             );
 
-            return;
-        }
-
-        $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
-
-        if (!$jobRecord) {
-            // job was removed, we are done here
             return;
         }
 
