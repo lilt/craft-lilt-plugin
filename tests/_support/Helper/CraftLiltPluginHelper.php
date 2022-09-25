@@ -94,6 +94,14 @@ class CraftLiltPluginHelper extends Module
             $createJobCommand
         );
 
+        //TODO: looks like same logic & job->status doesn't have any affect
+        if (!empty($data['status'])) {
+            $job->status = $data['status'];
+            $record = JobRecord::findOne(['id' => $job->id]);
+            $record->status = $data['status'];
+            $record->save();
+        }
+
         if (!empty($data['liltJobId'])) {
             $job->liltJobId = $data['liltJobId'];
             $record = JobRecord::findOne(['id' => $job->id]);
@@ -112,10 +120,14 @@ class CraftLiltPluginHelper extends Module
 
         foreach ($jobInfos as $jobInfo) {
             $actual = Craft::$app->queue->getJobDetails($jobInfo['id']);
-            $jobInfos[get_class($actual['job'])] = $actual['job'];
+            $key = get_class($actual['job']) . '_' . json_encode($actual['job']);
+            $jobInfos[$key] = $actual['job'];
         }
 
-        $this->assertEquals($expectedJob, $jobInfos[get_class($expectedJob)]);
+        $key = get_class($expectedJob) . '_' . json_encode($expectedJob);
+
+        $this->assertArrayHasKey($key, $jobInfos);
+        $this->assertEquals($expectedJob, $jobInfos[$key]);
     }
 
     public function assertTranslationsContentMatch(array $translations, array $expectedContent): void

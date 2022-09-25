@@ -122,12 +122,47 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      * @throws Exception
      * @throws ModuleException
      */
+    public function testExecuteJobNotFound(IntegrationTester $I): void
+    {
+        Db::truncateTable(Craft::$app->queue->tableName);
+
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $I->runQueue(
+            FetchJobStatusFromConnector::class,
+            [
+                'liltJobId' => 777,
+                'jobId'     => 100,
+            ]
+        );
+
+        Assert::assertEmpty(
+            Craft::$app->queue->getTotalJobs()
+        );
+    }
+
+    /**
+     * @throws Exception
+     * @throws ModuleException
+     */
     public function testExecuteSuccessProcessing(IntegrationTester $I): void
     {
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
+
+        $job = $I->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [999],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
 
         $I->expectJobGetRequest(
             777,
@@ -141,7 +176,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
             FetchJobStatusFromConnector::class,
             [
                 'liltJobId' => 777,
-                'jobId'     => 100,
+                'jobId'     => $job->id,
             ]
         );
 
@@ -150,7 +185,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
         Assert::assertCount(1, $totalJobs);
         $I->assertJobInQueue(
             new FetchJobStatusFromConnector([
-                'jobId' => 100,
+                'jobId' => $job->id,
                 'liltJobId' => 777
             ])
         );
@@ -167,6 +202,17 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
+        $job = $I->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [999],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
+
         $I->expectJobGetRequest(
             777,
             200,
@@ -179,7 +225,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
             FetchJobStatusFromConnector::class,
             [
                 'liltJobId' => 777,
-                'jobId'     => 100,
+                'jobId'     => $job->id,
             ]
         );
 
@@ -188,7 +234,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
         Assert::assertCount(1, $totalJobs);
         $I->assertJobInQueue(
             new FetchJobStatusFromConnector([
-                'jobId' => 100,
+                'jobId' => $job->id,
                 'liltJobId' => 777
             ])
         );

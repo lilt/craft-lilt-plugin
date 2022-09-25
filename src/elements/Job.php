@@ -383,15 +383,7 @@ class Job extends Element
 
     public function getTargetSiteIds(): array
     {
-        if ($this->targetSiteIds === null) {
-            return [];
-        }
-
-        if (is_array($this->targetSiteIds)) {
-            return $this->targetSiteIds;
-        }
-
-        return json_decode($this->targetSiteIds, true) ?? [];
+        return $this->targetSiteIds;
     }
 
     public function getSourceSiteIdHtml(): string
@@ -461,54 +453,6 @@ class Job extends Element
     public function getTranslationWorkflowLabel(): string
     {
         return Craft::t('craft-lilt-plugin', strtolower($this->translationWorkflow));
-    }
-
-    public function getTranslations(): array
-    {
-        if (!empty($this->_elements)) {
-            return $this->_elements;
-        }
-
-        $this->_translations = Craftliltplugin::getInstance()->translationRepository->findByJobIdSortByStatus(
-            $this->id
-        );
-
-        //TODO: it should be not here, it is a logic
-        $readyToPublish = true;
-
-        foreach ($this->_translations as $translation) {
-            if ($translation->status !== TranslationRecord::STATUS_READY_TO_PUBLISH) {
-                $readyToPublish = false;
-                break;
-            }
-        }
-
-        if ($readyToPublish) {
-            $this->status = Job::STATUS_READY_TO_PUBLISH;
-            Craft::$app->elements->saveElement($this);
-        }
-
-        return $this->_translations;
-    }
-
-    public function getElementsMappedById(): array
-    {
-        if (!empty($this->_elements)) {
-            return $this->_elements;
-        }
-
-        $this->_elements = [];
-
-        //TODO: maybe other way to select, not one by one?
-        $elements = array_map(static function (int $id) {
-            return Craft::$app->elements->getElementById($id);
-        }, $this->getElementIds());
-
-        foreach ($elements as $element) {
-            $this->_elements[$element->id] = $element;
-        }
-
-        return $this->_elements;
     }
 
     public function getCpEditUrl(): ?string

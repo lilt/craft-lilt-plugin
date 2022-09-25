@@ -64,6 +64,7 @@ class GetJobEditFormControllerCest
 
         $I->seeResponseCodeIs(400);
     }
+
     public function testSyncJobNotFound(IntegrationTester $I): void
     {
         $I->amLoggedInAs(
@@ -119,7 +120,7 @@ class GetJobEditFormControllerCest
             200
         );
 
-        $response = $controller->actionInvoke((string) $job->id);
+        $response = $controller->actionInvoke((string)$job->id);
 
         $behavior = $response->getBehavior('template');
         $actual = [
@@ -209,12 +210,12 @@ class GetJobEditFormControllerCest
                     'status' => 'new',
                     'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
                     'sourceSiteLanguage' => 'en-US',
-                    'targetSiteIds' => sprintf(
-                        '{"de-DE": %d, "es-ES": %d, "ru-RU": %d}',
+                    'targetSiteIds' => [
                         Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE'),
                         Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('es-ES'),
                         Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU')
-                    ),
+                    ]
+                    ,
                     'elementIds' => sprintf('["%d"]', $job->getElementIds()[0]),
                     'versions' => '[]',
                     'dueDate' => null,

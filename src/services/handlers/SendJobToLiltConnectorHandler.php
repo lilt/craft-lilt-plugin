@@ -17,8 +17,10 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
@@ -46,10 +48,15 @@ class SendJobToLiltConnectorHandler
         );
 
         $elementIdsToTranslate = $job->getElementIds();
+        $translations = Craftliltplugin::getInstance()->translationRepository->findRecordsByJobId($job->id);
+        /**
+         * @var TranslationRecord[][] $translationsMapped
+         */
+        $translationsMapped = [];
 
-        $targetLanguages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
-            $job->getTargetSiteIds()
-        );
+        foreach ($translations as $translation) {
+            $translationsMapped[$translation->versionId][$translation->targetSiteId] = $translation;
+        }
 
         foreach ($elementIdsToTranslate as $elementId) {
             $versionId = $job->getElementVersionId($elementId);
@@ -59,23 +66,22 @@ class SendJobToLiltConnectorHandler
                 //TODO: handle
                 continue;
             }
-            $drafts = [];
-            $contents = [];
+
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
                 //Create draft with & update all values to source element
-                $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
+                $draft = Craftliltplugin::getInstance()->createDraftHandler->create(
                     $element,
                     $job->title,
-                    (int) $job->sourceSiteId,
-                    (int) $targetSiteId
+                    $job->sourceSiteId,
+                    $targetSiteId
                 );
 
-                $contents[$targetSiteId] = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
-                    $drafts[$targetSiteId]
+                $content = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
+                    $draft
                 );
 
                 $result = $this->createJobFile(
-                    $contents[$targetSiteId],
+                    $content,
                     $versionId,
                     $jobLilt->getId(),
                     Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
@@ -86,24 +92,33 @@ class SendJobToLiltConnectorHandler
                 );
 
                 if (!$result) {
-                    //TODO: set job failed and exit
                     $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
-                    return;
+
+                    throw new \RuntimeException('Translations not created, upload failed');
                 }
-            }
 
-            $createTranslationsResult = Craftliltplugin::getInstance()->createTranslationsHandler->__invoke(
-                $job,
-                $contents,
-                $elementId,
-                $versionId,
-                $drafts
-            );
+                $translation = $translationsMapped[$elementId][$targetSiteId] ?? null;
+                if ($translation === null) {
+                    $translation = Craftliltplugin::getInstance()->translationRepository->create(
+                        $job->id,
+                        $elementId,
+                        $versionId,
+                        $job->sourceSiteId,
+                        $targetSiteId,
+                        TranslationRecord::STATUS_IN_PROGRESS
+                    );
+                }
 
-            if (!$createTranslationsResult) {
-                $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
+                $translation->sourceContent = $content;
+                $translation->translatedDraftId = $draft->id;
+                $translation->markAttributeDirty('sourceContent');
+                $translation->markAttributeDirty('translatedDraftId');
 
-                throw new \RuntimeException('Translations not created, upload failed');
+                if (!$translation->save()) {
+                    $this->updateJob($job, $jobLilt->getId(), Job::STATUS_FAILED);
+
+                    throw new \RuntimeException('Translations not created, upload failed');
+                }
             }
         }
 
@@ -121,7 +136,9 @@ class SendJobToLiltConnectorHandler
             (new FetchJobStatusFromConnector([
                 'jobId' => $job->id,
                 'liltJobId' => $jobLilt->getId(),
-            ]))
+            ])),
+            FetchJobStatusFromConnector::PRIORITY,
+            FetchJobStatusFromConnector::DELAY_IN_SECONDS
         );
     }
 

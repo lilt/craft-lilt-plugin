@@ -48,8 +48,8 @@ class CopySourceTextHandler
                 $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
                     $element,
                     $job->title,
-                    (int)$job->sourceSiteId,
-                    (int)$targetSiteId
+                    $job->sourceSiteId,
+                    $targetSiteId
                 );
 
                 $contents[$targetSiteId] = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
