@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
+
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\modules;
@@ -11,12 +16,17 @@ use Exception;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 class FetchVerifiedJobTranslationsFromConnector extends BaseJob
 {
-    private const DELAY_IN_SECONDS = 10;
+    public const DELAY_IN_SECONDS = 5 * 60;
+    public const PRIORITY = null;
+    public const TTR = null;
+
+    private const RETRY_COUNT = 0;
 
     /**
      * @var int $jobId
@@ -49,8 +59,16 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
             return;
         }
 
-        if ($job->isInstantFlow()) {
+        if (!$job->isVerifiedFlow()) {
             $this->markAsDone($queue);
+
+            return;
+        }
+
+        $mutex = Craft::$app->getMutex();
+        $mutexKey = __CLASS__ . '_' . __FUNCTION__ . '_' . $this->jobId;
+        if (!$mutex->acquire($mutexKey)) {
+            Craft::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
 
             return;
         }
@@ -131,7 +149,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
                         'liltJobId' => $this->liltJobId,
                     ]
                 )),
-                null,
+                self::PRIORITY,
                 self::DELAY_IN_SECONDS
             );
         }
@@ -139,21 +157,29 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
         if ($statuses === ['failed', 'canceled']) {
             $jobRecord->status = Job::STATUS_FAILED;
             $jobRecord->save();
-            $this->markAsDone($queue);
         } elseif (in_array('in-progress', $statuses, true)) {
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
             $jobRecord->save();
-            $this->markAsDone($queue);
         } else {
             //TODO: can't be default, we need to reach all translations to status ready for review!
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
             $jobRecord->save();
-            $this->markAsDone($queue);
+
+            Craft::$app->elements->invalidateCachesForElementType(Translation::class);
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $jobRecord->id,
+                Craft::$app->getUser()->getId(),
+                'Translations downloaded'
+            );
         }
 
         Craft::$app->elements->invalidateCachesForElement(
             $job
         );
+
+        $this->markAsDone($queue);
+        $mutex->release($mutexKey);
     }
 
     /**

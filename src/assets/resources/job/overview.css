@@ -52,3 +52,18 @@
 #translations-list #translations-element-index {
     box-shadow: none !important;
 }
+
+#translations-element-index .elements .not-found-message-container {
+    padding: 50px;
+    text-align: center;
+}
+#translations-element-index .elements .blue.status {
+    background-color: #1992d4;
+    animation: blinker 1s linear infinite;
+}
+#translations-element-index .elements .not-found-message-container h2
+{
+    text-align: center;
+    font-weight: inherit;
+    padding-right: 15px
+}
