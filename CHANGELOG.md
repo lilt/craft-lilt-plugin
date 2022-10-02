@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.8.1 - 2022-09-08
+## 0.8.2 - 2022-11-02
 ### Fixed
 - Invalidate cache for translations on publish & review
+
+## 0.8.1 - 2022-11-02
+### Fixed
+- Status query for translation elements index
+- Translation elements capability with different versions of CraftCMS
 
 ## 0.8.0 - 2022-09-08
 ### Added
