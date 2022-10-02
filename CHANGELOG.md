@@ -8,9 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Craft V4 support
 
-## 0.8.1 - 2022-09-08
+## 0.8.1 - 2022-11-02
 ### Fixed
-- Invalidate cache for translations on publish & review
+- Status query for translation elements index
+- Translation elements capability with different versions of CraftCMS 
 
 ## 0.8.0 - 2022-09-08
 ### Added

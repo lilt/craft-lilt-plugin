@@ -38,7 +38,7 @@ class TranslationQuery extends ElementQuery
     {
         //TODO: move to repository
         $translatedDrafts = array_map(function (Translation $element) {
-            return ['id' => (int) $element->translatedDraftId, 'siteId' => (int) $element->targetSiteId];
+            return ['id' => (int)$element->translatedDraftId, 'siteId' => (int)$element->targetSiteId];
         }, $elements);
         /**
          * @var Entry[] $translatedDraftsMapped
@@ -151,8 +151,8 @@ class TranslationQuery extends ElementQuery
         return $this->query;
     }
 
-    protected function statusCondition(string $status): bool
+    protected function statusCondition(string $status): ?bool
     {
-        return array_key_exists($status, Translation::statuses());
+        return null;
     }
 }
