@@ -12,12 +12,15 @@ namespace lilthq\craftliltplugin\models;
 use Craft;
 use craft\base\Model;
 use craft\helpers\UrlHelper;
+use Exception;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 class TranslationModel extends Model
 {
+    use TranslationModelTrait;
+
     public $id;
     public $uid;
     public $jobId;
@@ -79,51 +82,8 @@ class TranslationModel extends Model
 
     public function getElementUrl(): ?string
     {
-        $draft = null;
-
-        if (!empty($this->translatedDraftId)) {
-            $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
-        }
-
-        if (!$draft) {
-            $draft = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
-        }
-
-        return $draft->getUrl();
-
-        /* TODO: not working for default site? We can't preview disabled entries for default site?
-        $draft = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->sourceSiteId);
-        $element = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
-
-        $preview = [
-            'elementType' => get_class($element),
-            'sourceId' => $element->getId(),
-            'draftId' => $draft->draftId,
-            'siteId' => $this->targetSiteId,
-            'template' => 'blog/_entry',
-        ];
-
-        $token = Craft::$app->tokens->createToken([
-            "preview/preview",
-            $preview
-        ]);
-
-        return UrlHelper::urlWithParams(
-            $element->getUrl(),
-            ['token' => $token]
-        );
-        */
-    }
-
-    public function getLastDeliveryFormatted(): ?string
-    {
-        return (new DateTime($this->lastDelivery))->format(Craft::$app->locale->getDateFormat('short', 'php'));
-    }
-
-    public function getPreviewUrl(): ?string
-    {
-        if ($this->translatedDraftId === null) {
-            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
+        if ($this->versionId === null) {
+            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->sourceSiteId);
 
             if ($element === null) {
                 //element removed, we don't have any link
@@ -132,30 +92,19 @@ class TranslationModel extends Model
 
             return $element->getUrl();
         }
-        $element = Craft::$app->elements->getElementById($this->translatedDraftId, null, $this->targetSiteId);
 
-        if (!$element) {
-            $element = Craft::$app->elements->getElementById($this->elementId, null, $this->targetSiteId);
-
-            if ($element === null) {
-                //TODO: handle
-                return null;
-            }
-
-            return $element->getUrl();
-        }
+        $element = Craft::$app->elements->getElementById($this->versionId, null, $this->sourceSiteId);
 
         $token = Craft::$app->tokens->createToken([
-                "preview/preview",
-                [
-                    'elementType' => get_class($element),
-                    'sourceId' => $element->getCanonicalId(),
-                    'draftId' => $element->draftId,
-                    'siteId' => $this->targetSiteId,
-                ]
-            ]);
-        //TODO: Argument 1 passed to craft\helpers\UrlHelper::urlWithParams() must be of the type string, null given,
-        // called in /craft-lilt-plugin/src/models/TranslationModel.php on line 143   ?????
+            "preview/preview",
+            [
+                'elementType' => get_class($element),
+                'sourceId' => $element->getCanonicalId(),
+                'canonicalId' => $element->getCanonicalId(),
+                'draftId' => $element->draftId,
+                'siteId' => $this->sourceSiteId,
+            ]
+        ]);
         if ($element->getUrl() === null) {
             return null;
         }
@@ -163,6 +112,16 @@ class TranslationModel extends Model
         return UrlHelper::urlWithParams(
             $element->getUrl(),
             ['token' => $token]
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getLastDeliveryFormatted(): ?string
+    {
+        return (new DateTime($this->lastDelivery))->format(
+            Craft::$app->locale->getDateFormat('short', 'php')
         );
     }
 
@@ -205,8 +164,6 @@ class TranslationModel extends Model
         switch ($this->status) {
             case TranslationRecord::STATUS_READY_TO_PUBLISH:
                 return 'Ready to publish';
-            case TranslationRecord::STATUS_NEW:
-                return 'New';
             case TranslationRecord::STATUS_IN_PROGRESS:
                 return 'In progress';
             case TranslationRecord::STATUS_READY_FOR_REVIEW:
@@ -233,7 +190,6 @@ class TranslationModel extends Model
                 return 'green';
             case TranslationRecord::STATUS_FAILED:
                 return 'red';
-            case TranslationRecord::STATUS_NEW:
             default:
                 return '';
         }

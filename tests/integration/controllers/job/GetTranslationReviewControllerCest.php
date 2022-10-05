@@ -16,11 +16,14 @@ use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\GetTranslationReviewController;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\ViewWrapper;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
+
+use function PHPUnit\Framework\assertInstanceOf;
 
 class GetTranslationReviewControllerCest
 {
@@ -75,44 +78,95 @@ class GetTranslationReviewControllerCest
         $translations[0]->save();
 
         $controller = $this->getController();
+
+        $view = new ViewWrapper();
+        $view->setControllerView($controller->getView());
+
+        $controller->setView($view);
         $controller->request->setBodyParams(['translationId' => $translations[0]->id]);
         $response = $controller->actionInvoke();
 
-        $behavior = $response->getBehavior('template');
-        $actual = [
-            'variables' => $behavior->variables,
-            'template' => $behavior->template,
-            'templateMode' => $behavior->templateMode,
-        ];
+        $actual = $view->data;
 
-        $expected = $this->getExpected();
+        //make translation value as array
+        $translation = $actual['variables']['translation'];
+        assertInstanceOf(TranslationModel::class, $translation);
+        $actual['variables']['translation'] = $translation->toArray();
+
+        $translations[0]->refresh();
+        $expectedTranslatedDraftId = $translations[0]->translatedDraftId;
+        $expected = $this->getExpected($expectedTranslatedDraftId);
+
+        Assert::assertNotNull($expectedTranslatedDraftId);
 
         foreach ($expected['variables']['translation'] as $key => $value) {
             if (is_array($value)) {
-                Assert::assertEqualsCanonicalizing($value, $actual['variables']['translation'][$key]);
+                $expectedVariableValue = $this->ksort_recursive($value);
+                $actualVariableValue = $this->ksort_recursive($actual['variables']['translation'][$key]);
+
+                Assert::assertEqualsCanonicalizing($expectedVariableValue, $actualVariableValue);
                 continue;
+            }
+
+            if ($key === 'translatedDraftId') {
+                Assert::assertSame($expectedTranslatedDraftId, $value);
             }
 
             Assert::assertSame($value, $actual['variables']['translation'][$key]);
         }
 
         Assert::assertSame($expected['template'], $actual['template']);
-        Assert::assertSame($expected['variables']['previewUrl'], $actual['variables']['previewUrl']);
-        Assert::assertSame($expected['variables']['originalUrl'], $actual['variables']['originalUrl']);
+
+        if (method_exists(Assert::class, 'assertMatchesRegularExpression')) {
+            Assert::assertMatchesRegularExpression(
+                "/^http:\/\/\\\$PRIMARY_SITE_URL\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                $actual['variables']['originalUrl']
+            );
+            Assert::assertMatchesRegularExpression(
+                "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                $actual['variables']['previewUrl']
+            );
+        } else {
+            Assert::assertRegExp(
+                "/^http:\/\/\\\$PRIMARY_SITE_URL\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                $actual['variables']['originalUrl']
+            );
+            Assert::assertRegExp(
+                "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/es\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                $actual['variables']['previewUrl']
+            );
+        }
+
         Assert::assertNull($actual['templateMode']);
 
         Assert::assertSame(HttpCode::OK, $response->getStatusCode());
     }
 
-    private function getExpected(): array
+    /**
+     * @param mixed $array
+     * @return bool
+     */
+    private function ksort_recursive(&$array): bool
+    {
+        if (!is_array($array)) {
+            return false;
+        }
+
+        ksort($array);
+
+        foreach ($array as $index => $value) {
+            $this->ksort_recursive($array[$index]);
+        }
+        return true;
+    }
+
+    private function getExpected($translatedDraftId): array
     {
         return [
             'template' => 'craft-lilt-plugin/_components/translation/_overview.twig',
             'variables' => [
-                'previewUrl' => 'http://test.craftcms.test:80/index.php?p=blog/es/first-entry-user-1',
-                'originalUrl' => 'http://$PRIMARY_SITE_URL/index.php?p=blog/first-entry-user-1',
                 'translation' => [
-                    'translatedDraftId' => null,
+                    'translatedDraftId' => $translatedDraftId,
                     'sourceContent' => $this->getSourceContent(),
                     'targetContent' => $this->getTargetContent(),
                     'lastDelivery' => null,

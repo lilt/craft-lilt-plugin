@@ -34,21 +34,34 @@ class CraftLiltPluginHelper extends Module
 
         //TODO: DRY here?
         $elementIdsToTranslate = $job->getElementIds();
+
         foreach ($elementIdsToTranslate as $elementId) {
             $versionId = $job->getElementVersionId($elementId);
 
             $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
-            $content = Craftliltplugin::getInstance()
-                ->elementTranslatableContentProvider
-                ->provide($element);
+            $drafts = [];
+            $contents = [];
+            foreach ($job->getTargetSiteIds() as $targetSiteId) {
+                $contents[$targetSiteId] = Craftliltplugin::getInstance()
+                    ->elementTranslatableContentProvider
+                    ->provide($element);
+                //Create draft with & update all values to source element
+                $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
+                    $element,
+                    $job->title,
+                    $job->sourceSiteId,
+                    $targetSiteId
+                );
+            }
 
             $createTranslationsResult = Craftliltplugin::getInstance()
                 ->createTranslationsHandler
                 ->__invoke(
                     $job,
-                    $content,
+                    $contents,
                     $elementId,
-                    $versionId
+                    $versionId,
+                    $drafts
                 );
 
             if (!$createTranslationsResult) {
@@ -81,6 +94,14 @@ class CraftLiltPluginHelper extends Module
             $createJobCommand
         );
 
+        //TODO: looks like same logic & job->status doesn't have any affect
+        if (!empty($data['status'])) {
+            $job->status = $data['status'];
+            $record = JobRecord::findOne(['id' => $job->id]);
+            $record->status = $data['status'];
+            $record->save();
+        }
+
         if (!empty($data['liltJobId'])) {
             $job->liltJobId = $data['liltJobId'];
             $record = JobRecord::findOne(['id' => $job->id]);
@@ -99,10 +120,14 @@ class CraftLiltPluginHelper extends Module
 
         foreach ($jobInfos as $jobInfo) {
             $actual = Craft::$app->queue->getJobDetails($jobInfo['id']);
-            $jobInfos[get_class($actual['job'])] = $actual['job'];
+            $key = get_class($actual['job']) . '_' . json_encode($actual['job']);
+            $jobInfos[$key] = $actual['job'];
         }
 
-        $this->assertEquals($expectedJob, $jobInfos[get_class($expectedJob)]);
+        $key = get_class($expectedJob) . '_' . json_encode($expectedJob);
+
+        $this->assertArrayHasKey($key, $jobInfos);
+        $this->assertEquals($expectedJob, $jobInfos[$key]);
     }
 
     public function assertTranslationsContentMatch(array $translations, array $expectedContent): void
@@ -127,7 +152,7 @@ class CraftLiltPluginHelper extends Module
 
             //TODO: maybe we can write our own assertion to be sure that ids are correct
             //we definitely can't ignore keys
-            $this->assertEqualsCanonicalizing(
+            $this->assertSame(
                 $expectedContent[$translationTargetLanguage],
                 $appliedContent
             );
@@ -213,7 +238,7 @@ class CraftLiltPluginHelper extends Module
 
         $translation->refresh();
 
-        $this->assertEmpty($translation->translatedDraftId);
+        $this->assertNotEmpty($translation->translatedDraftId);
         $this->assertEmpty($translation->targetContent);
         $this->assertSame($connectorTranslationId, $translation->connectorTranslationId);
         $this->assertSame(TranslationRecord::STATUS_FAILED, $translation->status);
@@ -282,7 +307,7 @@ class CraftLiltPluginHelper extends Module
 
         $translation->refresh();
 
-        $this->assertEmpty($translation->translatedDraftId);
+        $this->assertNotEmpty($translation->translatedDraftId);
         $this->assertEmpty($translation->targetContent);
         $this->assertEmpty($translation->connectorTranslationId);
         $this->assertSame(TranslationRecord::STATUS_IN_PROGRESS, $translation->status);

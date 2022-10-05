@@ -88,7 +88,7 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
             sprintf('?p=admin/actions/%s', CraftliltpluginParameters::TRANSLATION_PUBLISH_ACTION),
             [
                 'csrf' => Craft::$app->getRequest()->getCsrfToken(true),
-                'translationId' => $translationToSubmit->id,
+                'translationIds' => [$translationToSubmit->id],
             ]
         );
 
@@ -168,7 +168,7 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
             sprintf('?p=admin/actions/%s', CraftliltpluginParameters::TRANSLATION_PUBLISH_ACTION),
             [
                 'csrf' => Craft::$app->getRequest()->getCsrfToken(true),
-                'translationId' => $translationToSubmit->id,
+                'translationIds' => [$translationToSubmit->id],
             ]
         );
 

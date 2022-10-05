@@ -1,6 +1,7 @@
 <?php
 
 use craft\test\TestSetup;
+use lilthq\craftliltplugin\Craftliltplugin;
 
 ini_set('date.timezone', 'UTC');
 

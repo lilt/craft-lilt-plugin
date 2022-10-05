@@ -15,7 +15,7 @@
     elementTypePluralName: '{{ elementInstance.pluralDisplayName()|e("js") }}',
     context: '{{ context }}',
     storageKey: 'elementindex.{{ elementType|e("js") }}',
-    criteria: Craft.defaultIndexCriteria,
+    criteria: { ...Craft.defaultIndexCriteria, ...JSON.parse("{{criteria|json_encode|e("js")}}")},
     toolbarSelector: '#toolbar',
     canHaveDrafts: {{ (canHaveDrafts ?? false) ? 'true' : 'false' }},
     });

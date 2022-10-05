@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services\appliers\field;
 
 use Craft;
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 use function Arrayy\array_first;
@@ -35,15 +36,14 @@ class ColourSwatchesContentApplier extends AbstractContentApplier implements App
                 continue;
             }
 
-            $translation = [
-                'target' => $fieldContent['labels'][$key],
-                'source' => $option['label'],
-                'sourceSiteId' => $command->getSourceSiteId(),
-                'targetSiteId' => $command->getTargetSiteId(),
-            ];
+            $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
+                $command->getSourceSiteId(),
+                $command->getTargetSiteId(),
+                $option['label'],
+                $fieldContent['labels'][$key]
+            );
 
-            $translation['hash'] = md5(json_encode($translation));
-            $i18NRecords[$translation['hash']] = $this->createI18NRecord($translation);
+            $i18NRecords[$i18NRecord->generateHash()] = $i18NRecord;
         }
 
         $value = $this->getOriginalFieldSerializedValue($command);

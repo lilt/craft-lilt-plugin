@@ -13,6 +13,7 @@ use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -66,17 +67,18 @@ class SyncJobFromLiltConnectorHandler
                 try {
                     $this->processTranslation($translationDto, $job);
                 } catch (Exception $ex) {
-                    $translationRecord = Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
+                    Craft::error([
+                        'message' => "Can't process translation!",
+                        'exception_message' => $ex->getMessage(),
+                        'exception_trace' => $ex->getTrace(),
+                        'exception' => $ex,
+                    ]);
+
+                    Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
                         $translationDto,
                         $job,
                         $unprocessedTranslations
                     );
-
-                    $translationRecord->status = TranslationRecord::STATUS_FAILED;
-                    $translationRecord->lastDelivery = new DateTime();
-                    $translationRecord->save();
-
-                    Craft::error(sprintf('%s %s', $ex->getMessage(), $ex->getTraceAsString()));
                 }
             }
         }
@@ -98,13 +100,15 @@ class SyncJobFromLiltConnectorHandler
         } else {
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
             $jobRecord->save();
-        }
 
-        Craftliltplugin::getInstance()->jobLogsRepository->create(
-            $jobRecord->id,
-            Craft::$app->getUser()->getId(),
-            'Translations downloaded'
-        );
+            Craft::$app->elements->invalidateCachesForElementType(Translation::class);
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $jobRecord->id,
+                Craft::$app->getUser()->getId(),
+                'Translations downloaded'
+            );
+        }
 
         Craft::$app->elements->invalidateCachesForElement($job);
     }
@@ -127,11 +131,7 @@ class SyncJobFromLiltConnectorHandler
 
         $translationId = $translationResponse->getId();
 
-        $targetLanguage = sprintf(
-            '%s-%s',
-            $translationResponse->getTrgLang(),
-            $translationResponse->getTrgLocale()
-        );
+        $targetLanguage = $this->getTargetLanguage($translationResponse);
 
         foreach ($content as $elementId => $elementContent) {
             $element = Craft::$app->elements->getElementById(
@@ -185,5 +185,18 @@ class SyncJobFromLiltConnectorHandler
 
             $translationRecord->save();
         }
+    }
+
+    private function getTargetLanguage(TranslationResponse $translationResponse): string
+    {
+        if (empty($translationResponse->getTrgLocale())) {
+            return $translationResponse->getTrgLang();
+        }
+
+        return sprintf(
+            '%s-%s',
+            $translationResponse->getTrgLang(),
+            $translationResponse->getTrgLocale()
+        );
     }
 }

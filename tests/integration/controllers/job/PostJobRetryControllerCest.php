@@ -108,15 +108,23 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
             ['jobIds' => [$job->id]]
         );
 
-        $translations = array_map(function (TranslationRecord $translationRecord) use ($element, $expectedBody) {
+        $translations = array_map(static function (TranslationRecord $translationRecord) use ($element) {
+            $expectedDraftBody = ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationRecord->translatedDraftId,
+                    null,
+                    $translationRecord->targetSiteId
+                )
+            );
+
             Assert::assertSame(Job::STATUS_IN_PROGRESS, $translationRecord->status);
             Assert::assertSame($element->id, $translationRecord->versionId);
-            Assert::assertEquals($expectedBody, $translationRecord->sourceContent);
+            Assert::assertEquals($expectedDraftBody, $translationRecord->sourceContent);
             Assert::assertSame(
                 Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
                 $translationRecord->sourceSiteId
             );
-            Assert::assertNull($translationRecord->translatedDraftId);
+            Assert::assertNotNull($translationRecord->translatedDraftId);
 
             return [
                 'versionId' => $translationRecord->versionId,

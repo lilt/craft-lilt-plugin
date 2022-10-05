@@ -1,12 +1,19 @@
 <?php
 
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
+
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
+use craft\helpers\Queue;
 use craft\web\Controller;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use yii\web\Response;
 
 class PostSyncController extends Controller
@@ -26,7 +33,20 @@ class PostSyncController extends Controller
         );
 
         foreach ($jobs as $job) {
-            Craftliltplugin::getInstance()->syncJobFromLiltConnectorHandler->__invoke($job);
+            if ($job->isCopySourceTextFlow()) {
+                continue;
+            }
+
+            Queue::push(
+                (new FetchJobStatusFromConnector(
+                    [
+                        'jobId' => $job->id,
+                        'liltJobId' => $job->liltJobId,
+                    ]
+                )),
+                FetchJobStatusFromConnector::PRIORITY,
+                FetchJobStatusFromConnector::DELAY_IN_SECONDS
+            );
         }
 
         if (count($jobs) === 0) {

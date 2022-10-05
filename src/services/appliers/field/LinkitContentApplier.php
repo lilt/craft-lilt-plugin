@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\appliers\field;
 
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 use function Arrayy\array_first;
@@ -46,27 +47,30 @@ class LinkitContentApplier extends AbstractContentApplier implements ApplierInte
 
         # Custom labels
         foreach ($fieldContent['customLabels'] as $key => $customLabel) {
-            $translation = [
-                'target' => $customLabel,
-                'source' => $command->getField()->types[$key]['customLabel'],
-                'sourceSiteId' => $command->getSourceSiteId(),
-                'targetSiteId' => $command->getTargetSiteId(),
-            ];
+            if (empty($customLabel) || empty($command->getField()->types[$key]['customLabel'])) {
+                continue;
+            }
 
-            $translation['hash'] = md5(json_encode($translation));
-            $i18NRecords[$translation['hash']] = $this->createI18NRecord($translation);
+            $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
+                $command->getSourceSiteId(),
+                $command->getTargetSiteId(),
+                $command->getField()->types[$key]['customLabel'],
+                $customLabel
+            );
+
+            $i18NRecords[$i18NRecord->generateHash()] = $i18NRecord;
         }
 
-        if (!empty($fieldContent['defaultText'])) {
+        if (!empty($fieldContent['defaultText']) && !empty($command->getField()->defaultText)) {
             # Default text
-            $translation = [
-                'target' => $fieldContent['defaultText'],
-                'source' => $command->getField()->defaultText,
-                'sourceSiteId' => $command->getSourceSiteId(),
-                'targetSiteId' => $command->getTargetSiteId(),
-            ];
-            $translation['hash'] = md5(json_encode($translation));
-            $i18NRecords[$translation['hash']] = $this->createI18NRecord($translation);
+            $i18NRecord = Craftliltplugin::getInstance()->i18NRepository->new(
+                $command->getSourceSiteId(),
+                $command->getTargetSiteId(),
+                $command->getField()->defaultText,
+                $fieldContent['defaultText']
+            );
+
+            $i18NRecords[$i18NRecord->generateHash()] = $i18NRecord;
         }
 
         return ApplyContentResult::applied(

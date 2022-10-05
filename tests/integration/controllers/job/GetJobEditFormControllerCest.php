@@ -64,6 +64,7 @@ class GetJobEditFormControllerCest
 
         $I->seeResponseCodeIs(400);
     }
+
     public function testSyncJobNotFound(IntegrationTester $I): void
     {
         $I->amLoggedInAs(
@@ -107,7 +108,19 @@ class GetJobEditFormControllerCest
         ]);
 
         $controller = $this->getController();
-        $response = $controller->actionInvoke((string) $job->id);
+
+        $I->expectSettingsGetRequest(
+            '/api/v1.0/settings',
+            'SECURE_API_KEY_FOR_LILT_CONNECTOR',
+            [
+                'project_prefix' => 'this-is-connector-project-prefix',
+                'project_name_template' => 'this-is-connector-project-name-template',
+                'lilt_translation_workflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            ],
+            200
+        );
+
+        $response = $controller->actionInvoke((string)$job->id);
 
         $behavior = $response->getBehavior('template');
         $actual = [
@@ -164,6 +177,7 @@ class GetJobEditFormControllerCest
                 'translationWorkflowsOptions' => [
                     'instant' => 'Instant',
                     'verified' => 'Verified',
+                    'copy_source_text' => 'Copy source text'
                 ],
                 'availableSites' => [
                     0 => [
@@ -196,16 +210,16 @@ class GetJobEditFormControllerCest
                     'status' => 'new',
                     'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
                     'sourceSiteLanguage' => 'en-US',
-                    'targetSiteIds' => sprintf(
-                        '{"de-DE": %d, "es-ES": %d, "ru-RU": %d}',
+                    'targetSiteIds' => [
                         Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE'),
                         Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('es-ES'),
                         Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU')
-                    ),
+                    ]
+                    ,
                     'elementIds' => sprintf('["%d"]', $job->getElementIds()[0]),
                     'versions' => '[]',
                     'dueDate' => null,
-                    'translationWorkflow' => 'INSTANT',
+                    'translationWorkflow' => 'instant',
                     'tempId' => null,
                     'draftId' => null,
                     'revisionId' => null,

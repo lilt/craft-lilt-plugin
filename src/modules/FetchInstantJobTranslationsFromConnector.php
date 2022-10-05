@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
+
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\modules;
@@ -12,10 +17,15 @@ use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use Throwable;
+use yii\queue\RetryableJobInterface;
 
-class FetchInstantJobTranslationsFromConnector extends BaseJob
+class FetchInstantJobTranslationsFromConnector extends BaseJob implements RetryableJobInterface
 {
-    private const DELAY_IN_SECONDS = 10;
+    public const DELAY_IN_SECONDS = 10;
+    public const PRIORITY = null;
+    public const TTR = 10 * 60;
+
+    private const RETRY_COUNT = 0;
 
     /**
      * @var int $jobId
@@ -43,6 +53,14 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob
             return;
         }
 
+        $mutex = Craft::$app->getMutex();
+        $mutexKey = __CLASS__ . '_' . __FUNCTION__ . '_' . $this->jobId;
+        if (!$mutex->acquire($mutexKey)) {
+            Craft::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
+
+            return;
+        }
+
         Craftliltplugin::$plugin->syncJobFromLiltConnectorHandler->__invoke($job);
 
         $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
@@ -53,6 +71,7 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob
         }
 
         $this->markAsDone($queue);
+        $mutex->release($mutexKey);
     }
 
     /**
@@ -81,5 +100,15 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob
                 ]
             )
         );
+    }
+
+    public function getTtr()
+    {
+        return self::TTR;
+    }
+
+    public function canRetry($attempt, $error)
+    {
+        return $attempt < self::RETRY_COUNT;
     }
 }

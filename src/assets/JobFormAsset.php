@@ -18,7 +18,9 @@ class JobFormAsset extends AssetBundle
         ];
 
         $this->js = [
+            'elements/PreviewTranslationsIndex.js',
             'elements/LiltElementIndex.js',
+            'elements/LiltBaseElementSelectorModal.js',
             'job-form.js',
             'job-translation-review.js',
             'job-try-again-button.js',

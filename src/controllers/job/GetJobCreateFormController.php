@@ -43,7 +43,7 @@ class GetJobCreateFormController extends AbstractJobController
         $sourceSiteId = $request->getQueryParam('sourceSiteId');
 
         if ($sourceSiteId) {
-            $job->sourceSiteId = $sourceSiteId;
+            $job->sourceSiteId = (int) $sourceSiteId;
         }
 
         return $this->renderJobForm(

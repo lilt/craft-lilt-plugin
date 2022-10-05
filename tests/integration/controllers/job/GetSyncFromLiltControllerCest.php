@@ -16,10 +16,12 @@ use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\ExpectedElementContent;
+use PHPUnit\Framework\Assert;
 use yii\base\InvalidConfigException;
 
 class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
@@ -124,24 +126,29 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
             $responseBody
         );
 
+        $expectedSpanishBody = $this->getTranslatedContent($translations, $element->getId(), 'es-ES', 'es-ES: ');
+        $expectedGermanBody = $this->getTranslatedContent($translations, $element->getId(), 'de-DE', 'de-DE: ');
+        $expectedRussianBody = $this->getTranslatedContent($translations, $element->getId(), 'ru-RU', 'ru-RU: ');
+
         $I->expectTranslationDownloadRequest(
             703695,
             HttpCode::OK,
-            $this->getExpectedContentEs($element, 'es-ES: ')
+            $expectedSpanishBody
         );
 
         $I->expectTranslationDownloadRequest(
             703696,
             HttpCode::OK,
-            $this->getExpectedContentDe($element, 'de-DE: ')
+            $expectedGermanBody
         );
 
         $I->expectTranslationDownloadRequest(
             703697,
             HttpCode::OK,
-            $this->getExpectedContentRu($element, 'ru-RU: ')
+            $expectedRussianBody
         );
 
+        $I->stopFollowingRedirects();
         $I->amOnPage(
             sprintf(
                 '?p=admin/%s/%d',
@@ -153,9 +160,10 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
         $I->assertTranslationsContentMatch(
             $translations,
             [
-                'es-ES' => $this->getExpectedContentEs($element),
-                'de-DE' => $this->getExpectedContentDe($element),
-                'ru-RU' => $this->getExpectedContentRu($element),
+                /** I18N functionality doesn't present in content body  */
+                'es-ES' => $this->getTranslatedContent($translations, $element->getId(), 'es-ES'),
+                'de-DE' => $this->getTranslatedContent($translations, $element->getId(), 'de-DE'),
+                'ru-RU' => $this->getTranslatedContent($translations, $element->getId(), 'ru-RU'),
             ]
         );
 
@@ -166,6 +174,21 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
         $I->assertI18NRecordsExist($deSiteId, ExpectedElementContent::getExpectedI18N('de-DE: '));
         $I->assertI18NRecordsExist($esSiteId, ExpectedElementContent::getExpectedI18N('es-ES: '));
         $I->assertI18NRecordsExist($ruSiteId, ExpectedElementContent::getExpectedI18N('ru-RU: '));
+
+        $i18nRecords = Craftliltplugin::getInstance()->i18NRepository->findAllByTargetSiteId($deSiteId);
+
+        $expectedI18nRecords = $this->getExpectedI18nRecords();
+        $actualI18nRecords = array_map(static function (I18NRecord $i18nRecord) {
+            return $i18nRecord->toArray([
+                'sourceSiteId',
+                'targetSiteId',
+                'source',
+                'target',
+                'hash'
+            ]);
+        }, $i18nRecords);
+
+        Assert::assertEquals($expectedI18nRecords, $actualI18nRecords);
     }
 
     public function testSyncJobNotFound(IntegrationTester $I): void
@@ -202,18 +225,98 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
         $I->seeResponseCodeIs(404);
     }
 
-    private function getExpectedContentDe(Entry $element, string $i18nPrefix = ''): array
+    private function getTranslatedContent(array $translations, int $elementId, string $target, string $i18n = ''): array
     {
-        return ExpectedElementContent::getExpectedBody($element, 'de-DE: ', $i18nPrefix);
+        /**
+         * @var TranslationRecord[][]
+         */
+        $translationsMapped = [];
+        foreach ($translations as $translation) {
+            $translationsMapped[$translation->elementId][Craftliltplugin::getInstance(
+            )->languageMapper->getLanguageBySiteId($translation->targetSiteId)] = $translation;
+        }
+
+        return ExpectedElementContent::getExpectedBody(
+            Craft::$app->elements->getElementById(
+                $translationsMapped[$elementId][$target]->translatedDraftId,
+                null,
+                $translationsMapped[$elementId][$target]->targetSiteId
+            ),
+            $target . ': ',
+            $i18n
+        );
     }
 
-    private function getExpectedContentEs(Entry $element, string $i18nPrefix = ''): array
+    /**
+     * @return array[]
+     */
+    private function getExpectedI18nRecords(): array
     {
-        return ExpectedElementContent::getExpectedBody($element, 'es-ES: ', $i18nPrefix);
-    }
-
-    private function getExpectedContentRu(Entry $element, string $i18nPrefix = ''): array
-    {
-        return ExpectedElementContent::getExpectedBody($element, 'ru-RU: ', $i18nPrefix);
+        $expectedI18nRecords = [
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'First checkbox label',
+                'target' => 'de-DE: First checkbox label',
+                'hash' => '1d93604319174b1f48d2ebb36acd37b8',
+            ],
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'Second checkbox label',
+                'target' => 'de-DE: Second checkbox label',
+                'hash' => '9178d0b17d9cc2b5b5c98049fd98146a',
+            ],
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'Third checkbox label',
+                'target' => 'de-DE: Third checkbox label',
+                'hash' => '63cbe6661a5878508d9e12e3e20afd02',
+            ],
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'The label text to display beside the lightswitch’s enabled state',
+                'target' => 'de-DE: The label text to display beside the lightswitch’s enabled state',
+                'hash' => '872f66ce13cdf0f6dbe2ca683240c17b',
+            ],
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'The label text to display beside the lightswitch’s disabled state.',
+                'target' => 'de-DE: The label text to display beside the lightswitch’s disabled state.',
+                'hash' => '136dd2cb9fa326349881737d14ad3e24',
+            ],
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'Column Heading 1',
+                'target' => 'de-DE: Column Heading 1',
+                'hash' => '11fc84ec58b1be6a41ce61f9012643d2',
+            ],
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'Column Heading 2',
+                'target' => 'de-DE: Column Heading 2',
+                'hash' => 'a15ec8913f1a5b54c6afd5c84cc52300',
+            ],
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'Column Heading 3',
+                'target' => 'de-DE: Column Heading 3',
+                'hash' => 'ae9c3761b2a664d27c5baf845cb1fcfa',
+            ],
+            [
+                'sourceSiteId' => 1,
+                'targetSiteId' => 2,
+                'source' => 'Column Heading 4',
+                'target' => 'de-DE: Column Heading 4',
+                'hash' => 'c2c1b7547dbc6b731519c5b2d773ea1e',
+            ],
+        ];
+        return $expectedI18nRecords;
     }
 }
