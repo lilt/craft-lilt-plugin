@@ -4,18 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 2.0.0 - 2022-10-04
+## 4.0.0 - 2022-10-04
 ### Added
-- Craft V4 support
+- Support of CraftCMS v4.0.0 and higher (^4.0.0)
 
-## 0.8.2 - 2022-10-02
+## 3.0.0 - 2022-10-04
+### Added
+- Support of CraftCMS v3.0.0 and higher (^3.0.0)
 ### Fixed
-- Invalidate cache for translations on publish & review
+- Style issue on create job page
 
 ## 0.8.1 - 2022-10-02
 ### Fixed
 - Status query for translation elements index
-- Translation elements capability with different versions of CraftCMS 
+- Translation elements capability with different versions of CraftCMS
+- Invalidate cache for translations on publish & review
 
 ## 0.8.0 - 2022-09-08
 ### Added
