@@ -23,9 +23,9 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob implements Retrya
 {
     public const DELAY_IN_SECONDS = 10;
     public const PRIORITY = null;
-    public const TTR = 10 * 60;
+    public const TTR = 60 * 5; // 10 minutes
 
-    private const RETRY_COUNT = 0;
+    private const RETRY_COUNT = 3;
 
     /**
      * @var int $jobId
@@ -102,12 +102,12 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob implements Retrya
         );
     }
 
-    public function getTtr()
+    public function getTtr(): int
     {
         return self::TTR;
     }
 
-    public function canRetry($attempt, $error)
+    public function canRetry($attempt, $error): bool
     {
         return $attempt < self::RETRY_COUNT;
     }
