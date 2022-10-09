@@ -98,7 +98,7 @@ class AfterErrorListener implements ListenerInterface
         }
 
         Craft::$app->queue->release(
-            $event->id
+            (string) $event->id
         );
 
         return $event;

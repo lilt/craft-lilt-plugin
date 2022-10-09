@@ -37,7 +37,7 @@ class PostSyncController extends Controller
         );
 
         if (count($jobs) === 0) {
-            return $this->response->setStatusCode(400, json_encode(['msg' => 'Job not found']));
+            return $this->response->setStatusCode(404, json_encode(['msg' => 'Job(s) not found']));
         }
 
         $selectedJobIds = [];
