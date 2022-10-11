@@ -16,7 +16,7 @@ use yii\web\Response;
 
 class GetTranslationReviewController extends AbstractJobController
 {
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     /**
      * @throws Throwable
@@ -31,22 +31,23 @@ class GetTranslationReviewController extends AbstractJobController
         }
 
         $translation = Craftliltplugin::getInstance()->translationRepository->findOneById(
-            (int) $translationId
+            (int)$translationId
         );
 
         if ($translation === null) {
             return $this->response->setStatusCode(404);
         }
 
-        $render = $this->renderTemplate(
+        $response = new Response();
+        $response->content = $this->getView()->renderTemplate(
             'craft-lilt-plugin/_components/translation/_overview.twig',
             [
                 'previewUrl' => $translation->getPreviewUrl(),
                 'originalUrl' => $translation->getElementUrl(),
                 'translation' => $translation,
-            ]
+            ],
         );
 
-        return $this->asRaw($render->data);
+        return $response;
     }
 }

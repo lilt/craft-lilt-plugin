@@ -14,6 +14,8 @@ use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\UrlHelper;
+use DateTime;
+use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\JobQuery;
@@ -43,11 +45,11 @@ class Job extends Element
     public const STATUS_FAILED = 'failed';
 
 
-    public $uid;
+    public ?string $uid = null;
     public $authorId;
-    public $title;
+    public ?string $title = null;
     public $liltJobId;
-    public $status;
+    public ?string $status = null;
     public $sourceSiteId;
     public $sourceSiteLanguage;
     public $targetSiteIds;
@@ -55,8 +57,9 @@ class Job extends Element
     public $versions;
     public $dueDate;
     public $translationWorkflow;
-    public $dateCreated;
-    public $dateUpdated;
+
+    public ?DateTime $dateCreated = null;
+    public ?DateTime $dateUpdated = null;
 
     // @codingStandardsIgnoreStart
     private $_author;
@@ -78,9 +81,9 @@ class Job extends Element
         return parent::beforeDelete();
     }
 
-    public function getSidebarHtml(): string
+    public function getSidebarHtml(bool $static): string
     {
-        $html = parent::getSidebarHtml();
+        $html = parent::getSidebarHtml($static);
         //TODO: add status here
         return $html;
     }
@@ -179,11 +182,10 @@ class Job extends Element
         return false;
     }
 
-    public function afterDelete(): bool
+    public function afterDelete(): void
     {
         JobRecord::deleteAll(['id' => $this->id]);
         parent::afterDelete();
-        return true;
     }
 
     public function isInstantFlow(): bool
@@ -433,7 +435,7 @@ class Job extends Element
         return parent::tableAttributeHtml($attribute);
     }
 
-    public function getStatus()
+    public function getStatus(): ?string
     {
         return $this->status;
     }
@@ -453,7 +455,7 @@ class Job extends Element
         return Craft::t('craft-lilt-plugin', strtolower($this->translationWorkflow));
     }
 
-    public function getCpEditUrl()
+    public function getCpEditUrl(): ?string
     {
         return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
     }

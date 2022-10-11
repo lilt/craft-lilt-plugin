@@ -14,8 +14,8 @@
 {% set context = 'index' %}
 {% set elementType = 'craft\\elements\\Entry' %}
 {% set userElementType = 'craft\\elements\\User' %}
-{% set sources = craft.app.elementIndexes.getSources('craft\\elements\\Entry', 'index') %}
-{% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}
+{#{% set sources = craft.app.elementIndexes.getSources('craft\\elements\\Entry', 'index') %}#}
+{#{% set customizableSources = (sources is not empty and context == 'index' and currentUser.can('customizeSources')) %}#}
 
 {% set fullPageForm = true %}
 
@@ -154,7 +154,7 @@
 
 {% block content %}
     {% if not isDraftJob and not isNewJob %}
-    {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
+        {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
     {% else %}
         {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
     {% endif %}

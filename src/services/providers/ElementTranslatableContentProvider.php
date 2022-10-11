@@ -47,10 +47,10 @@ class ElementTranslatableContentProvider
             //TODO: log issue
         }
 
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
 
         foreach ($fields as $field) {
-            $fieldData = Craft::$app->fields->getFieldById((int)$field->id);
+            $fieldData = Craft::$app->fields->getFieldById((int) $field->id);
 
             if ($fieldData === null) {
                 //TODO: log issue

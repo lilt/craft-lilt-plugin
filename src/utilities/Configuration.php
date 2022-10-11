@@ -19,7 +19,7 @@ class Configuration extends Utility
         return Craft::t('app', 'Configuration');
     }
 
-    public static function iconPath()
+    public static function iconPath(): ?string
     {
         return Craft::getAlias('@appicons/tools.svg');
     }
