@@ -23,7 +23,7 @@ class FetchInstantJobTranslationsFromConnector extends BaseJob implements Retrya
 {
     public const DELAY_IN_SECONDS = 10;
     public const PRIORITY = null;
-    public const TTR = 60 * 5; // 10 minutes
+    public const TTR = 60 * 5; // 5 minutes
 
     private const RETRY_COUNT = 3;
 

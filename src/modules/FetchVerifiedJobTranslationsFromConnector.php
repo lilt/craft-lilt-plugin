@@ -23,7 +23,7 @@ use yii\queue\RetryableJobInterface;
 
 class FetchVerifiedJobTranslationsFromConnector extends BaseJob implements RetryableJobInterface
 {
-    public const DELAY_IN_SECONDS = 5 * 60;
+    public const DELAY_IN_SECONDS = 60 * 5; // 5 minutes
     public const PRIORITY = null;
     public const TTR = 60 * 5; // 5 minutes
 
