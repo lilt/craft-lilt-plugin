@@ -12,20 +12,20 @@ namespace lilthq\craftliltplugin\modules;
 use Craft;
 use craft\errors\InvalidFieldException;
 use craft\queue\BaseJob;
-use Exception;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
 use Throwable;
+use yii\queue\RetryableJobInterface;
 
-class SendJobToConnector extends BaseJob
+class SendJobToConnector extends BaseJob implements RetryableJobInterface
 {
     public const DELAY_IN_SECONDS = 10;
     public const PRIORITY = null;
-    public const TTR = null;
+    public const TTR = 60 * 5; // 5 minutes
 
-    private const RETRY_COUNT = 0;
+    private const RETRY_COUNT = 3;
 
     /**
      * @var int $jobId
@@ -67,19 +67,12 @@ class SendJobToConnector extends BaseJob
             return;
         }
 
-        try {
-            if ($job->isVerifiedFlow() || $job->isInstantFlow()) {
-                Craftliltplugin::getInstance()->sendJobToLiltConnectorHandler->__invoke($job);
-            }
+        if ($job->isVerifiedFlow() || $job->isInstantFlow()) {
+            Craftliltplugin::getInstance()->sendJobToLiltConnectorHandler->__invoke($job);
+        }
 
-            if ($job->isCopySourceTextFlow()) {
-                Craftliltplugin::getInstance()->copySourceTextHandler->__invoke($job);
-            }
-        } catch (Exception $ex) {
-            $jobRecord->status = Job::STATUS_FAILED;
-            $jobRecord->save();
-
-            Craft::$app->elements->invalidateCachesForElement($job);
+        if ($job->isCopySourceTextFlow()) {
+            Craftliltplugin::getInstance()->copySourceTextHandler->__invoke($job);
         }
 
         $this->markAsDone($queue);
@@ -91,7 +84,7 @@ class SendJobToConnector extends BaseJob
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Lilt translations');
+        return Craft::t('app', 'Sending jobs to lilt');
     }
 
     /**
@@ -111,5 +104,15 @@ class SendJobToConnector extends BaseJob
                 ]
             )
         );
+    }
+
+    public function getTtr(): int
+    {
+        return self::TTR;
+    }
+
+    public function canRetry($attempt, $error): bool
+    {
+        return $attempt < self::RETRY_COUNT;
     }
 }

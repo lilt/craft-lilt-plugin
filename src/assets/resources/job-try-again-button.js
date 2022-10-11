@@ -31,9 +31,9 @@ CraftliltPlugin.JobTryAgainButton = Garnish.Base.extend({
       location.reload();
     }).catch(exception => {
       Craft.cp.displayError(
-          Craft.t('app', 'Can\'t mark reviewed, unexpected issue occurred'));
+          Craft.t('app', 'Can\'t retry job, unexpected issue occurred'));
       this.$spinner.remove();
-      $(this).removeClass('disabled');
+      this.$container.removeClass('disabled');
     });
   },
   _getJobId: function() {
