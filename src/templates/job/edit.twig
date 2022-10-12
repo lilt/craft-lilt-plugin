@@ -103,8 +103,7 @@
 {% endif %}
 
 {% block actionButton %}
-    {# TODO: create draft from published versions #}
-    {% if not isDraftJob and not isJobReadyForReview %}
+    {% if not isDraftJob %}
         <div id="save-draft-btn-container">
             {{ tag('button', {
                 type: 'button',

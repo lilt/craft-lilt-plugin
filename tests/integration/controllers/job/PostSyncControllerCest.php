@@ -95,8 +95,8 @@ class PostSyncControllerCest extends AbstractIntegrationCest
 
         $I->seeResponseCodeIs(200);
 
-        $I->assertJobStatus($job777->id, Job::STATUS_FAILED);
-        $I->assertJobStatus($job888->id, Job::STATUS_READY_FOR_REVIEW);
+        $I->assertJobStatus($job777->id, Job::STATUS_IN_PROGRESS);
+        $I->assertJobStatus($job888->id, Job::STATUS_IN_PROGRESS);
 
         $I->assertTranslationStatus($translations777[0]->id, Job::STATUS_IN_PROGRESS);
         $I->assertTranslationStatus($translations888[0]->id, Job::STATUS_IN_PROGRESS);

@@ -19,14 +19,15 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use yii\queue\RetryableJobInterface;
 
-class FetchVerifiedJobTranslationsFromConnector extends BaseJob
+class FetchVerifiedJobTranslationsFromConnector extends BaseJob implements RetryableJobInterface
 {
-    public const DELAY_IN_SECONDS = 5 * 60;
+    public const DELAY_IN_SECONDS = 60 * 5; // 5 minutes
     public const PRIORITY = null;
-    public const TTR = null;
+    public const TTR = 60 * 5; // 5 minutes
 
-    private const RETRY_COUNT = 0;
+    private const RETRY_COUNT = 3;
 
     /**
      * @var int $jobId
@@ -208,5 +209,15 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob
                 ]
             )
         );
+    }
+
+    public function getTtr(): int
+    {
+        return self::TTR;
+    }
+
+    public function canRetry($attempt, $error): bool
+    {
+        return $attempt < self::RETRY_COUNT;
     }
 }
