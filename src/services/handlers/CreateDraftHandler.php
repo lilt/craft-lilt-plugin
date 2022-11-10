@@ -5,11 +5,19 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
+use craft\base\Element;
 use craft\base\ElementInterface;
+use craft\base\FieldInterface;
+use craft\db\Table;
+use craft\db\Table as DbTable;
+use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 use craft\errors\ElementNotFoundException;
+use craft\errors\InvalidFieldException;
+use craft\helpers\Db;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use Throwable;
 use yii\base\Exception;
 
@@ -72,16 +80,6 @@ class CreateDraftHandler
         foreach ($fields as $field) {
             $field->copyValue($element, $draft);
         }
-        /*
-        if(
-            get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
-            || get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX
-            || get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
-        ) {
-            $draft->setFieldValue($field->handle, $element->getFieldValue($field->handle));
-        }
-        */
-        //Craft::$app->elements->saveElement($draft);
 
         $draft->title = $element->title;
 
@@ -91,6 +89,105 @@ class CreateDraftHandler
 
         Craft::$app->elements->saveElement($draft);
 
+        $this->markFieldsAsChanged($draft);
+
         return $draft;
+    }
+
+    /**
+     * @throws InvalidFieldException
+     * @throws \yii\db\Exception
+     */
+    private function markFieldsAsChanged(ElementInterface $element): void
+    {
+        $fieldLayout = $element->getFieldLayout();
+        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+
+        foreach ($fields as $field) {
+            if (
+                get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX
+                || get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
+                || get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
+            ) {
+
+                /**
+                 * @var ElementQuery $matrixBlockQuery
+                 */
+                $matrixBlockQuery = $element->getFieldValue($field->handle);
+
+                /**
+                 * @var Element[] $blockElements
+                 */
+                $blockElements = $matrixBlockQuery->all();
+
+                foreach ($blockElements as $blockElement) {
+                    $this->markFieldsAsChanged($blockElement);
+                }
+
+                continue;
+            }
+
+            $this->upsertChangedFields($element, $field);
+            $this->upsertChangedAttributes($element);
+        }
+    }
+
+
+
+    /**
+     * @throws \yii\db\Exception
+     */
+    private function upsertChangedFields(ElementInterface $element, FieldInterface $field): void
+    {
+        $userId = Craft::$app->getUser()->getId();
+        $timestamp = Db::prepareDateForDb(new DateTime());
+
+        $insert = [
+            'elementId' => $element->getId(),
+            'siteId' => $element->getSite()->id,
+            'fieldId' => $field->id,
+        ];
+
+        $update = [
+            'dateUpdated' => $timestamp,
+            'propagated' => $element->propagating,
+            'userId' => $userId,
+        ];
+
+        Db::upsert(
+            DbTable::CHANGEDFIELDS,
+            $insert,
+            $update,
+            [],
+            false
+        );
+    }
+
+    private function upsertChangedAttributes(ElementInterface $element, array $attributes = ['title']): void
+    {
+        $userId = Craft::$app->getUser()->getId();
+        $timestamp = Db::prepareDateForDb(new DateTime());
+
+        foreach ($attributes as $attribute) {
+            $insert = [
+                'elementId' => $element->id,
+                'siteId' => $element->siteId,
+                'attribute' => $attribute,
+            ];
+
+            $update = [
+                'dateUpdated' => $timestamp,
+                'propagated' => $element->propagating,
+                'userId' => $userId,
+            ];
+
+            Db::upsert(
+                Table::CHANGEDATTRIBUTES,
+                $insert,
+                $update,
+                [],
+                false
+            );
+        }
     }
 }
