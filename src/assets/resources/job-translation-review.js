@@ -587,9 +587,9 @@ $(document).ready(function() {
                   CraftliltPlugin.translationReview.showMultiModal(
                       selectedElements);
                 },
-                onPublishTriggered: function() {
-                  const selectedElements = CraftliltPlugin.elementIndexTranslation.getSelectedElementIds();
-                  if (selectedElements.length === 0) {
+                onPublishTriggered: async function() {
+                  const translationIds = CraftliltPlugin.elementIndexTranslation.getSelectedElementIds();
+                  if (translationIds.length === 0) {
                     return;
                   }
                   CraftliltPlugin.elementIndexTranslation.setIndexBusy();
@@ -598,28 +598,37 @@ $(document).ready(function() {
                   CraftliltPlugin.elementIndexTranslation.$reviewTrigger.addClass(
                       'disabled');
 
-                  Craft.sendActionRequest('POST',
-                      'craft-lilt-plugin/translation/post-translation-publish/invoke',
-                      {
-                        data: {
-                          translationIds: selectedElements,
-                          published: true,
-                        },
-                      }).
-                      then(response => {
-                        Craft.cp.displayNotice('Translation published');
-                        CraftliltPlugin.elementIndexTranslation.updateElements();
-                        CraftliltPlugin.elementIndexTranslation.$publishTrigger.removeClass(
-                            'disabled');
-                        CraftliltPlugin.elementIndexTranslation.$reviewTrigger.removeClass(
-                            'disabled');
-                      }).
-                      catch(exception => {
-                        Craft.cp.displayError(Craft.t('app',
-                            'Can\'t publish translation, unexpected issue occurred'));
-                        this.$modalFooterButtonsPublish.enable();
-                        this.$modalActionsSpinner.addClass('hidden');
-                      });
+                  let success = true;
+
+                  for (let translationId of translationIds) {
+                    await Craft.sendActionRequest('POST',
+                        'craft-lilt-plugin/translation/post-translation-publish/invoke',
+                        {
+                          data: {
+                            translationIds: [translationId],
+                            published: true,
+                          },
+                        }).
+                        catch(exception => {
+                          success = false;
+                          console.log(exception);
+                        });
+                  }
+
+                  if (!success) {
+                    Craft.cp.displayError(Craft.t('app',
+                        'Can\'t publish translation(s), unexpected issue occurred'));
+                    CraftliltPlugin.elementIndexTranslation.updateElements();
+
+                    return;
+                  }
+
+                  Craft.cp.displayNotice('Translation(s) published');
+                  CraftliltPlugin.elementIndexTranslation.updateElements();
+                  CraftliltPlugin.elementIndexTranslation.$publishTrigger.removeClass(
+                      'disabled');
+                  CraftliltPlugin.elementIndexTranslation.$reviewTrigger.removeClass(
+                      'disabled');
                 },
               });
         }
