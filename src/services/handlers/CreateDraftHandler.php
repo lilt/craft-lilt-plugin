@@ -90,7 +90,11 @@ class CreateDraftHandler
         $draft->mergingCanonicalChanges = true;
         $draft->afterPropagate(false);
 
-        $isCopySourceTextFlow = strtolower($command->getFlow()) === strtolower(CraftliltpluginParameters::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT);
+        $isCopySourceTextFlow =
+            strtolower($command->getFlow()) === strtolower(
+                CraftliltpluginParameters::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT
+            );
+
         if ($isCopySourceTextFlow) {
             $draft->slug = $element->slug;
         }
@@ -124,7 +128,6 @@ class CreateDraftHandler
                 || get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
                 || get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
             ) {
-
                 /**
                  * @var ElementQuery $matrixBlockQuery
                  */
@@ -145,7 +148,6 @@ class CreateDraftHandler
             $this->upsertChangedFields($element, $field);
         }
     }
-
 
 
     /**
