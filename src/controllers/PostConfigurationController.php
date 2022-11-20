@@ -51,6 +51,14 @@ class PostConfigurationController extends AbstractJobController
         $connectorApiUrlRecord->value = $request->getBodyParam('connectorApiUrl');
         $connectorApiUrlRecord->save();
 
+        # enableEntriesForTargetSites
+        $enableEntriesForTargetSites = SettingRecord::findOne(['name' => 'enable_entries_for_target_sites']);
+        if (!$enableEntriesForTargetSites) {
+            $enableEntriesForTargetSites = new SettingRecord(['name' => 'enable_entries_for_target_sites']);
+        }
+        $enableEntriesForTargetSites->value = (int) $request->getBodyParam('enableEntriesForTargetSites');
+        $enableEntriesForTargetSites->save();
+
         $liltConfigDisabled = true;
         if (!empty($connectorApiKey) && !empty($connectorApiUrl)) {
             //is token valid

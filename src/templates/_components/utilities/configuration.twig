@@ -58,6 +58,15 @@
             disabled: liltConfigDisabled
         }) }}
 
+        {{ forms.checkbox({
+            label: 'Enable entries for target site on translation publish',
+            name: 'enableEntriesForTargetSites',
+            id: 'enableEntriesForTargetSites',
+            checked: enableEntriesForTargetSites,
+            errors: model is defined? model.getErrors('enableEntriesForTargetSites') : [],
+            disabled: liltConfigDisabled
+        }) }}
+
         <div class="buttons">
             <button type="submit" class="btn submit">{{ 'Update configuration'|t('craft-lilt-plugin') }}</button>
             <div class="utility-status"></div>
