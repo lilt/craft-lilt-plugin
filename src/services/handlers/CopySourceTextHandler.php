@@ -16,6 +16,7 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use Throwable;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
@@ -46,10 +47,13 @@ class CopySourceTextHandler
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
                 //Create draft with & update all values to source element
                 $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
-                    $element,
-                    $job->title,
-                    $job->sourceSiteId,
-                    $targetSiteId
+                    new CreateDraftCommand(
+                        $element,
+                        $job->title,
+                        $job->sourceSiteId,
+                        $targetSiteId,
+                        $job->translationWorkflow
+                    )
                 );
 
                 $contents[$targetSiteId] = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(

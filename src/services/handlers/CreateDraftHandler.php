@@ -18,6 +18,7 @@ use craft\helpers\Db;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use Throwable;
 use yii\base\Exception;
 
@@ -29,11 +30,13 @@ class CreateDraftHandler
      * @throws ElementNotFoundException
      */
     public function create(
-        ElementInterface $element,
-        string $jobTitle,
-        int $sourceSiteId,
-        int $targetSiteId
+        CreateDraftCommand $command
     ): ElementInterface {
+        $element = $command->getElement();
+        $jobTitle = $command->getJobTitle();
+        $sourceSiteId = $command->getSourceSiteId();
+        $targetSiteId = $command->getTargetSiteId();
+
         /**
          * Element will be created from original one, we can't create draft from draft
          * @var Entry $createFrom
@@ -87,9 +90,21 @@ class CreateDraftHandler
         $draft->mergingCanonicalChanges = true;
         $draft->afterPropagate(false);
 
+        $isCopySourceTextFlow = strtolower($command->getFlow()) === strtolower(CraftliltpluginParameters::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT);
+        if ($isCopySourceTextFlow) {
+            $draft->slug = $element->slug;
+        }
+
         Craft::$app->elements->saveElement($draft);
 
         $this->markFieldsAsChanged($draft);
+
+        $attributes = ['title'];
+
+        if ($isCopySourceTextFlow) {
+            $attributes[] = 'slug';
+        }
+        $this->upsertChangedAttributes($draft, $attributes);
 
         return $draft;
     }
@@ -128,7 +143,6 @@ class CreateDraftHandler
             }
 
             $this->upsertChangedFields($element, $field);
-            $this->upsertChangedAttributes($element);
         }
     }
 
@@ -163,7 +177,7 @@ class CreateDraftHandler
         );
     }
 
-    private function upsertChangedAttributes(ElementInterface $element, array $attributes = ['title']): void
+    private function upsertChangedAttributes(ElementInterface $element, array $attributes): void
     {
         $userId = Craft::$app->getUser()->getId();
         $timestamp = Db::prepareDateForDb(new DateTime());
