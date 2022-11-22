@@ -18,6 +18,7 @@ use craft\helpers\Db;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use Throwable;
 use yii\base\Exception;
@@ -90,12 +91,12 @@ class CreateDraftHandler
         $draft->mergingCanonicalChanges = true;
         $draft->afterPropagate(false);
 
-        $isCopySourceTextFlow =
-            strtolower($command->getFlow()) === strtolower(
-                CraftliltpluginParameters::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT
-            );
+        $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
+            ['name' => 'copy_entries_slug_from_source_to_target']
+        );
+        $isCopySlugEnabled = (bool) ($copyEntriesSlugFromSourceToTarget->value ?? false);
 
-        if ($isCopySourceTextFlow) {
+        if ($isCopySlugEnabled) {
             $draft->slug = $element->slug;
         }
 
@@ -105,7 +106,7 @@ class CreateDraftHandler
 
         $attributes = ['title'];
 
-        if ($isCopySourceTextFlow) {
+        if ($isCopySlugEnabled) {
             $attributes[] = 'slug';
         }
         $this->upsertChangedAttributes($draft, $attributes);

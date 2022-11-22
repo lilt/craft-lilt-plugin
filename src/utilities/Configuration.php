@@ -81,6 +81,11 @@ class Configuration extends Utility
         $enableEntriesForTargetSites = (bool) ($enableEntriesForTargetSitesRecord->value
             ?? false);
 
+        $copyEntriesSlugFromSourceToTargetRecord = SettingRecord::findOne(
+            ['name' => 'copy_entries_slug_from_source_to_target']
+        );
+        $copyEntriesSlugFromSourceToTarget = (bool) ($copyEntriesSlugFromSourceToTargetRecord->value ?? false);
+
         return Craft::$app->getView()->renderTemplate(
             'craft-lilt-plugin/_components/utilities/configuration.twig',
             [
@@ -93,6 +98,7 @@ class Configuration extends Utility
                 'formActionUrl' => UrlHelper::cpUrl('craft-lilt-plugin/settings/lilt-configuration'),
                 'liltConfigDisabled' => $liltConfigDisabled,
                 'enableEntriesForTargetSites' => $enableEntriesForTargetSites,
+                'copyEntriesSlugFromSourceToTarget' => $copyEntriesSlugFromSourceToTarget,
             ]
         );
     }

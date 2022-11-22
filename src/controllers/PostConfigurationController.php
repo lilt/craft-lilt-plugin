@@ -59,6 +59,20 @@ class PostConfigurationController extends AbstractJobController
         $enableEntriesForTargetSites->value = (int) $request->getBodyParam('enableEntriesForTargetSites');
         $enableEntriesForTargetSites->save();
 
+        # copyEntriesSlugFromSourceToTarget
+        $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
+            ['name' => 'copy_entries_slug_from_source_to_target']
+        );
+        if (!$copyEntriesSlugFromSourceToTarget) {
+            $copyEntriesSlugFromSourceToTarget = new SettingRecord(
+                ['name' => 'copy_entries_slug_from_source_to_target']
+            );
+        }
+        $copyEntriesSlugFromSourceToTarget->value = (int) $request->getBodyParam(
+            'copyEntriesSlugFromSourceToTarget'
+        );
+        $copyEntriesSlugFromSourceToTarget->save();
+
         $liltConfigDisabled = true;
         if (!empty($connectorApiKey) && !empty($connectorApiUrl)) {
             //is token valid
