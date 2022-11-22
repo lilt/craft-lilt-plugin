@@ -18,6 +18,8 @@ use craft\helpers\Db;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\SettingRecord;
+use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use Throwable;
 use yii\base\Exception;
 
@@ -29,11 +31,13 @@ class CreateDraftHandler
      * @throws ElementNotFoundException
      */
     public function create(
-        ElementInterface $element,
-        string $jobTitle,
-        int $sourceSiteId,
-        int $targetSiteId
+        CreateDraftCommand $command
     ): ElementInterface {
+        $element = $command->getElement();
+        $jobTitle = $command->getJobTitle();
+        $sourceSiteId = $command->getSourceSiteId();
+        $targetSiteId = $command->getTargetSiteId();
+
         /**
          * Element will be created from original one, we can't create draft from draft
          * @var Entry $createFrom
@@ -87,9 +91,25 @@ class CreateDraftHandler
         $draft->mergingCanonicalChanges = true;
         $draft->afterPropagate(false);
 
+        $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
+            ['name' => 'copy_entries_slug_from_source_to_target']
+        );
+        $isCopySlugEnabled = (bool) ($copyEntriesSlugFromSourceToTarget->value ?? false);
+
+        if ($isCopySlugEnabled) {
+            $draft->slug = $element->slug;
+        }
+
         Craft::$app->elements->saveElement($draft);
 
         $this->markFieldsAsChanged($draft);
+
+        $attributes = ['title'];
+
+        if ($isCopySlugEnabled) {
+            $attributes[] = 'slug';
+        }
+        $this->upsertChangedAttributes($draft, $attributes);
 
         return $draft;
     }
@@ -109,7 +129,6 @@ class CreateDraftHandler
                 || get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
                 || get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
             ) {
-
                 /**
                  * @var ElementQuery $matrixBlockQuery
                  */
@@ -128,10 +147,8 @@ class CreateDraftHandler
             }
 
             $this->upsertChangedFields($element, $field);
-            $this->upsertChangedAttributes($element);
         }
     }
-
 
 
     /**
@@ -163,7 +180,7 @@ class CreateDraftHandler
         );
     }
 
-    private function upsertChangedAttributes(ElementInterface $element, array $attributes = ['title']): void
+    private function upsertChangedAttributes(ElementInterface $element, array $attributes): void
     {
         $userId = Craft::$app->getUser()->getId();
         $timestamp = Db::prepareDateForDb(new DateTime());

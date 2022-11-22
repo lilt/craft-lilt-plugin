@@ -21,6 +21,7 @@ use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use Throwable;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
@@ -70,10 +71,13 @@ class SendJobToLiltConnectorHandler
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
                 //Create draft with & update all values to source element
                 $draft = Craftliltplugin::getInstance()->createDraftHandler->create(
-                    $element,
-                    $job->title,
-                    $job->sourceSiteId,
-                    $targetSiteId
+                    new CreateDraftCommand(
+                        $element,
+                        $job->title,
+                        $job->sourceSiteId,
+                        $targetSiteId,
+                        $job->translationWorkflow
+                    )
                 );
 
                 $content = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(

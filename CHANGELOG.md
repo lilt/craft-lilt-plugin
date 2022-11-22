@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.2.0 - 2022-11-20
+### Added 
+- Option to enable target entries on translations publish
+- Option to enable slug copy from source entries to target
+
 ## 3.1.2 - 2022-11-17
 ### Fixed 
 - Multiple drafts apply issue for different sites 
