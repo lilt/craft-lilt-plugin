@@ -6,9 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## 3.2.0 - 2022-11-20
 ### Added 
-- Option to enable entries on translations publish
-### Fixed 
-- Entry slug for copy source text flow 
+- Option to enable target entries on translations publish
+- Option to enable slug copy from source entries to target
 
 ## 3.1.2 - 2022-11-17
 ### Fixed 
