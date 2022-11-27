@@ -171,6 +171,7 @@ class CreateDraftHandler
             'elementId' => $element->getId(),
             'siteId' => $element->getSite()->id,
             'fieldId' => $field->id,
+            'propagated' => $element->propagating,
         ];
 
         $update = [
@@ -198,6 +199,7 @@ class CreateDraftHandler
                 'elementId' => $element->id,
                 'siteId' => $element->siteId,
                 'attribute' => $attribute,
+                'propagated' => $element->propagating,
             ];
 
             $update = [
