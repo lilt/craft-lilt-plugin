@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use lilthq\craftliltplugin\services\handlers\commands\CreateJobCommand;
 use yii\base\InvalidArgumentException;
 
@@ -47,10 +48,13 @@ class CraftLiltPluginHelper extends Module
                     ->provide($element);
                 //Create draft with & update all values to source element
                 $drafts[$targetSiteId] = Craftliltplugin::getInstance()->createDraftHandler->create(
-                    $element,
-                    $job->title,
-                    $job->sourceSiteId,
-                    $targetSiteId
+                    new CreateDraftCommand(
+                        $element,
+                        $job->title,
+                        $job->sourceSiteId,
+                        $targetSiteId,
+                        $job->translationWorkflow
+                    )
                 );
             }
 
@@ -244,7 +248,7 @@ class CraftLiltPluginHelper extends Module
         $this->assertSame(TranslationRecord::STATUS_FAILED, $translation->status);
     }
 
-    public function assertTranslationStatus(int $translationId, string $expectedStatus)
+    public function assertTranslationStatus(int $translationId, string $expectedStatus): void
     {
         $actualTranslation = TranslationRecord::findOne(
             [
@@ -255,7 +259,7 @@ class CraftLiltPluginHelper extends Module
         $this->assertSame($expectedStatus, $actualTranslation->status);
     }
 
-    public function assertJobStatus(int $jobId, string $expectedStatus)
+    public function assertJobStatus(int $jobId, string $expectedStatus): void
     {
         $actualJob = JobRecord::findOne(
             [

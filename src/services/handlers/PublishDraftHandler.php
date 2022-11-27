@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
 use craft\services\Drafts as DraftRepository;
+use lilthq\craftliltplugin\records\SettingRecord;
 use Throwable;
 
 class PublishDraftHandler
@@ -34,6 +35,14 @@ class PublishDraftHandler
         if (!$draftElement) {
             //TODO: published already or what? Why we are here?
             return;
+        }
+
+        $enableEntriesForTargetSitesRecord = SettingRecord::findOne(['name' => 'enable_entries_for_target_sites']);
+        $enableEntriesForTargetSites = (bool) ($enableEntriesForTargetSitesRecord->value
+            ?? false);
+
+        if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($targetSiteId)) {
+            $draftElement->setEnabledForSite([$targetSiteId => true]);
         }
 
         $this->draftRepository->applyDraft($draftElement);
