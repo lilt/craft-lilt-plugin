@@ -129,7 +129,7 @@ class CreateDraftHandler
     private function markFieldsAsChanged(ElementInterface $element): void
     {
         $fieldLayout = $element->getFieldLayout();
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
 
         foreach ($fields as $field) {
             if (
