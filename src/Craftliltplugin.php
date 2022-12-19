@@ -50,6 +50,7 @@ use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRe
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use lilthq\craftliltplugin\services\ServiceInitializer;
 use yii\base\ActionEvent;
@@ -102,6 +103,7 @@ use yii\web\Response;
  * @property RefreshJobStatusHandler $refreshJobStatusHandler
  * @property CreateDraftHandler $createDraftHandler
  * @property CopySourceTextHandler $copySourceTextHandler
+ * @property SettingsRepository $settingsRepository
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin
@@ -308,6 +310,11 @@ class Craftliltplugin extends Plugin
     public function getConnectorKey(): ?string
     {
         return $this->connectorKey;
+    }
+
+    public function getUserAgent(): string
+    {
+        return sprintf('lilthq/craft-lilt-plugin:%s', Craftliltplugin::getInstance()->getVersion());
     }
 
     public static function getInstance(): Craftliltplugin
