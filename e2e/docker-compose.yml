@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  app:
+    build: ./happy-lager-main
+    image: happy-lager:latest
+    ports:
+      - "88:8080"
+    networks:
+      - e2e-network
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: "craft-lilt"
+      MYSQL_USER: "craft-lilt"
+      MYSQL_PASSWORD: "craft-lilt"
+    networks:
+      - e2e-network
+
+  mockserver:
+    image: mockserver/mockserver:latest
+    environment:
+      MOCKSERVER_CORS_ALLOW_ORIGIN: "*"
+      MOCKSERVER_CORS_ALLOW_METHODS: "CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, PATCH, TRACE"
+    ports:
+      - 1080:1080
+    networks:
+      - e2e-network
+
+networks:
+  e2e-network:
+    name: e2e-network
+    external: false
