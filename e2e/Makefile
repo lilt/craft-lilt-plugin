@@ -29,8 +29,8 @@ cli:
 	docker-compose exec -T app sh
 
 test:
-	docker run -u root -t -v ${PWD}:/e2e -w /e2e node:18.12.1 npm install
-	docker run -u root -t -v ${PWD}:/e2e -w /e2e  \
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=/e2e/.cache node:18.12.1 npm install
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=/e2e/.cache  \
 								  --network e2e-network \
 								  --env-file .env.test \
   								  --entrypoint=cypress \

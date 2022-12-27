@@ -248,10 +248,10 @@ Cypress.Commands.add('disableEntry', (slug, entryLabel) => {
         });
   };
 
-  cy.wrap(() => {enableLanguage(1);});
-  cy.wrap(() => {enableLanguage(2);});
-  cy.wrap(() => {enableLanguage(3);});
-  cy.wrap(() => {enableLanguage(4);});
+  enableLanguage(1);
+  enableLanguage(2);
+  enableLanguage(3);
+  enableLanguage(4);
 
   cy.get('#enabled').
       invoke('attr', 'aria-checked').
@@ -285,10 +285,10 @@ Cypress.Commands.add('enableEntry', (slug, entryLabel) => {
         });
   };
 
-  cy.wrap(() => { enableLanguage(1) });
-  cy.wrap(() => { enableLanguage(2) });
-  cy.wrap(() => { enableLanguage(3) });
-  cy.wrap(() => { enableLanguage(4) });
+   enableLanguage(1);
+   enableLanguage(2);
+   enableLanguage(3);
+   enableLanguage(4);
 
   cy.get('#enabled').
       invoke('attr', 'aria-checked').
