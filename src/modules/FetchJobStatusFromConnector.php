@@ -22,7 +22,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
 {
     public const DELAY_IN_SECONDS = 10;
     public const PRIORITY = null;
-    public const TTR = 60 * 5; // 5 minutes
+    public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
 
