@@ -102,16 +102,23 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
 
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
 
-            Queue::push(
-                new FetchVerifiedJobTranslationsFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                ),
-                FetchVerifiedJobTranslationsFromConnector::PRIORITY,
-                FetchVerifiedJobTranslationsFromConnector::DELAY_IN_SECONDS
+            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
+                $this->jobId
             );
+
+            foreach ($translations as $translation) {
+                Queue::push(
+                    new FetchTranslationFromConnector(
+                        [
+                            'jobId' => $this->jobId,
+                            'liltJobId' => $this->liltJobId,
+                            'translationId' => $translation->id,
+                        ]
+                    ),
+                    FetchTranslationFromConnector::PRIORITY,
+                    FetchTranslationFromConnector::DELAY_IN_SECONDS
+                );
+            }
         }
 
         if ($jobRecord->isInstantFlow()) {
@@ -123,16 +130,23 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                 $jobRecord->status = Job::STATUS_FAILED;
             }
 
-            Queue::push(
-                new FetchInstantJobTranslationsFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                ),
-                FetchInstantJobTranslationsFromConnector::PRIORITY,
-                FetchInstantJobTranslationsFromConnector::DELAY_IN_SECONDS
+            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
+                $this->jobId
             );
+
+            foreach ($translations as $translation) {
+                Queue::push(
+                    new FetchTranslationFromConnector(
+                        [
+                            'jobId' => $this->jobId,
+                            'liltJobId' => $this->liltJobId,
+                            'translationId' => $translation->id,
+                        ]
+                    ),
+                    FetchTranslationFromConnector::PRIORITY,
+                    FetchTranslationFromConnector::DELAY_IN_SECONDS
+                );
+            }
         }
 
         $jobRecord->save();

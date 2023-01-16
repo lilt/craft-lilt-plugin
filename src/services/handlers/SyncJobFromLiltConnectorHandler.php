@@ -13,8 +13,6 @@ use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\elements\Translation;
-use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\appliers\TranslationApplyCommand;
@@ -83,34 +81,7 @@ class SyncJobFromLiltConnectorHandler
             }
         }
 
-        $translationRecords = Craftliltplugin::getInstance()
-            ->translationRepository
-            ->findByJobId($job->id);
-
-        $statuses = array_map(static function (TranslationModel $tr) {
-            return $tr->status;
-        }, $translationRecords);
-
-        if (in_array(TranslationRecord::STATUS_FAILED, $statuses, true)) {
-            $jobRecord->status = Job::STATUS_FAILED;
-            $jobRecord->save();
-        } elseif (in_array(TranslationRecord::STATUS_IN_PROGRESS, $statuses, true)) {
-            $jobRecord->status = Job::STATUS_IN_PROGRESS;
-            $jobRecord->save();
-        } else {
-            $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
-            $jobRecord->save();
-
-            Craft::$app->elements->invalidateCachesForElementType(Translation::class);
-
-            Craftliltplugin::getInstance()->jobLogsRepository->create(
-                $jobRecord->id,
-                Craft::$app->getUser()->getId(),
-                'Translations downloaded'
-            );
-        }
-
-        Craft::$app->elements->invalidateCachesForElement($job);
+        Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
     }
 
     /**

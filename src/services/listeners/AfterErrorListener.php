@@ -16,6 +16,7 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
+use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
 use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -29,6 +30,7 @@ class AfterErrorListener implements ListenerInterface
         FetchJobStatusFromConnector::class,
         FetchInstantJobTranslationsFromConnector::class,
         FetchVerifiedJobTranslationsFromConnector::class,
+        FetchTranslationFromConnector::class,
         SendJobToConnector::class,
     ];
 
