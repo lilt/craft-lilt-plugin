@@ -53,6 +53,7 @@ use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRe
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use yii\base\InvalidConfigException;
 
@@ -232,6 +233,10 @@ class ServiceInitializer
                 [
                     'class' => ConnectorFileRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
+                ],
+            'settingsRepository' =>
+                [
+                    'class' => SettingsRepository::class,
                 ],
             'editJobHandler' =>
                 [

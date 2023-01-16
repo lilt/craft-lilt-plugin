@@ -80,6 +80,13 @@
         }) }}
         </div>
 
+        {{ forms.textField({
+            name: 'liltConfigDisabled',
+            id: 'liltConfigDisabled',
+            value: liltConfigDisabled,
+            class: 'hidden'
+        }) }}
+
         <div class="buttons">
             <button type="submit" class="btn submit">{{ 'Update configuration'|t('craft-lilt-plugin') }}</button>
             <div class="utility-status"></div>
