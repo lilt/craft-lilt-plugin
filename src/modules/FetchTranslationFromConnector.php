@@ -102,7 +102,6 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
         }
 
         if (!$isTranslationFinished) {
-
             $this->markAsDone($queue);
             $mutex->release($mutexKey);
 
@@ -209,8 +208,8 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
     private function isTranslationFinished($job, TranslationResponse $translationFromConnector): bool
     {
         return ($job->isInstantFlow() && $translationFromConnector->getStatus(
-                ) === TranslationResponse::STATUS_MT_COMPLETE)
+        ) === TranslationResponse::STATUS_MT_COMPLETE)
             || ($job->isVerifiedFlow() && $translationFromConnector->getStatus(
-                ) !== TranslationResponse::STATUS_EXPORT_COMPLETE);
+            ) !== TranslationResponse::STATUS_EXPORT_COMPLETE);
     }
 }
