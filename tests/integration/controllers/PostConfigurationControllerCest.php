@@ -25,8 +25,15 @@ class PostConfigurationControllerCest extends AbstractIntegrationCest
             Craft::$app->getUsers()->getUserById(1)
         );
 
+        $I->expectSettingsGetRequest(
+            '/api/v1.0/this-is-connector-api-url/settings',
+            'this-is-connector-api-key',
+            [],
+            200
+        );
+
         $I->expectSettingsUpdateRequest(
-            '/api/v1.0/settings',
+            '/api/v1.0/this-is-connector-api-url/settings',
             [
                 'project_prefix' => 'this-is-connector-project-prefix',
                 'project_name_template' => 'this-is-connector-project-name-template',
@@ -42,10 +49,12 @@ class PostConfigurationControllerCest extends AbstractIntegrationCest
             ),
             [
                 'connectorApiKey' => 'this-is-connector-api-key',
-                'connectorApiUrl' => 'this-is-connector-api-url',
+                'connectorApiUrl' => 'http://wiremock/api/v1.0/this-is-connector-api-url',
                 'projectPrefix' => 'this-is-connector-project-prefix',
                 'projectNameTemplate' => 'this-is-connector-project-name-template',
                 'liltTranslationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+                'enableEntriesForTargetSites' => true,
+                'copyEntriesSlugFromSourceToTarget' => true,
             ]
         );
 
@@ -53,7 +62,7 @@ class PostConfigurationControllerCest extends AbstractIntegrationCest
         $connectorApiUrlRecord = SettingRecord::findOne(['name' => 'connector_api_url']);
 
         Assert::assertSame('this-is-connector-api-key', $connectorApiKeyRecord->value);
-        Assert::assertSame('this-is-connector-api-url', $connectorApiUrlRecord->value);
+        Assert::assertSame('http://wiremock/api/v1.0/this-is-connector-api-url', $connectorApiUrlRecord->value);
     }
 
     public function _after(IntegrationTester $I): void

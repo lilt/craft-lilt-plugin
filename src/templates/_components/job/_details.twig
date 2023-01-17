@@ -75,7 +75,7 @@
             {% set statusLabel = statusDef.label ?? statusDef ?? status|ucfirst %}
         {% endif %}
         <div class="data">
-            <h5 class="heading">{{ 'Status'|t('app') }}</h5>
+            <h5 id="status-label" class="heading">{{ 'Status'|t('app') }}</h5>
             <div id="status-value" class="value">
                 {% if isUnpublishedDraft %}
                     <span data-icon="draft"></span>

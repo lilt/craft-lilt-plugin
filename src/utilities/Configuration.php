@@ -96,7 +96,7 @@ class Configuration extends Utility
                 'connectorApiKey' => $connectorApiKey,
                 'connectorApiUrl' => $connectorApiUrl,
                 'formActionUrl' => UrlHelper::cpUrl('craft-lilt-plugin/settings/lilt-configuration'),
-                'liltConfigDisabled' => $liltConfigDisabled,
+                'liltConfigDisabled' => (int) $liltConfigDisabled,
                 'enableEntriesForTargetSites' => $enableEntriesForTargetSites,
                 'copyEntriesSlugFromSourceToTarget' => $copyEntriesSlugFromSourceToTarget,
             ]

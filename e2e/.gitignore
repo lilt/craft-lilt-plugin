@@ -1,0 +1,5 @@
+node_modules
+cypress/videos
+.idea
+cypress.env.json
+happy-lager-main/
