@@ -25,7 +25,7 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob implements Retry
 {
     public const DELAY_IN_SECONDS = 60 * 5; // 5 minutes
     public const PRIORITY = null;
-    public const TTR = 60 * 5; // 5 minutes
+    public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
 
