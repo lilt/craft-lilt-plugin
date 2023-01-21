@@ -62,6 +62,7 @@ class Job extends Element
     private $_author;
     private $_elements;
     private $_translations;
+
     // @codingStandardsIgnoreEnd
 
     public function beforeDelete(): bool
@@ -120,7 +121,7 @@ class Job extends Element
         $this->elementIds = [];
 
         foreach ($elementIds as $elementId) {
-            $this->elementIds[] = (int) $elementId;
+            $this->elementIds[] = (int)$elementId;
         }
 
         return $this->elementIds;
@@ -146,11 +147,15 @@ class Job extends Element
     {
         $versions = $this->getVersions();
 
-        if (isset($versions[$elementId]) && $versions[$elementId] === 'null') {
-            $versions[$elementId] = null;
+        if (
+            !isset($versions[$elementId]) ||
+            $versions[$elementId] === 'null' ||
+            empty($versions[$elementId])
+        ) {
+            return $elementId;
         }
 
-        return (int)($versions[$elementId] ?? $elementId);
+        return (int)$versions[$elementId];
     }
 
     public function getVersionsAsString(): string

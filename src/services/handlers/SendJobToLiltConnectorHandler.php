@@ -101,7 +101,7 @@ class SendJobToLiltConnectorHandler
                     throw new \RuntimeException('Translations not created, upload failed');
                 }
 
-                $translation = $translationsMapped[$elementId][$targetSiteId] ?? null;
+                $translation = $translationsMapped[$versionId][$targetSiteId] ?? null;
                 if ($translation === null) {
                     $translation = Craftliltplugin::getInstance()->translationRepository->create(
                         $job->id,

@@ -45,7 +45,7 @@ class PostCreateJobController extends AbstractPostJobController
             $job->targetSiteIds,
             $job->sourceSiteId,
             $job->translationWorkflow,
-            $job->versions,
+            $job->getVersions(),
             $job->authorId
         );
 

@@ -55,6 +55,22 @@ class AfterErrorListener implements ListenerInterface
 
         if ($event->retry) {
             // we only wait for job which will be not retried anymore
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $event->job->jobId,
+                Craft::$app->getUser()->getId(),
+                substr(
+                    sprintf(
+                        'Job %s failed on %d attempt. Error message: %s',
+                        get_class($event->job),
+                        $event->attempt,
+                        $event->error->getMessage()
+                    ),
+                    0,
+                    255
+                )
+            );
+
             return false;
         }
 

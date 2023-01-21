@@ -50,7 +50,7 @@ class PostEditJobController extends AbstractPostJobController
             $job->targetSiteIds,
             $job->sourceSiteId,
             $job->translationWorkflow,
-            $job->versions
+            $job->getVersions()
         );
 
         Craftliltplugin::getInstance()->editJobHandler->__invoke(

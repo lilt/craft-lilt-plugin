@@ -2,7 +2,7 @@
 
 /**
  * @link      https://github.com/lilt
- * @copyright Copyright (c) 2022 Lilt Devs
+ * @copyright Copyright (c) 2023 Lilt Devs
  */
 
 declare(strict_types=1);
@@ -42,6 +42,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
     public function execute($queue): void
     {
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
+        $job = Job::findOne(['id' => $this->jobId]);
 
         if (!$jobRecord) {
             // job was removed, we are done here
@@ -106,6 +107,8 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                 $this->jobId
             );
 
+            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
+
             foreach ($translations as $translation) {
                 Queue::push(
                     new FetchTranslationFromConnector(
@@ -133,6 +136,8 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
             $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
                 $this->jobId
             );
+
+            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
 
             foreach ($translations as $translation) {
                 Queue::push(

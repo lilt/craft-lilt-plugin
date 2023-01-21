@@ -40,6 +40,7 @@ use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
+use lilthq\craftliltplugin\services\handlers\UpdateTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
@@ -105,6 +106,7 @@ use yii\web\Response;
  * @property CopySourceTextHandler $copySourceTextHandler
  * @property UpdateJobStatusHandler $updateJobStatusHandler
  * @property SettingsRepository $settingsRepository
+ * @property UpdateTranslationsConnectorIds $updateTranslationsConnectorIds
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin
