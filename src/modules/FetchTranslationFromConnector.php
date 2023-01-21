@@ -78,6 +78,10 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
             return;
         }
 
+        if (empty($translationRecord->connectorTranslationId)) {
+            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
+        }
+
         $translationFromConnector = Craftliltplugin::getInstance()->connectorTranslationRepository->findById(
             $translationRecord->connectorTranslationId
         );
