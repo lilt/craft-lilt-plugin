@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\modules;
 
 use Craft;
 use craft\errors\InvalidFieldException;
+use craft\helpers\Queue;
 use craft\queue\BaseJob;
 use Exception;
 use LiltConnectorSDK\ApiException;
@@ -24,6 +25,8 @@ use yii\queue\RetryableJobInterface;
 class FetchTranslationFromConnector extends BaseJob implements RetryableJobInterface
 {
     public const DELAY_IN_SECONDS = 10;
+    public const DELAY_IN_SECONDS_INSTANT = 10;
+    public const DELAY_IN_SECONDS_VERIFIED = 60 * 5;
     public const PRIORITY = null;
     public const TTR = 60 * 30;
 
@@ -106,6 +109,21 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
         }
 
         if (!$isTranslationFinished) {
+            Queue::push(
+                new FetchTranslationFromConnector(
+                    [
+                        'jobId' => $this->jobId,
+                        'liltJobId' => $this->liltJobId,
+                        'translationId' => $this->translationId,
+                    ]
+                ),
+                FetchTranslationFromConnector::PRIORITY,
+                ($job->isInstantFlow() ?
+                    FetchTranslationFromConnector::DELAY_IN_SECONDS_INSTANT :
+                    FetchTranslationFromConnector::DELAY_IN_SECONDS_VERIFIED
+                )
+            );
+
             $this->markAsDone($queue);
             $mutex->release($mutexKey);
 
@@ -214,6 +232,6 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
         return ($job->isInstantFlow() && $translationFromConnector->getStatus(
         ) === TranslationResponse::STATUS_MT_COMPLETE)
             || ($job->isVerifiedFlow() && $translationFromConnector->getStatus(
-            ) !== TranslationResponse::STATUS_EXPORT_COMPLETE);
+            ) === TranslationResponse::STATUS_EXPORT_COMPLETE);
     }
 }
