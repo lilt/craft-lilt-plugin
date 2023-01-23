@@ -406,7 +406,7 @@ class Job extends Element
         );
 
         foreach ($languages as $language) {
-            $html .= "<li><span data-icon='world'>{$language}</span></li>";
+            $html .= "<li><span data-icon='world' data-language='{$language}'>{$language}</span></li>";
         }
         $html .= '</ul>';
 
