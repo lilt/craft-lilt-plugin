@@ -46,6 +46,14 @@ class PostSyncController extends Controller
                 continue;
             }
 
+            if (
+                $job->status === Job::STATUS_NEW
+                || $job->status === Job::STATUS_DRAFT
+                || $job->status === Job::STATUS_IN_PROGRESS
+            ) {
+                continue;
+            }
+
             $selectedJobIds[] = $job->id;
 
             Queue::push(
