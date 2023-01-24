@@ -294,4 +294,12 @@ class Translation extends Element
     {
         return true;
     }
+
+    public function getHtmlAttributes(string $context): array
+    {
+        return [
+            'data-target-site-language' => $this->targetSiteLanguage,
+            'data-target-site-id' => $this->targetSiteId,
+        ];
+    }
 }
