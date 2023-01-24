@@ -39,7 +39,7 @@ class ElementQueryContentProvider extends AbstractContentProvider
                 ->elementTranslatableContentProvider
                 ->provide($blockElement)[$blockId];
 
-            if(!empty($blockFields)) {
+            if (!empty($blockFields)) {
                 $content[$blockId]['fields'] = $blockFields;
             }
         }

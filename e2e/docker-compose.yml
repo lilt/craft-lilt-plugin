@@ -8,9 +8,12 @@ services:
       - "88:8080"
     networks:
       - e2e-network
+    volumes:
+      - ./../:/tmp/craft-lilt-plugin
 
   mysql:
     image: mysql:5.7
+    platform: linux/x86_64
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 1
       MYSQL_DATABASE: "craft-lilt"
@@ -18,6 +21,8 @@ services:
       MYSQL_PASSWORD: "craft-lilt"
     networks:
       - e2e-network
+    ports:
+      - "3333:3306"
 
   mockserver:
     image: mockserver/mockserver:latest
@@ -25,7 +30,7 @@ services:
       MOCKSERVER_CORS_ALLOW_ORIGIN: "*"
       MOCKSERVER_CORS_ALLOW_METHODS: "CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, PATCH, TRACE"
     ports:
-      - 1080:1080
+      - "1080:1080"
     networks:
       - e2e-network
 

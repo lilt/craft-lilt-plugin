@@ -2,9 +2,12 @@
 FROM composer as vendor
 COPY composer.json composer.json
 COPY composer.lock composer.lock
-RUN composer update --no-interaction --prefer-dist
-RUN composer install --no-interaction --prefer-dist
-RUN composer require lilt/craft-lilt-plugin:"dev-3.x-development"
+COPY ./plugin-src /tmp/craft-lilt-plugin
+
+RUN composer update --no-interaction
+RUN composer install --no-interaction
+
+RUN composer require lilt/craft-lilt-plugin:^999.9.9
 
 FROM craftcms/nginx:8.0
 
@@ -16,3 +19,5 @@ USER www-data
 # the user is `www-data`, so we copy the files using the user and group
 COPY --chown=www-data:www-data --from=vendor /app/vendor/ /app/vendor/
 COPY --chown=www-data:www-data . .
+COPY --chown=www-data:www-data ./plugin-src /tmp/craft-lilt-plugin
+

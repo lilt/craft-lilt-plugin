@@ -1,7 +1,7 @@
 const {generateJobData} = require('../../../support/job/generator.js');
 
 describe(
-    'Success copy source text path with copy slug disabled',
+    'Success path for job with multiple target languages',
     () => {
       const entryLabel = 'The Future of Augmented Reality';
 
@@ -14,6 +14,8 @@ describe(
           jobTitle,
           copySlug: false,
           enableAfterPublish: false,
+          languages: ['de', 'es', 'uk'],
+          batchPublishing: true
         })
       });
 
@@ -26,6 +28,8 @@ describe(
           jobTitle,
           copySlug: false,
           enableAfterPublish: true,
+          languages: ['de', 'es', 'uk'],
+          batchPublishing: true
         })
       });
 
@@ -38,6 +42,8 @@ describe(
           jobTitle,
           copySlug: true,
           enableAfterPublish: false,
+          languages: ['de', 'es', 'uk'],
+          batchPublishing: true
         })
       });
 
@@ -50,6 +56,8 @@ describe(
           jobTitle,
           copySlug: true,
           enableAfterPublish: true,
+          languages: ['de', 'es', 'uk'],
+          batchPublishing: true
         })
       });
     });

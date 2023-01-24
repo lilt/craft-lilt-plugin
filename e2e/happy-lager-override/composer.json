@@ -4,13 +4,24 @@
     "craftcms/cms": "3.7.61",
     "vlucas/phpdotenv": "^2.4.0",
     "craftcms/redactor": "^2.8.7",
-    "lilt/craft-lilt-plugin": "^3.0"
+    "lilt/craft-lilt-plugin": "^999.9.9"
   },
   "autoload": {
     "psr-4": {
       "modules\\": "modules/"
     }
   },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "/tmp/craft-lilt-plugin",
+      "options": {
+        "versions": {
+          "lilt/craft-lilt-plugin": "999.9.9"
+        }
+      }
+    }
+  ],
   "config": {
     "optimize-autoloader": true,
     "platform": {

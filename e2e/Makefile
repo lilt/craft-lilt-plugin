@@ -1,3 +1,5 @@
+CYPRESS_CACHE_FOLDER?=/e2e/.cache
+
 build:
 	docker build -f happy-lager-main/Dockerfile happy-lager-main -t happy-lager
 
@@ -10,6 +12,11 @@ clone:
 	cp -R happy-lager-override/* happy-lager-main
 
 up: clone down
+	rm -rf happy-lager-main/plugin-src
+	mkdir happy-lager-main/plugin-src
+	cp -R ../resources happy-lager-main/plugin-src/resources
+	cp -R ../src happy-lager-main/plugin-src/src
+	cp -R ../composer.json happy-lager-main/plugin-src/composer.json
 	docker-compose -f docker-compose.yml up --build -d
 	docker-compose exec -T mysql sh -c 'while ! mysqladmin ping -h"mysql" --silent; do sleep 1; done'
 	docker-compose exec -T app sh -c 'php craft setup/security-key'
@@ -29,8 +36,8 @@ cli:
 	docker-compose exec -T app sh
 
 test:
-	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=/e2e/.cache node:18.12.1 npm install
-	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=/e2e/.cache  \
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER}
 								  --network e2e-network \
 								  --env-file .env.test \
   								  --entrypoint=cypress \

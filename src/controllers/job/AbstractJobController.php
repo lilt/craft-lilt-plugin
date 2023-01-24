@@ -64,7 +64,7 @@ class AbstractJobController extends Controller
 
         $translationWorkflow = CraftliltpluginParameters::TRANSLATION_WORKFLOW_VERIFIED;
 
-        if(
+        if (
             $job->status === Job::STATUS_DRAFT ||
             $job->status === Job::STATUS_NEW
         ) {
