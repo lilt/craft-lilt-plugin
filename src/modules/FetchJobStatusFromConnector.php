@@ -21,7 +21,7 @@ use yii\queue\RetryableJobInterface;
 class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterface
 {
     public const DELAY_IN_SECONDS = 10;
-    public const PRIORITY = null;
+    public const PRIORITY = 512;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
@@ -91,7 +91,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                         'liltJobId' => $this->liltJobId,
                     ]
                 )),
-                self::DELAY_IN_SECONDS,
+                self::PRIORITY,
                 self::DELAY_IN_SECONDS
             );
 

@@ -27,7 +27,7 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
     public const DELAY_IN_SECONDS = 10;
     public const DELAY_IN_SECONDS_INSTANT = 10;
     public const DELAY_IN_SECONDS_VERIFIED = 60 * 5;
-    public const PRIORITY = null;
+    public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
