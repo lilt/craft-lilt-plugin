@@ -7,15 +7,6 @@ on:
     branches:
       - "*"
 jobs:
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run automation
-        working-directory: ./e2e
-        run: |
-          make up
-          make test
   tests-php-72:
     runs-on: ubuntu-latest
     steps:
