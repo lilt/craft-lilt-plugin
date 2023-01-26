@@ -235,20 +235,15 @@ Cypress.Commands.add('disableEntry', (slug, entryLabel) => {
 
   cy.get('#expand-status-btn').click();
 
-  const enableLanguage = (langId) => {
-    cy.get(`#enabledForSite-${langId}`).
+  for (const [targetLanguage, targetLanguageId] of Object.entries(langs)) {
+    cy.get(`#enabledForSite-${targetLanguageId}`).
         invoke('attr', 'aria-checked').
         then((value) => {
           if (value === 'true') {
-            cy.get(`#enabledForSite-${langId}`).click();
+            cy.get(`#enabledForSite-${targetLanguageId}`).click();
           }
         });
-  };
-
-  enableLanguage(1);
-  enableLanguage(2);
-  enableLanguage(3);
-  enableLanguage(4);
+  }
 
   cy.get('#enabled').
       invoke('attr', 'aria-checked').
@@ -274,20 +269,16 @@ Cypress.Commands.add('enableEntry', (slug, entryLabel) => {
 
   cy.get('#expand-status-btn').click();
 
-  const enableLanguage = (langId) => {
-    cy.get(`#enabledForSite-${langId}`).
+  for (const [targetLanguage, targetLanguageId] of Object.entries(langs)) {
+    cy.get(`#enabledForSite-${targetLanguageId}`).
         invoke('attr', 'aria-checked').
         then((value) => {
           if (value === 'false') {
-            cy.get(`#enabledForSite-${langId}`).click();
+            cy.get(`#enabledForSite-${targetLanguageId}`).click();
           }
         });
-  };
+  }
 
-  enableLanguage(1);
-  enableLanguage(2);
-  enableLanguage(3);
-  enableLanguage(4);
 
   cy.get('#enabled').
       invoke('attr', 'aria-checked').
