@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.3.0 - 2022-11-20
+### Added 
+- Priority for jobs from queue
+- Background job for translation downloading
+
+### Fixed
+- Configuration page issues
+- Get versions for Jobs element
+- Skip sync for new jobs
+- Enabling of entries on translation publish
+- Entry version content provider 
+- Updating of translation connector ids
+
 ## 3.2.1 - 2022-11-20
 ### Added 
 - Increase TTR for background jobs 
