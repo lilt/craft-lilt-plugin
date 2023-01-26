@@ -25,6 +25,16 @@ class ConnectorTranslationRepository extends AbstractConnectorExternalRepository
     /**
      * @throws ApiException
      */
+    public function findById(int $translationId): TranslationResponse
+    {
+        return $this->apiInstance->servicesApiDeliveriesGetDeliveryById(
+            $translationId
+        );
+    }
+
+    /**
+     * @throws ApiException
+     */
     public function findTranslationContentById(int $translationId): string
     {
         return $this->apiInstance->servicesApiDeliveriesDownloadDelivery(

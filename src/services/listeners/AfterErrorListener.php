@@ -16,6 +16,7 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
+use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
 use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -29,6 +30,7 @@ class AfterErrorListener implements ListenerInterface
         FetchJobStatusFromConnector::class,
         FetchInstantJobTranslationsFromConnector::class,
         FetchVerifiedJobTranslationsFromConnector::class,
+        FetchTranslationFromConnector::class,
         SendJobToConnector::class,
     ];
 
@@ -53,6 +55,22 @@ class AfterErrorListener implements ListenerInterface
 
         if ($event->retry) {
             // we only wait for job which will be not retried anymore
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $event->job->jobId,
+                Craft::$app->getUser()->getId(),
+                substr(
+                    sprintf(
+                        'Job %s failed on %d attempt. Error message: %s',
+                        get_class($event->job),
+                        $event->attempt,
+                        $event->error->getMessage()
+                    ),
+                    0,
+                    255
+                )
+            );
+
             return false;
         }
 

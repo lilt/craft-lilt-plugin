@@ -50,7 +50,9 @@ class ConnectorConfigurationProvider
             }
         }
 
-        $config->setUserAgent('lilthq/craft-lilt-plugin:1.0.0');
+        $config->setUserAgent(
+            Craftliltplugin::getInstance()->getUserAgent()
+        );
 
         return $config;
     }

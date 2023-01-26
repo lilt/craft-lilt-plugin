@@ -45,6 +45,12 @@ class PublishDraftHandler
             $draftElement->setEnabledForSite([$targetSiteId => true]);
         }
 
+        if ($enableEntriesForTargetSites) {
+            $canonical = $draftElement->getCanonical();
+            $canonical->setEnabledForSite([$targetSiteId => true]);
+            Craft::$app->getElements()->saveElement($canonical);
+        }
+
         $this->draftRepository->applyDraft($draftElement);
     }
 }

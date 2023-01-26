@@ -33,6 +33,8 @@ use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
+use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
+use lilthq\craftliltplugin\services\handlers\UpdateTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
@@ -52,6 +54,7 @@ use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRe
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use yii\base\InvalidConfigException;
 
@@ -80,6 +83,8 @@ class ServiceInitializer
             'createTranslationsHandler' => CreateTranslationsHandler::class,
             'refreshJobStatusHandler' => RefreshJobStatusHandler::class,
             'createDraftHandler' => CreateDraftHandler::class,
+            'updateJobStatusHandler' => UpdateJobStatusHandler::class,
+            'updateTranslationsConnectorIds' => UpdateTranslationsConnectorIds::class,
             'listenerRegister' => [
                 'class' => ListenerRegister::class,
                 'availableListeners' => CraftliltpluginParameters::LISTENERS,
@@ -230,6 +235,10 @@ class ServiceInitializer
                 [
                     'class' => ConnectorFileRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
+                ],
+            'settingsRepository' =>
+                [
+                    'class' => SettingsRepository::class,
                 ],
             'editJobHandler' =>
                 [

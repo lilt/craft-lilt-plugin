@@ -35,9 +35,13 @@ class ElementQueryContentProvider extends AbstractContentProvider
         foreach ($blockElements as $blockElement) {
             $blockId = $blockElement->getId();
 
-            $content[$blockId]['fields'] = Craftliltplugin::getInstance()
+            $blockFields = Craftliltplugin::getInstance()
                 ->elementTranslatableContentProvider
                 ->provide($blockElement)[$blockId];
+
+            if (!empty($blockFields)) {
+                $content[$blockId]['fields'] = $blockFields;
+            }
         }
 
         return $content;

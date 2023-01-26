@@ -22,7 +22,7 @@ use yii\queue\RetryableJobInterface;
 class SendJobToConnector extends BaseJob implements RetryableJobInterface
 {
     public const DELAY_IN_SECONDS = 10;
-    public const PRIORITY = null;
+    public const PRIORITY = 256;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
