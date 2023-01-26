@@ -48,7 +48,7 @@ class TranslationRepository
         $translation = new Translation($config);
         Craft::$app->getElements()->saveElement($translation);
 
-        $translationRecord =  new TranslationRecord(
+        $translationRecord = new TranslationRecord(
             array_merge(
                 [
                     'id' => $translation->id,

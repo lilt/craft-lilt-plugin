@@ -2,7 +2,7 @@
 
 /**
  * @link      https://github.com/lilt
- * @copyright Copyright (c) 2022 Lilt Devs
+ * @copyright Copyright (c) 2023 Lilt Devs
  */
 
 declare(strict_types=1);
@@ -21,7 +21,7 @@ use yii\queue\RetryableJobInterface;
 class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterface
 {
     public const DELAY_IN_SECONDS = 10;
-    public const PRIORITY = null;
+    public const PRIORITY = 512;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
@@ -42,6 +42,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
     public function execute($queue): void
     {
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
+        $job = Job::findOne(['id' => $this->jobId]);
 
         if (!$jobRecord) {
             // job was removed, we are done here
@@ -90,7 +91,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                         'liltJobId' => $this->liltJobId,
                     ]
                 )),
-                self::DELAY_IN_SECONDS,
+                self::PRIORITY,
                 self::DELAY_IN_SECONDS
             );
 
@@ -102,16 +103,25 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
 
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
 
-            Queue::push(
-                new FetchVerifiedJobTranslationsFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                ),
-                FetchVerifiedJobTranslationsFromConnector::PRIORITY,
-                FetchVerifiedJobTranslationsFromConnector::DELAY_IN_SECONDS
+            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
+                $this->jobId
             );
+
+            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
+
+            foreach ($translations as $translation) {
+                Queue::push(
+                    new FetchTranslationFromConnector(
+                        [
+                            'jobId' => $this->jobId,
+                            'liltJobId' => $this->liltJobId,
+                            'translationId' => $translation->id,
+                        ]
+                    ),
+                    FetchTranslationFromConnector::PRIORITY,
+                    FetchTranslationFromConnector::DELAY_IN_SECONDS
+                );
+            }
         }
 
         if ($jobRecord->isInstantFlow()) {
@@ -123,16 +133,25 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                 $jobRecord->status = Job::STATUS_FAILED;
             }
 
-            Queue::push(
-                new FetchInstantJobTranslationsFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                ),
-                FetchInstantJobTranslationsFromConnector::PRIORITY,
-                FetchInstantJobTranslationsFromConnector::DELAY_IN_SECONDS
+            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
+                $this->jobId
             );
+
+            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
+
+            foreach ($translations as $translation) {
+                Queue::push(
+                    new FetchTranslationFromConnector(
+                        [
+                            'jobId' => $this->jobId,
+                            'liltJobId' => $this->liltJobId,
+                            'translationId' => $translation->id,
+                        ]
+                    ),
+                    FetchTranslationFromConnector::PRIORITY,
+                    FetchTranslationFromConnector::DELAY_IN_SECONDS
+                );
+            }
         }
 
         $jobRecord->save();
