@@ -60,6 +60,8 @@ class TranslationRepository
 
         $translationRecord->save();
 
+        Craft::$app->getElements()->invalidateCachesForElement($translation);
+
         return $translationRecord;
     }
 
