@@ -207,12 +207,30 @@ class Translation extends Element
         ];
     }
 
+    public function toJson(): string
+    {
+        return json_encode([
+            'draftId' => $this->translatedDraftId,
+            'translationId' => $this->id,
+            'sourceContent' => !empty($this->sourceContent) ? base64_encode($this->sourceContent) : null,
+            'sourceSiteId' => $this->sourceSiteId,
+            'targetSiteId' => $this->targetSiteId,
+        ]);
+    }
+
     public function getActionsHtml(): string
     {
+        $dataSourceContent = '';
+        if (!empty($this->sourceContent)) {
+            $dataSourceContent = 'data-source-content="' . base64_encode($this->sourceContent);
+        }
+
         return '
                 <span 
-                    class="lilt-review-translation " 
+                    class="lilt-review-translation" 
                     title="Review" 
+                    data-json="' . base64_encode($this->toJson()) . '"
+                    ' . $dataSourceContent . '
                     data-id="' . $this->id . '" data-title="' . $this->title . '" 
                     data-icon="view" 
                     style="margin-right: 5px;color: #0b69a3;cursor: pointer;font-size: 14pt;">
@@ -300,6 +318,7 @@ class Translation extends Element
         return [
             'data-target-site-language' => $this->targetSiteLanguage,
             'data-target-site-id' => $this->targetSiteId,
+            'data-translated-draft-id' => $this->translatedDraftId,
         ];
     }
 }

@@ -8,8 +8,6 @@ services:
       - "88:8080"
     networks:
       - e2e-network
-    volumes:
-      - ./../:/tmp/craft-lilt-plugin
 
   mysql:
     image: mysql:5.7

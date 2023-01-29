@@ -4,3 +4,4 @@ cypress/videos
 cypress.env.json
 happy-lager-main/
 !happy-lager-override/composer.lock
+*.override.yml
