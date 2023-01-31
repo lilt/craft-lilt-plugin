@@ -1,7 +1,7 @@
 const {generateJobData} = require('../../../support/job/generator.js');
 
 describe(
-    'Success path for job with one target language',
+    '[Copy Source Text] Success path for job with one target language',
     () => {
       const entryLabel = 'The Future of Augmented Reality';
 
