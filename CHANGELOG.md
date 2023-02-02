@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.4.0 - 2022-11-20
+### Added 
+- Entry slug name added to translation filenames
+
 ## 3.3.0 - 2022-11-20
 ### Added 
 - Priority for jobs from queue

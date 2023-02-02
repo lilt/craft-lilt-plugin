@@ -222,7 +222,7 @@ class Translation extends Element
     {
         $dataSourceContent = '';
         if (!empty($this->sourceContent)) {
-            $dataSourceContent = 'data-source-content="' . base64_encode($this->sourceContent);
+            $dataSourceContent = 'data-source-content="' . base64_encode($this->sourceContent) . '"';
         }
 
         return '

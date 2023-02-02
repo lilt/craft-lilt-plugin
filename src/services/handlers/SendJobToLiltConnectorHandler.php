@@ -84,6 +84,8 @@ class SendJobToLiltConnectorHandler
                     $draft
                 );
 
+                $slug = !empty($element->slug) ? $element->slug : '';
+
                 $result = $this->createJobFile(
                     $content,
                     $versionId,
@@ -92,7 +94,8 @@ class SendJobToLiltConnectorHandler
                     Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
                         [$targetSiteId]
                     ),
-                    null //TODO: $job->dueDate is not in use
+                    null, //TODO: $job->dueDate is not in use
+                    $slug
                 );
 
                 if (!$result) {
@@ -152,13 +155,18 @@ class SendJobToLiltConnectorHandler
         int $jobId,
         string $sourceLanguage,
         array $targetSiteLanguages,
-        ?DateTimeInterface $dueDate
+        ?DateTimeInterface $dueDate,
+        string $slug
     ): bool {
         $contentString = json_encode($content);
 
+        if (!empty($slug)) {
+            $slug = substr($slug, 0, 150);
+        }
+
         return Craftliltplugin::getInstance()->connectorJobsFileRepository->addFileToJob(
             $jobId,
-            'element_' . $entryId . '.json+html',
+            'element_' . $entryId . '_' . $slug . '.json+html',
             $contentString,
             $sourceLanguage,
             $targetSiteLanguages,

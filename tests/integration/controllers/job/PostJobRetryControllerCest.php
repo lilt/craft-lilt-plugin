@@ -92,7 +92,7 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
             . '&trglang=es-ES' .
             '&due=',
             urlencode(
-                sprintf('element_%d.json+html', $element->getId())
+                sprintf('element_%d_first-entry-user-1.json+html', $element->getId())
             )
         );
         $expectedBody = ExpectedElementContent::getExpectedBody($element);
