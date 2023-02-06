@@ -84,7 +84,7 @@ class SendJobToLiltConnectorHandler
                     $draft
                 );
 
-                $slug = !empty($element->slug) ? $element->slug : '';
+                $slug = !empty($element->slug) ? $element->slug : 'no-slug-available';
 
                 $result = $this->createJobFile(
                     $content,
