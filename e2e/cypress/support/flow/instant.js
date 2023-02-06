@@ -104,7 +104,7 @@ Cypress.Commands.add('instantFlow', ({
             }, {
               'name': 'srclang', 'values': ['en'],
             }, {
-              'name': 'name', 'values': ['element_[\\d]+\\.json\\+html'],
+              'name': 'name', 'values': ['element_[\\d]+_.*\\.json\\+html'],
             }, {
               'name': 'due', 'values': [''],
             }],
@@ -159,7 +159,7 @@ Cypress.Commands.add('instantFlow', ({
         'createdAt': '2022-05-29T11:31:58',
         'errorMsg': null,
         'id': translationId,
-        'name': '777_element_' + 24 + '.json+html',
+        'name': '777_element_' + 24 + '_slug_for_' + language + '.json+html',
         'status': 'mt_complete',
         'trgLang': language,
         'trgLocale': '',

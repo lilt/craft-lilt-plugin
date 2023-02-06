@@ -532,7 +532,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
         int $elementId,
         string $status
     ): array {
-        $fileName = sprintf('497058_element_%d.json+html', $elementId);
+        $fileName = sprintf('497058_element_%d_first-entry-user-1.json+html', $elementId);
 
         $translationsResponseBody = [
             'limit' => 25,
@@ -575,7 +575,7 @@ class FetchVerifiedJobTranslationsFromConnectorCest extends AbstractIntegrationC
 
     private function getTranslationsResponseBodyOneFailed(int $elementId): array
     {
-        $fileName = sprintf('497058_element_%d.json+html', $elementId);
+        $fileName = sprintf('497058_element_%d_first-entry-user-1.json+html', $elementId);
 
         return [
             'limit' => 25,

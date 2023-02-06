@@ -44,7 +44,7 @@ class ConnectorTranslationRepository extends AbstractConnectorExternalRepository
 
     public function getElementIdFromTranslationResponse(TranslationResponse $translationResponse): int
     {
-        $regExpr = '/\d+_element_(\d+).json\+html/';
+        $regExpr = '/\d+_element_(\d+)(_.*|)\.json\+html/';
         preg_match($regExpr, $translationResponse->getName(), $matches);
 
         if (!isset($matches[1])) {

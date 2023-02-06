@@ -96,7 +96,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
             . '&trglang=de-DE'
             . '&due=',
             urlencode(
-                sprintf('element_%d.json+html', $elementToTranslate->getId())
+                sprintf('element_%d_first-entry-user-1.json+html', $elementToTranslate->getId())
             )
         );
         $I->expectJobTranslationsRequest($expectedUrlDe, [], HttpCode::OK);
@@ -107,7 +107,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
             . '&trglang=ru-RU'
             . '&due=',
             urlencode(
-                sprintf('element_%d.json+html', $elementToTranslate->getId())
+                sprintf('element_%d_first-entry-user-1.json+html', $elementToTranslate->getId())
             )
         );
         $I->expectJobTranslationsRequest($expectedUrlRu, [], HttpCode::OK);
@@ -118,7 +118,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
             . '&trglang=es-ES'
             . '&due=',
             urlencode(
-                sprintf('element_%d.json+html', $elementToTranslate->getId())
+                sprintf('element_%d_first-entry-user-1.json+html', $elementToTranslate->getId())
             )
         );
         $I->expectJobTranslationsRequest($expectedUrlEs, [], HttpCode::OK);
@@ -317,7 +317,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
             . '&trglang=de-DE'
             . '&due=',
             urlencode(
-                sprintf('element_%d.json+html', $element->getId())
+                sprintf('element_%d_first-entry-user-1.json+html', $element->getId())
             )
         );
         $I->expectJobTranslationsRequest($expectedUrlDe, [], HttpCode::INTERNAL_SERVER_ERROR);
@@ -328,7 +328,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
             . '&trglang=ru-RU'
             . '&due=',
             urlencode(
-                sprintf('element_%d.json+html', $element->getId())
+                sprintf('element_%d_first-entry-user-1.json+html', $element->getId())
             )
         );
         $I->expectJobTranslationsRequest($expectedUrlRu, [], HttpCode::INTERNAL_SERVER_ERROR);
@@ -339,7 +339,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
             . '&trglang=es-ES'
             . '&due=',
             urlencode(
-                sprintf('element_%d.json+html', $element->getId())
+                sprintf('element_%d_first-entry-user-1.json+html', $element->getId())
             )
         );
         $I->expectJobTranslationsRequest($expectedUrlEs, [], HttpCode::INTERNAL_SERVER_ERROR);
