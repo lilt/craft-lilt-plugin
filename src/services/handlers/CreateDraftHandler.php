@@ -77,7 +77,7 @@ class CreateDraftHandler
         $fields = $fieldLayout ? $fieldLayout->getFields() : [];
 
         foreach ($fields as $field) {
-            if(get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
+            if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
                 $draft->setFieldValue($field->handle, $draft->getFieldValue($field->handle));
 
                 Craft::$app->matrix->duplicateBlocks($field, $createFrom, $draft, false, false);
