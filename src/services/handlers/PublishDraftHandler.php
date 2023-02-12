@@ -51,6 +51,11 @@ class PublishDraftHandler
             Craft::$app->getElements()->saveElement($canonical);
         }
 
+        $draftElement->setIsFresh();
+        $draftElement->propagateAll = true;
+
+        Craft::$app->getElements()->saveElement($draftElement);
+
         $this->draftRepository->applyDraft($draftElement);
     }
 }
