@@ -12,7 +12,7 @@ namespace lilthq\craftliltplugin\services\handlers;
 use Craft;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\exeptions\JobNotFoundException;
+use lilthq\craftliltplugin\exceptions\JobNotFoundException;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\services\handlers\commands\EditJobCommand;
 use lilthq\craftliltplugin\services\repositories\JobRepository;

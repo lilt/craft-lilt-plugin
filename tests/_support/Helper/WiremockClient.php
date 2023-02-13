@@ -207,6 +207,29 @@ class WiremockClient extends Module
         );
     }
 
+    public function expectTranslationGetRequest(
+        int $translationId,
+        int $responseCode,
+        ?array $responseBody = null
+    ): void {
+        $response = WireMock::aResponse()
+            ->withStatus($responseCode);
+
+        if ($responseBody !== null) {
+            $response->withBody(json_encode($responseBody));
+        }
+
+        $this->wireMock->stubFor(
+            WireMock::get(
+                WireMock::urlEqualTo(
+                    sprintf('/api/v1.0/translations/%d', $translationId)
+                )
+            )->willReturn(
+                $response
+            )
+        );
+    }
+
     public function expectAllRequestsAreMatched(): void
     {
         $unmatched = $this->wireMock->findUnmatchedRequests();

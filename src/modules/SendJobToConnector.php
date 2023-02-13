@@ -21,8 +21,8 @@ use yii\queue\RetryableJobInterface;
 
 class SendJobToConnector extends BaseJob implements RetryableJobInterface
 {
-    public const DELAY_IN_SECONDS = 10;
-    public const PRIORITY = 256;
+    public const DELAY_IN_SECONDS = 60;
+    public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
@@ -114,5 +114,15 @@ class SendJobToConnector extends BaseJob implements RetryableJobInterface
     public function canRetry($attempt, $error): bool
     {
         return $attempt < self::RETRY_COUNT;
+    }
+
+    public static function getDelay(): int
+    {
+        $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
+        if (!empty($envDelay) || $envDelay === '0') {
+            return (int) $envDelay;
+        }
+
+        return self::DELAY_IN_SECONDS;
     }
 }

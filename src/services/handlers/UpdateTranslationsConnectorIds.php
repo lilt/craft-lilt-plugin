@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\services\handlers;
 
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exceptions\WrongTranslationFilenameException;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use RuntimeException;
 
@@ -23,8 +24,12 @@ class UpdateTranslationsConnectorIds
         );
 
         foreach ($connectorTranslations->getResults() as $translationResponse) {
-            $elementId = Craftliltplugin::getInstance(
-            )->connectorTranslationRepository->getElementIdFromTranslationResponse($translationResponse);
+            try {
+                $elementId = Craftliltplugin::getInstance(
+                )->connectorTranslationRepository->getElementIdFromTranslationResponse($translationResponse);
+            } catch (WrongTranslationFilenameException $ex) {
+                continue;
+            }
 
             if (empty($translationResponse->getTrgLocale())) {
                 $targetLanguage = $translationResponse->getTrgLang();

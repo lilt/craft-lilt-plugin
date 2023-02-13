@@ -16,6 +16,7 @@ use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
+use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
 use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -25,7 +26,7 @@ use lilthq\tests\fixtures\ExpectedElementContent;
 use PHPUnit\Framework\Assert;
 use yii\db\Exception;
 
-class FetchInstantJobTranslationsFromConnectorCest extends AbstractIntegrationCest
+class FetchTranslationFromConnectorCest extends AbstractIntegrationCest
 {
     public function _fixtures(): array
     {
@@ -36,68 +37,13 @@ class FetchInstantJobTranslationsFromConnectorCest extends AbstractIntegrationCe
         ];
     }
 
-    /**
-     * @throws Exception
-     */
-    public function testExecuteJobNotFound(IntegrationTester $I): void
-    {
-        Db::truncateTable(Craft::$app->queue->tableName);
-
-        $I->runQueue(
-            FetchInstantJobTranslationsFromConnector::class,
-            [
-                'liltJobId' => 1000,
-                'jobId' => 1,
-            ]
-        );
-
-        Assert::assertEmpty(
-            Craft::$app->queue->getTotalJobs()
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function testExecuteJobIsVerified(IntegrationTester $I): void
-    {
-        Db::truncateTable(Craft::$app->queue->tableName);
-
-        $user = Craft::$app->getUsers()->getUserById(1);
-        $I->amLoggedInAs($user);
-
-        $element = Entry::findOne(['authorId' => 1]);
-
-        [$job, $translations] = $I->createJobWithTranslations([
-            'title' => 'Awesome test job',
-            'elementIds' => [$element->id],
-            'targetSiteIds' => '*',
-            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
-            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED,
-            'versions' => [],
-            'authorId' => 1,
-            'liltJobId' => 777,
-        ]);
-
-        $I->runQueue(
-            FetchInstantJobTranslationsFromConnector::class,
-            [
-                'liltJobId' => 777,
-                'jobId' => $job->id,
-            ]
-        );
-
-        Assert::assertEmpty(
-            Craft::$app->queue->getTotalJobs()
-        );
-    }
 
     /**
      * @param IntegrationTester $I
      * @return void
      * @throws InvalidFieldException
      */
-    public function testExecuteSuccess(IntegrationTester $I): void
+    public function testExecuteInstantSuccess(IntegrationTester $I): void
     {
         Db::truncateTable(Craft::$app->queue->tableName);
 
@@ -135,7 +81,7 @@ class FetchInstantJobTranslationsFromConnectorCest extends AbstractIntegrationCe
         );
 
         /**
-         * @var TranslationRecord[][]
+         * @var TranslationRecord[][] $translationsMapped
          */
         $translationsMapped = [];
         foreach ($translations as $translation) {
@@ -143,25 +89,19 @@ class FetchInstantJobTranslationsFromConnectorCest extends AbstractIntegrationCe
             )->languageMapper->getLanguageBySiteId($translation->targetSiteId)] = $translation;
         }
 
+        $translationsMapped[$element->getId()]['es-ES']->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
+        $translationsMapped[$element->getId()]['ru-RU']->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
+
+        $translationsMapped[$element->getId()]['es-ES']->save();
+        $translationsMapped[$element->getId()]['ru-RU']->save();
+
+
         $I->expectTranslationsGetRequest(
             777,
             0,
             100,
             HttpCode::OK,
             $translationsResponseBody
-        );
-
-        $I->expectTranslationDownloadRequest(
-            703695,
-            HttpCode::OK,
-            ExpectedElementContent::getExpectedBody(
-                Craft::$app->elements->getElementById(
-                    $translationsMapped[$element->getId()]['es-ES']->translatedDraftId,
-                    null,
-                    $translationsMapped[$element->getId()]['es-ES']->targetSiteId
-                ),
-                'es-ES'
-            )
         );
 
         $I->expectTranslationDownloadRequest(
@@ -175,39 +115,39 @@ class FetchInstantJobTranslationsFromConnectorCest extends AbstractIntegrationCe
                 ),
                 'de-DE'
             )
+
         );
 
-        $I->expectTranslationDownloadRequest(
-            703697,
+        $fileName = sprintf('497058_element_%d_first-entry-user-1.json+html', $element->getId());
+        $I->expectTranslationGetRequest(
+            703696,
             HttpCode::OK,
-            ExpectedElementContent::getExpectedBody(
-                Craft::$app->elements->getElementById(
-                    $translationsMapped[$element->getId()]['ru-RU']->translatedDraftId,
-                    null,
-                    $translationsMapped[$element->getId()]['ru-RU']->targetSiteId
-                ),
-                'ru-RU'
-            )
-        );
-
-        $I->runQueue(
-            FetchInstantJobTranslationsFromConnector::class,
             [
-                'liltJobId' => 777,
-                'jobId' => $job->id,
+                'createdAt' => '2022-05-29T11:31:58',
+                'errorMsg' => null,
+                'id' => 703696,
+                'name' => $fileName,
+                'status' => TranslationResponse::STATUS_MT_COMPLETE,
+                'trgLang' => 'de',
+                'trgLocale' => 'DE',
+                'updatedAt' => '2022-06-02T23:01:42',
             ]
         );
 
-        $I->assertTranslationsContentMatch($translations, [
-            'es-ES' => ExpectedElementContent::getExpectedBody(
-                Craft::$app->elements->getElementById(
-                    $translationsMapped[$element->getId()]['es-ES']->translatedDraftId,
-                    null,
-                    $translationsMapped[$element->getId()]['es-ES']->targetSiteId
-                ),
-                'es-ES'
-            ),
-            'de-DE' => ExpectedElementContent::getExpectedBody(
+        $I->runQueue(
+            FetchTranslationFromConnector::class,
+            [
+                'liltJobId' => 777,
+                'jobId' => $job->id,
+                'translationId' => $translationsMapped[$element->getId()]['de-DE']->id,
+            ]
+        );
+
+        $I->assertTranslationContentMatch(
+            $job->getId(),
+            $element->getId(),
+            'de-DE',
+            ExpectedElementContent::getExpectedBody(
                 Craft::$app->elements->getElementById(
                     $translationsMapped[$element->getId()]['de-DE']->translatedDraftId,
                     null,
@@ -215,15 +155,151 @@ class FetchInstantJobTranslationsFromConnectorCest extends AbstractIntegrationCe
                 ),
                 'de-DE'
             ),
-            'ru-RU' => ExpectedElementContent::getExpectedBody(
-                Craft::$app->elements->getElementById(
-                    $translationsMapped[$element->getId()]['ru-RU']->translatedDraftId,
-                    null,
-                    $translationsMapped[$element->getId()]['ru-RU']->targetSiteId
-                ),
-                'ru-RU'
-            ),
+            703696,
+            TranslationRecord::STATUS_READY_FOR_REVIEW
+        );
+
+        Assert::assertEmpty(
+            Craft::$app->queue->getTotalJobs()
+        );
+
+        $jobRecord = JobRecord::findOne(['id' => $job->id]);
+
+        foreach ($translations as $translation) {
+            $translation->refresh();
+
+            Assert::assertSame(
+                TranslationRecord::STATUS_READY_FOR_REVIEW,
+                $translation->status
+            );
+        }
+
+        Assert::assertSame(
+            Job::STATUS_READY_FOR_REVIEW,
+            $jobRecord->status
+        );
+    }
+
+    /**
+     * @param IntegrationTester $I
+     * @return void
+     * @throws InvalidFieldException
+     */
+    public function testExecuteVerifiedSuccess(IntegrationTester $I): void
+    {
+        Db::truncateTable(Craft::$app->queue->tableName);
+
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $element = Entry::findOne(['authorId' => 1]);
+
+        /**
+         * @var Job $job
+         * @var TranslationRecord[] $translations
+         */
+        [$job, $translations] = $I->createJobWithTranslations([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
         ]);
+
+        $I->expectJobGetRequest(777, 200, [
+            'status' => JobResponse::STATUS_COMPLETE
+        ]);
+
+        $I->expectJobGetRequest(777, 200, [
+            'status' => JobResponse::STATUS_COMPLETE
+        ]);
+
+        $translationsResponseBody = $this->getTranslationsResponseBody(
+            $element->getId(),
+            TranslationResponse::STATUS_EXPORT_COMPLETE
+        );
+
+        /**
+         * @var TranslationRecord[][] $translationsMapped
+         */
+        $translationsMapped = [];
+        foreach ($translations as $translation) {
+            $translationsMapped[$translation->elementId][Craftliltplugin::getInstance(
+            )->languageMapper->getLanguageBySiteId($translation->targetSiteId)] = $translation;
+        }
+
+        $translationsMapped[$element->getId()]['es-ES']->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
+        $translationsMapped[$element->getId()]['ru-RU']->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
+
+        $translationsMapped[$element->getId()]['es-ES']->save();
+        $translationsMapped[$element->getId()]['ru-RU']->save();
+
+
+        $I->expectTranslationsGetRequest(
+            777,
+            0,
+            100,
+            HttpCode::OK,
+            $translationsResponseBody
+        );
+
+        $I->expectTranslationDownloadRequest(
+            703696,
+            HttpCode::OK,
+            ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationsMapped[$element->getId()]['de-DE']->translatedDraftId,
+                    null,
+                    $translationsMapped[$element->getId()]['de-DE']->targetSiteId
+                ),
+                'de-DE'
+            )
+
+        );
+
+        $fileName = sprintf('497058_element_%d_first-entry-user-1.json+html', $element->getId());
+        $I->expectTranslationGetRequest(
+            703696,
+            HttpCode::OK,
+            [
+                'createdAt' => '2022-05-29T11:31:58',
+                'errorMsg' => null,
+                'id' => 703696,
+                'name' => $fileName,
+                'status' => TranslationResponse::STATUS_EXPORT_COMPLETE,
+                'trgLang' => 'de',
+                'trgLocale' => 'DE',
+                'updatedAt' => '2022-06-02T23:01:42',
+            ]
+        );
+
+        $I->runQueue(
+            FetchTranslationFromConnector::class,
+            [
+                'liltJobId' => 777,
+                'jobId' => $job->id,
+                'translationId' => $translationsMapped[$element->getId()]['de-DE']->id,
+            ]
+        );
+
+        $I->assertTranslationContentMatch(
+            $job->getId(),
+            $element->getId(),
+            'de-DE',
+            ExpectedElementContent::getExpectedBody(
+                Craft::$app->elements->getElementById(
+                    $translationsMapped[$element->getId()]['de-DE']->translatedDraftId,
+                    null,
+                    $translationsMapped[$element->getId()]['de-DE']->targetSiteId
+                ),
+                'de-DE'
+            ),
+            703696,
+            TranslationRecord::STATUS_READY_FOR_REVIEW
+        );
 
         Assert::assertEmpty(
             Craft::$app->queue->getTotalJobs()

@@ -362,7 +362,7 @@ Cypress.Commands.add('publishTranslation', (jobTitle, language) => {
         cy.get('#translations-publish-action').click();
       });
 
-  cy.wait(5000); //delay for publishing
+  cy.wait(10000); //delay for publishing
   cy.waitForJobStatus('complete');
 });
 
@@ -391,7 +391,7 @@ Cypress.Commands.add('publishTranslations', (jobTitle, languages) => {
 
   cy.get('#translations-publish-action').click();
 
-  cy.wait(5000); //delay for publishing
+  cy.wait(10000); //delay for publishing
   cy.waitForJobStatus('complete');
 });
 

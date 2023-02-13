@@ -20,8 +20,8 @@ use yii\queue\RetryableJobInterface;
 
 class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterface
 {
-    public const DELAY_IN_SECONDS = 10;
-    public const PRIORITY = 512;
+    public const DELAY_IN_SECONDS = 5 * 60;
+    public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
@@ -50,11 +50,12 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
         }
 
         if (empty($this->liltJobId)) {
-            //looks like job is
+            //looks like job is not sent
             Queue::push(
                 new SendJobToConnector(['jobId' => $this->jobId]),
                 SendJobToConnector::PRIORITY,
-                SendJobToConnector::DELAY_IN_SECONDS
+                SendJobToConnector::getDelay(),
+                SendJobToConnector::TTR
             );
 
             $this->markAsDone($queue);
@@ -92,7 +93,8 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                     ]
                 )),
                 self::PRIORITY,
-                self::DELAY_IN_SECONDS
+                self::getDelay(),
+                self::TTR
             );
 
             return;
@@ -119,7 +121,8 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                         ]
                     ),
                     FetchTranslationFromConnector::PRIORITY,
-                    FetchTranslationFromConnector::DELAY_IN_SECONDS
+                    FetchTranslationFromConnector::DELAY_IN_SECONDS_VERIFIED,
+                    FetchTranslationFromConnector::TTR
                 );
             }
         }
@@ -149,17 +152,19 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                         ]
                     ),
                     FetchTranslationFromConnector::PRIORITY,
-                    FetchTranslationFromConnector::DELAY_IN_SECONDS
+                    10, //10 seconds for first job
+                    FetchTranslationFromConnector::TTR
                 );
             }
         }
 
         $jobRecord->save();
-        $this->markAsDone($queue);
 
         Craft::$app->elements->invalidateCachesForElementType(
             Job::class
         );
+
+        $this->markAsDone($queue);
     }
 
     /**
@@ -167,7 +172,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Updating lilt job');
+        return Craft::t('app', 'Fetching lilt job status');
     }
 
     /**
@@ -198,5 +203,15 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
     public function canRetry($attempt, $error): bool
     {
         return $attempt < self::RETRY_COUNT;
+    }
+
+    public static function getDelay(): int
+    {
+        $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
+        if (!empty($envDelay) || $envDelay === '0') {
+            return (int) $envDelay;
+        }
+
+        return self::DELAY_IN_SECONDS;
     }
 }
