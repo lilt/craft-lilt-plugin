@@ -41,16 +41,6 @@ class PublishDraftHandler
         $enableEntriesForTargetSites = (bool) ($enableEntriesForTargetSitesRecord->value
             ?? false);
 
-        if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($targetSiteId)) {
-            $draftElement->setEnabledForSite([$targetSiteId => true]);
-        }
-
-        if ($enableEntriesForTargetSites) {
-            $canonical = $draftElement->getCanonical();
-            $canonical->setEnabledForSite([$targetSiteId => true]);
-            Craft::$app->getElements()->saveElement($canonical);
-        }
-
         if (method_exists($draftElement, 'setIsFresh')) {
             $draftElement->setIsFresh();
         }
@@ -59,6 +49,12 @@ class PublishDraftHandler
 
         Craft::$app->getElements()->saveElement($draftElement);
 
-        $this->draftRepository->applyDraft($draftElement);
+        $element = $this->draftRepository->applyDraft($draftElement);
+        if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($targetSiteId)) {
+            $element->setEnabledForSite([$targetSiteId => true]);
+        }
+
+        Craft::$app->getElements()->saveElement($element);
+        Craft::$app->getElements()->invalidateCachesForElement($element);
     }
 }
