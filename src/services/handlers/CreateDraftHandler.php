@@ -151,6 +151,8 @@ class CreateDraftHandler
                     $this->markFieldsAsChanged($blockElement);
                 }
 
+                $this->upsertChangedFields($element, $field);
+
                 continue;
             }
 

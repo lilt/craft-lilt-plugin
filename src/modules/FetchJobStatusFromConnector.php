@@ -121,7 +121,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                         ]
                     ),
                     FetchTranslationFromConnector::PRIORITY,
-                    FetchTranslationFromConnector::DELAY_IN_SECONDS_VERIFIED,
+                    10, //10 seconds for first job
                     FetchTranslationFromConnector::TTR
                 );
             }
