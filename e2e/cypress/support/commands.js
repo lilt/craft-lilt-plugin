@@ -321,7 +321,7 @@ Cypress.Commands.add('waitForJobStatus',
  * @returns undefined
  */
 Cypress.Commands.add('waitForTranslationDrafts',
-    (maxAttempts = 30, attempts = 0, waitPerIteration = 3000) => {
+    (maxAttempts = 100, attempts = 0, waitPerIteration = 1000) => {
       if (attempts > maxAttempts) {
         throw new Error('Timed out waiting for report to be generated');
       }

@@ -45,7 +45,7 @@ class PublishDraftHandler
             $draftElement->setIsFresh();
         }
 
-        $draftElement->propagateAll = true;
+        $draftElement->propagateAll = false;
 
         Craft::$app->getElements()->saveElement($draftElement);
 
