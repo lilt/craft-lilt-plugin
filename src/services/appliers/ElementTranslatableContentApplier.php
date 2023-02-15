@@ -15,7 +15,7 @@ use craft\errors\InvalidFieldException;
 use craft\services\Drafts as DraftRepository;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
-use lilthq\craftliltplugin\exeptions\DraftNotFoundException;
+use lilthq\craftliltplugin\exceptions\DraftNotFoundException;
 use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\services\appliers\field\ApplyContentCommand;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;

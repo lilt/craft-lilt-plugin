@@ -83,7 +83,7 @@ class GetSendToLiltController extends Controller
         Queue::push(
             new SendJobToConnector(['jobId' => $jobId]),
             SendJobToConnector::PRIORITY,
-            SendJobToConnector::DELAY_IN_SECONDS
+            10 //10 seconds for first job
         );
 
         $jobRecord->status = Job::STATUS_IN_PROGRESS;

@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\exeptions;
+namespace lilthq\craftliltplugin\exceptions;
 
 use RuntimeException;
 
-class JobNotFoundException extends RuntimeException
+class DraftNotFoundException extends RuntimeException
 {
 }

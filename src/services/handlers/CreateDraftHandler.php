@@ -48,17 +48,12 @@ class CreateDraftHandler
 
         $creatorId = Craft::$app->user->getId();
         if ($creatorId === null) {
-            //TODO: it is not expected to reach, but it is possible. Investigation herer, why user id is null?
-            Craft::error(
-                "Can't get user from current session with Craft::\$app->user->getId(),"
-                . "please check you app configuration!"
-            );
             $creatorId = $createFrom->authorId;
         }
 
         $draft = Craft::$app->drafts->createDraft(
             $createFrom,
-            $creatorId ?? 0, //TODO: not best but one of the ways. Need to check why user can have nullable id?
+            $creatorId ?? 0,
             sprintf(
                 '%s [%s -> %s] ' . (new DateTime())->format('H:i:s'),
                 $jobTitle,
@@ -82,14 +77,27 @@ class CreateDraftHandler
         $fields = $fieldLayout ? $fieldLayout->getFields() : [];
 
         foreach ($fields as $field) {
+            if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
+                $draft->setFieldValue($field->handle, $draft->getFieldValue($field->handle));
+
+                Craft::$app->matrix->duplicateBlocks($field, $createFrom, $draft, false, false);
+                Craft::$app->matrix->saveField($field, $draft);
+
+                continue;
+            }
+
             $field->copyValue($element, $draft);
         }
 
         $draft->title = $element->title;
 
+        $draft->setCanonicalId(
+            $createFrom->id
+        );
+
         $draft->duplicateOf = $element;
         $draft->mergingCanonicalChanges = true;
-        $draft->afterPropagate(false);
+        $draft->afterPropagate(true);
 
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
@@ -142,6 +150,8 @@ class CreateDraftHandler
                 foreach ($blockElements as $blockElement) {
                     $this->markFieldsAsChanged($blockElement);
                 }
+
+                $this->upsertChangedFields($element, $field);
 
                 continue;
             }

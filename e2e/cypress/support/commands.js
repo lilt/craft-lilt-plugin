@@ -321,7 +321,7 @@ Cypress.Commands.add('waitForJobStatus',
  * @returns undefined
  */
 Cypress.Commands.add('waitForTranslationDrafts',
-    (maxAttempts = 30, attempts = 0, waitPerIteration = 3000) => {
+    (maxAttempts = 100, attempts = 0, waitPerIteration = 1000) => {
       if (attempts > maxAttempts) {
         throw new Error('Timed out waiting for report to be generated');
       }
@@ -362,7 +362,7 @@ Cypress.Commands.add('publishTranslation', (jobTitle, language) => {
         cy.get('#translations-publish-action').click();
       });
 
-  cy.wait(5000); //delay for publishing
+  cy.wait(10000); //delay for publishing
   cy.waitForJobStatus('complete');
 });
 
@@ -391,7 +391,7 @@ Cypress.Commands.add('publishTranslations', (jobTitle, languages) => {
 
   cy.get('#translations-publish-action').click();
 
-  cy.wait(5000); //delay for publishing
+  cy.wait(10000); //delay for publishing
   cy.waitForJobStatus('complete');
 });
 

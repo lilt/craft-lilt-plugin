@@ -64,7 +64,7 @@ class PostSyncController extends Controller
                     ]
                 )),
                 FetchJobStatusFromConnector::PRIORITY,
-                FetchJobStatusFromConnector::DELAY_IN_SECONDS
+                10 //10 seconds for first job
             );
         }
 

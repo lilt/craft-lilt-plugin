@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.4.1 - 2023-02-13
+### Changed 
+- Queues priority decreased for sending jobs to 1024 and receiving to 2048
+- Deprecate FetchInstantJobTranslationsFromConnector and FetchVerifiedJobTranslationsFromConnector
+
+### Fixed 
+- Copy source text for Matrix fields
+
 ## 3.4.0 - 2023-02-06
 ### Added 
 - Entry slug name added to translation filenames
