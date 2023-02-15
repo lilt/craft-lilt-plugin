@@ -18,16 +18,16 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
 use yii\queue\RetryableJobInterface;
 
 class FetchTranslationFromConnector extends BaseJob implements RetryableJobInterface
 {
-    public const DELAY_IN_SECONDS = 10;
     public const DELAY_IN_SECONDS_INSTANT = 10;
     public const DELAY_IN_SECONDS_VERIFIED = 60 * 5;
-    public const PRIORITY = 1024;
+    public const PRIORITY = 2048;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
@@ -84,6 +84,7 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
         if (empty($translationRecord->connectorTranslationId)) {
             Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
         }
+        $translationRecord->refresh();
 
         $translationFromConnector = Craftliltplugin::getInstance()->connectorTranslationRepository->findById(
             $translationRecord->connectorTranslationId
@@ -103,8 +104,8 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
                 ]
             );
 
-            $this->markAsDone($queue);
             $mutex->release($mutexKey);
+            $this->markAsDone($queue);
             return;
         }
 
@@ -117,15 +118,12 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
                         'translationId' => $this->translationId,
                     ]
                 ),
-                FetchTranslationFromConnector::PRIORITY,
-                ($job->isInstantFlow() ?
-                    FetchTranslationFromConnector::DELAY_IN_SECONDS_INSTANT :
-                    FetchTranslationFromConnector::DELAY_IN_SECONDS_VERIFIED
-                )
+                self::PRIORITY,
+                self::getDelay($job->translationWorkflow)
             );
 
-            $this->markAsDone($queue);
             $mutex->release($mutexKey);
+            $this->markAsDone($queue);
 
             return;
         }
@@ -153,15 +151,15 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
                 ]
             );
 
-            $this->markAsDone($queue);
             $mutex->release($mutexKey);
+            $this->markAsDone($queue);
             return;
         }
 
         Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
 
-        $this->markAsDone($queue);
         $mutex->release($mutexKey);
+        $this->markAsDone($queue);
     }
 
     /**
@@ -233,5 +231,17 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
         ) === TranslationResponse::STATUS_MT_COMPLETE)
             || ($job->isVerifiedFlow() && $translationFromConnector->getStatus(
             ) === TranslationResponse::STATUS_EXPORT_COMPLETE);
+    }
+
+    public static function getDelay(string $flow): int
+    {
+        $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
+        if (!empty($envDelay) || $envDelay === '0') {
+            return (int) $envDelay;
+        }
+
+        return strtolower($flow) === strtolower(CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT) ?
+            self::DELAY_IN_SECONDS_INSTANT :
+            self::DELAY_IN_SECONDS_VERIFIED;
     }
 }

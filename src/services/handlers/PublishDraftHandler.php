@@ -45,8 +45,6 @@ class PublishDraftHandler
             $draftElement->setIsFresh();
         }
 
-        $draftElement->propagateAll = true;
-
         Craft::$app->getElements()->saveElement($draftElement);
 
         $element = $this->draftRepository->applyDraft($draftElement);

@@ -145,7 +145,7 @@ class SendJobToLiltConnectorHandler
                 'liltJobId' => $jobLilt->getId(),
             ])),
             FetchJobStatusFromConnector::PRIORITY,
-            FetchJobStatusFromConnector::DELAY_IN_SECONDS
+            10 //10 seconds for fist job
         );
     }
 

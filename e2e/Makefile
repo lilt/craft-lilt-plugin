@@ -27,6 +27,7 @@ up: clone down
 	docker-compose exec -T app sh -c 'echo DB_PASSWORD=craft-lilt >> .env'
 	docker-compose exec -T app sh -c 'echo DB_SCHEMA=public >> .env'
 	docker-compose exec -T app sh -c 'echo DB_TABLE_PREFIX= >> .env'
+	docker-compose exec -T app sh -c 'echo CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS=5 >> .env'
 	docker-compose exec -T app sh -c 'php craft db/restore happylager.sql'
 	docker-compose exec -T app sh -c 'php craft up'
 	docker-compose exec -T app sh -c 'php craft migrate/up'
