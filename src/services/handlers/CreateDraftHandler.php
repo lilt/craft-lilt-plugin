@@ -96,8 +96,6 @@ class CreateDraftHandler
         );
 
         $draft->duplicateOf = $element;
-        $draft->mergingCanonicalChanges = true;
-        $draft->afterPropagate(true);
 
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
@@ -108,7 +106,7 @@ class CreateDraftHandler
             $draft->slug = $element->slug;
         }
 
-        Craft::$app->elements->saveElement($draft);
+        Craft::$app->elements->saveElement($draft, true, false, false);
 
         $this->markFieldsAsChanged($draft);
 
