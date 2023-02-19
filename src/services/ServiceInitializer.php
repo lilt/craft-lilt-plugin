@@ -99,14 +99,18 @@ class ServiceInitializer
             'connectorTranslationsApi' =>
                 function () use ($pluginInstance) {
                     return new TranslationsApi(
-                        new Client(),
+                        new Client([
+                            'timeout' => 60,
+                        ]),
                         $pluginInstance->connectorConfiguration
                     );
                 },
             'connectorSettingsApi' =>
                 function () use ($pluginInstance) {
                     return new SettingsApi(
-                        new Client(),
+                        new Client([
+                            'timeout' => 10,
+                        ]),
                         $pluginInstance->connectorConfiguration
                     );
                 },
@@ -121,13 +125,15 @@ class ServiceInitializer
         $pluginInstance->setComponents([
             'connectorJobsApi' => function () use ($pluginInstance) {
                 return new JobsApi(
-                    new Client(),
+                    new Client([
+                        'timeout' => 60,
+                    ]),
                     $pluginInstance->connectorConfiguration
                 );
             }
         ]);
 
-        $getProvidersMap = static function () use ($pluginInstance) {
+        $getProvidersMap = static function () {
             return [
                 CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentProvider(),
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentProvider(),
