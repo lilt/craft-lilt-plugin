@@ -16,20 +16,14 @@ use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
-use yii\queue\RetryableJobInterface;
 
-class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterface
+class FetchJobStatusFromConnector extends AbstractRetryJob
 {
     public const DELAY_IN_SECONDS = 5 * 60;
     public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
-
-    /**
-     * @var int $jobId
-     */
-    public $jobId;
 
     /**
      * @var int $liltJobId
@@ -195,14 +189,18 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
         );
     }
 
-    public function getTtr(): int
+    public function canRetry(): bool
     {
-        return self::TTR;
+        return $this->attempt < self::RETRY_COUNT;
     }
 
-    public function canRetry($attempt, $error): bool
+    public function getRetryJob(): BaseJob
     {
-        return $attempt < self::RETRY_COUNT;
+        return new self([
+            'jobId' => $this->jobId,
+            'liltJobId' => $this->liltJobId,
+            'attempt' => $this->attempt + 1
+        ]);
     }
 
     public static function getDelay(): int

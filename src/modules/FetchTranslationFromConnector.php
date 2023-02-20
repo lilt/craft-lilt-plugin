@@ -21,9 +21,8 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
-use yii\queue\RetryableJobInterface;
 
-class FetchTranslationFromConnector extends BaseJob implements RetryableJobInterface
+class FetchTranslationFromConnector extends AbstractRetryJob
 {
     public const DELAY_IN_SECONDS_INSTANT = 10;
     public const DELAY_IN_SECONDS_VERIFIED = 60 * 5;
@@ -31,11 +30,6 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
-
-    /**
-     * @var int $jobId
-     */
-    public $jobId;
 
     /**
      * @var int $liltJobId
@@ -191,14 +185,19 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
         );
     }
 
-    public function getTtr(): int
+    public function canRetry(): bool
     {
-        return self::TTR;
+        return $this->attempt < self::RETRY_COUNT;
     }
 
-    public function canRetry($attempt, $error): bool
+    public function getRetryJob(): BaseJob
     {
-        return $attempt < self::RETRY_COUNT;
+        return new self([
+            'jobId' => $this->jobId,
+            'liltJobId' => $this->liltJobId,
+            'translationId' => $this->translationId,
+            'attempt' => $this->attempt + 1
+        ]);
     }
 
     /**
@@ -233,7 +232,7 @@ class FetchTranslationFromConnector extends BaseJob implements RetryableJobInter
             ) === TranslationResponse::STATUS_EXPORT_COMPLETE);
     }
 
-    public static function getDelay(string $flow): int
+    public static function getDelay(string $flow = CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT): int
     {
         $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
         if (!empty($envDelay) || $envDelay === '0') {
