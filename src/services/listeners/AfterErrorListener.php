@@ -53,27 +53,6 @@ class AfterErrorListener implements ListenerInterface
             return false;
         }
 
-        if ($event->retry) {
-            // we only wait for job which will be not retried anymore
-
-            Craftliltplugin::getInstance()->jobLogsRepository->create(
-                $event->job->jobId,
-                Craft::$app->getUser()->getId(),
-                substr(
-                    sprintf(
-                        'Job %s failed on %d attempt. Error message: %s',
-                        get_class($event->job),
-                        $event->attempt,
-                        $event->error->getMessage()
-                    ),
-                    0,
-                    255
-                )
-            );
-
-            return false;
-        }
-
         $jobClass = get_class($event->job);
 
         return in_array($jobClass, self::SUPPORTED_JOBS);
@@ -85,24 +64,29 @@ class AfterErrorListener implements ListenerInterface
             return $event;
         }
 
-        $jobRecord = JobRecord::findOne(['id' => $event->job->jobId]);
+        /**
+         * @var FetchTranslationFromConnector|FetchJobStatusFromConnector|SendJobToConnector $queueJob
+         */
+        $queueJob = $event->job;
 
-        if ($jobRecord !== null) {
+        $jobRecord = JobRecord::findOne(['id' => $queueJob->jobId]);
+
+        Craftliltplugin::getInstance()->jobLogsRepository->create(
+            $jobRecord->id,
+            Craft::$app->getUser()->getId(),
+            substr(
+                sprintf(
+                    'Job failed after %d attempt(s). Error message: %s',
+                    $queueJob->attempt,
+                    $event->error->getMessage()
+                ),
+                0,
+                255
+            )
+        );
+
+        if (!$queueJob->canRetry()) {
             $jobRecord->status = Job::STATUS_FAILED;
-
-            Craftliltplugin::getInstance()->jobLogsRepository->create(
-                $jobRecord->id,
-                Craft::$app->getUser()->getId(),
-                substr(
-                    sprintf(
-                        'Job failed after %d attempt(s). Error message: %s',
-                        $event->attempt,
-                        $event->error->getMessage()
-                    ),
-                    0,
-                    255
-                )
-            );
 
             $jobRecord->save();
 
@@ -113,10 +97,24 @@ class AfterErrorListener implements ListenerInterface
 
             Craft::$app->elements->invalidateCachesForElementType(Translation::class);
             Craft::$app->elements->invalidateCachesForElementType(Job::class);
+
+            Craft::$app->queue->release(
+                (string) $event->id
+            );
+
+            return $event;
         }
 
         Craft::$app->queue->release(
             (string) $event->id
+        );
+
+        ++$queueJob->attempt;
+
+        \craft\helpers\Queue::push(
+            $queueJob,
+            $queueJob::PRIORITY,
+            $queueJob::getDelay()
         );
 
         return $event;

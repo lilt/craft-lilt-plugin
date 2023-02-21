@@ -17,20 +17,14 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
 use Throwable;
-use yii\queue\RetryableJobInterface;
 
-class SendJobToConnector extends BaseJob implements RetryableJobInterface
+class SendJobToConnector extends AbstractRetryJob
 {
     public const DELAY_IN_SECONDS = 60;
     public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
-
-    /**
-     * @var int $jobId
-     */
-    public $jobId;
 
     /**
      * @inheritdoc
@@ -106,23 +100,26 @@ class SendJobToConnector extends BaseJob implements RetryableJobInterface
         );
     }
 
-    public function getTtr(): int
-    {
-        return self::TTR;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        return $attempt < self::RETRY_COUNT;
-    }
-
     public static function getDelay(): int
     {
         $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
         if (!empty($envDelay) || $envDelay === '0') {
-            return (int) $envDelay;
+            return (int)$envDelay;
         }
 
         return self::DELAY_IN_SECONDS;
+    }
+
+    public function canRetry(): bool
+    {
+        return $this->attempt < self::RETRY_COUNT;
+    }
+
+    public function getRetryJob(): BaseJob
+    {
+        return new self([
+            'jobId' => $this->jobId,
+            'attempt' => $this->attempt + 1
+        ]);
     }
 }

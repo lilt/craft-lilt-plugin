@@ -187,7 +187,11 @@ class Job extends Element
     public function afterDelete(): bool
     {
         JobRecord::deleteAll(['id' => $this->id]);
+
         parent::afterDelete();
+
+        Craft::$app->elements->invalidateCachesForElementType(self::class);
+
         return true;
     }
 
