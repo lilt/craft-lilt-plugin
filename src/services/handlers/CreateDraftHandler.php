@@ -90,7 +90,7 @@ class CreateDraftHandler
                 Craft::$app->matrix->saveField($field, $draft);
 
                 foreach ($blocks as $block) {
-                    if($block instanceof MatrixBlock) {
+                    if ($block instanceof MatrixBlock) {
                         Craft::$app->getElements()->deleteElement($block, true);
                     }
                 }

@@ -118,8 +118,10 @@ class PostTranslationPublishController extends AbstractJobController
             if ($isCopySlugEnabled) {
                 $attributes[] = 'slug';
             }
-            Craftliltplugin::getInstance()->createDraftHandler->upsertChangedAttributes($draftElement->getCanonical(false), $attributes);
-
+            Craftliltplugin::getInstance()->createDraftHandler->upsertChangedAttributes(
+                $draftElement->getCanonical(false),
+                $attributes
+            );
 
             Craftliltplugin::getInstance()->publishDraftsHandler->mergeCanonicalChanges(
                 $draftElement
