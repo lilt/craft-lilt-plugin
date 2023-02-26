@@ -129,9 +129,14 @@ class ElementTranslatableContentApplier
             $draftElement->setIsFresh();
         }
 
-        Craft::$app->elements->saveElement(
-            $draftElement
-        );
+        Craft::$app
+            ->elements
+            ->saveElement(
+                $draftElement,
+                true,
+                false,
+                false
+            );
 
         return $draftElement;
     }
@@ -151,7 +156,6 @@ class ElementTranslatableContentApplier
         TranslationApplyCommand $translationApplyCommand,
         array $newAttributes
     ): ElementInterface {
-
         /** Element will be created from original one, we can't create draft from draft */
         $createFrom = $translationApplyCommand->getElement()->getIsDraft() ? Craft::$app->elements->getElementById(
             $translationApplyCommand->getElement()->getCanonicalId()

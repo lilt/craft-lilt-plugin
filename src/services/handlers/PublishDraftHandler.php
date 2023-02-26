@@ -12,8 +12,6 @@ namespace lilthq\craftliltplugin\services\handlers;
 use Craft;
 use craft\base\ElementInterface;
 use craft\services\Drafts as DraftRepository;
-use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use Throwable;
 
@@ -43,84 +41,20 @@ class PublishDraftHandler
         $enableEntriesForTargetSites = (bool)($enableEntriesForTargetSitesRecord->value
             ?? false);
 
-        if (method_exists($draftElement, 'setIsFresh')) {
-            $draftElement->setIsFresh();
-            Craft::$app->getElements()->saveElement($draftElement);
-        }
-
-        //TODO: ENG-6776
-        //It is a bit unclear why canonical changes doesn't appear on the draft after we publish another draft
-        $this->updateDraftToCanonicalChanges($targetSiteId, $draftElement);
-
         $element = $this->draftRepository->applyDraft($draftElement);
         if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($targetSiteId)) {
             $element->setEnabledForSite([$targetSiteId => true]);
         }
 
-        Craft::$app->getElements()->saveElement($element);
+        Craft::$app->getElements()->saveElement($element, true, false, false);
         Craft::$app->getElements()->invalidateCachesForElement($element);
     }
 
-    /**
-     *
-     * Function to copy content for languages except skipped from canonical element to draft
-     *
-     * @param int $skippedSiteId
-     * @param ElementInterface $draftElement
-     * @return void
-     * @throws Throwable
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\Exception
-     */
-    private function updateDraftToCanonicalChanges(int $skippedSiteId, ElementInterface $draftElement): void
+    public function mergeCanonicalChanges(ElementInterface $draftElement): void
     {
-        $availableSites = Craftliltplugin::getInstance()->languageMapper->getAvailableSites();
-        foreach ($availableSites as $availableSite) {
-            if ($availableSite->id === $skippedSiteId) {
-                continue;
-            }
+        Craft::$app->getElements()->mergeCanonicalChanges($draftElement);
 
-            $canonicalElement = Craft::$app->elements->getElementById(
-                $draftElement->getCanonicalId(),
-                null,
-                $availableSite->id
-            );
-
-            if ($canonicalElement === null) {
-                continue;
-            }
-
-            $draftElementOtherSite = Craft::$app->elements->getElementById(
-                $draftElement->id,
-                null,
-                $availableSite->id
-            );
-
-            if ($draftElementOtherSite === null) {
-                continue;
-            }
-
-            $fieldLayout = $canonicalElement->getFieldLayout();
-            $fields = $fieldLayout ? $fieldLayout->getFields() : [];
-
-            foreach ($fields as $field) {
-                if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
-                    Craft::$app->matrix->duplicateBlocks(
-                        $field,
-                        $canonicalElement,
-                        $draftElementOtherSite,
-                        false,
-                        false
-                    );
-                    Craft::$app->matrix->saveField($field, $draftElementOtherSite);
-
-                    continue;
-                }
-
-                $field->copyValue($canonicalElement, $draftElementOtherSite);
-            }
-
-            Craft::$app->getElements()->saveElement($draftElementOtherSite);
-        }
+        Craft::$app->getElements()->saveElement($draftElement, true, false);
+        Craft::$app->getElements()->invalidateCachesForElement($draftElement);
     }
 }
