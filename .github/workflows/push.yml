@@ -16,6 +16,24 @@ jobs:
         run: |
           make up
           make test
+  e2e-instant:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run automation
+        working-directory: ./e2e
+        run: |
+          make up
+          make test-instant
+  e2e-copy-source-text:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run automation
+        working-directory: ./e2e
+        run: |
+          make up
+          make test-copy-source-text
   tests-php-72:
     runs-on: ubuntu-latest
     steps:
