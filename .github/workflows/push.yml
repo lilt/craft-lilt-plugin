@@ -16,6 +16,15 @@ jobs:
         run: |
           make up
           make test-instant
+  e2e-verified:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run automation
+        working-directory: ./e2e
+        run: |
+          make up
+          make test-verified
   e2e-copy-source-text:
     runs-on: ubuntu-latest
     steps:

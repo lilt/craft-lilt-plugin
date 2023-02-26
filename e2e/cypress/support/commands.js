@@ -391,7 +391,11 @@ Cypress.Commands.add('publishTranslations', (jobTitle, languages) => {
 
   cy.get('#translations-publish-action').click();
 
-  cy.wait(10000); //delay for publishing
+  cy.
+      get('#notifications .notification.notice').
+      invoke('text').
+      should('contain', 'Translation(s) published');
+
   cy.waitForJobStatus('complete');
 });
 
