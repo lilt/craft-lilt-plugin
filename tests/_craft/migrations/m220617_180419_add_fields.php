@@ -6,7 +6,6 @@ namespace craft\contentmigrations;
 
 use benf\neo\Field as NeoField;
 use Craft;
-use craft\base\Field;
 use craft\db\Migration;
 use craft\db\Query;
 use craft\fields\Checkboxes;
@@ -50,10 +49,6 @@ class m220617_180419_add_fields extends Migration
         if (!$group['id']) {
             return false;
         }
-
-        $field = Craft::$app->getFields()->getFieldByHandle('shortDescription');
-        $field->translationMethod = Field::TRANSLATION_METHOD_SITE;
-        Craft::$app->getFields()->saveField($field);
 
         $entryType = (Craft::$app->sections->getAllEntryTypes()[0]);
 
