@@ -1,5 +1,6 @@
 import './commands'
 import './flow/instant'
+import './flow/verified'
 
 beforeEach(() => {
   cy.wrap(Cypress.session.clearAllSavedSessions())

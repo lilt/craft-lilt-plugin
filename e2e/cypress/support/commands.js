@@ -362,8 +362,10 @@ Cypress.Commands.add('publishTranslation', (jobTitle, language) => {
         cy.get('#translations-publish-action').click();
       });
 
-  cy.wait(10000); //delay for publishing
-  cy.waitForJobStatus('complete');
+  cy.
+      get('#notifications .notification.notice').
+      invoke('text').
+      should('contain', 'Translation(s) published');
 });
 
 /**
@@ -391,7 +393,11 @@ Cypress.Commands.add('publishTranslations', (jobTitle, languages) => {
 
   cy.get('#translations-publish-action').click();
 
-  cy.wait(10000); //delay for publishing
+  cy.
+      get('#notifications .notification.notice').
+      invoke('text').
+      should('contain', 'Translation(s) published');
+
   cy.waitForJobStatus('complete');
 });
 
@@ -413,7 +419,11 @@ Cypress.Commands.add('publishJob',
         cy.assertDraftSlugValue(copySlug, slug, language);
 
         cy.publishTranslation(jobTitle, language);
+      }
 
+      cy.waitForJobStatus('complete');
+
+      for (const language of languages) {
         cy.assertAfterPublish(copySlug, slug, entryId, language,
             enableAfterPublish);
       }
