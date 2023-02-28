@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## 3.4.3 - 2023-02-24
 ### Fixed
 - Multilingual draft publishing issue
+- Failed jobs aren't able to be deleted ([github issue](https://github.com/lilt/craft-lilt-plugin/issues/90))
 
 ## 3.4.2 - 2023-02-21
 ### Changed
