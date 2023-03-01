@@ -43,3 +43,27 @@ test:
 								  --env-file .env.test \
   								  --entrypoint=cypress \
   								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --record false
+
+test-instant:
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} \
+								  --network e2e-network \
+								  --env-file .env.test \
+  								  --entrypoint=cypress \
+  								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --spec cypress/e2e/jobs/instant/*.js --record false
+
+test-verified:
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} \
+								  --network e2e-network \
+								  --env-file .env.test \
+  								  --entrypoint=cypress \
+  								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --spec cypress/e2e/jobs/verified/*.js --record false
+
+test-copy-source-text:
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install
+	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} \
+								  --network e2e-network \
+								  --env-file .env.test \
+  								  --entrypoint=cypress \
+  								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --spec cypress/e2e/jobs/copy-source-text-flow/*.js --record false

@@ -2,7 +2,7 @@
 
 /**
  * @link      https://github.com/lilt
- * @copyright Copyright (c) 2022 Lilt Devs
+ * @copyright Copyright (c) 2023 Lilt Devs
  */
 
 declare(strict_types=1);
@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
+use craft\base\ElementInterface;
 use craft\services\Drafts as DraftRepository;
 use lilthq\craftliltplugin\records\SettingRecord;
 use Throwable;
@@ -33,26 +34,27 @@ class PublishDraftHandler
         );
 
         if (!$draftElement) {
-            //TODO: published already or what? Why we are here?
             return;
         }
 
         $enableEntriesForTargetSitesRecord = SettingRecord::findOne(['name' => 'enable_entries_for_target_sites']);
-        $enableEntriesForTargetSites = (bool) ($enableEntriesForTargetSitesRecord->value
+        $enableEntriesForTargetSites = (bool)($enableEntriesForTargetSitesRecord->value
             ?? false);
-
-        if (method_exists($draftElement, 'setIsFresh')) {
-            $draftElement->setIsFresh();
-        }
-
-        Craft::$app->getElements()->saveElement($draftElement);
 
         $element = $this->draftRepository->applyDraft($draftElement);
         if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($targetSiteId)) {
             $element->setEnabledForSite([$targetSiteId => true]);
         }
 
-        Craft::$app->getElements()->saveElement($element);
+        Craft::$app->getElements()->saveElement($element, true, false, false);
         Craft::$app->getElements()->invalidateCachesForElement($element);
+    }
+
+    public function mergeCanonicalChanges(ElementInterface $draftElement): void
+    {
+        Craft::$app->getElements()->mergeCanonicalChanges($draftElement);
+
+        Craft::$app->getElements()->saveElement($draftElement, true, false);
+        Craft::$app->getElements()->invalidateCachesForElement($draftElement);
     }
 }

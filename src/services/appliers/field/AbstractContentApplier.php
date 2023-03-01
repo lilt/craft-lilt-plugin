@@ -9,7 +9,6 @@ use Craft;
 use craft\base\FieldInterface;
 use craft\elements\MatrixBlock;
 use craft\errors\InvalidFieldException;
-use lilthq\craftliltplugin\records\I18NRecord;
 use verbb\supertable\elements\SuperTableBlockElement;
 
 abstract class AbstractContentApplier
@@ -30,9 +29,15 @@ abstract class AbstractContentApplier
                 // @since In craft only from 3.7.14
                 $command->getElement()->setIsFresh();
             }
-            $success = Craft::$app->elements->saveElement(
-                $command->getElement()
-            );
+
+            $success = Craft::$app
+                ->elements
+                ->saveElement(
+                    $command->getElement(),
+                    true,
+                    false,
+                    false
+                );
 
             Craft::$app->elements->invalidateCachesForElement($command->getElement());
 
@@ -60,9 +65,8 @@ abstract class AbstractContentApplier
     }
 
     /**
-     * @throws InvalidFieldException
-     *
      * @return mixed
+     * @throws InvalidFieldException
      */
     protected function getOriginalFieldSerializedValue(ApplyContentCommand $command)
     {

@@ -70,9 +70,11 @@ class Job extends Element
         $translationRecords = TranslationRecord::findAll(['jobId' => $this->id]);
 
         array_map(static function (TranslationRecord $t) {
-            Craft::$app->elements->deleteElementById(
-                $t->translatedDraftId
-            );
+            if ($t->translatedDraftId !== null) {
+                Craft::$app->elements->deleteElementById(
+                    $t->translatedDraftId
+                );
+            }
         }, $translationRecords);
 
         JobRecord::deleteAll(['id' => $this->id]);

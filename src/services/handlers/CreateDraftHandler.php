@@ -12,6 +12,7 @@ use craft\db\Table;
 use craft\db\Table as DbTable;
 use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
+use craft\elements\MatrixBlock;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidFieldException;
 use craft\helpers\Db;
@@ -42,7 +43,7 @@ class CreateDraftHandler
          * Element will be created from original one, we can't create draft from draft
          * @var Entry $createFrom
          */
-        $createFrom = $element ? Craft::$app->elements->getElementById(
+        $createFrom = $element->getIsDraft() ? Craft::$app->elements->getElementById(
             $element->getCanonicalId()
         ) : $element;
 
@@ -78,10 +79,21 @@ class CreateDraftHandler
 
         foreach ($fields as $field) {
             if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
-                $draft->setFieldValue($field->handle, $draft->getFieldValue($field->handle));
+                $blocksQuery = $draft->getFieldValue($field->handle);
+
+                /**
+                 * @var MatrixBlock[] $blocks
+                 */
+                $blocks = $blocksQuery->all();
 
                 Craft::$app->matrix->duplicateBlocks($field, $createFrom, $draft, false, false);
                 Craft::$app->matrix->saveField($field, $draft);
+
+                foreach ($blocks as $block) {
+                    if ($block instanceof MatrixBlock) {
+                        Craft::$app->getElements()->deleteElement($block, true);
+                    }
+                }
 
                 continue;
             }
@@ -96,8 +108,6 @@ class CreateDraftHandler
         );
 
         $draft->duplicateOf = $element;
-        $draft->mergingCanonicalChanges = true;
-        $draft->afterPropagate(true);
 
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
@@ -108,7 +118,7 @@ class CreateDraftHandler
             $draft->slug = $element->slug;
         }
 
-        Craft::$app->elements->saveElement($draft);
+        Craft::$app->elements->saveElement($draft, true, false, false);
 
         $this->markFieldsAsChanged($draft);
 
@@ -126,7 +136,7 @@ class CreateDraftHandler
      * @throws InvalidFieldException
      * @throws \yii\db\Exception
      */
-    private function markFieldsAsChanged(ElementInterface $element): void
+    public function markFieldsAsChanged(ElementInterface $element): void
     {
         $fieldLayout = $element->getFieldLayout();
         $fields = $fieldLayout ? $fieldLayout->getFields() : [];
@@ -190,7 +200,7 @@ class CreateDraftHandler
         );
     }
 
-    private function upsertChangedAttributes(ElementInterface $element, array $attributes): void
+    public function upsertChangedAttributes(ElementInterface $element, array $attributes): void
     {
         $userId = Craft::$app->getUser()->getId();
         $timestamp = Db::prepareDateForDb(new DateTime());
