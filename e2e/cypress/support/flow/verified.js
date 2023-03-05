@@ -1,4 +1,5 @@
-import {siteLanguages} from '../parameters';
+import {translateContent, siteLanguages} from '../parameters';
+
 import mockServer from 'mockserver-client';
 
 /**
@@ -206,14 +207,15 @@ Cypress.Commands.add('verifiedFlow', ({
   for (const language of languages) {
     cy.get(
         `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
-        invoke('attr', 'data-translated-draft-id').
-        then(async translatedDraftId => {
+          invoke('attr', 'data-source-content').
+          then(async dataSourceContent => {
+
+            const content = atob(dataSourceContent);
+
             const siteId = siteLanguages[language];
           const translationId = 777000 + siteId;
 
-          let expectedSourceContent = {};
-          expectedSourceContent[translatedDraftId] = {'title': `Translated ${language}: The Future of Augmented Reality`};
-
+            let translatedContent = translateContent(JSON.parse(content), language);
 
           cy.wrap(mockServerClient.mockAnyResponse({
             'httpRequest': {
@@ -224,7 +226,8 @@ Cypress.Commands.add('verifiedFlow', ({
                   'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
                 }],
             }, 'httpResponse': {
-              'statusCode': 200, 'body': JSON.stringify(expectedSourceContent),
+                'statusCode': 200,
+                'body': JSON.stringify(translatedContent),
             }, 'times': {
               'remainingTimes': 1, 'unlimited': false,
             },
@@ -288,10 +291,14 @@ Cypress.Commands.add('verifiedFlow', ({
       languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
     });
 
+    cy.assertEntryContent(languages, 'verified', entryId)
+
     return;
   }
 
   cy.publishJob({
     languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
   });
+
+  cy.assertEntryContent(languages, 'verified', entryId)
 });

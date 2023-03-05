@@ -4,7 +4,13 @@ build:
 	docker build -f happy-lager-main/Dockerfile happy-lager-main -t happy-lager
 
 down:
-	docker-compose -f docker-compose.yml down --remove-orphans -v
+	docker-compose down --remove-orphans -v
+
+mup: #migrate app up
+	docker-compose exec -T app sh -c 'php craft migrate/up'
+
+mdown: #migrate app down
+	docker-compose exec -T app sh -c 'php craft migrate/down'
 
 clone:
 	rm -rf happy-lager-main
@@ -17,7 +23,7 @@ up: clone down
 	cp -R ../resources happy-lager-main/plugin-src/resources
 	cp -R ../src happy-lager-main/plugin-src/src
 	cp -R ../composer.json happy-lager-main/plugin-src/composer.json
-	docker-compose -f docker-compose.yml up --build -d
+	docker-compose up --build -d
 	docker-compose exec -T mysql sh -c 'while ! mysqladmin ping -h"mysql" --silent; do sleep 1; done'
 	docker-compose exec -T app sh -c 'php craft setup/security-key'
 	docker-compose exec -T app sh -c 'echo DB_DRIVER=mysql >> .env'
@@ -29,9 +35,10 @@ up: clone down
 	docker-compose exec -T app sh -c 'echo DB_TABLE_PREFIX= >> .env'
 	docker-compose exec -T app sh -c 'echo CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS=5 >> .env'
 	docker-compose exec -T app sh -c 'php craft db/restore happylager.sql'
+	docker-compose exec -T app sh -c 'php craft plugin/install craft-lilt-plugin'
 	docker-compose exec -T app sh -c 'php craft up'
 	docker-compose exec -T app sh -c 'php craft migrate/up'
-	docker-compose exec -T app sh -c 'php craft plugin/install craft-lilt-plugin'
+	docker-compose exec -T app sh -c 'php craft queue/run'
 
 cli:
 	docker-compose exec -T app sh

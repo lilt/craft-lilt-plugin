@@ -315,10 +315,16 @@ class Translation extends Element
 
     public function getHtmlAttributes(string $context): array
     {
-        return [
+        $attributes = [
             'data-target-site-language' => $this->targetSiteLanguage,
             'data-target-site-id' => $this->targetSiteId,
             'data-translated-draft-id' => $this->translatedDraftId,
         ];
+
+        if (!empty($this->sourceContent)) {
+            $attributes['data-source-content'] = base64_encode($this->sourceContent);
+        }
+
+        return $attributes;
     }
 }

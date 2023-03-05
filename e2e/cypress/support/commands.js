@@ -270,7 +270,14 @@ Cypress.Commands.add('resetEntryContent', (entryId, languages) => {
 
     cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
-    cy.get('.redactor-in, #fields .input input[type="text"]').then(els => {
+    cy.get('.redactor-in').then(els => {
+      [...els].forEach(el => {
+        cy.wrap(el).clear();
+        cy.wrap(el).type('This content should be changed');
+      });
+    });
+
+    cy.get('#fields .input input[type="text"]').then(els => {
       [...els].forEach(el => {
         cy.wrap(el).clear();
         cy.wrap(el).type('This content should be changed');
@@ -494,7 +501,7 @@ Cypress.Commands.add('publishJobBatch',
  */
 Cypress.Commands.add('assertEntryContent',
     (languages, flow, entryId = 24) => {
-      const expected = (flow === 'copy-source-text') ? {
+      const expected = (flow === 'copy_source_text') ? {
         'de': originalContent,
         'es': originalContent,
         'uk': originalContent,
@@ -553,6 +560,7 @@ Cypress.Commands.add('copySourceTextFlow', ({
   cy.disableEntry(slug, entryId);
   cy.resetEntryContent(entryId, languages);
 
+  return;
   // create job
   cy.createJob(jobTitle, 'copy_source_text', languages);
 
@@ -618,6 +626,8 @@ Cypress.Commands.add('copySourceTextFlow', ({
     cy.publishJobBatch({
       languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
     });
+
+    cy.assertEntryContent(languages, 'copy_source_text', entryId)
 
     return;
   }

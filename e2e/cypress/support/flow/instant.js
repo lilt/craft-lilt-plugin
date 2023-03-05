@@ -17,9 +17,6 @@ Cypress.Commands.add('instantFlow', ({
   batchPublishing = false, //publish all translations at once with publish button
   entryId = 24,
 }) => {
-  cy.assertEntryContent(languages, 'instant', entryId)
-
-  return;
   const isMockserverEnabled = Cypress.env('MOCKSERVER_ENABLED');
 
   cy.releaseQueueManager();
@@ -213,16 +210,14 @@ Cypress.Commands.add('instantFlow', ({
       cy.get(
           `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
           invoke('attr', 'data-source-content').
-          then(async translatedDraftId => {
+          then(async dataSourceContent => {
 
-            const content = atob(translatedDraftId);
+            const content = atob(dataSourceContent);
 
             const siteId = siteLanguages[language];
             const translationId = 777000 + siteId;
 
             let translatedContent = translateContent(JSON.parse(content), language);
-
-            cy.log(JSON.stringify(translatedContent))
 
             cy.wrap(mockServerClient.mockAnyResponse({
               'httpRequest': {
