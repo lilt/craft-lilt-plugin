@@ -4,6 +4,9 @@ const langs = {
   en: 1, uk: 2, de: 3, es: 4,
 };
 
+import {translateContent, originalContent, germanContent, spanishContent, ukrainianContent} from './parameters.js';
+
+
 /**
  * Create new job
  *
@@ -92,7 +95,7 @@ Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
   }
 
   const isMockserverEnabled = Cypress.env('MOCKSERVER_ENABLED');
-  if(isMockserverEnabled) {
+  if (isMockserverEnabled) {
     let mockServerClient = mockServer.mockServerClient(
         Cypress.env('MOCKSERVER_HOST'), Cypress.env('MOCKSERVER_PORT'));
 
@@ -245,6 +248,42 @@ Cypress.Commands.add('disableEntry', (slug, entryId) => {
       should('equal', 'false');
 
   cy.get('#save-btn-container .btn.submit[type="submit"]').click();
+});
+
+/**
+ * Reset entry content for site
+ *
+ * @memberof cy
+ * @method resetEntryContent
+ * @param {string} entryId
+ * @param {array} languages
+ * @returns undefined
+ */
+Cypress.Commands.add('resetEntryContent', (entryId, languages) => {
+  const appUrl = Cypress.env('APP_URL');
+
+  for (const language of languages) {
+    cy.visit(`${appUrl}/admin/entries/news`);
+
+    cy.get(`#context-btn`).click();
+    cy.get(`a[data-site-id="${langs[language]}"][role="option"]`).click();
+
+    cy.get(`.elements .element[data-id="${entryId}"]`).click();
+
+    cy.get('.redactor-in, #fields .input input[type="text"]').then(els => {
+      [...els].forEach(el => {
+        cy.wrap(el).clear();
+        cy.wrap(el).type('This content should be changed');
+      });
+    });
+
+    cy.get('#save-btn-container .btn.submit[type="submit"]').click();
+
+    cy.
+        get('#notifications .notification.notice').
+        invoke('text').
+        should('contain', 'Entry saved');
+  }
 });
 
 /**
@@ -446,6 +485,45 @@ Cypress.Commands.add('publishJobBatch',
     });
 
 /**
+ * @memberof cy
+ * @method assertEntryContent
+ * @param {array} languages
+ * @param {string} flow
+ * @param {int} entryId
+ * @returns undefined
+ */
+Cypress.Commands.add('assertEntryContent',
+    (languages, flow, entryId = 24) => {
+      const expected = (flow === 'copy-source-text') ? {
+        'de': originalContent,
+        'es': originalContent,
+        'uk': originalContent,
+      } :  {
+        'de': germanContent,
+        'es': spanishContent,
+        'uk': ukrainianContent,
+      }
+
+      const appUrl = Cypress.env('APP_URL');
+
+
+      for (const language of languages) {
+        cy.visit(`${appUrl}/admin/entries/news`);
+
+        cy.get(`#context-btn`).click();
+        cy.get(`a[data-site-id="${langs[language]}"][role="option"]`).click();
+
+        cy.get(`.elements .element[data-id="${entryId}"]`).click();
+
+        for (let expectedValue of expected[language]) {
+          cy
+          .get(expectedValue.id)
+          .invoke(expectedValue.functionName).should('equal', expectedValue.value);
+        }
+      }
+    });
+
+/**
  *
  * Run E2E for copy source text flow with options
  *
@@ -464,7 +542,6 @@ Cypress.Commands.add('copySourceTextFlow', ({
   batchPublishing = false, //publish all translations at once with publish button
   entryId = 24,
 }) => {
-
   cy.setConfigurationOption('enableEntries', enableAfterPublish);
   cy.setConfigurationOption('copySlug', copySlug);
 
@@ -474,6 +551,7 @@ Cypress.Commands.add('copySourceTextFlow', ({
   }
 
   cy.disableEntry(slug, entryId);
+  cy.resetEntryContent(entryId, languages);
 
   // create job
   cy.createJob(jobTitle, 'copy_source_text', languages);
@@ -547,6 +625,8 @@ Cypress.Commands.add('copySourceTextFlow', ({
   cy.publishJob({
     languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
   });
+
+  cy.assertEntryContent(languages, 'copy_source_text', entryId)
 });
 
 /**

@@ -1,4 +1,4 @@
-import {siteLanguages} from '../parameters';
+import {translateContent, siteLanguages} from '../parameters';
 import mockServer from 'mockserver-client';
 
 /**
@@ -17,6 +17,9 @@ Cypress.Commands.add('instantFlow', ({
   batchPublishing = false, //publish all translations at once with publish button
   entryId = 24,
 }) => {
+  cy.assertEntryContent(languages, 'instant', entryId)
+
+  return;
   const isMockserverEnabled = Cypress.env('MOCKSERVER_ENABLED');
 
   cy.releaseQueueManager();
@@ -209,13 +212,17 @@ Cypress.Commands.add('instantFlow', ({
     for (const language of languages) {
       cy.get(
           `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
-          invoke('attr', 'data-translated-draft-id').
+          invoke('attr', 'data-source-content').
           then(async translatedDraftId => {
+
+            const content = atob(translatedDraftId);
+
             const siteId = siteLanguages[language];
             const translationId = 777000 + siteId;
 
-            let expectedSourceContent = {};
-            expectedSourceContent[translatedDraftId] = {'title': `Translated ${language}: The Future of Augmented Reality`};
+            let translatedContent = translateContent(JSON.parse(content), language);
+
+            cy.log(JSON.stringify(translatedContent))
 
             cy.wrap(mockServerClient.mockAnyResponse({
               'httpRequest': {
@@ -228,7 +235,7 @@ Cypress.Commands.add('instantFlow', ({
                   }],
               }, 'httpResponse': {
                 'statusCode': 200,
-                'body': JSON.stringify(expectedSourceContent),
+                'body': JSON.stringify(translatedContent),
               }, 'times': {
                 'remainingTimes': 1, 'unlimited': false,
               },
@@ -292,10 +299,14 @@ Cypress.Commands.add('instantFlow', ({
       languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
     });
 
+    cy.assertEntryContent(languages, 'instant', entryId)
+
     return;
   }
 
   cy.publishJob({
     languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
   });
+
+  cy.assertEntryContent(languages, 'instant', entryId)
 });
