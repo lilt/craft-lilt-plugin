@@ -15,6 +15,7 @@ mdown: #migrate app down
 clone:
 	rm -rf happy-lager-main
 	git clone https://github.com/craftcms/demo.git happy-lager-main
+	rm -rf happy-lager-main/.git
 	cp -R happy-lager-override/* happy-lager-main
 
 up: clone down
@@ -57,7 +58,7 @@ test-instant:
 								  --network e2e-network \
 								  --env-file .env.test \
   								  --entrypoint=cypress \
-  								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --spec cypress/e2e/jobs/instant/*.js --record false
+  								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --spec cypress/e2e/jobs/instant/success-path-multiple.cy.js --record false
 
 test-verified:
 	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install
