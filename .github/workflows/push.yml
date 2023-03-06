@@ -10,50 +10,25 @@ jobs:
   e2e-instant:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Set the value
+        uses: actions/checkout@v2
+        id: step_one
+        run: |
+          echo "CYPRESS_SCENARIO=${{ matrix.scenario }}" >> $GITHUB_ENV
       - name: Run automation
+        uses: actions/checkout@v2
         working-directory: ./e2e
         run: |
-          make up
-          make test-instant
           pwd
           ls -la
+          make up
+          make test-instant
       - name: Use the Upload Artifact GitHub Action
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
           name: screenshots-e2e-instant
           path: ./cypress/screenshots
-#  e2e-verified:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Run automation
-#        working-directory: ./e2e
-#        run: |
-#          make up
-#          make test-verified
-#      - name: Use the Upload Artifact GitHub Action
-#        if: ${{ failure() }}
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: screenshots-e2e-verified
-#          path: ./cypress/screenshots
-#  e2e-copy-source-text:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Run automation
-#        working-directory: ./e2e
-#        run: |
-#          make up
-#          make test-copy-source-text
-#      - name: Use the Upload Artifact GitHub Action
-#        if: ${{ failure() }}
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: screenshots-e2e-copy-source-text
-#          path: ./cypress/screenshots
 #  tests-php-72:
 #    runs-on: ubuntu-latest
 #    steps:

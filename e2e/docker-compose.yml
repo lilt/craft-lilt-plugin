@@ -4,8 +4,6 @@ services:
   app:
     build: ./happy-lager-main
     image: happy-lager:latest
-    ports:
-      - "88:8080"
     networks:
       - e2e-network
 
@@ -19,16 +17,13 @@ services:
       MYSQL_PASSWORD: "craft-lilt"
     networks:
       - e2e-network
-    ports:
-      - "3333:3306"
+
 
   mockserver:
     image: mockserver/mockserver:latest
     environment:
       MOCKSERVER_CORS_ALLOW_ORIGIN: "*"
       MOCKSERVER_CORS_ALLOW_METHODS: "CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, PATCH, TRACE"
-    ports:
-      - "1080:1080"
     networks:
       - e2e-network
 

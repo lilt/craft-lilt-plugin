@@ -1,0 +1,38 @@
+name: E2E Tests
+on:
+  pull_request:
+    branches:
+      - "*"
+jobs:
+  tests:
+    strategy:
+      matrix:
+        scenario: [
+          "cypress/e2e/jobs/copy-source-text-flow/*.js",
+          "cypress/e2e/jobs/instant/success-path-multiple.cy.js",
+          "cypress/e2e/jobs/instant/success-path-single.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-single.cy.js",
+        ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set the value
+        id: step_one
+        run: |
+          echo "CYPRESS_SCENARIO=${{ matrix.scenario }}" >> $GITHUB_ENV
+      - name: Run automation
+        uses: actions/checkout@v2
+        working-directory: ./e2e
+        run: |
+          pwd
+          ls -la
+          make up
+          make e2e-github
+      - name: Use the Upload Artifact GitHub Action
+        uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: screenshots-e2e-instant
+          path: ./e2e/cypress/screenshots
