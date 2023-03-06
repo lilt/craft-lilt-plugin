@@ -22,6 +22,7 @@ Cypress.Commands.add('verifiedFlow', ({
 
   cy.releaseQueueManager();
   cy.resetEntryTitle(entryId, entryLabel);
+  cy.resetEntryContent(entryId, languages);
 
   cy.setConfigurationOption('enableEntries', enableAfterPublish);
   cy.setConfigurationOption('copySlug', copySlug);
