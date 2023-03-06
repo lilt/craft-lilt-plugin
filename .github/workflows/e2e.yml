@@ -1,5 +1,9 @@
 name: E2E Tests
 on:
+  push:
+    branches:
+      - 1.x #CraftCMS v3 | PHP 7.2
+      - 2.x #CraftCMS v4 | PHP 8.0.2
   pull_request:
     branches:
       - "*"
