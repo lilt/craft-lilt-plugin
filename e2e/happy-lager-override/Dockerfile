@@ -9,7 +9,7 @@ RUN composer install --no-interaction
 
 RUN composer require lilt/craft-lilt-plugin:^999.9.9
 
-FROM craftcms/nginx:8.0
+FROM craftcms/nginx:7.4
 
 # switch to the root user to install mysql tools
 USER root

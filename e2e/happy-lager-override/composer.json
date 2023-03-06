@@ -26,7 +26,7 @@
   "config": {
     "optimize-autoloader": true,
     "platform": {
-      "php": "8.0"
+      "php": "7.4"
     },
     "allow-plugins": {
       "craftcms/plugin-installer": true,
