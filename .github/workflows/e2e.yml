@@ -38,4 +38,4 @@ jobs:
         if: ${{ failure() }}
         with:
           name: screenshots-e2e-instant
-          path: ./e2e/cypress/screenshots
+          path: ./e2e/cypress

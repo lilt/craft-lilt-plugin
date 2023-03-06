@@ -84,4 +84,4 @@ e2e-github:
 								  --network e2e-network \
 								  --env-file .env.test \
   								  --entrypoint=cypress \
-  								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --spec ${CYPRESS_SCENARIO} --record false
+  								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --spec ${CYPRESS_SCENARIO}
