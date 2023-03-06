@@ -27,7 +27,6 @@ jobs:
         run: |
           echo "CYPRESS_SCENARIO=${{ matrix.scenario }}" >> $GITHUB_ENV
       - name: Run automation
-        uses: actions/checkout@v2
         working-directory: ./e2e
         run: |
           pwd
