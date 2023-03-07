@@ -4,8 +4,13 @@ const langs = {
   en: 1, uk: 2, de: 3, es: 4,
 };
 
-import {translateContent, originalContent, germanContent, spanishContent, ukrainianContent} from './parameters.js';
-
+import {
+  translateContent,
+  originalContent,
+  germanContent,
+  spanishContent,
+  ukrainianContent,
+} from './parameters.js';
 
 /**
  * Create new job
@@ -505,14 +510,13 @@ Cypress.Commands.add('assertEntryContent',
         'de': originalContent,
         'es': originalContent,
         'uk': originalContent,
-      } :  {
+      } : {
         'de': germanContent,
         'es': spanishContent,
         'uk': ukrainianContent,
-      }
+      };
 
       const appUrl = Cypress.env('APP_URL');
-
 
       for (const language of languages) {
         cy.visit(`${appUrl}/admin/entries/news`);
@@ -522,10 +526,16 @@ Cypress.Commands.add('assertEntryContent',
 
         cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
+        cy.screenshot(
+            `${flow}_${entryId}_${language}`,
+            {
+              capture: 'fullPage',
+            });
+
         for (let expectedValue of expected[language]) {
-          cy
-          .get(expectedValue.id)
-          .invoke(expectedValue.functionName).should('equal', expectedValue.value);
+          cy.get(expectedValue.id, {timeout: 1000}).
+              invoke(expectedValue.functionName).
+              should('equal', expectedValue.value);
         }
       }
     });
@@ -627,7 +637,7 @@ Cypress.Commands.add('copySourceTextFlow', ({
       languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
     });
 
-    cy.assertEntryContent(languages, 'copy_source_text', entryId)
+    cy.assertEntryContent(languages, 'copy_source_text', entryId);
 
     return;
   }
@@ -636,7 +646,7 @@ Cypress.Commands.add('copySourceTextFlow', ({
     languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
   });
 
-  cy.assertEntryContent(languages, 'copy_source_text', entryId)
+  cy.assertEntryContent(languages, 'copy_source_text', entryId);
 });
 
 /**
