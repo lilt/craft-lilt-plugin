@@ -531,6 +531,7 @@ Cypress.Commands.add('assertEntryContent',
             {
               capture: 'fullPage',
             });
+        cy.get('.redactor-toolbar-wrapper').should('be.visible');
 
         for (let expectedValue of expected[language]) {
           cy.get(expectedValue.id, {timeout: 1000}).
