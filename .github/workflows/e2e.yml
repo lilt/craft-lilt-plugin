@@ -32,9 +32,12 @@ jobs:
       - name: Run automation
         working-directory: ./e2e
         run: |
-          pwd
-          ls -la
           make up
+          mkdir e2e/cypress/craft
+          mkdir e2e/cypress/craft/logs
+          cp e2e/happy-lager-main/storage/logs e2e/cypress/craft/logs
+          cp e2e/happy-lager-main/composer.json e2e/cypress/craft
+          cp e2e/happy-lager-main/composer.lock e2e/cypress/craft
           make e2e-github
       - name: Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2

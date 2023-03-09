@@ -516,6 +516,8 @@ Cypress.Commands.add('assertEntryContent',
         'uk': ukrainianContent,
       };
 
+      cy.releaseQueueManager();
+
       const appUrl = Cypress.env('APP_URL');
 
       for (const language of languages) {
