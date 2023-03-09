@@ -19,3 +19,5 @@ COPY --chown=www-data:www-data --from=vendor /app/vendor/ /app/vendor/
 COPY --chown=www-data:www-data . .
 COPY --chown=www-data:www-data ./plugin-src /tmp/craft-lilt-plugin
 
+RUN chmod -R 777 /app/storage
+
