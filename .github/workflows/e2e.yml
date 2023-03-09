@@ -50,10 +50,10 @@ jobs:
         if: ${{ failure() }}
         working-directory: ./e2e
         run: |
-          make backup-db
+          make db/backup
           mkdir cypress/craft
           mkdir cypress/craft/logs
-          docker-compose cp app:/app/storage cypress/craft
+          docker compose cp app:/app/storage cypress/craft
           cp -R happy-lager-main/storage/logs cypress/craft/logs | true
           cp happy-lager-main/composer.json cypress/craft
           cp happy-lager-main/composer.lock cypress/craft
