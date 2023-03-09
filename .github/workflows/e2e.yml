@@ -10,6 +10,7 @@ on:
 jobs:
   tests:
     strategy:
+      max-parallel: 1
       matrix:
         scenario: [
           "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
