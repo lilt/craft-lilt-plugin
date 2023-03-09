@@ -17,18 +17,18 @@ jobs:
           "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-single.cy.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-1.cy.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-2.cy.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-3.cy.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-4.cy.js",
-          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-1.cy.js",
-          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-2.cy.js",
-          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-3.cy.js",
-          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-4.cy.js",
-          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-1.cy.js",
-          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-2.cy.js",
-          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-3.cy.js",
-          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-4.cy.js",
+          "cypress/e2e/jobs/instant/success-path-multiple.cy.js",
+          "cypress/e2e/jobs/instant/success-path-multiple-copy-slug.cy.js",
+          "cypress/e2e/jobs/instant/success-path-multiple-copy-slug-and-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/instant/success-path-multiple-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-copy-slug.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-copy-slug-and-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-copy-slug.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-copy-slug-and-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-enable-after-publish.cy.js",
           "cypress/e2e/jobs/verified/success-path-single.cy.js",
           "cypress/e2e/jobs/instant/success-path-single.cy.js",
         ]
@@ -50,11 +50,10 @@ jobs:
         if: ${{ failure() }}
         working-directory: ./e2e
         run: |
-          make db/backup
+          make backup-db
           mkdir cypress/craft
-          mkdir cypress/craft/logs
-          docker compose cp app:/app/storage cypress/craft
-          cp -R happy-lager-main/storage/logs cypress/craft/logs | true
+          mkdir cypress/craft/storage
+          docker compose cp app:/app/storage cypress/craft/storage
           cp happy-lager-main/composer.json cypress/craft
           cp happy-lager-main/composer.lock cypress/craft
       - name: Use the Upload Artifact GitHub Action
