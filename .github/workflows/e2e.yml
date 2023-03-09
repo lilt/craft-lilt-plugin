@@ -13,7 +13,6 @@ jobs:
 #      max-parallel: 1
       matrix:
         os: [ ubuntu-latest ]
-        runs-on: ${{ matrix.os }}
         scenario: [
           "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",
