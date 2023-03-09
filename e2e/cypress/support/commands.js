@@ -532,6 +532,7 @@ Cypress.Commands.add('assertEntryContent',
               capture: 'fullPage',
             });
         cy.get('.redactor-toolbar-wrapper').should('be.visible');
+        cy.wait(2000)
 
         for (let expectedValue of expected[language]) {
           if (flow === 'instant') {
