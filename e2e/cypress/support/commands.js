@@ -592,7 +592,6 @@ Cypress.Commands.add('copySourceTextFlow', ({
   cy.disableEntry(slug, entryId);
   cy.resetEntryContent(entryId, languages);
 
-  return;
   // create job
   cy.createJob(jobTitle, 'copy_source_text', languages);
 
