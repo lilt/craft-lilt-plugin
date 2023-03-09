@@ -6,8 +6,6 @@ services:
     image: happy-lager:latest
     networks:
       - e2e-network
-    volumes:
-      - ./happy-lager-main/storage:/app/storage
     depends_on:
       - mysql
       - mockserver
