@@ -1,5 +1,12 @@
 CYPRESS_CACHE_FOLDER?=/e2e/.cache
 
+install: clone
+	docker run --rm \
+		-v ${PWD}/happy-lager-main:/app \
+		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
+		composer:latest \
+		composer require craftcms/cms:3.7.68 -W
+
 build:
 	docker build -f happy-lager-main/Dockerfile happy-lager-main -t happy-lager
 
@@ -17,13 +24,13 @@ clone:
 	git clone https://github.com/craftcms/demo.git happy-lager-main
 	rm -rf happy-lager-main/.git
 	cp -R happy-lager-override/* happy-lager-main
-
-up: clone down
 	rm -rf happy-lager-main/plugin-src
 	mkdir happy-lager-main/plugin-src
 	cp -R ../resources happy-lager-main/plugin-src/resources
 	cp -R ../src happy-lager-main/plugin-src/src
 	cp -R ../composer.json happy-lager-main/plugin-src/composer.json
+
+up: clone down
 	docker-compose up --build -d
 	docker-compose exec -T mysql sh -c 'while ! mysqladmin ping -h"mysql" --silent; do sleep 1; done'
 	docker-compose exec -T app sh -c 'php craft setup/security-key'
