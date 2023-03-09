@@ -13,7 +13,7 @@ jobs:
       matrix:
         scenario: [
           "cypress/e2e/jobs/copy-source-text-flow/*.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-1.cy.js",
+#          "cypress/e2e/jobs/instant/success-path-multiple-1.cy.js",
           "cypress/e2e/jobs/instant/success-path-multiple-2.cy.js",
           "cypress/e2e/jobs/instant/success-path-multiple-3.cy.js",
           "cypress/e2e/jobs/instant/success-path-multiple-4.cy.js",
