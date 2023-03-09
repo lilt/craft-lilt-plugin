@@ -63,4 +63,4 @@ jobs:
           name: screenshots-e2e-instant
           path: |
             ./e2e/cypress
-            ./e2e/happy-lager-main/storage
+            ./e2e/app-storage

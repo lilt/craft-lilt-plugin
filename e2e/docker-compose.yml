@@ -7,7 +7,7 @@ services:
     networks:
       - e2e-network
     volumes:
-      - ${PWD}/happy-lager-main/storage:/e2e/storage
+      - ./app-storage:/e2e/storage
     depends_on:
       - mysql
       - mockserver
