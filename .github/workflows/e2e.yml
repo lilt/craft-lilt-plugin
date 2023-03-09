@@ -33,15 +33,19 @@ jobs:
         working-directory: ./e2e
         run: |
           make up
+          make e2e-github
+      - name: Copy artifacts
+        working-directory: ./e2e
+        run: |
           mkdir cypress/craft
           mkdir cypress/craft/logs
-          cp e2e/happy-lager-main/storage/logs cypress/craft/logs
-          cp e2e/happy-lager-main/composer.json cypress/craft
-          cp e2e/happy-lager-main/composer.lock cypress/craft
-          make e2e-github
+          cp -R happy-lager-main/storage/logs cypress/craft/logs | true
+          cp happy-lager-main/composer.json cypress/craft
+          cp happy-lager-main/composer.lock cypress/craft
       - name: Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
         with:
           name: screenshots-e2e-instant
-          path: ./e2e/cypress
+          path:
+            ./e2e/cypress
