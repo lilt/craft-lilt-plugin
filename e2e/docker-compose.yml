@@ -26,6 +26,12 @@ services:
       MOCKSERVER_CORS_ALLOW_METHODS: "CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, PATCH, TRACE"
     networks:
       - e2e-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:1080/status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure
 
 networks:
   e2e-network:

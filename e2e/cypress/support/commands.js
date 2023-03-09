@@ -534,6 +534,23 @@ Cypress.Commands.add('assertEntryContent',
         cy.get('.redactor-toolbar-wrapper').should('be.visible');
 
         for (let expectedValue of expected[language]) {
+          if (flow === 'instant') {
+            cy.get(expectedValue.id, {timeout: 1000}).
+                invoke(expectedValue.functionName).
+                should('not.equal', 'This content should be changed');
+
+            cy.get(expectedValue.id, {timeout: 1000}).
+                invoke(expectedValue.functionName).
+                then(text => {
+                  expect(
+                      text.replace(/<[^>]*>/g, ''),
+                  ).to.equal(
+                      expectedValue.value.replace(/<[^>]*>/g, ''),
+                  );
+                });
+            continue;
+          }
+
           cy.get(expectedValue.id, {timeout: 1000}).
               invoke(expectedValue.functionName).
               should('equal', expectedValue.value);
