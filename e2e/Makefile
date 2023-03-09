@@ -9,7 +9,7 @@ install: clone
 		composer require craftcms/cms:3.7.68 -W
 
 backup-db:
-	docker-compose exec -T root app sh -c 'php craft db/backup'
+	docker-compose exec -T app sh -c 'php craft db/backup'
 
 build:
 	docker build -f happy-lager-main/Dockerfile happy-lager-main -t happy-lager
