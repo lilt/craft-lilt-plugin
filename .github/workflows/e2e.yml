@@ -13,15 +13,17 @@ jobs:
 #      max-parallel: 1
       matrix:
         scenario: [
-          #"cypress/e2e/jobs/copy-source-text-flow/*.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-1.cy.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-2.cy.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-3.cy.js",
-          "cypress/e2e/jobs/instant/success-path-multiple-4.cy.js",
-          #"cypress/e2e/jobs/instant/success-path-single.cy.js",
-          #"cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing.cy.js",
-          #"cypress/e2e/jobs/verified/success-path-multiple-single-publishing.cy.js",
-          #"cypress/e2e/jobs/verified/success-path-single.cy.js",
+          "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
+          "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",
+          "cypress/e2e/jobs/copy-source-text-flow/success-path-single.cy.js",
+#          "cypress/e2e/jobs/instant/success-path-multiple-1.cy.js",
+#          "cypress/e2e/jobs/instant/success-path-multiple-2.cy.js",
+#          "cypress/e2e/jobs/instant/success-path-multiple-3.cy.js",
+#          "cypress/e2e/jobs/instant/success-path-multiple-4.cy.js",
+          "cypress/e2e/jobs/instant/success-path-single.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-single.cy.js",
         ]
     runs-on: ubuntu-latest
     steps:
@@ -50,4 +52,4 @@ jobs:
         with:
           name: screenshots-e2e-instant
           path:
-            ./e2e
+            ./e2e/cypress
