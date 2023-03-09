@@ -46,16 +46,15 @@ jobs:
           echo ${DB_DATABASE}
           make up
           make e2e-github
-          make backup-db
       - name: Copy artifacts
-        working-directory: ./e2e
         if: ${{ failure() }}
         run: |
-          mkdir cypress/craft
-          mkdir cypress/craft/logs
+          make backup-db
+          mkdir e2e/cypress/craft
+          mkdir e2e/cypress/craft/logs
           cp -R happy-lager-main/storage/logs cypress/craft/logs | true
-          cp happy-lager-main/composer.json cypress/craft
-          cp happy-lager-main/composer.lock cypress/craft
+          cp happy-lager-main/composer.json e2e/cypress/craft
+          cp happy-lager-main/composer.lock e2e/cypress/craft
       - name: Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
