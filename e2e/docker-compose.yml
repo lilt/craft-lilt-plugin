@@ -6,6 +6,8 @@ services:
     image: happy-lager:latest
     networks:
       - e2e-network
+    volumes:
+      - ${PWD}/happy-lager-main/storage:/e2e/storage
     depends_on:
       - mysql
       - mockserver
@@ -15,7 +17,7 @@ services:
     platform: linux/x86_64
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 1
-      MYSQL_DATABASE: "craft-lilt"
+      MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: "craft-lilt"
       MYSQL_PASSWORD: "craft-lilt"
     networks:

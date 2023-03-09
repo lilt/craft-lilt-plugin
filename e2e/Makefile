@@ -1,4 +1,5 @@
 CYPRESS_CACHE_FOLDER?=/e2e/.cache
+DB_DATABASE?=craft-lilt
 
 install: clone
 	docker run --rm \
@@ -6,6 +7,9 @@ install: clone
 		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
 		composer:latest \
 		composer require craftcms/cms:3.7.68 -W
+
+backup-db:
+	docker-compose exec -T app sh -c 'php craft backup/db'
 
 build:
 	docker build -f happy-lager-main/Dockerfile happy-lager-main -t happy-lager
@@ -36,7 +40,7 @@ up: clone down
 	docker-compose exec -T app sh -c 'php craft setup/security-key'
 	docker-compose exec -T app sh -c 'echo DB_DRIVER=mysql >> .env'
 	docker-compose exec -T app sh -c 'echo DB_SERVER=mysql >> .env'
-	docker-compose exec -T app sh -c 'echo DB_DATABASE=craft-lilt >> .env'
+	docker-compose exec -T app sh -c 'echo DB_DATABASE=${DB_DATABASE} >> .env'
 	docker-compose exec -T app sh -c 'echo DB_USER=craft-lilt >> .env'
 	docker-compose exec -T app sh -c 'echo DB_PASSWORD=craft-lilt >> .env'
 	docker-compose exec -T app sh -c 'echo DB_SCHEMA=public >> .env'

@@ -10,8 +10,10 @@ on:
 jobs:
   tests:
     strategy:
-      max-parallel: 1
+#      max-parallel: 1
       matrix:
+        os: [ ubuntu-latest ]
+        runs-on: ${{ matrix.os }}
         scenario: [
           "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",
@@ -38,11 +40,14 @@ jobs:
         id: step_one
         run: |
           echo "CYPRESS_SCENARIO=${{ matrix.scenario }}" >> $GITHUB_ENV
+          echo "DB_DATABASE=$(uuidgen)" >> $GITHUB_ENV
       - name: Run automation
         working-directory: ./e2e
         run: |
+          echo ${DB_DATABASE}
           make up
           make e2e-github
+          make backup-db
       - name: Copy artifacts
         working-directory: ./e2e
         if: ${{ failure() }}
@@ -57,5 +62,6 @@ jobs:
         if: ${{ failure() }}
         with:
           name: screenshots-e2e-instant
-          path:
+          path: |
             ./e2e/cypress
+            ./e2e/happy-lager-main/storage
