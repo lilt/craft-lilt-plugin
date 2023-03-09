@@ -28,7 +28,14 @@ class m221218_182344_add_sites extends Migration
         $site->setBaseUrl('@web/');
         Craft::$app->sites->saveSite($site);
 
-        $sitesToCreate = ['uk' => 'uk', 'de' => 'de', 'es' => 'es'];
+        // handle => language
+        $sitesToCreate = [
+            'uk' => 'uk',
+            'de' => 'de',
+            'es' => 'es',
+//            'fr' => 'fr',
+//            'it' => 'it'
+        ];
 
         $groups[0]->name = 'Happy Lager';
         Craft::$app->sites->saveGroup($groups[0]);
@@ -72,7 +79,13 @@ class m221218_182344_add_sites extends Migration
             Craft::$app->getSections()->deleteSectionById((int) $section->id);
         }
 
-        $sitesToCreate = ['esES' => 'es-ES', 'deDE' => 'de-DE', 'ruRU' => 'ru-RU'];
+        $sitesToCreate = [
+            'uk' => 'uk',
+            'de' => 'de',
+            'es' => 'es',
+//            'fr' => 'fr',
+//            'it' => 'it'
+        ];
         foreach ($sitesToCreate as $handle => $language) {
             $site = Craft::$app->getSites()->getSiteByHandle($handle);
             if ($site) {

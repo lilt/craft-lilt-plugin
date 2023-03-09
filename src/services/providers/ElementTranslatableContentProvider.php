@@ -19,7 +19,7 @@ use craft\fields\MultiSelect;
 use craft\fields\RadioButtons;
 use craft\fields\Table;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\services\providers\field\ProvideContentCommand;
+use lilthq\craftliltplugin\services\providers\command\ProvideContentCommand;
 
 class ElementTranslatableContentProvider
 {
@@ -36,24 +36,22 @@ class ElementTranslatableContentProvider
             $content['title'] = $element->title;
         }
 
-        # TODO: clarify should we translate slug or not
-        #if (!empty($element->slug)) {
-        #    $content['slug'] = $element->slug;
-        #}
-
         $fieldLayout = $element->getFieldLayout();
 
         if ($fieldLayout === null) {
-            //TODO: log issue
+            return $content;
         }
 
         $fields = $fieldLayout ? $fieldLayout->getFields() : [];
 
         foreach ($fields as $field) {
-            $fieldData = Craft::$app->fields->getFieldById((int)$field->id);
+            $fieldData = Craft::$app->fields->getFieldById((int) $field->id);
 
             if ($fieldData === null) {
-                //TODO: log issue
+                Craft::error(
+                    sprintf("Can't get field data for field %d", $field->id)
+                );
+
                 continue;
             }
 

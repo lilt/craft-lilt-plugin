@@ -1,7 +1,7 @@
 const {generateJobData} = require('../../../support/job/generator.js');
 
 describe(
-    '[Verified] Success path for job with multiple target languages with single publishing',
+    '[Verified] Success path for job with multiple target languages with bulk publishing',
     () => {
       const entryLabel = 'The Future of Augmented Reality';
       const entryId = 24;
@@ -17,7 +17,7 @@ describe(
           copySlug: false,
           enableAfterPublish: false,
           languages: ['de', 'es', 'uk'],
-          batchPublishing: false,
+          batchPublishing: true,
         });
       });
     });
