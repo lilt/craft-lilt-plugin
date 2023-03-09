@@ -218,7 +218,8 @@ Cypress.Commands.add('instantFlow', ({
             const siteId = siteLanguages[language];
             const translationId = 777000 + siteId;
 
-            let translatedContent = translateContent(JSON.parse(content), language);
+            let translatedContent = translateContent(JSON.parse(content),
+                language);
 
             cy.wrap(mockServerClient.mockAnyResponse({
               'httpRequest': {
@@ -295,7 +296,7 @@ Cypress.Commands.add('instantFlow', ({
       languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
     });
 
-    cy.assertEntryContent(languages, 'instant', entryId)
+    cy.assertEntryContent(languages, 'instant', entryId);
 
     return;
   }
@@ -304,5 +305,5 @@ Cypress.Commands.add('instantFlow', ({
     languages, jobTitle, copySlug, slug, entryId, enableAfterPublish,
   });
 
-  cy.assertEntryContent(languages, 'instant', entryId)
+  cy.assertEntryContent(languages, 'instant', entryId);
 });

@@ -528,13 +528,14 @@ Cypress.Commands.add('assertEntryContent',
 
         cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
+        cy.get('.redactor-toolbar-wrapper').should('be.visible');
+        cy.wait(2000)
+
         cy.screenshot(
             `${flow}_${entryId}_${language}`,
             {
               capture: 'fullPage',
             });
-        cy.get('.redactor-toolbar-wrapper').should('be.visible');
-        cy.wait(2000)
 
         for (let expectedValue of expected[language]) {
           if (flow === 'instant') {
