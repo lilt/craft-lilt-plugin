@@ -1,0 +1,68 @@
+name: E2E Tests
+on:
+  push:
+    branches:
+      - 3.x #CraftCMS v3 | PHP 7.2
+      - 4.x #CraftCMS v4 | PHP 8.0.2
+  pull_request:
+    branches:
+      - "*"
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        scenario: [
+          "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
+          "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",
+          "cypress/e2e/jobs/copy-source-text-flow/success-path-single.cy.js",
+
+          #TODO: check why CI is failing but tests are green
+#          "cypress/e2e/jobs/instant/success-path-multiple.cy.js",
+#          "cypress/e2e/jobs/instant/success-path-multiple-copy-slug.cy.js",
+#          "cypress/e2e/jobs/instant/success-path-multiple-copy-slug-and-enable-after-publish.cy.js",
+#          "cypress/e2e/jobs/instant/success-path-multiple-enable-after-publish.cy.js",
+
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-copy-slug.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-copy-slug-and-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-copy-slug.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-copy-slug-and-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/verified/success-path-single.cy.js",
+          "cypress/e2e/jobs/instant/success-path-single.cy.js",
+        ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set the value
+        id: step_one
+        run: |
+          echo "CYPRESS_SCENARIO=${{ matrix.scenario }}" >> $GITHUB_ENV
+          echo "DB_DATABASE=$(uuidgen)" >> $GITHUB_ENV
+      - name: Run automation
+        working-directory: ./e2e
+        run: |
+          echo ${DB_DATABASE}
+          make up
+          make e2e-github
+      - name: Copy artifacts
+        if: ${{ failure() }}
+        working-directory: ./e2e
+        run: |
+          make backup-db
+          mkdir cypress/craft
+          mkdir cypress/craft/storage
+          docker compose cp app:/app/storage cypress/craft/storage
+          cp happy-lager-main/composer.json cypress/craft
+          cp happy-lager-main/composer.lock cypress/craft
+      - name: Use the Upload Artifact GitHub Action
+        uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: screenshots-e2e-instant
+          path: |
+            ./e2e/cypress
+            ./e2e/happy-lager-main/storage

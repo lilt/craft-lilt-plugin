@@ -1,12 +1,13 @@
+
 const {generateJobData} = require('../../../support/job/generator.js');
 
 describe(
-    '[Verified] Success path for job with multiple target languages with single publishing',
+    '[Verified] Success path for job with multiple target languages with bulk publishing',
     () => {
       const entryLabel = 'The Future of Augmented Reality';
       const entryId = 24;
 
-      it('with copy slug disabled & enable after publish disabled', () => {
+      it('with copy slug disabled & enable after publish enabled', () => {
         const {jobTitle, slug} = generateJobData();
 
         cy.verifiedFlow({
@@ -15,9 +16,9 @@ describe(
           jobTitle,
           entryId,
           copySlug: false,
-          enableAfterPublish: false,
+          enableAfterPublish: true,
           languages: ['de', 'es', 'uk'],
-          batchPublishing: false,
+          batchPublishing: true,
         });
       });
     });

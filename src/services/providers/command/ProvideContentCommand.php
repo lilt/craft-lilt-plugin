@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace lilthq\craftliltplugin\services\providers\field;
+namespace lilthq\craftliltplugin\services\providers\command;
 
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
