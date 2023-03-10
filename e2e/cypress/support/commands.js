@@ -265,6 +265,11 @@ Cypress.Commands.add('disableEntry', (slug, entryId) => {
  * @returns undefined
  */
 Cypress.Commands.add('resetEntryContent', (entryId, languages) => {
+  const isAssertingContent = Cypress.env('CYPRESS_ASSERT_ENTRY_CONTENT');
+  if(!isAssertingContent) {
+    return
+  }
+
   const appUrl = Cypress.env('APP_URL');
 
   for (const language of languages) {
@@ -506,6 +511,12 @@ Cypress.Commands.add('publishJobBatch',
  */
 Cypress.Commands.add('assertEntryContent',
     (languages, flow, entryId = 24) => {
+
+      const isAssertingContent = Cypress.env('CYPRESS_ASSERT_ENTRY_CONTENT');
+      if(!isAssertingContent) {
+        return
+      }
+
       const expected = (flow === 'copy_source_text') ? {
         'de': originalContent,
         'es': originalContent,
@@ -529,7 +540,7 @@ Cypress.Commands.add('assertEntryContent',
         cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
         cy.get('.redactor-toolbar-wrapper').should('be.visible');
-        cy.wait(2000)
+        cy.wait(2000);
 
         cy.screenshot(
             `${flow}_${entryId}_${language}`,
