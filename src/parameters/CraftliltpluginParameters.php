@@ -13,6 +13,7 @@ use Craft;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\services\listeners\AfterDraftAppliedListener;
 use lilthq\craftliltplugin\services\listeners\AfterErrorListener;
+use lilthq\craftliltplugin\services\listeners\RegisterCpAlertsListener;
 use lilthq\craftliltplugin\services\listeners\RegisterDefaultTableAttributesListener;
 use lilthq\craftliltplugin\services\listeners\RegisterElementTypesListener;
 use lilthq\craftliltplugin\services\listeners\RegisterTableAttributesListener;
@@ -64,6 +65,7 @@ class CraftliltpluginParameters
         RegisterDefaultTableAttributesListener::class,
         RegisterTableAttributesListener::class,
         AfterErrorListener::class,
+        RegisterCpAlertsListener::class,
     ];
 
     public const TRANSLATION_WORKFLOW_INSTANT = SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT;
