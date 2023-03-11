@@ -197,6 +197,21 @@ Cypress.Commands.add('setEntrySlug', (slug, entryId, language = 'en') => {
 });
 
 /**
+ * @memberof cy
+ * @method databaseBackup
+ * @returns undefined
+ */
+Cypress.Commands.add('databaseBackup', () => {
+  const appUrl = Cypress.env('APP_URL');
+
+  cy.visit(`${appUrl}/admin/utilities/db-backup`);
+  cy.get('label[for="download-backup"]').click();
+  cy.get('div.buttons button.btn.submit[type="submit"]').click();
+
+  cy.get('div.alldone').should('be.visible');
+});
+
+/**
  * Set entry slug
  *
  * @memberof cy
@@ -265,11 +280,6 @@ Cypress.Commands.add('disableEntry', (slug, entryId) => {
  * @returns undefined
  */
 Cypress.Commands.add('resetEntryContent', (entryId, languages) => {
-  const isAssertingContent = Cypress.env('CYPRESS_ASSERT_ENTRY_CONTENT');
-  if(!isAssertingContent) {
-    return
-  }
-
   const appUrl = Cypress.env('APP_URL');
 
   for (const language of languages) {
@@ -467,6 +477,8 @@ Cypress.Commands.add('publishTranslations', (jobTitle, languages) => {
  */
 Cypress.Commands.add('publishJob',
     ({languages, jobTitle, copySlug, slug, entryId, enableAfterPublish}) => {
+      cy.databaseBackup();
+
       //assert copy slug functionality
       for (const language of languages) {
         // open job page
@@ -495,6 +507,8 @@ Cypress.Commands.add('publishJob',
  */
 Cypress.Commands.add('publishJobBatch',
     ({languages, jobTitle, copySlug, slug, entryId, enableAfterPublish}) => {
+      cy.databaseBackup();
+
       cy.assertBeforePublishBatch(jobTitle, languages, copySlug, slug);
       cy.publishTranslations(jobTitle, languages);
       cy.assertAfterPublishBatch(languages, copySlug, slug, entryId,
@@ -511,12 +525,6 @@ Cypress.Commands.add('publishJobBatch',
  */
 Cypress.Commands.add('assertEntryContent',
     (languages, flow, entryId = 24) => {
-
-      const isAssertingContent = Cypress.env('CYPRESS_ASSERT_ENTRY_CONTENT');
-      if(!isAssertingContent) {
-        return
-      }
-
       const expected = (flow === 'copy_source_text') ? {
         'de': originalContent,
         'es': originalContent,
@@ -549,26 +557,20 @@ Cypress.Commands.add('assertEntryContent',
             });
 
         for (let expectedValue of expected[language]) {
-          if (flow === 'instant') {
-            cy.get(expectedValue.id, {timeout: 1000}).
-                invoke(expectedValue.functionName).
-                should('not.equal', 'This content should be changed');
-
-            cy.get(expectedValue.id, {timeout: 1000}).
-                invoke(expectedValue.functionName).
-                then(text => {
-                  expect(
-                      text.replace(/<[^>]*>/g, ''),
-                  ).to.equal(
-                      expectedValue.value.replace(/<[^>]*>/g, ''),
-                  );
-                });
-            continue;
-          }
+          //TODO: check why CraftCMS add or remove extra spaces on html elements
+          cy.get(expectedValue.id, {timeout: 1000}).
+              invoke(expectedValue.functionName).
+              should('not.equal', 'This content should be changed');
 
           cy.get(expectedValue.id, {timeout: 1000}).
               invoke(expectedValue.functionName).
-              should('equal', expectedValue.value);
+              then(text => {
+                expect(
+                    text.replace(/<[^>]*>/g, ''),
+                ).to.equal(
+                    expectedValue.value.replace(/<[^>]*>/g, ''),
+                );
+              });
         }
       }
     });

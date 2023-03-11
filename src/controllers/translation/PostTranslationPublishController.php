@@ -14,7 +14,6 @@ use craft\base\ElementInterface;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Translation;
-use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
 use yii\web\Response;
@@ -49,7 +48,7 @@ class PostTranslationPublishController extends AbstractJobController
                 $translation->targetSiteId
             );
 
-            $this->mergeCanonicalForAllDrafts($translation->jobId, $translation);
+            $this->mergeCanonicalForAllDrafts($translation);
         }
 
         $updated = TranslationRecord::updateAll(
@@ -84,17 +83,30 @@ class PostTranslationPublishController extends AbstractJobController
      * @return ElementInterface|null
      */
     private function mergeCanonicalForAllDrafts(
-        int $jobId,
         TranslationRecord $translation
     ): void {
         $translationsToUpdate = TranslationRecord::findAll(
             [
-                'jobId' => $jobId,
-                'status' => [TranslationRecord::STATUS_READY_FOR_REVIEW, TranslationRecord::STATUS_READY_TO_PUBLISH]
+                'and',
+                ['not', ['id' => $translation->id]],
+                [
+                    'jobId' => $translation->jobId,
+                    'status' => [TranslationRecord::STATUS_READY_FOR_REVIEW, TranslationRecord::STATUS_READY_TO_PUBLISH]
+                ]
             ]
         );
 
         foreach ($translationsToUpdate as $translationToUpdate) {
+            Craft::info(
+                sprintf(
+                    'Merge canonical changes for %d site %s',
+                    $translationToUpdate->translatedDraftId,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $translationToUpdate->targetSiteId
+                    )
+                )
+            );
+
             $draftElement = Craft::$app->elements->getElementById(
                 $translationToUpdate->translatedDraftId,
                 null,
@@ -105,30 +117,12 @@ class PostTranslationPublishController extends AbstractJobController
                 throw new \RuntimeException('Draft not found');
             }
 
-            Craftliltplugin::getInstance()->createDraftHandler->markFieldsAsChanged(
-                $draftElement->getCanonical()
-            );
-            $attributes = ['title'];
+            Craft::$app->getElements()->mergeCanonicalChanges($draftElement);
 
-            $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
-                ['name' => 'copy_entries_slug_from_source_to_target']
-            );
-            $isCopySlugEnabled = (bool) ($copyEntriesSlugFromSourceToTarget->value ?? false);
+            Craft::$app->getElements()->saveElement($draftElement, true, false);
 
-            if ($isCopySlugEnabled) {
-                $attributes[] = 'slug';
-            }
-            Craftliltplugin::getInstance()->createDraftHandler->upsertChangedAttributes(
-                $draftElement->getCanonical(false),
-                $attributes
-            );
-
-            Craftliltplugin::getInstance()->publishDraftsHandler->mergeCanonicalChanges(
-                $draftElement
-            );
-
-            Craft::$app->elements->invalidateCachesForElement($draftElement->getCanonical());
-            Craft::$app->elements->invalidateCachesForElement($draftElement);
+            Craft::$app->getElements()->invalidateCachesForElement($draftElement);
+            Craft::$app->getElements()->invalidateCachesForElement($draftElement->getCanonical());
         }
     }
 }
