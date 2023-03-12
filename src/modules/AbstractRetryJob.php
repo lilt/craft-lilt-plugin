@@ -14,6 +14,8 @@ use craft\queue\BaseJob;
 abstract class AbstractRetryJob extends BaseJob
 {
     /**
+     * Lilt plugin internal job id
+     *
      * @var int
      */
     public $jobId;
