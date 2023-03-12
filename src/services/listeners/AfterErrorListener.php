@@ -87,7 +87,6 @@ class AfterErrorListener implements ListenerInterface
 
         if (!$queueJob->canRetry()) {
             $jobRecord->status = Job::STATUS_FAILED;
-
             $jobRecord->save();
 
             TranslationRecord::updateAll(
