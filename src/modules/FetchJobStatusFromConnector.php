@@ -16,6 +16,7 @@ use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 
 class FetchJobStatusFromConnector extends AbstractRetryJob
 {
@@ -74,6 +75,12 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             );
 
             $jobRecord->save();
+
+            TranslationRecord::updateAll(
+                ['status' => TranslationRecord::STATUS_FAILED],
+                ['jobId' => $jobRecord->id]
+            );
+
             $this->markAsDone($queue);
             return;
         }
@@ -124,10 +131,20 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
         if ($jobRecord->isInstantFlow()) {
             #LILT_TRANSLATION_WORKFLOW_INSTANT
 
-            if ($liltJob->getStatus() === JobResponse::STATUS_FAILED) {
+            if (
+                $liltJob->getStatus() === JobResponse::STATUS_FAILED
+                || $liltJob->getStatus() === JobResponse::STATUS_CANCELED
+            ) {
                 $jobRecord->status = Job::STATUS_FAILED;
-            } elseif ($liltJob->getStatus() === JobResponse::STATUS_CANCELED) {
-                $jobRecord->status = Job::STATUS_FAILED;
+
+                TranslationRecord::updateAll(
+                    ['status' => TranslationRecord::STATUS_FAILED],
+                    ['jobId' => $jobRecord->id]
+                );
+
+                $this->markAsDone($queue);
+
+                return;
             }
 
             $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(

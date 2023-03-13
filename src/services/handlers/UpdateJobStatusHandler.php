@@ -44,6 +44,11 @@ class UpdateJobStatusHandler
 
         if (in_array(TranslationRecord::STATUS_FAILED, $statuses, true)) {
             $jobRecord->status = Job::STATUS_FAILED;
+            TranslationRecord::updateAll(
+                ['status' => TranslationRecord::STATUS_FAILED],
+                ['jobId' => $jobRecord->id]
+            );
+
             $jobRecord->save();
         } elseif (in_array(TranslationRecord::STATUS_IN_PROGRESS, $statuses, true)) {
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
@@ -61,6 +66,7 @@ class UpdateJobStatusHandler
             );
         }
 
+        Craft::$app->elements->invalidateCachesForElementType(Translation::class);
         Craft::$app->elements->invalidateCachesForElement(
             Job::findOne(['id' => $jobId])
         );

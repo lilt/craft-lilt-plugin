@@ -16,13 +16,10 @@ jobs:
           "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-single.cy.js",
-
-          #TODO: check why CI is failing but tests are green
-#          "cypress/e2e/jobs/instant/success-path-multiple.cy.js",
-#          "cypress/e2e/jobs/instant/success-path-multiple-copy-slug.cy.js",
-#          "cypress/e2e/jobs/instant/success-path-multiple-copy-slug-and-enable-after-publish.cy.js",
-#          "cypress/e2e/jobs/instant/success-path-multiple-enable-after-publish.cy.js",
-
+          "cypress/e2e/jobs/instant/success-path-multiple.cy.js",
+          "cypress/e2e/jobs/instant/success-path-multiple-copy-slug.cy.js",
+          "cypress/e2e/jobs/instant/success-path-multiple-copy-slug-and-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/instant/success-path-multiple-enable-after-publish.cy.js",
           "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing.cy.js",
           "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-copy-slug.cy.js",
           "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-copy-slug-and-enable-after-publish.cy.js",
@@ -55,14 +52,18 @@ jobs:
           make backup-db
           mkdir cypress/craft
           mkdir cypress/craft/storage
+          mkdir cypress/craft/config
           docker compose cp app:/app/storage cypress/craft/storage
-          cp happy-lager-main/composer.json cypress/craft
-          cp happy-lager-main/composer.lock cypress/craft
+          docker compose cp app:/app/config cypress/craft/config
+          docker compose cp app:/app/composer.json cypress/craft
+          docker compose cp app:/app/composer.lock cypress/craft
       - name: Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
         with:
-          name: screenshots-e2e-instant
+          name: "${{ github.job }}_${{ github.run_id }}_${{ github.workflow }}_e2e_artifacts"
           path: |
-            ./e2e/cypress
+            ./e2e/cypress/craft
+            ./e2e/cypress/screenshots
+            ./e2e/cypress/videos
             ./e2e/happy-lager-main/storage
