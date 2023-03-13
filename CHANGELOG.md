@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.5.0 - 2023-03-14
+### Added
+- Notification if the plugin is outdated
+- New queue job for manually syncing Lilt jobs
+
+### Fixed
+- Fixed an issue with drafts being overridden due to an incorrect canonical merge
+- Fixed a problem where translations were not updating to a failed status when a job fails
+
 ## 3.4.3 - 2023-02-24
 ### Fixed
 - Multilingual draft publishing issue
