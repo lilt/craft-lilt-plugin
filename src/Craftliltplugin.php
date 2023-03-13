@@ -49,6 +49,7 @@ use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
+use lilthq\craftliltplugin\services\repositories\external\PackagistRepository;
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
@@ -107,6 +108,7 @@ use yii\web\Response;
  * @property UpdateJobStatusHandler $updateJobStatusHandler
  * @property SettingsRepository $settingsRepository
  * @property UpdateTranslationsConnectorIds $updateTranslationsConnectorIds
+ * @property PackagistRepository $packagistRepository
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin
