@@ -51,6 +51,7 @@ use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
+use lilthq\craftliltplugin\services\repositories\external\PackagistRepository;
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
@@ -85,6 +86,7 @@ class ServiceInitializer
             'createDraftHandler' => CreateDraftHandler::class,
             'updateJobStatusHandler' => UpdateJobStatusHandler::class,
             'updateTranslationsConnectorIds' => UpdateTranslationsConnectorIds::class,
+            'packagistRepository' => PackagistRepository::class,
             'listenerRegister' => [
                 'class' => ListenerRegister::class,
                 'availableListeners' => CraftliltpluginParameters::LISTENERS,

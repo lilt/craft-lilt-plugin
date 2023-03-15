@@ -49,7 +49,7 @@ class CreateDraftHandler
 
         $creatorId = Craft::$app->user->getId();
         if ($creatorId === null) {
-            $creatorId = $createFrom->authorId;
+            $creatorId = $element->authorId;
         }
 
         $draft = Craft::$app->drafts->createDraft(
@@ -74,51 +74,16 @@ class CreateDraftHandler
             $targetSiteId
         );
 
-        $fieldLayout = $element->getFieldLayout();
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
-
-        foreach ($fields as $field) {
-            if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
-                $blocksQuery = $draft->getFieldValue($field->handle);
-
-                /**
-                 * @var MatrixBlock[] $blocks
-                 */
-                $blocks = $blocksQuery->all();
-
-                Craft::$app->matrix->duplicateBlocks($field, $createFrom, $draft, false, false);
-                Craft::$app->matrix->saveField($field, $draft);
-
-                foreach ($blocks as $block) {
-                    if ($block instanceof MatrixBlock) {
-                        Craft::$app->getElements()->deleteElement($block, true);
-                    }
-                }
-
-                continue;
-            }
-
-            $field->copyValue($element, $draft);
-        }
-
-        $draft->title = $element->title;
-
-        $draft->setCanonicalId(
-            $createFrom->id
-        );
-
-        $draft->duplicateOf = $element;
+        $this->copyEntryContent($element, $draft);
 
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
         );
-        $isCopySlugEnabled = (bool) ($copyEntriesSlugFromSourceToTarget->value ?? false);
+        $isCopySlugEnabled = (bool)($copyEntriesSlugFromSourceToTarget->value ?? false);
 
         if ($isCopySlugEnabled) {
             $draft->slug = $element->slug;
         }
-
-        Craft::$app->elements->saveElement($draft, true, false, false);
 
         $this->markFieldsAsChanged($draft);
 
@@ -128,6 +93,19 @@ class CreateDraftHandler
             $attributes[] = 'slug';
         }
         $this->upsertChangedAttributes($draft, $attributes);
+
+        $result = Craft::$app->elements->saveElement($draft, true, false, false);
+        if (!$result) {
+            Craft::error(
+                sprintf(
+                    "Can't save freshly createdd draft %d for site %s",
+                    $draft->id,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $targetSiteId
+                    )
+                )
+            );
+        }
 
         return $draft;
     }
@@ -148,14 +126,14 @@ class CreateDraftHandler
                 || get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
             ) {
                 /**
-                 * @var ElementQuery $matrixBlockQuery
+                 * @var ElementQuery $blockQuery
                  */
-                $matrixBlockQuery = $element->getFieldValue($field->handle);
+                $blockQuery = $element->getFieldValue($field->handle);
 
                 /**
                  * @var Element[] $blockElements
                  */
-                $blockElements = $matrixBlockQuery->all();
+                $blockElements = $blockQuery->all();
 
                 foreach ($blockElements as $blockElement) {
                     $this->markFieldsAsChanged($blockElement);
@@ -226,5 +204,46 @@ class CreateDraftHandler
                 false
             );
         }
+    }
+
+    /**
+     * @param ElementInterface $from
+     * @param ElementInterface|null $to
+     *
+     * @throws ElementNotFoundException
+     * @throws Exception
+     * @throws InvalidFieldException
+     * @throws Throwable
+     */
+    private function copyEntryContent(ElementInterface $from, ElementInterface $to): void
+    {
+        $fieldLayout = $from->getFieldLayout();
+        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+
+        foreach ($fields as $field) {
+            if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
+                $blocksQuery = $to->getFieldValue($field->handle);
+
+                /**
+                 * @var MatrixBlock[] $blocks
+                 */
+                $blocks = $blocksQuery->all();
+
+                Craft::$app->matrix->duplicateBlocks($field, $from, $to, false, false);
+                Craft::$app->matrix->saveField($field, $to);
+
+                foreach ($blocks as $block) {
+                    if ($block instanceof MatrixBlock) {
+                        Craft::$app->getElements()->deleteElement($block, true);
+                    }
+                }
+
+                continue;
+            }
+
+            $field->copyValue($from, $to);
+        }
+
+        $to->title = $from->title;
     }
 }

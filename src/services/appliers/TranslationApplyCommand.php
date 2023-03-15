@@ -7,6 +7,7 @@ namespace lilthq\craftliltplugin\services\appliers;
 use craft\base\ElementInterface;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\records\TranslationRecord;
 
 class TranslationApplyCommand
 {

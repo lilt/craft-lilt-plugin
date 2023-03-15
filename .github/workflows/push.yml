@@ -7,33 +7,6 @@ on:
     branches:
       - "*"
 jobs:
-  e2e-instant:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run automation
-        working-directory: ./e2e
-        run: |
-          make up
-          make test-instant
-  e2e-verified:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run automation
-        working-directory: ./e2e
-        run: |
-          make up
-          make test-verified
-  e2e-copy-source-text:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run automation
-        working-directory: ./e2e
-        run: |
-          make up
-          make test-copy-source-text
   tests-php-72:
     runs-on: ubuntu-latest
     steps:
@@ -79,6 +52,21 @@ jobs:
       - name: Tests
         run: make test
 
+  tests-php-80:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set the value
+        id: step_one
+        run: |
+          echo "PHP_VERSION=8.0" >> $GITHUB_ENV
+      - name: Build containers
+        run: make up
+      - name: Composer install
+        run: make composer-install
+      - name: Tests
+        run: make test
+
   tests-php-72-guzzle-6:
     runs-on: ubuntu-latest
     steps:
@@ -96,7 +84,7 @@ jobs:
       - name: Tests
         run: make test
 
-  tests-php-74-mysql-80:
+  tests-php-80-mysql-80:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

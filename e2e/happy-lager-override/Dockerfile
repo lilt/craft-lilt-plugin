@@ -4,12 +4,12 @@ COPY composer.json composer.json
 COPY composer.lock composer.lock
 COPY ./plugin-src /tmp/craft-lilt-plugin
 
-RUN composer update --no-interaction
 RUN composer install --no-interaction
-
 RUN composer require lilt/craft-lilt-plugin:^999.9.9
 
-FROM craftcms/nginx:8.0
+#RUN chmod 755 /app
+
+FROM craftcms/nginx:7.4
 
 # switch to the root user to install mysql tools
 USER root
@@ -20,4 +20,3 @@ USER www-data
 COPY --chown=www-data:www-data --from=vendor /app/vendor/ /app/vendor/
 COPY --chown=www-data:www-data . .
 COPY --chown=www-data:www-data ./plugin-src /tmp/craft-lilt-plugin
-

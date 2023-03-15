@@ -14,6 +14,7 @@ use craft\errors\ElementNotFoundException;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
@@ -130,6 +131,15 @@ class CopySourceTextHandler
         $jobRecord->liltJobId = $jobLiltId;
 
         $jobRecord->update();
-        Craft::$app->getCache()->flush();
+
+        if ($status === Job::STATUS_FAILED) {
+            TranslationRecord::updateAll(
+                ['status' => TranslationRecord::STATUS_FAILED],
+                ['jobId' => $jobRecord->id]
+            );
+        }
+
+        Craft::$app->getElements()->invalidateCachesForElementType(Job::class);
+        Craft::$app->getElements()->invalidateCachesForElementType(Translation::class);
     }
 }

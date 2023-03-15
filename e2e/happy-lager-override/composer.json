@@ -1,10 +1,9 @@
 {
   "require": {
     "php": ">=7.0.0",
-    "craftcms/cms": "3.7.61",
+    "craftcms/cms": "3.7.68",
     "vlucas/phpdotenv": "^2.4.0",
-    "craftcms/redactor": "^2.8.7",
-    "lilt/craft-lilt-plugin": "^999.9.9"
+    "craftcms/redactor": "^2.8.7"
   },
   "autoload": {
     "psr-4": {
@@ -26,7 +25,7 @@
   "config": {
     "optimize-autoloader": true,
     "platform": {
-      "php": "8.0"
+      "php": "7.4"
     },
     "allow-plugins": {
       "craftcms/plugin-installer": true,
