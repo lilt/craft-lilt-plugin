@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\handlers;
 
-use benf\neo\services\Fields;
 use Craft;
 use craft\base\Element;
 use craft\base\ElementInterface;
@@ -23,7 +22,6 @@ use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use Throwable;
-use verbb\supertable\services\SuperTableService;
 use yii\base\Exception;
 
 class CreateDraftHandler
@@ -234,7 +232,7 @@ class CreateDraftHandler
                 $neoPluginInstance = call_user_func(['benf\neo\Plugin', 'getInstance']);
 
                 // Get the Neo plugin Fields service
-                /** @var Fields $neoPluginFieldsService  */
+                /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
                 $neoPluginFieldsService = $neoPluginInstance->get('fields');
 
                 // Duplicate the blocks for the field
@@ -253,7 +251,7 @@ class CreateDraftHandler
                 $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
 
                 // Get the Super Table plugin service
-                /** @var SuperTableService $superTablePluginService */
+                /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
                 $superTablePluginService = $superTablePluginInstance->getService();
 
                 // Duplicate the blocks for the field

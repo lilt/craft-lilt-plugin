@@ -47,8 +47,6 @@ class PostTranslationPublishController extends AbstractJobController
                 $translation->translatedDraftId,
                 $translation->targetSiteId
             );
-
-            $this->mergeCanonicalForAllDrafts($translation);
         }
 
         $updated = TranslationRecord::updateAll(
@@ -75,55 +73,5 @@ class PostTranslationPublishController extends AbstractJobController
         return $this->asJson([
             'success' => $updated === 1
         ]);
-    }
-
-    /**
-     * @param $translations
-     * @param TranslationRecord $translation
-     * @return ElementInterface|null
-     */
-    private function mergeCanonicalForAllDrafts(
-        TranslationRecord $translation
-    ): void {
-        $translationsToUpdate = TranslationRecord::findAll(
-            [
-                'jobId' => $translation->jobId,
-                'status' => [TranslationRecord::STATUS_READY_FOR_REVIEW, TranslationRecord::STATUS_READY_TO_PUBLISH]
-            ]
-        );
-
-        foreach ($translationsToUpdate as $translationToUpdate) {
-            if ((int) $translation->id === (int) $translationToUpdate->id) {
-                //we don't need to update current translation
-                continue;
-            }
-
-            Craft::info(
-                sprintf(
-                    'Merge canonical changes for %d site %s',
-                    $translationToUpdate->translatedDraftId,
-                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
-                        $translationToUpdate->targetSiteId
-                    )
-                )
-            );
-
-            $draftElement = Craft::$app->elements->getElementById(
-                $translationToUpdate->translatedDraftId,
-                null,
-                $translation->targetSiteId
-            );
-
-            if (!$draftElement) {
-                throw new \RuntimeException('Draft not found');
-            }
-
-            Craft::$app->getElements()->mergeCanonicalChanges($draftElement);
-
-            Craft::$app->getElements()->saveElement($draftElement, true, false);
-
-            Craft::$app->getElements()->invalidateCachesForElement($draftElement);
-            Craft::$app->getElements()->invalidateCachesForElement($draftElement->getCanonical());
-        }
     }
 }
