@@ -87,16 +87,17 @@ class PostTranslationPublishController extends AbstractJobController
     ): void {
         $translationsToUpdate = TranslationRecord::findAll(
             [
-                'and',
-                ['not', ['id' => $translation->id]],
-                [
-                    'jobId' => $translation->jobId,
-                    'status' => [TranslationRecord::STATUS_READY_FOR_REVIEW, TranslationRecord::STATUS_READY_TO_PUBLISH]
-                ]
+                'jobId' => $translation->jobId,
+                'status' => [TranslationRecord::STATUS_READY_FOR_REVIEW, TranslationRecord::STATUS_READY_TO_PUBLISH]
             ]
         );
 
         foreach ($translationsToUpdate as $translationToUpdate) {
+            if ((int) $translation->id === (int) $translationToUpdate->id) {
+                //we don't need to update current translation
+                continue;
+            }
+
             Craft::info(
                 sprintf(
                     'Merge canonical changes for %d site %s',

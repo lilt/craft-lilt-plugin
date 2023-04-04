@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\handlers;
 
+use benf\neo\services\Fields;
 use Craft;
 use craft\base\Element;
 use craft\base\ElementInterface;
@@ -22,6 +23,7 @@ use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use Throwable;
+use verbb\supertable\services\SuperTableService;
 use yii\base\Exception;
 
 class CreateDraftHandler
@@ -221,6 +223,45 @@ class CreateDraftHandler
         $fields = $fieldLayout ? $fieldLayout->getFields() : [];
 
         foreach ($fields as $field) {
+            // Check if the field is of Neo type and the required classes and methods are available
+            if (
+                get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
+                && class_exists('benf\neo\Plugin')
+                && method_exists('benf\neo\Plugin', 'getInstance')
+            ) {
+                // Get the Neo plugin instance
+                /** @var \benf\neo\Plugin $neoPluginInstance */
+                $neoPluginInstance = call_user_func(['benf\neo\Plugin', 'getInstance']);
+
+                // Get the Neo plugin Fields service
+                /** @var Fields $neoPluginFieldsService  */
+                $neoPluginFieldsService = $neoPluginInstance->get('fields');
+
+                // Duplicate the blocks for the field
+                $neoPluginFieldsService->duplicateBlocks($field, $from, $to);
+
+                continue;
+            }
+
+            // Check if the field is of Super Table type and the required classes and methods are available
+            if (
+                get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
+                && class_exists('verbb\supertable\SuperTable')
+                && method_exists('verbb\supertable\SuperTable', 'getInstance')
+            ) {
+                // Get the Super Table plugin instance
+                $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
+
+                // Get the Super Table plugin service
+                /** @var SuperTableService $superTablePluginService */
+                $superTablePluginService = $superTablePluginInstance->getService();
+
+                // Duplicate the blocks for the field
+                $superTablePluginService->duplicateBlocks($field, $from, $to);
+
+                continue;
+            }
+
             if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
                 $blocksQuery = $to->getFieldValue($field->handle);
 
