@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## 3.5.1 - 2023-04-04
 ### Fixed
 - Query for fetching translations by status and id
-- Duplication of Neo and Super Table fields content
+- Duplication of Neo fields content
 
 ## 3.5.0 - 2023-03-14
 ### Added
