@@ -241,25 +241,24 @@ class CreateDraftHandler
                 continue;
             }
 
-//            // TODO: enable once ENG-7315 is done
-//            // Check if the field is of Super Table type and the required classes and methods are available
-//            if (
-//                get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
-//                && class_exists('verbb\supertable\SuperTable')
-//                && method_exists('verbb\supertable\SuperTable', 'getInstance')
-//            ) {
-//                // Get the Super Table plugin instance
-//                $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
-//
-//                // Get the Super Table plugin service
-//                /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
-//                $superTablePluginService = $superTablePluginInstance->getService();
-//
-//                // Duplicate the blocks for the field
-//                $superTablePluginService->duplicateBlocks($field, $from, $to);
-//
-//                continue;
-//            }
+            // Check if the field is of Super Table type and the required classes and methods are available
+            if (
+                get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
+                && class_exists('verbb\supertable\SuperTable')
+                && method_exists('verbb\supertable\SuperTable', 'getInstance')
+            ) {
+                // Get the Super Table plugin instance
+                $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
+
+                // Get the Super Table plugin service
+                /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
+                $superTablePluginService = $superTablePluginInstance->getService();
+
+                // Duplicate the blocks for the field
+                $superTablePluginService->duplicateBlocks($field, $from, $to);
+
+                continue;
+            }
 
             if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
                 $blocksQuery = $to->getFieldValue($field->handle);
