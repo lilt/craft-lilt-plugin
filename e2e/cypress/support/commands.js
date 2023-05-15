@@ -85,6 +85,7 @@ Cypress.Commands.add('openJob', (title) => {
  */
 Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
   const apiUrl = Cypress.env('API_URL');
+  const apiKey = Cypress.env('API_KEY');
   const appUrl = Cypress.env('APP_URL');
 
   const options = {
@@ -140,8 +141,13 @@ Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
 
   cy.visit(`${appUrl}/admin/craft-lilt-plugin/settings`);
 
-  cy.get('#connectorApiUrl').clear().type(apiUrl);
-  cy.get('#connectorApiKey').clear().type('this_is_apy_key');
+  if (apiUrl) {
+    cy.get('#connectorApiUrl').clear().type(apiUrl);
+  }
+
+  if(apiKey) {
+    cy.get('#connectorApiKey').clear().type('this_is_apy_key');
+  }
 
   cy.get('#content .btn.submit').click();
 
@@ -292,15 +298,15 @@ Cypress.Commands.add('resetEntryContent', (entryId, languages) => {
 
     cy.get('.redactor-in').then(els => {
       [...els].forEach(el => {
-        cy.wrap(el).clear();
-        cy.wrap(el).type('This content should be changed');
+        cy.wrap(el).clear({force: true});
+        cy.wrap(el).type('This content should be changed', {force: true});
       });
     });
 
     cy.get('#fields .input input[type="text"]').then(els => {
       [...els].forEach(el => {
-        cy.wrap(el).clear();
-        cy.wrap(el).type('This content should be changed');
+        cy.wrap(el).clear({force: true});
+        cy.wrap(el).type('This content should be changed', {force: true});
       });
     });
 
@@ -556,22 +562,40 @@ Cypress.Commands.add('assertEntryContent',
               capture: 'fullPage',
             });
 
-        for (let expectedValue of expected[language]) {
-          //TODO: check why CraftCMS add or remove extra spaces on html elements
-          cy.get(expectedValue.id, {timeout: 1000}).
-              invoke(expectedValue.functionName).
-              should('not.equal', 'This content should be changed');
+        let values = [];
+        cy.get('input, textarea').each(($input) => {
+          const value = $input.val(); // Assuming the input uses jQuery syntax
 
-          cy.get(expectedValue.id, {timeout: 1000}).
-              invoke(expectedValue.functionName).
-              then(text => {
-                expect(
-                    text.replace(/<[^>]*>/g, ''),
-                ).to.equal(
-                    expectedValue.value.replace(/<[^>]*>/g, ''),
-                );
-              });
-        }
+          if (value != '') {
+            values.push(value.replace(/<[^>]*>/g, ''));
+          }
+        }).then(() => {
+          for (let expectedValue of expected[language]) {
+            if (expectedValue.type === 'nested') {
+              expect(values.indexOf(expectedValue.value.replace(/<[^>]*>/g, '')), `Asserting that page has input or textarea with content: "${expectedValue.value}"`).
+                  to.
+                  be.
+                  not.
+                  equal(-1);
+
+              continue;
+            }
+            //TODO: check why CraftCMS add or remove extra spaces on html elements
+            cy.get(expectedValue.id, {timeout: 1000}).
+                invoke(expectedValue.functionName).
+                should('not.equal', 'This content should be changed');
+
+            cy.get(expectedValue.id, {timeout: 1000}).
+                invoke(expectedValue.functionName).
+                then(text => {
+                  expect(
+                      text.replace(/<[^>]*>/g, ''),
+                  ).to.equal(
+                      expectedValue.value.replace(/<[^>]*>/g, ''),
+                  );
+                });
+          }
+        });
       }
     });
 

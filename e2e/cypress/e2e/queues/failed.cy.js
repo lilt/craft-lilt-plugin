@@ -71,9 +71,7 @@ describe(
             invoke('attr', 'data-status').
             should('equal', 'failed');
 
-        cy.get('.lilt-job-activity-log').invoke('text').should('contain', 'Job failed after 0 attempt(s). Error message: [500] Server error: `POST http://mockserver:1080/jobs` resulted in a `500 Internal Server Error` response')
-        cy.get('.lilt-job-activity-log').invoke('text').should('contain', 'Job failed after 1 attempt(s). Error message: [500] Server error: `POST http://mockserver:1080/jobs` resulted in a `500 Internal Server Error` response')
-        cy.get('.lilt-job-activity-log').invoke('text').should('contain', 'Job failed after 2 attempt(s). Error message: [500] Server error: `POST http://mockserver:1080/jobs` resulted in a `500 Internal Server Error` response')
-        cy.get('.lilt-job-activity-log').invoke('text').should('contain', 'Job failed after 3 attempt(s). Error message: [500] Server error: `POST http://mockserver:1080/jobs` resulted in a `500 Internal Server Error` response')
+        cy.get('.lilt-job-activity-log').invoke('text').should('contain', 'Unexpected error: [500] Server error: `POST http://mockserver:1080/jobs` resulted in a `500 Internal Server Error` response')
+        cy.get('.lilt-job-activity-log').invoke('text').should('contain', 'Job failed after 3 attempt(s)')
       });
     });
