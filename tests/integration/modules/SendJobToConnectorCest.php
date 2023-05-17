@@ -58,8 +58,6 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJob(IntegrationTester $I, $scenario): void
     {
-        $scenario->skip('Neo field is not getting updated and missing in source content');
-
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
@@ -182,8 +180,6 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
 
     public function testSendCopySourceFlow(IntegrationTester $I, $scenario): void
     {
-        $scenario->skip('Neo field is not getting updated and missing in source content');
-
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
@@ -300,8 +296,6 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I, $scenario): void
     {
-        $scenario->skip('Neo field is not getting updated and missing in source content');
-
         $element = Entry::find()
             ->where(['authorId' => 1])
             ->orderBy(['id' => SORT_DESC])

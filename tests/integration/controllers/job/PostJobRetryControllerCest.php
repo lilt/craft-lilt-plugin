@@ -45,8 +45,6 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
      */
     public function testRetrySuccess(IntegrationTester $I, $scenario): void
     {
-        $scenario->skip('Neo field is not getting updated and missing in source content');
-
         $I->amLoggedInAs(
             Craft::$app->getUsers()->getUserById(1)
         );
