@@ -217,6 +217,9 @@ class CreateDraftHandler
      */
     private function copyEntryContent(ElementInterface $from, ElementInterface $to): void
     {
+        // copy title
+        $to->title = $from->title;
+
         $fieldLayout = $from->getFieldLayout();
         $fields = $fieldLayout ? $fieldLayout->getFields() : [];
 
@@ -235,32 +238,46 @@ class CreateDraftHandler
                 /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
                 $neoPluginFieldsService = $neoPluginInstance->get('fields');
 
+                // Clear current neo field value
+                $neoField = $to->getFieldValue($field->handle);
+                foreach ($neoField as $block) {
+                    Craft::$app->getElements()->deleteElement($block);
+                }
+                Craft::$app->getElements()->saveElement($to);
+
                 // Duplicate the blocks for the field
                 $neoPluginFieldsService->duplicateBlocks($field, $from, $to);
 
                 continue;
             }
 
-//            // TODO: enable once ENG-7315 is done
-//            // Check if the field is of Super Table type and the required classes and methods are available
-//            if (
-//                get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
-//                && class_exists('verbb\supertable\SuperTable')
-//                && method_exists('verbb\supertable\SuperTable', 'getInstance')
-//            ) {
-//                // Get the Super Table plugin instance
-//                $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
-//
-//                // Get the Super Table plugin service
-//                /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
-//                $superTablePluginService = $superTablePluginInstance->getService();
-//
-//                // Duplicate the blocks for the field
-//                $superTablePluginService->duplicateBlocks($field, $from, $to);
-//
-//                continue;
-//            }
+            // Check if the field is of Super Table type and the required classes and methods are available
+            if (
+                get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
+                && class_exists('verbb\supertable\SuperTable')
+                && method_exists('verbb\supertable\SuperTable', 'getInstance')
+            ) {
+                // Get the Super Table plugin instance
+                $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
 
+                // Get the Super Table plugin service
+                /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
+                $superTablePluginService = $superTablePluginInstance->getService();
+
+                // Clear current Supertable field value
+                $supertableField = $to->getFieldValue($field->handle);
+                foreach ($supertableField as $block) {
+                    Craft::$app->getElements()->deleteElement($block);
+                }
+                Craft::$app->getElements()->saveElement($to);
+
+                // Duplicate the blocks for the field
+                $superTablePluginService->duplicateBlocks($field, $from, $to);
+
+                continue;
+            }
+
+            // Check if the field is of Matrix type
             if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
                 $blocksQuery = $to->getFieldValue($field->handle);
 
@@ -283,7 +300,5 @@ class CreateDraftHandler
 
             $field->copyValue($from, $to);
         }
-
-        $to->title = $from->title;
     }
 }
