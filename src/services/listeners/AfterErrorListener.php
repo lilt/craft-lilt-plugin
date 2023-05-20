@@ -84,8 +84,19 @@ class AfterErrorListener implements ListenerInterface
             Craft::$app->elements->invalidateCachesForElementType(Job::class);
 
             Craft::$app->queue->release(
-                (string) $event->id
+                (string)$event->id
             );
+
+            if (property_exists($queueJob, 'attempt')) {
+                Craftliltplugin::getInstance()->jobLogsRepository->create(
+                    $jobRecord->id,
+                    Craft::$app->getUser()->getId(),
+                    sprintf(
+                        'Job failed after %d attempt(s)',
+                        $queueJob->attempt
+                    )
+                );
+            }
 
             Craftliltplugin::getInstance()->jobLogsRepository->create(
                 $jobRecord->id,
@@ -104,7 +115,7 @@ class AfterErrorListener implements ListenerInterface
         }
 
         Craft::$app->queue->release(
-            (string) $event->id
+            (string)$event->id
         );
 
         ++$queueJob->attempt;

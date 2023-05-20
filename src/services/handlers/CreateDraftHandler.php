@@ -217,6 +217,9 @@ class CreateDraftHandler
      */
     private function copyEntryContent(ElementInterface $from, ElementInterface $to): void
     {
+        // copy title
+        $to->title = $from->title;
+
         $fieldLayout = $from->getFieldLayout();
         $fields = $fieldLayout ? $fieldLayout->getFields() : [];
 
@@ -234,6 +237,13 @@ class CreateDraftHandler
                 // Get the Neo plugin Fields service
                 /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
                 $neoPluginFieldsService = $neoPluginInstance->get('fields');
+
+                // Clear current neo field value
+                $neoField = $to->getFieldValue($field->handle);
+                foreach ($neoField as $block) {
+                    Craft::$app->getElements()->deleteElement($block);
+                }
+                Craft::$app->getElements()->saveElement($to);
 
                 // Duplicate the blocks for the field
                 $neoPluginFieldsService->duplicateBlocks($field, $from, $to);
@@ -254,12 +264,20 @@ class CreateDraftHandler
                 /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
                 $superTablePluginService = $superTablePluginInstance->getService();
 
+                // Clear current Supertable field value
+                $supertableField = $to->getFieldValue($field->handle);
+                foreach ($supertableField as $block) {
+                    Craft::$app->getElements()->deleteElement($block);
+                }
+                Craft::$app->getElements()->saveElement($to);
+
                 // Duplicate the blocks for the field
                 $superTablePluginService->duplicateBlocks($field, $from, $to);
 
                 continue;
             }
 
+            // Check if the field is of Matrix type
             if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
                 $blocksQuery = $to->getFieldValue($field->handle);
 
@@ -282,7 +300,5 @@ class CreateDraftHandler
 
             $field->copyValue($from, $to);
         }
-
-        $to->title = $from->title;
     }
 }

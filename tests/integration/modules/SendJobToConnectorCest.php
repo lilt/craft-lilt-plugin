@@ -56,7 +56,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      * @throws ModuleException
      * @throws InvalidConfigException
      */
-    public function testCreateJob(IntegrationTester $I): void
+    public function testCreateJob(IntegrationTester $I, $scenario): void
     {
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
@@ -178,7 +178,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
         $I->assertJobInQueue($expectQueueJob);
     }
 
-    public function testSendCopySourceFlow(IntegrationTester $I): void
+    public function testSendCopySourceFlow(IntegrationTester $I, $scenario): void
     {
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
@@ -294,7 +294,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
     /**
      * @throws ModuleException
      */
-    public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I): void
+    public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I, $scenario): void
     {
         $element = Entry::find()
             ->where(['authorId' => 1])

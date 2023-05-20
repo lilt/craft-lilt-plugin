@@ -33,6 +33,16 @@ class ElementQueryContentProvider extends AbstractContentProvider
          */
         $blockElements = $matrixBlockQuery->all();
 
+        //Fallback for neo block elements without a created structure
+        if (count($blockElements) === 0 && get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD) {
+            /** @var \benf\neo\elements\db\BlockQuery $matrixBlockQuery */
+            $matrixBlockQuery->withStructure = false;
+            $matrixBlockQuery->orderBy = '';
+
+            $blockElements = $matrixBlockQuery->orderBy([])->all();
+        }
+
+
         foreach ($blockElements as $blockElement) {
             $blockId = $blockElement->getId();
 

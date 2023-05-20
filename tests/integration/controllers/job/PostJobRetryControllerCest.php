@@ -43,7 +43,7 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
      * @throws InvalidFieldException
      * @throws ModuleException
      */
-    public function testRetrySuccess(IntegrationTester $I): void
+    public function testRetrySuccess(IntegrationTester $I, $scenario): void
     {
         $I->amLoggedInAs(
             Craft::$app->getUsers()->getUserById(1)
