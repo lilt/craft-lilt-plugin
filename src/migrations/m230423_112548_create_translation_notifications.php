@@ -25,8 +25,8 @@ class m230423_112548_create_translation_notifications extends Migration
 
         $this->createTable(CraftliltpluginParameters::TRANSLATION_NOTIFICATIONS_TABLE_NAME, [
             'id' => $this->primaryKey()->unsigned(),
-            'jobId' => $this->integer()->notNull(),
-            'translationId' => $this->integer()->notNull(),
+            'jobId' => $this->integer()->unsigned()->notNull(),
+            'translationId' => $this->integer()->unsigned()->notNull(),
             'reason' => $this->string(64),
             'level' => $this->string(64),
             'fieldId' => $this->integer(),
@@ -44,6 +44,16 @@ class m230423_112548_create_translation_notifications extends Migration
             CraftliltpluginParameters::TRANSLATION_NOTIFICATIONS_TABLE_NAME,
             ['jobId', 'level'],
             false
+        );
+
+        $this->addForeignKey(
+            null,
+            CraftliltpluginParameters::TRANSLATION_NOTIFICATIONS_TABLE_NAME,
+            ['jobId'],
+            CraftliltpluginParameters::JOB_TABLE_NAME,
+            ['id'],
+            'CASCADE',
+            null
         );
     }
 
