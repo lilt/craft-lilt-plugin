@@ -100,7 +100,7 @@ class ElementTranslatableContentApplier
                 $command
             );
 
-            if (!$result->isApplied()) {
+            if (!$result->isApplied() && $result->isCharLimitReached()) {
                 $translationApplyCommand->getTranslationRecord()->status = TranslationRecord::STATUS_NEEDS_ATTENTION;
                 $translationApplyCommand->getTranslationRecord()->save();
             }

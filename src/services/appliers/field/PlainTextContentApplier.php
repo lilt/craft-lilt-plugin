@@ -55,7 +55,7 @@ class PlainTextContentApplier extends AbstractContentApplier implements ApplierI
 
                 $translationNotification->save();
 
-                return ApplyContentResult::fail();
+                return ApplyContentResult::charLimit();
             }
         }
 
