@@ -14,6 +14,7 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationNotificationsRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\appliers\TranslationApplyCommand;
 use Throwable;
@@ -53,7 +54,7 @@ class SyncJobFromLiltConnectorHandler
             ->translationRepository
             ->findUnprocessedByJobIdMapped($job->id);
 
-        if (!empty($unprocessedTranslations)) {
+        if (!empty($unprocessedTranslations) || true) {
             foreach ($translations->getResults() as $translationDto) {
                 if (
                     $translationDto->getStatus() !== TranslationResponse::STATUS_EXPORT_COMPLETE
@@ -116,25 +117,13 @@ class SyncJobFromLiltConnectorHandler
                 continue;
             }
 
-            $translationApplyCommand = new TranslationApplyCommand(
-                $element,
-                $job,
-                $elementContent,
-                $targetLanguage
-            );
-
-            $draft = Craftliltplugin::getInstance()->elementTranslatableContentApplier->apply(
-                $translationApplyCommand
-            );
-
-            //TODO: move to repository or so
             $translationRecord = TranslationRecord::findOne([
                 'targetSiteId' => Craftliltplugin::getInstance()
                     ->languageMapper
                     ->getSiteIdByLanguage(
                         trim($targetLanguage, '-')
                     ),
-                'elementId' => $draft->getCanonicalId() ?? $elementId,
+                'elementId' => $element->getCanonicalId() ?? $elementId,
                 'jobId' => $job->getId()
             ]);
 
@@ -148,8 +137,26 @@ class SyncJobFromLiltConnectorHandler
                 );
             }
 
+            TranslationNotificationsRecord::deleteAll(['translationId' => $translationRecord->id]);
+
+            $translationApplyCommand = new TranslationApplyCommand(
+                $element,
+                $job,
+                $elementContent,
+                $targetLanguage,
+                $translationRecord
+            );
+
+            $draft = Craftliltplugin::getInstance()->elementTranslatableContentApplier->apply(
+                $translationApplyCommand
+            );
+
             $translationRecord->translatedDraftId = $draft->getId();
-            $translationRecord->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
+
+            if ($translationRecord->status !== TranslationRecord::STATUS_NEEDS_ATTENTION) {
+                $translationRecord->status = TranslationRecord::STATUS_READY_FOR_REVIEW;
+            }
+
             $translationRecord->targetContent = [$elementId => $elementContent];
             $translationRecord->connectorTranslationId = $translationId;
             $translationRecord->lastDelivery = new DateTime();

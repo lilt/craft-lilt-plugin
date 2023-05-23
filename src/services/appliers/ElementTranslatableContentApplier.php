@@ -15,8 +15,10 @@ use craft\errors\InvalidFieldException;
 use craft\services\Drafts as DraftRepository;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
+use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\exceptions\DraftNotFoundException;
 use lilthq\craftliltplugin\records\I18NRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\appliers\field\ApplyContentCommand;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
 use Throwable;
@@ -89,7 +91,9 @@ class ElementTranslatableContentApplier
                 $fieldData,
                 $content,
                 $translationApplyCommand->getSourceSiteId(),
-                $translationApplyCommand->getTargetSiteId()
+                $translationApplyCommand->getTargetSiteId(),
+                $translationApplyCommand->getJob(),
+                $translationApplyCommand->getTranslationRecord()
             );
 
             $result = $this->fieldContentApplier->apply(
@@ -97,7 +101,8 @@ class ElementTranslatableContentApplier
             );
 
             if (!$result->isApplied()) {
-                //TODO: is it possible?
+                $translationApplyCommand->getTranslationRecord()->status = TranslationRecord::STATUS_NEEDS_ATTENTION;
+                $translationApplyCommand->getTranslationRecord()->save();
             }
 
             if ($result->isApplied() && $result->getFieldValue()) {

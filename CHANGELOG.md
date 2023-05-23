@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.6.0 - 2023-05-18
+### Added 
+- Introduced new job and translation status "needs attention"
+- Added warning message for translation jobs exceeding field limit with
+- Included warning icon for each translation exceeding field limit with
+
 ## 3.5.3 - 2023-05-18
 ### Fixed 
 - Added fallback for block elements without a created structure to fix content provider

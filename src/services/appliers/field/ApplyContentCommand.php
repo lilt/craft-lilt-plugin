@@ -6,6 +6,8 @@ namespace lilthq\craftliltplugin\services\appliers\field;
 
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
+use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\records\TranslationRecord;
 
 class ApplyContentCommand
 {
@@ -34,18 +36,32 @@ class ApplyContentCommand
      */
     private $targetSiteId;
 
+    /**
+     * @var Job
+     */
+    private $job;
+
+    /**
+     * @var TranslationRecord
+     */
+    private $translationRecord;
+
     public function __construct(
         ElementInterface $element,
         FieldInterface $field,
         array $content,
         int $sourceSiteId,
-        int $targetSiteId
+        int $targetSiteId,
+        Job $job,
+        TranslationRecord $translationRecord
     ) {
         $this->element = $element;
         $this->field = $field;
         $this->content = $content;
         $this->sourceSiteId = $sourceSiteId;
         $this->targetSiteId = $targetSiteId;
+        $this->job = $job;
+        $this->translationRecord = $translationRecord;
     }
 
     /**
@@ -96,5 +112,21 @@ class ApplyContentCommand
     public function getTargetSiteId(): int
     {
         return $this->targetSiteId;
+    }
+
+    /**
+     * @return Job
+     */
+    public function getJob(): Job
+    {
+        return $this->job;
+    }
+
+    /**
+     * @return TranslationRecord
+     */
+    public function getTranslationRecord(): TranslationRecord
+    {
+        return $this->translationRecord;
     }
 }

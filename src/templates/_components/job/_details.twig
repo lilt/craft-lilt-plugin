@@ -16,7 +16,7 @@
 {% if notices ?? false %}
     <div class="meta read-only warning">
         {% for notice in notices %}
-            <p>{{ notice }}</p>
+            <p>{{ notice|raw }}</p>
             {% if not loop.last %}
                 <hr>{% endif %}
         {% endfor %}

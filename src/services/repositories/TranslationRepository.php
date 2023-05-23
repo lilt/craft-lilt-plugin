@@ -167,6 +167,10 @@ class TranslationRepository
         return TranslationRecord::findOne(['translatedDraftId' => $translatedDraftId]);
     }
 
+    /**
+     * @param int $jobId
+     * @return TranslationRecord[][]
+     */
     public function findUnprocessedByJobIdMapped(int $jobId): array
     {
         $result = TranslationRecord::findAll(

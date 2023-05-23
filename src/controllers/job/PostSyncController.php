@@ -17,6 +17,7 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\ManualJobSync;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationNotificationsRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use yii\web\Response;
 
@@ -54,7 +55,7 @@ class PostSyncController extends Controller
                 continue;
             }
 
-            $selectedJobIds[] = (int) $job->id;
+            $selectedJobIds[] = (int)$job->id;
         }
 
         sort($selectedJobIds);
@@ -68,6 +69,8 @@ class PostSyncController extends Controller
             ManualJobSync::PRIORITY,
             ManualJobSync::DELAY_IN_SECONDS
         );
+
+        TranslationNotificationsRecord::deleteAll(['jobId' => $selectedJobIds]);
 
         TranslationRecord::updateAll(
             [

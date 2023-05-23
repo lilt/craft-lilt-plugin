@@ -478,8 +478,48 @@ $(document).ready(function() {
                 selectable: true,
                 multiSelect: true,
                 checkboxMode: true,
-
                 onUpdateElements: function() {
+
+                  const elements = CraftliltPlugin.elementIndexTranslation.view.getAllElements().get();
+
+                  console.log(elements)
+                  elements.forEach((element) => {
+
+                    const title = jQuery(element).find('th');
+                    const titleDiv = jQuery(element).find('th div');
+
+                    const hasNotification = (titleDiv.length > 0 &&
+                        titleDiv.data('has-notifications') === 1);
+
+                    if(hasNotification) {
+
+                      const notifications = titleDiv.data('notifications');
+                      console.log(notifications)
+
+                        const span = jQuery(
+                            '<span class="info warning lilt-warning-span-centred translation-need-attention"></span>');
+
+                      const reasons = notifications.map(notification => notification.reason);
+                      const joinedReasons = reasons.join('<hr />');
+
+                        span.on('click', function() {
+                          new Garnish.HUD(span,
+                              joinedReasons,
+                              {
+                                orientations: [
+                                  'top',
+                                  'bottom',
+                                  'right',
+                                  'left'],
+                              });
+                        });
+
+                        title.append(span);
+                    }
+                  });
+
+
+
 
                   if (CraftliltPlugin.elementIndexTranslation !== undefined &&
                       CraftliltPlugin.elementIndexTranslation.view !==
