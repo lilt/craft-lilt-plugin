@@ -518,9 +518,6 @@ $(document).ready(function() {
                     }
                   });
 
-
-
-
                   if (CraftliltPlugin.elementIndexTranslation !== undefined &&
                       CraftliltPlugin.elementIndexTranslation.view !==
                       undefined) {

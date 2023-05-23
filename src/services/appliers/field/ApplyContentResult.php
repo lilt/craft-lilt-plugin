@@ -24,8 +24,12 @@ class ApplyContentResult
     public const REASON_UNKNOWN = "unknown";
     public const REASON_CHAR_LIMIT = "char_limit";
 
-    public function __construct(bool $applied, array $i18nRecords = [], $fieldValue = null, string $reason = self::REASON_UNKNOWN)
-    {
+    public function __construct(
+        bool $applied,
+        array $i18nRecords = [],
+        $fieldValue = null,
+        string $reason = self::REASON_UNKNOWN
+    ) {
         $this->applied = $applied;
         $this->reason = $reason;
         $this->i18nRecords = $i18nRecords;
