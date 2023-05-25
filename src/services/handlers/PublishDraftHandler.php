@@ -44,8 +44,7 @@ class PublishDraftHandler
         // Merge canonical changes for supertable fields in current draft before publishing
         if (
             class_exists('verbb\supertable\SuperTable')
-            && method_exists('verbb\supertable\SuperTable', 'getService')
-            && method_exists('verbb\supertable\SuperTable', 'getInstance')
+            || class_exists('benf\neo\Plugin')
         ) {
             $translation = TranslationRecord::findOne(['translatedDraftId' => $draftId]);
             $translations = TranslationRecord::findAll(
@@ -69,6 +68,8 @@ class PublishDraftHandler
                     // Check if the field is of Super Table type and the required classes and methods are available
                     if (
                         get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
+                        && method_exists('verbb\supertable\SuperTable', 'getService')
+                        && method_exists('verbb\supertable\SuperTable', 'getInstance')
                     ) {
                         // Get the Super Table plugin instance
                         $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
@@ -83,6 +84,38 @@ class PublishDraftHandler
                             $draftElementLanguageToUpdate->getCanonical(),
                             $draftElementLanguageToUpdate
                         );
+
+                        continue;
+                    }
+
+                    if (
+                        get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
+                        && class_exists('benf\neo\Plugin')
+                        && method_exists('benf\neo\Plugin', 'getInstance')
+                    ) {
+                        // Get the Neo plugin instance
+                        /** @var \benf\neo\Plugin $neoPluginInstance */
+                        $neoPluginInstance = call_user_func(['benf\neo\Plugin', 'getInstance']);
+
+                        // Get the Neo plugin Fields service
+                        /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
+                        $neoPluginFieldsService = $neoPluginInstance->get('fields');
+
+                        // Clear current neo field value
+                        $neoField = $draftElementLanguageToUpdate->getFieldValue($field->handle);
+                        foreach ($neoField as $block) {
+                            Craft::$app->getElements()->deleteElement($block);
+                        }
+                        Craft::$app->getElements()->saveElement($draftElementLanguageToUpdate);
+
+                        // Duplicate the blocks for the field
+                        $neoPluginFieldsService->duplicateBlocks(
+                            $field,
+                            $draftElementLanguageToUpdate->getCanonical(),
+                            $draftElementLanguageToUpdate
+                        );
+
+                        continue;
                     }
                 }
             }
