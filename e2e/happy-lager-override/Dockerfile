@@ -6,6 +6,7 @@ COPY ./plugin-src /tmp/craft-lilt-plugin
 
 RUN composer install --no-interaction
 RUN composer require lilt/craft-lilt-plugin:^999.9.9
+RUN composer require yiisoft/yii2:"<= 2.0.47"
 
 #RUN chmod 755 /app
 FROM craftcms/nginx:7.4
