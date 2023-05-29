@@ -23,7 +23,7 @@ class PlainTextContentApplier extends AbstractContentApplier implements ApplierI
         if (isset($fieldSettings['charLimit'])) {
             $maxLength = (int)$fieldSettings['charLimit'];
 
-            if ($maxLength < strlen($content[$fieldKey])) {
+            if ($maxLength < mb_strlen($content[$fieldKey])) {
                 $translationNotification = new TranslationNotificationsRecord();
 
                 $translationNotification->translationId = $command->getTranslationRecord()->id;
@@ -60,7 +60,6 @@ class PlainTextContentApplier extends AbstractContentApplier implements ApplierI
         }
 
         $command->getElement()->setFieldValue($command->getField()->handle, $content[$fieldKey]);
-
         $this->forceSave($command);
 
         return ApplyContentResult::applied([], $command->getElement()->getFieldValue($command->getField()->handle));
