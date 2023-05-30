@@ -5,7 +5,8 @@
 {% set isDraftJob = constant('STATUS_DRAFT', element) is same as element.getStatus() %}
 {% set isNewJob = constant('STATUS_NEW', element) is same as element.getStatus() %}
 {% set isFailed = constant('STATUS_FAILED', element) is same as element.getStatus() %}
-{% set isJobReadyForReview = constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() or constant('STATUS_READY_TO_PUBLISH', element) is same as element.getStatus() or constant('STATUS_COMPLETE', element) is same as element.getStatus() or constant('STATUS_FAILED', element) is same as element.getStatus() %}
+{% set isJobReadyForReview = constant('STATUS_NEEDS_ATTENTION', element) is same as element.getStatus() or constant('STATUS_READY_FOR_REVIEW', element) is same as element.getStatus() or constant('STATUS_READY_TO_PUBLISH', element) is same as element.getStatus() or constant('STATUS_COMPLETE', element) is same as element.getStatus() or constant('STATUS_FAILED', element) is same as element.getStatus() %}
+{% set isJobNeedsAttention = constant('STATUS_NEEDS_ATTENTION', element) is same as element.getStatus() or constant('STATUS_FAILED', element) is same as element.getStatus() %}
 
 {% set title = isJobInProgress ? "Job edit" : "Job overview" %}
 
@@ -30,16 +31,16 @@
 } %}
 
 {% if not isDraftJob and not isNewJob %}
-{% set tabs = {
-    translationsList: {
-        label: 'Translations'|t('app'),
-        url: "#translations-list",
-    },
-    overview: {
-        label: 'Submited job'|t('app'),
-        url: "#overview",
-    },
-} %}
+    {% set tabs = {
+        translationsList: {
+            label: 'Translations'|t('app'),
+            url: "#translations-list",
+        },
+        overview: {
+            label: 'Submited job'|t('app'),
+            url: "#overview",
+        },
+    } %}
 {% endif %}
 
 
@@ -122,6 +123,13 @@
         </div>
     {% endif %}
 
+    {% if isJobNeedsAttention %}
+        <div>
+            <a id="lilt-job-edit-sync-button" data-job-id="{{ element.id }}" class="btn big submit icon btn-create-new-job"
+               data-icon="refresh">{{ 'Sync job'|t }}</a>
+        </div>
+    {% endif %}
+
     {# TODO: create draft from published versions #}
     {% if fullPageForm and not isJobReadyForReview %}
         <div class="btngroup">
@@ -154,7 +162,7 @@
 
 {% block content %}
     {% if not isDraftJob and not isNewJob %}
-    {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
+        {% include 'craft-lilt-plugin/_components/translation/_elements.twig' %}
     {% else %}
         {% include 'craft-lilt-plugin/_components/job/_form.twig' %}
     {% endif %}

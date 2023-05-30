@@ -18,6 +18,7 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\TranslationQuery;
 use lilthq\craftliltplugin\models\TranslationModelTrait;
+use lilthq\craftliltplugin\records\TranslationNotificationsRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 /**
@@ -107,6 +108,7 @@ class Translation extends Element
             TranslationRecord::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
             TranslationRecord::STATUS_PUBLISHED => ['label' => 'Published', 'color' => 'green'],
             TranslationRecord::STATUS_FAILED => ['label' => 'Failed', 'color' => 'red'],
+            TranslationRecord::STATUS_NEEDS_ATTENTION => ['label' => 'Needs Attention', 'color' => 'red'],
         ];
     }
 
@@ -315,7 +317,25 @@ class Translation extends Element
 
     public function getHtmlAttributes(string $context): array
     {
+        $notifications = [];
+
+        if ($this->status === TranslationRecord::STATUS_NEEDS_ATTENTION) {
+            $notifications = TranslationNotificationsRecord::findAll(['translationId' => $this->id]);
+
+            $notifications = array_map(function (TranslationNotificationsRecord $translationNotificationsRecord) {
+                return [
+                    'reason' => $translationNotificationsRecord->getReason(),
+                    'fieldId' => $translationNotificationsRecord->fieldId,
+                    'sourceContent' => $translationNotificationsRecord->sourceContent,
+                    'targetContent' => $translationNotificationsRecord->targetContent,
+                ];
+            }, $notifications);
+        }
+
+        $notificationsString = json_encode($notifications);
         $attributes = [
+            'data-notifications' => $notificationsString,
+            'data-has-notifications' => !empty($notifications),
             'data-target-site-language' => $this->targetSiteLanguage,
             'data-target-site-id' => $this->targetSiteId,
             'data-translated-draft-id' => $this->translatedDraftId,

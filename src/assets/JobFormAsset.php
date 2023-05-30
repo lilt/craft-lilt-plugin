@@ -25,6 +25,7 @@ class JobFormAsset extends AssetBundle
             'job-translation-review.js',
             'job-try-again-button.js',
             'job-target-sites.js',
+            'job-edit-sync-button.js',
         ];
 
         $this->css = [

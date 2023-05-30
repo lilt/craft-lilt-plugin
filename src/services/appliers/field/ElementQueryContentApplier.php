@@ -59,7 +59,9 @@ class ElementQueryContentApplier extends AbstractContentApplier implements Appli
                     $blockField,
                     $content[$field->handle][$blockId]['fields'],
                     $command->getSourceSiteId(),
-                    $command->getTargetSiteId()
+                    $command->getTargetSiteId(),
+                    $command->getJob(),
+                    $command->getTranslationRecord()
                 );
 
                 $result = Craftliltplugin::getInstance()->fieldContentApplier->apply($blockCommand);

@@ -53,6 +53,9 @@ class UpdateJobStatusHandler
         } elseif (in_array(TranslationRecord::STATUS_IN_PROGRESS, $statuses, true)) {
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
             $jobRecord->save();
+        } elseif (in_array(TranslationRecord::STATUS_NEEDS_ATTENTION, $statuses, true)) {
+            $jobRecord->status = Job::STATUS_NEEDS_ATTENTION;
+            $jobRecord->save();
         } else {
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
             $jobRecord->save();

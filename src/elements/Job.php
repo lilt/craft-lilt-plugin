@@ -41,6 +41,7 @@ class Job extends Element
     public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
     public const STATUS_COMPLETE = 'complete';
     public const STATUS_FAILED = 'failed';
+    public const STATUS_NEEDS_ATTENTION = 'needs-attention';
 
 
     public $uid;
@@ -231,6 +232,7 @@ class Job extends Element
             self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
             self::STATUS_COMPLETE => ['label' => 'Complete', 'color' => 'green'],
             self::STATUS_FAILED => ['label' => 'Failed', 'color' => 'red'],
+            self::STATUS_NEEDS_ATTENTION => ['label' => 'Needs attention', 'color' => 'red'],
         ];
     }
 

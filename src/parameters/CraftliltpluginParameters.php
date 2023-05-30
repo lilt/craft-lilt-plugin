@@ -39,6 +39,7 @@ class CraftliltpluginParameters
 
     public const JOB_TABLE_NAME = '{{%lilt_jobs}}';
     public const TRANSLATION_TABLE_NAME = '{{%lilt_translations}}';
+    public const TRANSLATION_NOTIFICATIONS_TABLE_NAME = '{{%lilt_translations_notifications}}';
     public const I18N_TABLE_NAME = '{{%lilt_i18n}}';
     public const SETTINGS_TABLE_NAME = '{{%lilt_settings}}';
     public const JOB_LOGS_TABLE_NAME = '{{%lilt_jobs_logs}}';
