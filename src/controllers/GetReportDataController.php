@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2023 Lilt Devs
+ */
+
+declare(strict_types=1);
+
 namespace lilthq\craftliltplugin\controllers;
 
 use Craft;
