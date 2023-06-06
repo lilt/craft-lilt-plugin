@@ -19,10 +19,19 @@ class ApplyContentResult
     private $applied;
 
     private $fieldValue;
+    private $reason;
 
-    public function __construct(bool $applied, array $i18nRecords = [], $fieldValue = null)
-    {
+    public const REASON_UNKNOWN = "unknown";
+    public const REASON_CHAR_LIMIT = "char_limit";
+
+    public function __construct(
+        bool $applied,
+        array $i18nRecords = [],
+        $fieldValue = null,
+        string $reason = self::REASON_UNKNOWN
+    ) {
         $this->applied = $applied;
+        $this->reason = $reason;
         $this->i18nRecords = $i18nRecords;
         $this->fieldValue = $fieldValue;
     }
@@ -44,6 +53,10 @@ class ApplyContentResult
     {
         return new self(false);
     }
+    public static function charLimit(): self
+    {
+        return new self(false, [], null, self::REASON_CHAR_LIMIT);
+    }
 
     /**
      * @return bool
@@ -51,6 +64,10 @@ class ApplyContentResult
     public function isApplied(): bool
     {
         return $this->applied;
+    }
+    public function isCharLimitReached(): bool
+    {
+        return $this->reason === self::REASON_CHAR_LIMIT;
     }
 
     /**

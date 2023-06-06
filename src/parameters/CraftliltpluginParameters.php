@@ -21,6 +21,7 @@ use lilthq\craftliltplugin\services\listeners\RegisterCpUrlRulesListener;
 
 class CraftliltpluginParameters
 {
+    public const REPORT_DATA = 'craft-lilt-plugin/get-report-data/invoke';
     public const TRANSLATION_REVIEW_ACTION = 'craft-lilt-plugin/translation/post-translation-review/invoke';
     public const TRANSLATION_PUBLISH_ACTION = 'craft-lilt-plugin/translation/post-translation-publish/invoke';
     public const TRANSLATION_REVIEW_PATH = 'craft-lilt-plugin/job/translation/review';
@@ -39,6 +40,7 @@ class CraftliltpluginParameters
 
     public const JOB_TABLE_NAME = '{{%lilt_jobs}}';
     public const TRANSLATION_TABLE_NAME = '{{%lilt_translations}}';
+    public const TRANSLATION_NOTIFICATIONS_TABLE_NAME = '{{%lilt_translations_notifications}}';
     public const I18N_TABLE_NAME = '{{%lilt_i18n}}';
     public const SETTINGS_TABLE_NAME = '{{%lilt_settings}}';
     public const JOB_LOGS_TABLE_NAME = '{{%lilt_jobs_logs}}';
