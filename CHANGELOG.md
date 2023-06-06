@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Introduced new job and translation status "needs attention"
 - Added warning message for translation jobs exceeding field limit with
 - Included warning icon for each translation exceeding field limit with
+- Download Diagnostic Data button for error reporting
 
 ## 3.5.4 - 2023-05-26
 ### Fixed 

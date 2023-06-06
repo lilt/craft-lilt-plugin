@@ -87,10 +87,12 @@
             class: 'hidden'
         }) }}
 
-        <div class="buttons">
+        <div class="buttons" style="z-index: 2;">
             <button type="submit" class="btn submit">{{ 'Update configuration'|t('craft-lilt-plugin') }}</button>
             <div class="utility-status"></div>
         </div>
+
+        <a style="color: grey" href="{{ url('admin/craft-lilt-plugin/report/data') }}">Download Diagnostic Data</a>
 
     </form>
 </div>
