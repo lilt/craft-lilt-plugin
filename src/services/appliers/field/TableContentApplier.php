@@ -29,7 +29,7 @@ class TableContentApplier extends AbstractContentApplier implements ApplierInter
         $tableSource = $content[$field->handle]['content'];
         foreach ($field->columns as $column => $columnData) {
             foreach ($tableSource as $rowId => $rows) {
-                $tableSource[$rowId][$column] = $tableSource[$rowId][$columnData['handle']];
+                $tableSource[$rowId][$column] = $rows[$columnData['handle']];
             }
         }
         $content[$field->handle]['content'] = $tableSource;

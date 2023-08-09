@@ -19,7 +19,7 @@ use yii\web\Response;
 
 class PostCreateJobController extends AbstractPostJobController
 {
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     /**
      * @throws InvalidConfigException

@@ -27,20 +27,93 @@
 }
 
 /* Make content fill full modal */
-#lilt-preview-modal-body #lilt-modal-preview-tabs #content {
+#lilt-preview-modal-body #lilt-modal-preview-tabs .content-pane,
+#lilt-preview-modal-body #lilt-modal-preview-tabs .content-pane #preview,
+#lilt-preview-modal-body #lilt-modal-preview-tabs .content-pane #text-preview
+{
     height: calc(100% - 48px);
 }
-
-#lilt-preview-modal-body #lilt-modal-preview-tabs #content #preview {
-    height: calc(100% - 48px);
+#lilt-preview-modal-body #lilt-modal-preview-tabs .content-pane #preview,
+#lilt-preview-modal-body #lilt-modal-preview-tabs .content-pane #text-preview
+{
+    overflow: scroll;
 }
-
 #lilt-preview-modal-body #lilt-modal-preview-tabs {
     height: calc(100% - 86px);
 }
 
 #lilt-modal-preview-tabs #content {
     overflow: scroll;
+}
+
+#lilt-preview-modal-body #lilt-modal-preview-tabs .content-pane #text-preview table {
+    height: 100%;
+    width: 100%;
+    table-layout:fixed;
+}
+/** Tabs */
+#lilt-modal-preview-tabs .content-pane .pane-header .pane-tabs [role=tablist] [role=tab].sel {
+    cursor: default;
+    color: hsl(209, 18%, 30%);
+    background: #fff;
+    box-shadow: 0 0 0 1px #cdd8e4, 0 2px 12px rgb(205 216 228 / 50%);
+}
+
+#lilt-modal-preview-tabs .content-pane .pane-header .pane-tabs [role=tablist] [role=tab] {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    -webkit-align-items: center;
+    align-items: center;
+    position: relative;
+    border-radius: 4px 4px 0 0;
+    padding: 0 12px;
+    white-space: nowrap;
+    color: hsl(211, 12%, 43%);
+    height: 50px;
+}
+
+#lilt-modal-preview-tabs .content-pane .pane-header .pane-tabs [role=tablist] {
+    margin: calc(8px*-1) calc(24px * -1) 0;
+    padding: 8px 24px 0;
+    -webkit-flex: 1;
+    flex: 1;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+#lilt-modal-preview-tabs .content-pane .pane-header .pane-tabs {
+    margin-bottom: calc(8px * -1);
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    -webkit-align-items: center;
+    align-items: center;
+    max-width: 100%;
+}
+#lilt-modal-preview-tabs .content-pane .pane-header {
+    margin: calc(24px*-1) calc(24px*-1) 0;
+    padding: 8px 24px;
+    min-height: 50px;
+    box-sizing: border-box;
+    background: hsl(212, 60%, 97%);
+    box-shadow: inset 0 -1px 0 0 rgb(154 165 177 / 25%);
+    border-radius: 5px 5px 0 0;
+}
+#lilt-modal-preview-tabs .content-pane {
+    background: #fff;
+    box-shadow: 0 0 0 1px #cdd8e4, 0 2px 12px rgb(205 216 228 / 50%);
+    border-radius: 5px;
+    position: relative;
+    background-clip: padding-box;
+    padding: 24px;
+    word-wrap: break-word;
 }
 
 #translations-element-index .tablepane {

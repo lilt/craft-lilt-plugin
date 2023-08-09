@@ -65,7 +65,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
         $I->canSeeResponseCodeIsRedirection();
         $I->seeHeader(
             'location',
-            sprintf('https://localhost/index.php?p=admin/craft-lilt-plugin/job/edit/%d', $job->id)
+            sprintf('https://test.craftcms.test:80/index.php?p=admin/craft-lilt-plugin/job/edit/%d&site=default', $job->id)
         );
 
         $I->assertJobInQueue($expectQueueJob);
@@ -110,7 +110,7 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
         $I->canSeeResponseCodeIsRedirection();
         $I->seeHeader(
             'location',
-            sprintf('https://localhost/index.php?p=admin/craft-lilt-plugin/job/edit/%d', $job->id)
+            sprintf('https://test.craftcms.test:80/index.php?p=admin/craft-lilt-plugin/job/edit/%d&site=default', $job->id)
         );
 
         Assert::assertEmpty(

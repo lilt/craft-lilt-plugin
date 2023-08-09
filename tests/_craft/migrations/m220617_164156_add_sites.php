@@ -57,6 +57,7 @@ class m220617_164156_add_sites extends Migration
             $site = new Site();
             $site->language = $language;
             $site->handle = $handle;
+
             $site->setName(
                 sprintf('Craft test %s', explode('-', $language)[0])
             );
@@ -101,10 +102,12 @@ class m220617_164156_add_sites extends Migration
         Craft::$app->sections->saveSection($section);
 
         Craft::$app->plugins->installPlugin('colour-swatches');
-        Craft::$app->plugins->installPlugin('linkit');
         Craft::$app->plugins->installPlugin('neo');
         Craft::$app->plugins->installPlugin('redactor');
-        Craft::$app->plugins->installPlugin('super-table');
+
+        if (TEST_SUPERTABLE_PLUGIN) {
+            Craft::$app->plugins->installPlugin('super-table');
+        }
     }
 
     /**

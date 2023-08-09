@@ -14,6 +14,7 @@ use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
+use DateTime;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\TranslationQuery;
@@ -34,10 +35,10 @@ class Translation extends Element
 {
     use TranslationModelTrait;
 
-    public $id;
-    public $uid;
-    public $title;
-    public $status;
+    public ?int $id = null;
+    public ?string $uid = null;
+    public ?string $title = null;
+    public $status = null;
 
     public $jobId;
     public $elementId;
@@ -52,10 +53,10 @@ class Translation extends Element
     public $lastDelivery;
     public $connectorTranslationId;
 
-    public $dateCreated;
-    public $dateUpdated;
+    public ?DateTime $dateCreated = null;
+    public ?DateTime $dateUpdated = null;
 
-    public $cpEditUrl;
+    public $cpEditUrl = null;
 
     /**
      * @var Entry
@@ -164,7 +165,7 @@ class Translation extends Element
         return $actions;
     }
 
-    public function getStatus()
+    public function getStatus(): ?string
     {
         return $this->status;
     }
@@ -188,7 +189,6 @@ class Translation extends Element
     protected static function defineTableAttributes(): array
     {
         return [
-            'title' => 'Title',
             'status' => 'Status',
             'targetSiteLanguage' => 'Target source',
             'actions' => 'Actions',
@@ -235,7 +235,7 @@ class Translation extends Element
                     ' . $dataSourceContent . '
                     data-id="' . $this->id . '" data-title="' . $this->title . '" 
                     data-icon="view" 
-                    style="margin-right: 5px;color: #0b69a3;cursor: pointer;font-size: 14pt;">
+                    style="margin-right: 5px;color: #2563eb; cursor: pointer;font-size: 14pt;">
                 </span>
                 <a 
                     href="' . $this->getPreviewUrl() . '" 
