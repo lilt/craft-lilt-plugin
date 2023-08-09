@@ -38,9 +38,13 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
     public function testCopySlugSettingEnabled(IntegrationTester $I): void
     {
         // enable copy slug
-        $copyEntriesSlugFromSourceToTarget = new SettingRecord(
-            ['name' => 'copy_entries_slug_from_source_to_target']
-        );
+        $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(['name' => 'connector_api_url']);
+        if($copyEntriesSlugFromSourceToTarget === null) {
+            $copyEntriesSlugFromSourceToTarget = new SettingRecord(
+                ['name' => 'copy_entries_slug_from_source_to_target']
+            );
+        }
+
         $copyEntriesSlugFromSourceToTarget->value = 1;
         $copyEntriesSlugFromSourceToTarget->save();
 
@@ -155,9 +159,14 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
     public function testCopySlugSettingDisabled(IntegrationTester $I): void
     {
         // enable copy slug
-        $copyEntriesSlugFromSourceToTarget = new SettingRecord(
-            ['name' => 'copy_entries_slug_from_source_to_target']
-        );
+        $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(['name' => 'connector_api_url']);
+
+        if($copyEntriesSlugFromSourceToTarget === null) {
+            $copyEntriesSlugFromSourceToTarget = new SettingRecord(
+                ['name' => 'copy_entries_slug_from_source_to_target']
+            );
+        }
+
         $copyEntriesSlugFromSourceToTarget->value = 0;
         $copyEntriesSlugFromSourceToTarget->save();
 
