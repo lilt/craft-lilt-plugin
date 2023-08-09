@@ -63,7 +63,7 @@ class PublishDraftHandler
                 $draftElementLanguageToUpdate->mergingCanonicalChanges = true;
 
                 $fieldLayout = $draftElementLanguageToUpdate->getFieldLayout();
-                $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+                $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
                 foreach ($fields as $field) {
                     // Check if the field is of Super Table type and the required classes and methods are available
                     if (

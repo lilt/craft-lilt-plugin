@@ -22,7 +22,6 @@
     }
   ],
   "require": {
-    "php": "^8.0.2",
     "craftcms/cms": "^4.0.0",
     "lilt/lilt-connector-sdk-php": "0.1.0",
     "ext-json": "*",

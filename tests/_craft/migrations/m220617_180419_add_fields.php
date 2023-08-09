@@ -122,7 +122,7 @@ class m220617_180419_add_fields extends Migration
                 'maxTopBlocks' => '',
                 'maxLevels' => '',
                 'wasModified' => false,
-                'propagationMethod' => 'all',
+                'propagationMethod' => NeoField::PROPAGATION_METHOD_SITE_GROUP,
                 #'propagationKeyFormat' => NULL,
             ]
         );
@@ -185,7 +185,7 @@ class m220617_180419_add_fields extends Migration
                 'minRows' => '',
                 'maxRows' => '',
                 'contentTable' => '{{%stc_supertable}}',
-                'propagationMethod' => 'all',
+                'propagationMethod' => SuperTableField::PROPAGATION_METHOD_SITE_GROUP,
                 'propagationKeyFormat' => null,
                 'staticField' => '',
                 'columns' => [
@@ -321,7 +321,7 @@ class m220617_180419_add_fields extends Migration
                 'minBlocks' => '',
                 'maxBlocks' => '',
                 'contentTable' => '{{%matrixcontent_matrix}}',
-                'propagationMethod' => 'all',
+                'propagationMethod' => Matrix::PROPAGATION_METHOD_SITE_GROUP,
                 'propagationKeyFormat' => null,
                 'blockTypes' => [
                     'new1' => [
