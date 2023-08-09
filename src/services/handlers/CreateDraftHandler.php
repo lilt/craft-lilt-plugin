@@ -42,23 +42,18 @@ class CreateDraftHandler
          * Element will be created from original one, we can't create draft from draft
          * @var Entry $createFrom
          */
-        $createFrom = $element ? Craft::$app->elements->getElementById(
+        $createFrom = $element->getIsDraft() ? Craft::$app->elements->getElementById(
             $element->getCanonicalId()
         ) : $element;
 
         $creatorId = Craft::$app->user->getId();
         if ($creatorId === null) {
-            //TODO: it is not expected to reach, but it is possible. Investigation herer, why user id is null?
-            Craft::error(
-                "Can't get user from current session with Craft::\$app->user->getId(),"
-                . "please check you app configuration!"
-            );
-            $creatorId = $createFrom->authorId;
+            $creatorId = $element->authorId;
         }
 
         $draft = Craft::$app->drafts->createDraft(
             $createFrom,
-            $creatorId ?? 0, //TODO: not best but one of the ways. Need to check why user can have nullable id?
+            $creatorId ?? 0,
             sprintf(
                 '%s [%s -> %s] ' . (new DateTime())->format('H:i:s'),
                 $jobTitle,
@@ -78,37 +73,16 @@ class CreateDraftHandler
             $targetSiteId
         );
 
-        $fieldLayout = $element->getFieldLayout();
-        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
-
-        foreach ($fields as $field) {
-            $field->copyValue($element, $draft);
-        }
-
-        $draft->title = $element->title;
-
-        $draft->duplicateOf = $element;
-        $draft->mergingCanonicalChanges = true;
-
-        /**
-         * TODO: for some reason we have duplicate error here.
-         *  Craft tries to create same block. Need investigation here.
-         */
-        $draftId = $draft->draftId;
-        $draft->draftId = null;
-        $draft->afterPropagate(false);
-        $draft->draftId = $draftId;
+        $this->copyEntryContent($element, $draft);
 
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
         );
-        $isCopySlugEnabled = (bool) ($copyEntriesSlugFromSourceToTarget->value ?? false);
+        $isCopySlugEnabled = (bool)($copyEntriesSlugFromSourceToTarget->value ?? false);
 
         if ($isCopySlugEnabled) {
             $draft->slug = $element->slug;
         }
-
-        Craft::$app->elements->saveElement($draft);
 
         $this->markFieldsAsChanged($draft);
 
@@ -119,6 +93,19 @@ class CreateDraftHandler
         }
         $this->upsertChangedAttributes($draft, $attributes);
 
+        $result = Craft::$app->elements->saveElement($draft, true, false, false);
+        if (!$result) {
+            Craft::error(
+                sprintf(
+                    "Can't save freshly createdd draft %d for site %s",
+                    $draft->id,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $targetSiteId
+                    )
+                )
+            );
+        }
+
         return $draft;
     }
 
@@ -126,7 +113,7 @@ class CreateDraftHandler
      * @throws InvalidFieldException
      * @throws \yii\db\Exception
      */
-    private function markFieldsAsChanged(ElementInterface $element): void
+    public function markFieldsAsChanged(ElementInterface $element): void
     {
         $fieldLayout = $element->getFieldLayout();
         $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
@@ -138,18 +125,20 @@ class CreateDraftHandler
                 || get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
             ) {
                 /**
-                 * @var ElementQuery $matrixBlockQuery
+                 * @var ElementQuery $blockQuery
                  */
-                $matrixBlockQuery = $element->getFieldValue($field->handle);
+                $blockQuery = $element->getFieldValue($field->handle);
 
                 /**
                  * @var Element[] $blockElements
                  */
-                $blockElements = $matrixBlockQuery->all();
+                $blockElements = $blockQuery->all();
 
                 foreach ($blockElements as $blockElement) {
                     $this->markFieldsAsChanged($blockElement);
                 }
+
+                $this->upsertChangedFields($element, $field);
 
                 continue;
             }
@@ -189,7 +178,7 @@ class CreateDraftHandler
         );
     }
 
-    private function upsertChangedAttributes(ElementInterface $element, array $attributes): void
+    public function upsertChangedAttributes(ElementInterface $element, array $attributes): void
     {
         $userId = Craft::$app->getUser()->getId();
         $timestamp = Db::prepareDateForDb(new DateTime());
@@ -215,6 +204,102 @@ class CreateDraftHandler
                 [],
                 false
             );
+        }
+    }
+
+    /**
+     * @param ElementInterface $from
+     * @param ElementInterface|null $to
+     *
+     * @throws ElementNotFoundException
+     * @throws Exception
+     * @throws InvalidFieldException
+     * @throws Throwable
+     */
+    private function copyEntryContent(ElementInterface $from, ElementInterface $to): void
+    {
+        // copy title
+        $to->title = $from->title;
+
+        $fieldLayout = $from->getFieldLayout();
+        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
+
+        foreach ($fields as $field) {
+//            // Check if the field is of Neo type and the required classes and methods are available
+//            if (
+//                get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
+//                && class_exists('benf\neo\Plugin')
+//                && method_exists('benf\neo\Plugin', 'getInstance')
+//            ) {
+//                // Get the Neo plugin instance
+//                /** @var \benf\neo\Plugin $neoPluginInstance */
+//                $neoPluginInstance = call_user_func(['benf\neo\Plugin', 'getInstance']);
+//
+//                // Get the Neo plugin Fields service
+//                /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
+//                $neoPluginFieldsService = $neoPluginInstance->get('fields');
+//
+//                // Clear current neo field value
+//                $neoField = $to->getFieldValue($field->handle);
+//                foreach ($neoField as $block) {
+//                    Craft::$app->getElements()->deleteElement($block);
+//                }
+//                Craft::$app->getElements()->saveElement($to);
+//
+//                // Duplicate the blocks for the field
+//                $neoPluginFieldsService->duplicateBlocks($field, $from, $to);
+//
+//                continue;
+//            }
+//
+//            // Check if the field is of Super Table type and the required classes and methods are available
+//            if (
+//                get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
+//                && class_exists('verbb\supertable\SuperTable')
+//                && method_exists('verbb\supertable\SuperTable', 'getInstance')
+//            ) {
+//                // Get the Super Table plugin instance
+//                $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
+//
+//                // Get the Super Table plugin service
+//                /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
+//                $superTablePluginService = $superTablePluginInstance->getService();
+//
+//                // Clear current Supertable field value
+//                $supertableField = $to->getFieldValue($field->handle);
+//                foreach ($supertableField as $block) {
+//                    Craft::$app->getElements()->deleteElement($block);
+//                }
+//                Craft::$app->getElements()->saveElement($to);
+//
+//                // Duplicate the blocks for the field
+//                $superTablePluginService->duplicateBlocks($field, $from, $to);
+//
+//                continue;
+//            }
+//
+//            // Check if the field is of Matrix type
+//            if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
+//                $blocksQuery = $to->getFieldValue($field->handle);
+//
+//                /**
+//                 * @var MatrixBlock[] $blocks
+//                 */
+//                $blocks = $blocksQuery->all();
+//
+//                Craft::$app->matrix->duplicateBlocks($field, $from, $to, false, false);
+//                Craft::$app->matrix->saveField($field, $to);
+//
+//                foreach ($blocks as $block) {
+//                    if ($block instanceof MatrixBlock) {
+//                        Craft::$app->getElements()->deleteElement($block, true);
+//                    }
+//                }
+//
+//                continue;
+//            }
+
+            $field->copyValue($from, $to);
         }
     }
 }

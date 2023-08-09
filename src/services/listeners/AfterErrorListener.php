@@ -13,7 +13,6 @@ use Craft;
 use craft\queue\Queue;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
@@ -80,7 +79,7 @@ class AfterErrorListener implements ListenerInterface
                 ['jobId' => $jobRecord->id]
             );
 
-            Craft::$app->elements->invalidateCachesForElementType(Translation::class);
+            Craft::$app->elements->invalidateCachesForElementType(TranslationRecord::class);
             Craft::$app->elements->invalidateCachesForElementType(Job::class);
 
             Craft::$app->queue->release(
