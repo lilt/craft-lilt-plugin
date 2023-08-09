@@ -104,7 +104,7 @@ class PublishDraftHandler
                         // Clear current neo field value
                         $neoField = $draftElementLanguageToUpdate->getFieldValue($field->handle);
                         foreach ($neoField as $block) {
-                            if(!$block instanceof ElementInterface) {
+                            if (!$block instanceof ElementInterface) {
                                 continue;
                             }
 
