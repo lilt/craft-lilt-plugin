@@ -12,7 +12,9 @@ namespace lilthq\craftliltplugin\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\actions\Delete;
+use craft\elements\actions\Edit;
 use craft\elements\db\ElementQueryInterface;
+use craft\elements\User;
 use craft\helpers\UrlHelper;
 use DateTime;
 use LiltConnectorSDK\Model\SettingsResponse;
@@ -470,6 +472,21 @@ class Job extends Element
     public function getCpEditUrl(): ?string
     {
         return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
+    }
+
+    public function canDelete(User $user): bool
+    {
+        return true;
+    }
+
+    public function canSave(User $user): bool
+    {
+        return true;
+    }
+
+    public function canView(User $user): bool
+    {
+        return true;
     }
 
     protected static function defineActions(string $source = null): array

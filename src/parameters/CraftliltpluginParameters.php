@@ -15,6 +15,7 @@ use lilthq\craftliltplugin\services\listeners\AfterDraftAppliedListener;
 use lilthq\craftliltplugin\services\listeners\AfterErrorListener;
 use lilthq\craftliltplugin\services\listeners\RegisterCpAlertsListener;
 use lilthq\craftliltplugin\services\listeners\RegisterDefaultTableAttributesListener;
+use lilthq\craftliltplugin\services\listeners\RegisterElementActionsListener;
 use lilthq\craftliltplugin\services\listeners\RegisterElementTypesListener;
 use lilthq\craftliltplugin\services\listeners\RegisterTableAttributesListener;
 use lilthq\craftliltplugin\services\listeners\RegisterCpUrlRulesListener;
@@ -68,6 +69,7 @@ class CraftliltpluginParameters
         RegisterTableAttributesListener::class,
         AfterErrorListener::class,
         RegisterCpAlertsListener::class,
+        RegisterElementActionsListener::class,
     ];
 
     public const TRANSLATION_WORKFLOW_INSTANT = SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT;

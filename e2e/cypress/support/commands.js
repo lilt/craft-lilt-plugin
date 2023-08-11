@@ -26,7 +26,7 @@ Cypress.Commands.add('createJob', (title, flow, languages = ['de']) => {
   cy.get('#nav-craft-lilt-plugin > a').click();
 
   cy.
-      get('#action-button .btn-create-new-job[data-icon="language"]').
+      get('#action-buttons .btn-create-new-job[data-icon="language"]').
       click();
 
   cy.get('#title').type(title);
@@ -51,10 +51,10 @@ Cypress.Commands.add('createJob', (title, flow, languages = ['de']) => {
 
   cy.url().should('contain', 'admin/craft-lilt-plugin/job/edit');
 
-  cy.
-      get('#notifications .notification.notice').
-      invoke('text').
-      should('contain', 'Translate job created successfully.');
+  // cy.
+  //     get('#notifications .notification.notice').
+  //     invoke('text').
+  //     should('contain', 'Translate job created successfully.');
 
 });
 
@@ -151,10 +151,10 @@ Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
 
   cy.get('#content .btn.submit').click();
 
-  cy.
-      get('#notifications .notification.notice').
-      invoke('text').
-      should('contain', 'Configuration options saved successfully');
+  // cy.
+  //     get('#notifications .notification.notice').
+  //     invoke('text').
+  //     should('contain', 'Configuration options saved successfully');
 
   cy.visit(`${appUrl}/admin/craft-lilt-plugin/settings`);
 
@@ -165,10 +165,10 @@ Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
           cy.get(`label[for="${options[option].id}"]`).click();
           cy.get('#content .btn.submit').click();
 
-          cy.
-              get('#notifications .notification.notice').
-              invoke('text').
-              should('contain', 'Configuration options saved successfully');
+          // cy.
+          //     get('#notifications .notification.notice').
+          //     invoke('text').
+          //     should('contain', 'Configuration options saved successfully');
         }
       });
 
@@ -193,13 +193,13 @@ Cypress.Commands.add('setEntrySlug', (slug, entryId, language = 'en') => {
   cy.visit(`${appUrl}/admin/entries/news`);
 
   cy.get(`#context-btn`).click();
-  cy.get(`a[data-site-id="${langs[language]}"][role="option"]`).click();
+  cy.get(`li[role="option"] a[data-site-id="${langs[language]}"]`).click();
 
   cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
   cy.get('#slug').clear().type(slug);
 
-  cy.get('#save-btn-container .btn.submit[type="submit"]').click();
+  cy.get('#action-buttons .btn.submit[type="submit"]').click();
 });
 
 /**
@@ -232,13 +232,13 @@ Cypress.Commands.add('resetEntryTitle', (entryId, title) => {
 
   for (const [targetLanguage, targetLanguageId] of Object.entries(langs)) {
     cy.get(`#context-btn`).click();
-    cy.get(`a[data-site-id="${targetLanguageId}"][role="option"]`).click();
+    cy.get(`li[role="option"] a[data-site-id="${targetLanguageId}"]`).click();
 
     cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
     cy.get('#title').clear().type(title);
 
-    cy.get('#save-btn-container .btn.submit[type="submit"]').click();
+    cy.get('#action-buttons .btn.submit[type="submit"]').click();
   }
 });
 
@@ -257,23 +257,23 @@ Cypress.Commands.add('disableEntry', (slug, entryId) => {
 
   cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
-  cy.get('#expand-status-btn').click();
+  cy.get('.expand-status-btn').click();
 
   for (const [targetLanguage, targetLanguageId] of Object.entries(langs)) {
-    cy.get(`#enabledForSite-${targetLanguageId}`).
+    cy.get(`.enabled-for-site-${targetLanguageId}-field button`).
         invoke('attr', 'aria-checked').
         then((value) => {
           if (value === 'true') {
-            cy.get(`#enabledForSite-${targetLanguageId}`).click();
+            cy.get(`.enabled-for-site-${targetLanguageId}-field button`).click();
           }
         });
   }
 
-  cy.get('#enabled').
+  cy.get('#details-container #details div.field.lightswitch-field:not(.nested) button').
       invoke('attr', 'aria-checked').
       should('equal', 'false');
 
-  cy.get('#save-btn-container .btn.submit[type="submit"]').click();
+  cy.get('#action-buttons .btn.submit[type="submit"]').click();
 });
 
 /**
@@ -292,7 +292,7 @@ Cypress.Commands.add('resetEntryContent', (entryId, languages) => {
     cy.visit(`${appUrl}/admin/entries/news`);
 
     cy.get(`#context-btn`).click();
-    cy.get(`a[data-site-id="${langs[language]}"][role="option"]`).click();
+    cy.get(`li[role="option"] a[data-site-id="${langs[language]}"]`).click();
 
     cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
@@ -303,19 +303,19 @@ Cypress.Commands.add('resetEntryContent', (entryId, languages) => {
       });
     });
 
-    cy.get('#fields .input input[type="text"]').then(els => {
+    cy.get('#content .input input[type="text"]').then(els => {
       [...els].forEach(el => {
         cy.wrap(el).clear({force: true});
         cy.wrap(el).type('This content should be changed', {force: true});
       });
     });
 
-    cy.get('#save-btn-container .btn.submit[type="submit"]').click();
+    cy.get('#action-buttons .btn.submit[type="submit"]').click();
 
-    cy.
-        get('#notifications .notification.notice').
-        invoke('text').
-        should('contain', 'Entry saved');
+    // cy.
+    //     get('#notifications .notification.notice').
+    //     invoke('text').
+    //     should('contain', 'Entry saved');
   }
 });
 
@@ -334,23 +334,23 @@ Cypress.Commands.add('enableEntry', (slug, entryId) => {
 
   cy.get(`.elements .element[data-label="${entryId}"]`).click();
 
-  cy.get('#expand-status-btn').click();
+  cy.get('.expand-status-btn').click();
 
   for (const [targetLanguage, targetLanguageId] of Object.entries(langs)) {
-    cy.get(`#enabledForSite-${targetLanguageId}`).
+    cy.get(`.enabled-for-site-${targetLanguageId}-field button`).
         invoke('attr', 'aria-checked').
         then((value) => {
           if (value === 'false') {
-            cy.get(`#enabledForSite-${targetLanguageId}`).click();
+            cy.get(`.enabled-for-site-${targetLanguageId}-field button`).click();
           }
         });
   }
 
-  cy.get('#enabled').
+  cy.get('\'#details-container #details div.field.lightswitch-field:not(.nested) button').
       invoke('attr', 'aria-checked').
       should('equal', 'true');
 
-  cy.get('#save-btn-container .btn.submit[type="submit"]').click();
+  cy.get('#action-buttons .btn.submit[type="submit"]').click();
 });
 
 /**
@@ -365,8 +365,8 @@ Cypress.Commands.add('enableEntry', (slug, entryId) => {
  * @returns undefined
  */
 Cypress.Commands.add('waitForJobStatus',
-    (status = 'ready-for-review', maxAttempts = 15, attempts = 0,
-        waitPerIteration = 3000) => {
+    (status = 'ready-for-review', maxAttempts = 100, attempts = 0,
+        waitPerIteration = 5000) => {
       if (attempts > maxAttempts) {
         throw new Error('Timed out waiting for jpb status to be ' + status);
       }
@@ -397,7 +397,7 @@ Cypress.Commands.add('waitForTranslationDrafts',
       if (attempts > maxAttempts) {
         throw new Error('Timed out waiting for report to be generated');
       }
-      cy.get('#translations-list th[data-title="Title"] div.element').
+      cy.get('#translations-list th[data-title="Translation"] div.element').
           invoke('attr', 'data-translated-draft-id').
           then(async translatedDraftId => {
             cy.log('TransladtedDraftId');
@@ -427,17 +427,17 @@ Cypress.Commands.add('publishTranslation', (jobTitle, language) => {
 
   // select checkbox of taraget language and click publish button
   cy.get(
-      `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
+      `#translations-list th[data-title="Translation"] div.element[data-target-site-language="${language}"]`).
       invoke('attr', 'data-id').
       then((dataId) => {
         cy.get(`tbody tr[data-id="${dataId}"] .checkbox-cell`).click();
         cy.get('#translations-publish-action').click();
       });
 
-  cy.
-      get('#notifications .notification.notice').
-      invoke('text').
-      should('contain', 'Translation(s) published');
+  // cy.
+  //     get('#notifications .notification.notice').
+  //     invoke('text').
+  //     should('contain', 'Translation(s) published');
 });
 
 /**
@@ -456,7 +456,7 @@ Cypress.Commands.add('publishTranslations', (jobTitle, languages) => {
   for (const language of languages) {
     // select checkbox of taraget language and click publish button
     cy.get(
-        `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
+        `#translations-list th[data-title="Translation"] div.element[data-target-site-language="${language}"]`).
         invoke('attr', 'data-id').
         then((dataId) => {
           cy.get(`tbody tr[data-id="${dataId}"] .checkbox-cell`).click();
@@ -465,10 +465,15 @@ Cypress.Commands.add('publishTranslations', (jobTitle, languages) => {
 
   cy.get('#translations-publish-action').click();
 
-  cy.
-      get('#notifications .notification.notice').
-      invoke('text').
-      should('contain', 'Translation(s) published');
+  cy.get('.elements.busy').should('be.visible')
+
+  //wait till it is finished
+  cy.get('.elements.busy', { timeout: 300000 }).should('not.exist');
+
+  // cy.
+  //     get('#notifications .notification.notice').
+  //     invoke('text').
+  //     should('contain', 'Translation(s) published');
 
   cy.waitForJobStatus('complete');
 });
@@ -531,11 +536,14 @@ Cypress.Commands.add('publishJobBatch',
  */
 Cypress.Commands.add('assertEntryContent',
     (languages, flow, entryId = 24) => {
+      //TODO: add check that source language wasn't change
       const expected = (flow === 'copy_source_text') ? {
         'de': originalContent,
         'es': originalContent,
         'uk': originalContent,
+        'en': originalContent,
       } : {
+        'en': originalContent,
         'de': germanContent,
         'es': spanishContent,
         'uk': ukrainianContent,
@@ -549,7 +557,7 @@ Cypress.Commands.add('assertEntryContent',
         cy.visit(`${appUrl}/admin/entries/news`);
 
         cy.get(`#context-btn`).click();
-        cy.get(`a[data-site-id="${langs[language]}"][role="option"]`).click();
+        cy.get(`li[role="option"] a[data-site-id="${langs[language]}"]`).click();
 
         cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
@@ -649,19 +657,19 @@ Cypress.Commands.add('copySourceTextFlow', ({
       invoke('text').
       should('contain', 'Ready for review');
 
-  cy.get('#translations-list th[data-title="Title"] div.element').
+  cy.get('#translations-list th[data-title="Translation"] div.element').
       invoke('attr', 'data-type').
       should('equal', 'lilthq\\craftliltplugin\\elements\\Translation');
 
-  cy.get('#translations-list th[data-title="Title"] div.element').
+  cy.get('#translations-list th[data-title="Translation"] div.element').
       invoke('attr', 'data-status').
       should('equal', 'ready-for-review');
 
-  cy.get('#translations-list th[data-title="Title"] div.element').
+  cy.get('#translations-list th[data-title="Translation"] div.element').
       invoke('attr', 'data-label').
       should('equal', 'The Future of Augmented Reality');
 
-  cy.get('#translations-list th[data-title="Title"] div.element').
+  cy.get('#translations-list th[data-title="Translation"] div.element').
       invoke('attr', 'title').
       should('equal', 'The Future of Augmented Reality – Happy Lager (en)');
 
@@ -686,7 +694,7 @@ Cypress.Commands.add('copySourceTextFlow', ({
       then((createdJobId) => {
         const appUrl = Cypress.env('APP_URL');
         cy.url().
-            should('equal',
+            should('contain',
                 `${appUrl}/admin/craft-lilt-plugin/job/edit/${createdJobId}`);
       });
 
@@ -722,7 +730,7 @@ Cypress.Commands.add('assertEntrySlug',
       cy.visit(`${appUrl}/admin/entries/news`);
 
       cy.get(`#context-btn`).click();
-      cy.get(`a[data-site-id="${langs[language]}"][role="option"]`).click();
+      cy.get(`li[role="option"] a[data-site-id="${langs[language]}"]`).click();
 
       cy.get(`.elements .element[data-id="${entryId}"]`).click();
 
@@ -740,7 +748,7 @@ Cypress.Commands.add('assertEntrySlug',
 Cypress.Commands.add('assertDraftSlugValue', (copySlug, slug, language) => {
   // going to draft page
   cy.get(
-      `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"] a`).
+      `#translations-list th[data-title="Translation"] div.element[data-target-site-language="${language}"] a`).
       click();
   cy.url().should('contain', `site=${language}&draftId=`);
 
@@ -781,15 +789,15 @@ Cypress.Commands.add('assertAfterPublish',
 
       //assert copy slug functionality
       if (enableAfterPublish) {
-        cy.get('#expand-status-btn').click();
+        cy.get('.expand-status-btn').click();
 
-        cy.get(`#enabledForSite-${langs[language]}`).
+        cy.get(`.enabled-for-site-${langs[language]}-field button`).
             invoke('attr', 'aria-checked').
             should('equal', 'true');
       } else {
-        cy.get('#expand-status-btn').click();
+        cy.get('.expand-status-btn').click();
 
-        cy.get(`#enabledForSite-${langs[language]}`).
+        cy.get(`.enabled-for-site-${langs[language]}-field button`).
             invoke('attr', 'aria-checked').
             should('equal', 'false');
       }

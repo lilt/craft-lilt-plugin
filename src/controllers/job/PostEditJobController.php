@@ -64,6 +64,10 @@ class PostEditJobController extends AbstractPostJobController
             'Translate job saved successfully.'
         );
 
+        Craft::$app->getSession()->setNotice(
+            'Translate job saved successfully.'
+        );
+
         return $this->redirect($job->getCpEditUrl());
     }
 }

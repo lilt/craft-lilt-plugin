@@ -75,7 +75,7 @@ class PublishDraftHandler
                         $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
 
                         // Get the Super Table plugin service
-                        /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
+                        /** @var \verbb\supertable\services\Service $superTablePluginService */
                         $superTablePluginService = $superTablePluginInstance->getService();
 
                         // Duplicate the blocks for the field

@@ -3,8 +3,8 @@
 
 export
 
-PHP_VERSION?=8.0
-MYSQL_VERSION?=5.7
+PHP_VERSION?=8.1
+MYSQL_VERSION?=8.0
 
 up:
 	docker-compose up -d

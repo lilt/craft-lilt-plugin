@@ -36,7 +36,7 @@
     "craftcms/redactor": "^2.0 || ^3.0",
     "percipioglobal/craft-colour-swatches": "^1.0 || ^4.0",
     "spicyweb/craft-neo": "3.1.5",
-    "verbb/super-table": "^2.0 || 3.0.0-beta.6",
+    "verbb/super-table": "^3.0",
     "wiremock-php/wiremock-php": "^2.33"
   },
   "autoload": {
