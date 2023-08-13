@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\handlers\field\copier;
 
-use Craft;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
-use craft\elements\MatrixBlock;
 use craft\errors\InvalidFieldException;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
@@ -27,21 +25,15 @@ class MatrixFieldCopier implements FieldCopierInterface
             return false;
         }
 
-        $blocksQuery = $to->getFieldValue($field->handle);
+        $serializedValue = $field->serializeValue($from->getFieldValue($field->handle), $from);
 
-        /**
-         * @var MatrixBlock[] $blocks
-         */
-        $blocks = $blocksQuery->all();
-
-        Craft::$app->matrix->duplicateBlocks($field, $from, $to, false, false);
-        Craft::$app->matrix->saveField($field, $to);
-
-        foreach ($blocks as $block) {
-            if ($block instanceof MatrixBlock) {
-                Craft::$app->getElements()->deleteElement($block, true);
-            }
+        $prepared = [];
+        $i = 1;
+        foreach ($serializedValue as $item) {
+            $prepared[sprintf('new%d', $i++)] = $item;
         }
+
+        $to->setFieldValues([$field->handle => $prepared]);
 
         return true;
     }

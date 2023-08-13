@@ -42,18 +42,13 @@ class NeoFieldCopier implements FieldCopierInterface
         $neoPluginInstance = call_user_func(['benf\neo\Plugin', 'getInstance']);
 
         // Get the Neo plugin Fields service
-        /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
+        /** @var \benf\neo\services\Fields $neoPluginFieldsService */
         $neoPluginFieldsService = $neoPluginInstance->get('fields');
-
-        // Clear current neo field value
-        $neoField = $to->getFieldValue($field->handle);
-        foreach ($neoField as $block) {
-            Craft::$app->getElements()->deleteElement($block);
-        }
-        Craft::$app->getElements()->saveElement($to);
 
         // Duplicate the blocks for the field
         $neoPluginFieldsService->duplicateBlocks($field, $from, $to);
+
+        Craft::$app->getElements()->saveElement($to);
 
         return true;
     }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\handlers\field\copier;
 
-use Craft;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
@@ -25,22 +24,15 @@ class SuperTableFieldCopier implements FieldCopierInterface
             return false;
         }
 
-        // Get the Super Table plugin instance
-        $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
+        $serializedValue = $field->serializeValue($from->getFieldValue($field->handle), $from);
 
-        // Get the Super Table plugin service
-        /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
-        $superTablePluginService = $superTablePluginInstance->getService();
-
-        // Clear current Supertable field value
-        $supertableField = $to->getFieldValue($field->handle);
-        foreach ($supertableField as $block) {
-            Craft::$app->getElements()->deleteElement($block);
+        $prepared = [];
+        $i = 1;
+        foreach ($serializedValue as $item) {
+            $prepared[sprintf('new%d', $i++)] = $item;
         }
-        Craft::$app->getElements()->saveElement($to);
 
-        // Duplicate the blocks for the field
-        $superTablePluginService->duplicateBlocks($field, $from, $to);
+        $to->setFieldValues([$field->handle => $prepared]);
 
         return true;
     }
