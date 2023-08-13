@@ -35,7 +35,7 @@ class CopyFieldsHandler
         $to->title = $from->title;
 
         $fieldLayout = $from->getFieldLayout();
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
 
         $result = [];
 
