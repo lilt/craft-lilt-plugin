@@ -43,12 +43,15 @@ jobs:
         run: |
           echo ${DB_DATABASE}
           make up
+          make wait-service
           make e2e-github
       - name: Copy artifacts
         if: ${{ failure() }}
         working-directory: ./e2e
         run: |
           make backup-db
+          mkdir var
+          mkdir var/log
           mkdir cypress/craft
           mkdir cypress/craft/storage
           mkdir cypress/craft/config
@@ -56,6 +59,7 @@ jobs:
           docker compose cp app:/app/config cypress/craft/config
           docker compose cp app:/app/composer.json cypress/craft
           docker compose cp app:/app/composer.lock cypress/craft
+          docker compose cp app:/var/log var/log
       - name: Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
