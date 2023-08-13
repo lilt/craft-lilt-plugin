@@ -44,7 +44,7 @@ clone:
 	cp -R ../src happy-lager-main/plugin-src/src
 	cp -R ../composer.json happy-lager-main/plugin-src/composer.json
 
-up: down clone composer-install
+up: clone down composer-install
 	docker-compose up --build -d
 	docker-compose exec -T mysql sh -c 'while ! mysqladmin ping -h"mysql" --silent; do sleep 1; done'
 	docker-compose exec -T app sh -c 'php craft setup/security-key'
