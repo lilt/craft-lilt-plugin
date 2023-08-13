@@ -6,6 +6,7 @@ namespace lilthq\tests\fixtures;
 
 use benf\neo\elements\Block;
 use benf\neo\elements\db\BlockQuery;
+use Craft;
 use craft\base\Element;
 use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
@@ -148,8 +149,15 @@ final class ExpectedElementContent
          */
         $matrixFieldValue = $element->getFieldValue('matrix');
 
-        $firstBlockId = $matrixFieldValue->type('firstBlock')->one()->id;
-        $secondBlockId = $matrixFieldValue->type('secondblock')->one()->id;
+        $firstBlock = $matrixFieldValue->type('firstBlock')->one();
+        $secondBlock = $matrixFieldValue->type('secondblock')->one();
+
+        if($firstBlock === null || $secondBlock === null) {
+            return [];
+        }
+
+        $firstBlockId = $firstBlock->id;
+        $secondBlockId = $secondBlock->id;
 
         $content = [
             $firstBlockId => [
@@ -193,8 +201,15 @@ final class ExpectedElementContent
      */
     public static function getExpectedNeoContent(Entry $element, string $prefix = '', string $i18nPrefix = ''): array
     {
+        Craft::$app->getElements()->invalidateCachesForElement(
+            $element
+        );
+        $element = Craft::$app->getElements()->getElementById(
+            $element->id
+        );
+
         /**
-         * @var BlockQuery
+         * @var BlockQuery $neoFieldValue
          */
         $neoFieldValue = $element->getFieldValue('neo');
 
@@ -202,8 +217,18 @@ final class ExpectedElementContent
          * @var Block $firstBlock
          */
         $firstBlock = $neoFieldValue->type('firstBlockType')->one();
-        $firstBlockId = $neoFieldValue->type('firstBlockType')->one()->id;
-        $secondBlockId = $neoFieldValue->type('secondBlockType')->one()->id;
+
+        /**
+         * @var Block $secondBlock
+         */
+        $secondBlock = $neoFieldValue->type('secondBlockType')->one();
+
+        if($firstBlock === null || $secondBlock === null) {
+            return [];
+        }
+
+        $firstBlockId = $firstBlock->id;
+        $secondBlockId = $secondBlock->id;
 
         $content = [
             $firstBlockId => [

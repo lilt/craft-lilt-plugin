@@ -246,14 +246,17 @@ class CreateDraftHandler
                 $neoPluginFieldsService = $neoPluginInstance->get('fields');
 
                 // Clear current neo field value
-                $neoField = $to->getFieldValue($field->handle);
-                foreach ($neoField as $block) {
-                    Craft::$app->getElements()->deleteElement($block);
-                }
-                Craft::$app->getElements()->saveElement($to);
+//                $neoField = $to->getFieldValue($field->handle);
+//                $blocks = $neoField->all();
 
                 // Duplicate the blocks for the field
                 $neoPluginFieldsService->duplicateBlocks($field, $from, $to);
+
+                // Delete old blocks
+//                foreach ($blocks as $block) {
+//                    Craft::$app->getElements()->deleteElement($block);
+//                }
+                Craft::$app->getElements()->saveElement($to);
 
                 continue;
             }
@@ -279,21 +282,15 @@ class CreateDraftHandler
 
             // Check if the field is of Matrix type
             if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
-                $blocksQuery = $to->getFieldValue($field->handle);
+                $serializedValue = $field->serializeValue($from->getFieldValue($field->handle), $from);
 
-                /**
-                 * @var MatrixBlock[] $blocks
-                 */
-                $blocks = $blocksQuery->all();
-
-                Craft::$app->matrix->duplicateBlocks($field, $from, $to, false, false);
-                Craft::$app->matrix->saveField($field, $to);
-
-                foreach ($blocks as $block) {
-                    if ($block instanceof MatrixBlock) {
-                        Craft::$app->getElements()->deleteElement($block, true);
-                    }
+                $prepared = [];
+                $i = 1;
+                foreach ($serializedValue as $item) {
+                    $prepared[sprintf('new%d', $i++)] = $item;
                 }
+
+                $to->setFieldValues([$field->handle => $prepared]);
 
                 continue;
             }
