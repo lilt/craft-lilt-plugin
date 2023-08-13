@@ -27,6 +27,11 @@ use lilthq\craftliltplugin\services\handlers\CreateDraftHandler;
 use lilthq\craftliltplugin\services\handlers\CreateJobHandler;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\EditJobHandler;
+use lilthq\craftliltplugin\services\handlers\field\copier\DefaultFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\MatrixFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\NeoFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\SuperTableFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
@@ -83,7 +88,6 @@ class ServiceInitializer
             'translationFailedHandler' => TranslationFailedHandler::class,
             'createTranslationsHandler' => CreateTranslationsHandler::class,
             'refreshJobStatusHandler' => RefreshJobStatusHandler::class,
-            'createDraftHandler' => CreateDraftHandler::class,
             'updateJobStatusHandler' => UpdateJobStatusHandler::class,
             'updateTranslationsConnectorIds' => UpdateTranslationsConnectorIds::class,
             'packagistRepository' => PackagistRepository::class,
@@ -95,6 +99,22 @@ class ServiceInitializer
 
         $pluginInstance->setComponents([
             'connectorConfiguration' => $pluginInstance->connectorConfigurationProvider->provide(),
+        ]);
+
+        $pluginInstance->setComponents([
+            'createDraftHandler' => function () {
+                return new CreateDraftHandler(
+                    new CopyFieldsHandler(
+                        [
+                            CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldCopier(),
+                            CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldCopier(),
+                            CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableFieldCopier(),
+
+                            CopyFieldsHandler::DEFAULT_FIELD_COPIER => new DefaultFieldCopier()
+                        ]
+                    )
+                );
+            },
         ]);
 
         $pluginInstance->setComponents([

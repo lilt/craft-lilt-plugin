@@ -12,7 +12,6 @@ use craft\db\Table;
 use craft\db\Table as DbTable;
 use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
-use craft\elements\MatrixBlock;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidFieldException;
 use craft\helpers\Db;
@@ -21,11 +20,23 @@ use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
+use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use Throwable;
 use yii\base\Exception;
 
 class CreateDraftHandler
 {
+    /**
+     * @var CopyFieldsHandler
+     */
+    public $copyFieldsHandler;
+
+    public function __construct(
+        CopyFieldsHandler $copyFieldsHandler
+    ) {
+        $this->copyFieldsHandler = $copyFieldsHandler;
+    }
+
     /**
      * @throws Exception
      * @throws Throwable
@@ -74,7 +85,7 @@ class CreateDraftHandler
             $targetSiteId
         );
 
-        $this->copyEntryContent($element, $draft);
+        $this->copyFieldsHandler->copy($element, $draft);
 
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
