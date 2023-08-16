@@ -5,24 +5,17 @@ describe(
     () => {
       const entryLabel = 'The Future of Augmented Reality';
 
-      it('with copy slug disabled & enable after publish disabled', () => {
+      it('with copy slug enabled & enable after publish disabled', () => {
         const {jobTitle, slug} = generateJobData();
 
-        // cy.assertEntryContent(
-        //     ['en'],
-        //     'copy_source_text',
-        //     24,
-        // );
-        //
-        // return;
         cy.copySourceTextFlow({
           slug,
           entryLabel,
           jobTitle,
-          copySlug: false,
+          copySlug: true,
           enableAfterPublish: false,
           languages: ['de', 'es', 'uk'],
-          batchPublishing: true,
-        });
+          batchPublishing: true
+        })
       });
     });
