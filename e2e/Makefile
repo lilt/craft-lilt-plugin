@@ -1,17 +1,19 @@
 CYPRESS_CACHE_FOLDER?=/e2e/.cache
 DB_DATABASE?=craft-lilt
 
+cli-dev:
+	docker run --rm -it \
+		-v ${PWD}/happy-lager-main:/app \
+		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
+		craftcms/cli:8.0-dev \
+		sh
+
 composer-install:
-	docker run --rm \
+	docker run --rm -it \
 		-v ${PWD}/happy-lager-main:/app \
 		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
-		composer:latest \
-		composer remove --ignore-platform-reqs -W "lilt/craft-lilt-plugin"
-	docker run --rm \
-		-v ${PWD}/happy-lager-main:/app \
-		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
-		composer:latest \
-		composer require --ignore-platform-reqs -W "lilt/craft-lilt-plugin":"^999.9.9"
+		craftcms/cli:8.0-dev \
+		composer require -W "lilt/craft-lilt-plugin":"^999.9.9"
 
 reset: cp composer-install
 	docker-compose exec -T app sh -c 'php craft db/restore happylager.sql'
