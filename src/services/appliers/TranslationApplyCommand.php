@@ -7,6 +7,7 @@ namespace lilthq\craftliltplugin\services\appliers;
 use craft\base\ElementInterface;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\records\TranslationRecord;
 
 class TranslationApplyCommand
 {
@@ -31,17 +32,28 @@ class TranslationApplyCommand
     private $targetLanguage;
 
     /**
+     * @var TranslationRecord
+     */
+    private $translationRecord;
+
+    /**
      * @param ElementInterface $element
      * @param Job $job
      * @param array $content
      * @param string $targetLanguage
      */
-    public function __construct(ElementInterface $element, Job $job, array $content, string $targetLanguage)
-    {
+    public function __construct(
+        ElementInterface $element,
+        Job $job,
+        array $content,
+        string $targetLanguage,
+        TranslationRecord $translationRecord
+    ) {
         $this->element = $element;
         $this->job = $job;
         $this->content = $content;
         $this->targetLanguage = $targetLanguage;
+        $this->translationRecord = $translationRecord;
     }
 
     /**
@@ -84,5 +96,13 @@ class TranslationApplyCommand
     public function getSourceSiteId(): int
     {
         return $this->job->sourceSiteId;
+    }
+
+    /**
+     * @return TranslationRecord
+     */
+    public function getTranslationRecord(): TranslationRecord
+    {
+        return $this->translationRecord;
     }
 }

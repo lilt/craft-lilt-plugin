@@ -12,7 +12,9 @@ namespace lilthq\craftliltplugin\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\actions\Delete;
+use craft\elements\actions\Edit;
 use craft\elements\db\ElementQueryInterface;
+use craft\elements\User;
 use craft\helpers\UrlHelper;
 use DateTime;
 use LiltConnectorSDK\Model\SettingsResponse;
@@ -43,6 +45,7 @@ class Job extends Element
     public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
     public const STATUS_COMPLETE = 'complete';
     public const STATUS_FAILED = 'failed';
+    public const STATUS_NEEDS_ATTENTION = 'needs-attention';
 
 
     public ?string $uid = null;
@@ -65,6 +68,7 @@ class Job extends Element
     private $_author;
     private $_elements;
     private $_translations;
+
     // @codingStandardsIgnoreEnd
 
     public function beforeDelete(): bool
@@ -72,9 +76,11 @@ class Job extends Element
         $translationRecords = TranslationRecord::findAll(['jobId' => $this->id]);
 
         array_map(static function (TranslationRecord $t) {
-            Craft::$app->elements->deleteElementById(
-                $t->translatedDraftId
-            );
+            if ($t->translatedDraftId !== null) {
+                Craft::$app->elements->deleteElementById(
+                    $t->translatedDraftId
+                );
+            }
         }, $translationRecords);
 
         JobRecord::deleteAll(['id' => $this->id]);
@@ -123,7 +129,7 @@ class Job extends Element
         $this->elementIds = [];
 
         foreach ($elementIds as $elementId) {
-            $this->elementIds[] = (int) $elementId;
+            $this->elementIds[] = (int)$elementId;
         }
 
         return $this->elementIds;
@@ -149,11 +155,15 @@ class Job extends Element
     {
         $versions = $this->getVersions();
 
-        if (isset($versions[$elementId]) && $versions[$elementId] === 'null') {
-            $versions[$elementId] = null;
+        if (
+            !isset($versions[$elementId]) ||
+            $versions[$elementId] === 'null' ||
+            empty($versions[$elementId])
+        ) {
+            return $elementId;
         }
 
-        return (int)($versions[$elementId] ?? $elementId);
+        return (int)$versions[$elementId];
     }
 
     public function getVersionsAsString(): string
@@ -185,7 +195,10 @@ class Job extends Element
     public function afterDelete(): void
     {
         JobRecord::deleteAll(['id' => $this->id]);
+
         parent::afterDelete();
+
+        Craft::$app->elements->invalidateCachesForElementType(self::class);
     }
 
     public function isInstantFlow(): bool
@@ -222,6 +235,7 @@ class Job extends Element
             self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
             self::STATUS_COMPLETE => ['label' => 'Complete', 'color' => 'green'],
             self::STATUS_FAILED => ['label' => 'Failed', 'color' => 'red'],
+            self::STATUS_NEEDS_ATTENTION => ['label' => 'Needs attention', 'color' => 'red'],
         ];
     }
 
@@ -408,7 +422,7 @@ class Job extends Element
         );
 
         foreach ($languages as $language) {
-            $html .= "<li><span data-icon='world'>{$language}</span></li>";
+            $html .= "<li><span data-icon='world' data-language='{$language}'>{$language}</span></li>";
         }
         $html .= '</ul>';
 
@@ -458,6 +472,21 @@ class Job extends Element
     public function getCpEditUrl(): ?string
     {
         return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
+    }
+
+    public function canDelete(User $user): bool
+    {
+        return true;
+    }
+
+    public function canSave(User $user): bool
+    {
+        return true;
+    }
+
+    public function canView(User $user): bool
+    {
+        return true;
     }
 
     protected static function defineActions(string $source = null): array

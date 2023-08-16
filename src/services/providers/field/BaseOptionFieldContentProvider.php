@@ -8,6 +8,7 @@ use craft\errors\InvalidFieldException;
 use craft\fields\data\MultiOptionsFieldData;
 use craft\fields\data\SingleOptionFieldData;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\services\providers\command\ProvideContentCommand;
 
 class BaseOptionFieldContentProvider extends AbstractContentProvider
 {

@@ -39,13 +39,13 @@ class WiremockClient extends Module
                     $expectedUrl
                 )
             )
-            //                ->withRequestBody(
-            //                    WireMock::equalToJson(
-            //                        json_encode($expectedBody),
-            //                        true,
-            //                        false
-            //                    )
-            //                )
+                //                ->withRequestBody(
+                //                    WireMock::equalToJson(
+                //                        json_encode($expectedBody),
+                //                        true,
+                //                        false
+                //                    )
+                //                )
                 ->willReturn(
                     WireMock::aResponse()
                         ->withStatus($statusCode)
@@ -79,8 +79,12 @@ class WiremockClient extends Module
     /**
      * @throws JsonException
      */
-    public function expectSettingsGetRequest(string $expectedUrl, string $apiKey, array $responseBody, int $responseStatusCode): void
-    {
+    public function expectSettingsGetRequest(
+        string $expectedUrl,
+        string $apiKey,
+        array $responseBody,
+        int $responseStatusCode
+    ): void {
         $this->wireMock->stubFor(
             WireMock::get(
                 WireMock::urlEqualTo(
@@ -89,6 +93,26 @@ class WiremockClient extends Module
             )->withHeader(
                 'Authorization',
                 WireMock::equalTo('Bearer ' . $apiKey)
+            )->willReturn(
+                WireMock::aResponse()
+                    ->withStatus($responseStatusCode)
+                    ->withBody(
+                        json_encode($responseBody, 4194304)
+                    )
+            )
+        );
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function expectPackagistRequest(string $expectedUrl, array $responseBody, int $responseStatusCode): void
+    {
+        $this->wireMock->stubFor(
+            WireMock::get(
+                WireMock::urlEqualTo(
+                    $expectedUrl
+                )
             )->willReturn(
                 WireMock::aResponse()
                     ->withStatus($responseStatusCode)
@@ -207,6 +231,29 @@ class WiremockClient extends Module
         );
     }
 
+    public function expectTranslationGetRequest(
+        int $translationId,
+        int $responseCode,
+        ?array $responseBody = null
+    ): void {
+        $response = WireMock::aResponse()
+            ->withStatus($responseCode);
+
+        if ($responseBody !== null) {
+            $response->withBody(json_encode($responseBody));
+        }
+
+        $this->wireMock->stubFor(
+            WireMock::get(
+                WireMock::urlEqualTo(
+                    sprintf('/api/v1.0/translations/%d', $translationId)
+                )
+            )->willReturn(
+                $response
+            )
+        );
+    }
+
     public function expectAllRequestsAreMatched(): void
     {
         $unmatched = $this->wireMock->findUnmatchedRequests();
@@ -219,7 +266,6 @@ class WiremockClient extends Module
             ];
         }
 
-        $unmatched123 = $unmatched->getRequests();
         $this->assertEmpty(
             $unmatched->getRequests(),
             sprintf('Some of requests are unmatched: %s', json_encode($requests, JSON_PRETTY_PRINT))

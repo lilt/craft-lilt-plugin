@@ -20,11 +20,23 @@ use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
+use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use Throwable;
 use yii\base\Exception;
 
 class CreateDraftHandler
 {
+    /**
+     * @var CopyFieldsHandler
+     */
+    public $copyFieldsHandler;
+
+    public function __construct(
+        CopyFieldsHandler $copyFieldsHandler
+    ) {
+        $this->copyFieldsHandler = $copyFieldsHandler;
+    }
+
     /**
      * @throws Exception
      * @throws Throwable
@@ -42,23 +54,18 @@ class CreateDraftHandler
          * Element will be created from original one, we can't create draft from draft
          * @var Entry $createFrom
          */
-        $createFrom = $element ? Craft::$app->elements->getElementById(
+        $createFrom = $element->getIsDraft() ? Craft::$app->elements->getElementById(
             $element->getCanonicalId()
         ) : $element;
 
         $creatorId = Craft::$app->user->getId();
         if ($creatorId === null) {
-            //TODO: it is not expected to reach, but it is possible. Investigation herer, why user id is null?
-            Craft::error(
-                "Can't get user from current session with Craft::\$app->user->getId(),"
-                . "please check you app configuration!"
-            );
-            $creatorId = $createFrom->authorId;
+            $creatorId = $element->authorId;
         }
 
         $draft = Craft::$app->drafts->createDraft(
             $createFrom,
-            $creatorId ?? 0, //TODO: not best but one of the ways. Need to check why user can have nullable id?
+            $creatorId ?? 0,
             sprintf(
                 '%s [%s -> %s] ' . (new DateTime())->format('H:i:s'),
                 $jobTitle,
@@ -78,37 +85,16 @@ class CreateDraftHandler
             $targetSiteId
         );
 
-        $fieldLayout = $element->getFieldLayout();
-        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
-
-        foreach ($fields as $field) {
-            $field->copyValue($element, $draft);
-        }
-
-        $draft->title = $element->title;
-
-        $draft->duplicateOf = $element;
-        $draft->mergingCanonicalChanges = true;
-
-        /**
-         * TODO: for some reason we have duplicate error here.
-         *  Craft tries to create same block. Need investigation here.
-         */
-        $draftId = $draft->draftId;
-        $draft->draftId = null;
-        $draft->afterPropagate(false);
-        $draft->draftId = $draftId;
+        $this->copyFieldsHandler->copy($element, $draft);
 
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
         );
-        $isCopySlugEnabled = (bool) ($copyEntriesSlugFromSourceToTarget->value ?? false);
+        $isCopySlugEnabled = (bool)($copyEntriesSlugFromSourceToTarget->value ?? false);
 
         if ($isCopySlugEnabled) {
             $draft->slug = $element->slug;
         }
-
-        Craft::$app->elements->saveElement($draft);
 
         $this->markFieldsAsChanged($draft);
 
@@ -119,6 +105,19 @@ class CreateDraftHandler
         }
         $this->upsertChangedAttributes($draft, $attributes);
 
+        $result = Craft::$app->elements->saveElement($draft, true, false, false);
+        if (!$result) {
+            Craft::error(
+                sprintf(
+                    "Can't save freshly createdd draft %d for site %s",
+                    $draft->id,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $targetSiteId
+                    )
+                )
+            );
+        }
+
         return $draft;
     }
 
@@ -126,7 +125,7 @@ class CreateDraftHandler
      * @throws InvalidFieldException
      * @throws \yii\db\Exception
      */
-    private function markFieldsAsChanged(ElementInterface $element): void
+    public function markFieldsAsChanged(ElementInterface $element): void
     {
         $fieldLayout = $element->getFieldLayout();
         $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
@@ -138,18 +137,20 @@ class CreateDraftHandler
                 || get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
             ) {
                 /**
-                 * @var ElementQuery $matrixBlockQuery
+                 * @var ElementQuery $blockQuery
                  */
-                $matrixBlockQuery = $element->getFieldValue($field->handle);
+                $blockQuery = $element->getFieldValue($field->handle);
 
                 /**
                  * @var Element[] $blockElements
                  */
-                $blockElements = $matrixBlockQuery->all();
+                $blockElements = $blockQuery->all();
 
                 foreach ($blockElements as $blockElement) {
                     $this->markFieldsAsChanged($blockElement);
                 }
+
+                $this->upsertChangedFields($element, $field);
 
                 continue;
             }
@@ -166,6 +167,11 @@ class CreateDraftHandler
     {
         $userId = Craft::$app->getUser()->getId();
         $timestamp = Db::prepareDateForDb(new DateTime());
+
+        if ($element->getId() === null) {
+            //field wasn't created yet
+            return;
+        }
 
         $insert = [
             'elementId' => $element->getId(),
@@ -189,7 +195,7 @@ class CreateDraftHandler
         );
     }
 
-    private function upsertChangedAttributes(ElementInterface $element, array $attributes): void
+    public function upsertChangedAttributes(ElementInterface $element, array $attributes): void
     {
         $userId = Craft::$app->getUser()->getId();
         $timestamp = Db::prepareDateForDb(new DateTime());

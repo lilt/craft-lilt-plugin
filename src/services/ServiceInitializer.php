@@ -27,12 +27,19 @@ use lilthq\craftliltplugin\services\handlers\CreateDraftHandler;
 use lilthq\craftliltplugin\services\handlers\CreateJobHandler;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\EditJobHandler;
+use lilthq\craftliltplugin\services\handlers\field\copier\DefaultFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\MatrixFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\NeoFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\SuperTableFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
+use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
+use lilthq\craftliltplugin\services\handlers\UpdateTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
@@ -49,9 +56,11 @@ use lilthq\craftliltplugin\services\providers\field\TableContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
+use lilthq\craftliltplugin\services\repositories\external\PackagistRepository;
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use yii\base\InvalidConfigException;
 
@@ -79,7 +88,9 @@ class ServiceInitializer
             'translationFailedHandler' => TranslationFailedHandler::class,
             'createTranslationsHandler' => CreateTranslationsHandler::class,
             'refreshJobStatusHandler' => RefreshJobStatusHandler::class,
-            'createDraftHandler' => CreateDraftHandler::class,
+            'updateJobStatusHandler' => UpdateJobStatusHandler::class,
+            'updateTranslationsConnectorIds' => UpdateTranslationsConnectorIds::class,
+            'packagistRepository' => PackagistRepository::class,
             'listenerRegister' => [
                 'class' => ListenerRegister::class,
                 'availableListeners' => CraftliltpluginParameters::LISTENERS,
@@ -88,6 +99,22 @@ class ServiceInitializer
 
         $pluginInstance->setComponents([
             'connectorConfiguration' => $pluginInstance->connectorConfigurationProvider->provide(),
+        ]);
+
+        $pluginInstance->setComponents([
+            'createDraftHandler' => function () {
+                return new CreateDraftHandler(
+                    new CopyFieldsHandler(
+                        [
+                            CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldCopier(),
+                            CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldCopier(),
+                            CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableFieldCopier(),
+
+                            CopyFieldsHandler::DEFAULT_FIELD_COPIER => new DefaultFieldCopier()
+                        ]
+                    )
+                );
+            },
         ]);
 
         $pluginInstance->setComponents([
@@ -230,6 +257,10 @@ class ServiceInitializer
                 [
                     'class' => ConnectorFileRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
+                ],
+            'settingsRepository' =>
+                [
+                    'class' => SettingsRepository::class,
                 ],
             'editJobHandler' =>
                 [

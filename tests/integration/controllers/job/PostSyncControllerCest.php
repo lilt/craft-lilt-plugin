@@ -5,25 +5,17 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugintests\integration\controllers\job;
 
 use Codeception\Exception\ModuleException;
-use Codeception\Util\HttpCode;
 use Craft;
-use craft\elements\db\MatrixBlockQuery;
 use craft\elements\Entry;
-use craft\elements\MatrixBlock;
 use IntegrationTester;
-use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\SettingsResponse;
-use LiltConnectorSDK\Model\TranslationResponse;
-use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
+use lilthq\craftliltplugin\modules\ManualJobSync;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
-use lilthq\tests\fixtures\ExpectedElementContent;
-use yii\base\InvalidConfigException;
 
 class PostSyncControllerCest extends AbstractIntegrationCest
 {
@@ -101,20 +93,13 @@ class PostSyncControllerCest extends AbstractIntegrationCest
         $I->assertTranslationStatus($translations777[0]->id, Job::STATUS_IN_PROGRESS);
         $I->assertTranslationStatus($translations888[0]->id, Job::STATUS_IN_PROGRESS);
 
-        $I->assertJobInQueue(
-            (new FetchJobStatusFromConnector(
-                [
-                    'jobId' => $job888->id,
-                    'liltJobId' => $job888->liltJobId,
-                ]
-            ))
-        );
+        $jobs = [$job888->id, $job777->id];
+        sort($jobs);
 
         $I->assertJobInQueue(
-            (new FetchJobStatusFromConnector(
+            (new ManualJobSync(
                 [
-                    'jobId' => $job777->id,
-                    'liltJobId' => $job777->liltJobId,
+                    'jobIds' => $jobs,
                 ]
             ))
         );

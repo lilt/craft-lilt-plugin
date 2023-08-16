@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\translation;
 
 use Craft;
+use craft\base\ElementInterface;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Translation;
@@ -52,10 +53,6 @@ class PostTranslationPublishController extends AbstractJobController
             ['status' => TranslationRecord::STATUS_PUBLISHED],
             ['id' => $translationIds]
         );
-
-        if ($updated !== 1) {
-            //TODO: handle when we update more then one row
-        }
 
         if ($updated) {
             foreach ($translations as $translation) {

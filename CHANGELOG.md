@@ -4,10 +4,44 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 4.2.0 - 2022-11-27
+## 4.2.0 - 2023-08-09
 ### Added
+- Introduced new job and translation status "needs attention"
+- Added warning message for translation jobs exceeding field limit with
+- Included warning icon for each translation exceeding field limit with
+- Download Diagnostic Data button for error reporting
+- Notification if the plugin is outdated
+- New queue job for manually syncing Lilt jobs
+- Entry slug name added to translation filenames
+- Priority for jobs from queue
+- Background job for translation downloading
+- Increase TTR for background jobs
 - Option to enable target entries on translations publish
 - Option to enable slug copy from source entries to target
+
+### Changed
+- Updated error message for failed jobs after retries
+- Retry logic for queues
+- Queues priority decreased for sending jobs to 1024 and receiving to 2048
+- Deprecate FetchInstantJobTranslationsFromConnector and FetchVerifiedJobTranslationsFromConnector
+
+### Fixed
+- Merge canonical changes from the Neo field into drafts
+- Added fallback for block elements without a created structure to fix content provider
+- Resolved duplication issue with Neo and SuperTable fields
+- Query for fetching translations by status and id
+- Duplication of Neo fields content
+- Fixed an issue with drafts being overridden due to an incorrect canonical merge
+- Fixed a problem where translations were not updating to a failed status when a job fails
+- Multilingual draft publishing issue
+- Failed jobs aren't able to be deleted ([github issue](https://github.com/lilt/craft-lilt-plugin/issues/90))
+- Copy source text for Matrix fields
+- Configuration page issues
+- Get versions for Jobs element
+- Skip sync for new jobs
+- Enabling of entries on translation publish
+- Entry version content provider
+- Updating of translation connector ids
 
 ### Fixed
 - Multiple drafts apply issue for different sites

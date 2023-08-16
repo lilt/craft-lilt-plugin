@@ -118,20 +118,32 @@ class CraftLiltPluginHelper extends Module
 
     public function assertJobInQueue(BaseJob $expectedJob): void
     {
-        $jobInfos = Craft::$app->queue->getJobInfo();
-
-        $this->assertNotEmpty($jobInfos);
-
-        foreach ($jobInfos as $jobInfo) {
-            $actual = Craft::$app->queue->getJobDetails($jobInfo['id']);
-            $key = get_class($actual['job']) . '_' . json_encode($actual['job']);
-            $jobInfos[$key] = $actual['job'];
-        }
+        $jobInfos = $this->getJobInfos();
 
         $key = get_class($expectedJob) . '_' . json_encode($expectedJob);
 
         $this->assertArrayHasKey($key, $jobInfos);
         $this->assertEquals($expectedJob, $jobInfos[$key]);
+    }
+
+    public function assertJobNotInQueue(BaseJob $expectedJob, string $message = ''): void
+    {
+        $jobInfos = $this->getJobInfos();
+
+        $key = get_class($expectedJob) . '_' . json_encode($expectedJob);
+
+        $this->assertArrayNotHasKey($key, $jobInfos, $message);
+    }
+
+    public function assertJobIdNotInQueue(int $jobId, string $message = ''): void
+    {
+        $jobInfos = $this->getJobInfos();
+
+        foreach ($jobInfos as $jobInfo) {
+            if (property_exists($jobInfo, 'jobId')) {
+                $this->assertNotEquals($jobId, $jobInfo->jobId, $message);
+            }
+        }
     }
 
     public function assertTranslationsContentMatch(array $translations, array $expectedContent): void
@@ -340,5 +352,38 @@ class CraftLiltPluginHelper extends Module
         Craft::$app->getQueue()->push($job);
 
         Craft::$app->getQueue()->run();
+    }
+
+    public function executeQueue(string $queueItem, array $params = []): void
+    {
+        /** @var BaseJob $job */
+        $job = new $queueItem($params);
+
+        if (!$job instanceof BaseJob) {
+            throw new InvalidArgumentException('Not a job');
+        }
+
+        $job->execute(
+            Craft::$app->queue
+        );
+    }
+
+    /**
+     * @return array
+     */
+    private function getJobInfos(): array
+    {
+        $jobInfos = Craft::$app->queue->getJobInfo();
+
+        $this->assertNotEmpty($jobInfos);
+
+        $return = [];
+
+        foreach ($jobInfos as $jobInfo) {
+            $actual = Craft::$app->queue->getJobDetails($jobInfo['id']);
+            $key = get_class($actual['job']) . '_' . json_encode($actual['job']);
+            $return[$key] = $actual['job'];
+        }
+        return $return;
     }
 }

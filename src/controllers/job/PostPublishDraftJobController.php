@@ -49,7 +49,7 @@ class PostPublishDraftJobController extends AbstractPostJobController
             $job->targetSiteIds,
             $job->sourceSiteId,
             $job->translationWorkflow,
-            $job->versions,
+            $job->getVersions(),
             Job::STATUS_NEW
         );
 

@@ -2,7 +2,7 @@ name: Tests
 on:
   push:
     branches:
-      - 4.x #CraftCMS v4 | PHP 8.0.2
+      - 4.x #CraftCMS v4
   pull_request:
     branches:
       - "*"

@@ -2,7 +2,7 @@
 
 /**
  * @link      https://github.com/lilt
- * @copyright Copyright (c) 2022 Lilt Devs
+ * @copyright Copyright (c) 2023 Lilt Devs
  */
 
 declare(strict_types=1);
@@ -10,9 +10,14 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
+use craft\base\ElementInterface;
+use craft\errors\InvalidElementException;
 use craft\services\Drafts as DraftRepository;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
+use yii\base\Exception;
 
 class PublishDraftHandler
 {
@@ -33,18 +38,139 @@ class PublishDraftHandler
         );
 
         if (!$draftElement) {
-            //TODO: published already or what? Why we are here?
             return;
         }
 
-        $enableEntriesForTargetSitesRecord = SettingRecord::findOne(['name' => 'enable_entries_for_target_sites']);
-        $enableEntriesForTargetSites = (bool) ($enableEntriesForTargetSitesRecord->value
-            ?? false);
+        // Merge canonical changes for supertable fields in current draft before publishing
+        if (
+            class_exists('verbb\supertable\SuperTable')
+            || class_exists('benf\neo\Plugin')
+        ) {
+            $translation = TranslationRecord::findOne(['translatedDraftId' => $draftId]);
+            $translations = TranslationRecord::findAll(
+                [
+                    'jobId' => $translation->jobId,
+                    'status' => TranslationRecord::STATUS_PUBLISHED
+                ]
+            );
 
-        if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($targetSiteId)) {
-            $draftElement->setEnabledForSite([$targetSiteId => true]);
+            foreach ($translations as $translation) {
+                $draftElementLanguageToUpdate = Craft::$app->elements->getElementById(
+                    $draftId,
+                    null,
+                    $translation->targetSiteId
+                );
+                $draftElementLanguageToUpdate->mergingCanonicalChanges = true;
+
+                $fieldLayout = $draftElementLanguageToUpdate->getFieldLayout();
+                $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
+                foreach ($fields as $field) {
+                    // Check if the field is of Super Table type and the required classes and methods are available
+                    if (
+                        get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
+                        && method_exists('verbb\supertable\SuperTable', 'getService')
+                        && method_exists('verbb\supertable\SuperTable', 'getInstance')
+                    ) {
+                        // Get the Super Table plugin instance
+                        $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
+
+                        // Get the Super Table plugin service
+                        /** @var \verbb\supertable\services\Service $superTablePluginService */
+                        $superTablePluginService = $superTablePluginInstance->getService();
+
+                        // Duplicate the blocks for the field
+                        $superTablePluginService->duplicateBlocks(
+                            $field,
+                            $draftElementLanguageToUpdate->getCanonical(),
+                            $draftElementLanguageToUpdate
+                        );
+
+                        continue;
+                    }
+
+                    if (
+                        get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
+                        && class_exists('benf\neo\Plugin')
+                        && method_exists('benf\neo\Plugin', 'getInstance')
+                    ) {
+                        // Get the Neo plugin instance
+                        /** @var \benf\neo\Plugin $neoPluginInstance */
+                        $neoPluginInstance = call_user_func(['benf\neo\Plugin', 'getInstance']);
+
+                        // Get the Neo plugin Fields service
+                        /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
+                        $neoPluginFieldsService = $neoPluginInstance->get('fields');
+
+                        // Clear current neo field value
+                        $neoField = $draftElementLanguageToUpdate->getFieldValue($field->handle);
+                        foreach ($neoField as $block) {
+                            if (!$block instanceof ElementInterface) {
+                                continue;
+                            }
+
+                            Craft::$app->getElements()->deleteElement($block);
+                        }
+                        Craft::$app->getElements()->saveElement($draftElementLanguageToUpdate);
+
+                        // Duplicate the blocks for the field
+                        $neoPluginFieldsService->duplicateBlocks(
+                            $field,
+                            $draftElementLanguageToUpdate->getCanonical(),
+                            $draftElementLanguageToUpdate
+                        );
+
+                        continue;
+                    }
+                }
+            }
         }
 
-        $this->draftRepository->applyDraft($draftElement);
+        $enableEntriesForTargetSitesRecord = SettingRecord::findOne(['name' => 'enable_entries_for_target_sites']);
+        $enableEntriesForTargetSites = (bool)($enableEntriesForTargetSitesRecord->value
+            ?? false);
+
+        $element = $this->apply($draftElement);
+        if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($targetSiteId)) {
+            $element->setEnabledForSite([$targetSiteId => true]);
+        }
+
+        Craft::$app->getElements()->saveElement($element, true, false, false);
+        Craft::$app->getElements()->invalidateCachesForElement($element);
+    }
+
+    // copied from \craft\controllers\EntryRevisionsController::actionPublishDraft
+    private function apply(ElementInterface $draft): ElementInterface
+    {
+        if ($draft->getIsUnpublishedDraft()) {
+            /** @since setIsFresh in craft only since 3.7.14 */
+            if (method_exists($draft, 'setIsFresh')) {
+                $draft->setIsFresh();
+            }
+
+            $draft->propagateAll = true;
+        }
+
+        if (!Craft::$app->getElements()->saveElement($draft)) {
+            throw new InvalidElementException($draft);
+        }
+
+        $isDerivative = $draft->getIsDerivative();
+        if ($isDerivative) {
+            $lockKey = "entry:$draft->canonicalId";
+            $mutex = Craft::$app->getMutex();
+            if (!$mutex->acquire($lockKey, 15)) {
+                throw new Exception('Could not acquire a lock to save the entry.');
+            }
+        }
+
+        try {
+            $newEntry = $this->draftRepository->applyDraft($draft);
+        } finally {
+            if ($isDerivative) {
+                $mutex->release($lockKey);
+            }
+        }
+
+        return $newEntry;
     }
 }

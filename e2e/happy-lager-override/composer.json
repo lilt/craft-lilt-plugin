@@ -1,0 +1,38 @@
+{
+  "require": {
+    "php": ">=7.0.0",
+    "craftcms/cms": "^4.0.0",
+    "vlucas/phpdotenv": "2.6.7",
+    "craftcms/redactor": "*",
+    "verbb/super-table": "*",
+    "spicyweb/craft-neo": "*",
+    "yiisoft/yii2": "2.0.45"
+  },
+  "autoload": {
+    "psr-4": {
+      "modules\\": "modules/"
+    }
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "/tmp/craft-lilt-plugin",
+      "options": {
+        "versions": {
+          "lilt/craft-lilt-plugin": "999.9.9",
+          "symlink": false
+        }
+      }
+    }
+  ],
+  "config": {
+    "optimize-autoloader": true,
+    "platform": {
+      "php": "8.0.26"
+    },
+    "allow-plugins": {
+      "craftcms/plugin-installer": true,
+      "yiisoft/yii2-composer": true
+    }
+  }
+}

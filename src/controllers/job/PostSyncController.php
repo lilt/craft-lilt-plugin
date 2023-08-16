@@ -15,8 +15,9 @@ use craft\web\Controller;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
-use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
+use lilthq\craftliltplugin\modules\ManualJobSync;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationNotificationsRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use yii\web\Response;
 
@@ -46,19 +47,30 @@ class PostSyncController extends Controller
                 continue;
             }
 
-            $selectedJobIds[] = $job->id;
+            if (
+                $job->status === Job::STATUS_NEW
+                || $job->status === Job::STATUS_DRAFT
+                || $job->status === Job::STATUS_COMPLETE
+            ) {
+                continue;
+            }
 
-            Queue::push(
-                (new FetchJobStatusFromConnector(
-                    [
-                        'jobId' => $job->id,
-                        'liltJobId' => $job->liltJobId,
-                    ]
-                )),
-                FetchJobStatusFromConnector::PRIORITY,
-                FetchJobStatusFromConnector::DELAY_IN_SECONDS
-            );
+            $selectedJobIds[] = (int)$job->id;
         }
+
+        sort($selectedJobIds);
+
+        Queue::push(
+            (new ManualJobSync(
+                [
+                    'jobIds' => $selectedJobIds,
+                ]
+            )),
+            ManualJobSync::PRIORITY,
+            ManualJobSync::DELAY_IN_SECONDS
+        );
+
+        TranslationNotificationsRecord::deleteAll(['jobId' => $selectedJobIds]);
 
         TranslationRecord::updateAll(
             [
