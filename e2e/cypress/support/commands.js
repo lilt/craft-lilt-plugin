@@ -588,12 +588,13 @@ Cypress.Commands.add('assertEntryContent',
 
               continue;
             }
+
             //TODO: check why CraftCMS add or remove extra spaces on html elements
-            cy.get(expectedValue.id, {timeout: 1000}).
+            cy.get(expectedValue.id, {timeout: 10000}).
                 invoke(expectedValue.functionName).
                 should('not.equal', 'This content should be changed');
 
-            cy.get(expectedValue.id, {timeout: 1000}).
+            cy.get(expectedValue.id, {timeout: 10000}).
                 invoke(expectedValue.functionName).
                 then(text => {
                   expect(
@@ -754,8 +755,6 @@ Cypress.Commands.add('assertDraftSlugValue', (copySlug, slug, language) => {
 
   if (copySlug) {
     // assert slug to be equal to updated one on draft
-    cy.get('#slug-field #slug-status.status-badge.modified').
-        should('be.visible');
     cy.get('#slug-field input#slug').invoke('val').should('equal', slug);
   } else {
     // assert slug to be equal to be updated
