@@ -2,18 +2,18 @@ CYPRESS_CACHE_FOLDER?=/e2e/.cache
 DB_DATABASE?=craft-lilt
 
 cli-dev:
-	docker run --rm -it \
+	docker run -u www-data --rm -it \
 		-v ${PWD}/happy-lager-main:/app \
 		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
 		craftcms/cli:8.0-dev \
 		sh
 
 composer-install:
-	docker run --rm -it \
+	docker run --rm \
 		-v ${PWD}/happy-lager-main:/app \
 		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
-		craftcms/cli:8.0-dev \
-		composer require -W "lilt/craft-lilt-plugin":"^999.9.9"
+		composer:latest \
+		composer require --ignore-platform-reqs "lilt/craft-lilt-plugin":"^999.9.9"
 
 reset: cp composer-install
 	docker-compose exec -T app sh -c 'php craft db/restore happylager.sql'
@@ -21,7 +21,7 @@ reset: cp composer-install
 
 
 install: clone
-	docker run --rm \
+	docker run -u www-data --rm \
 		-v ${PWD}/happy-lager-main:/app \
 		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
 		composer:latest \
@@ -53,7 +53,8 @@ clone:
 	rm -rf happy-lager-main
 	git clone https://github.com/craftcms/demo.git happy-lager-main
 	rm -rf happy-lager-main/.git
-	cp -R happy-lager-override/* happy-lager-main
+	cp happy-lager-override/.dockerignore happy-lager-main/
+	cp -R happy-lager-override/* happy-lager-main/
 	rm -rf happy-lager-main/plugin-src
 	mkdir happy-lager-main/plugin-src
 	cp -R ../resources happy-lager-main/plugin-src/resources
@@ -81,6 +82,8 @@ wait-service:
 up: clone down composer-install
 	docker-compose up --build -d
 	docker-compose ps
+	docker-compose exec -T app sh -c 'chmod -R 777 /app'
+	docker-compose exec -T app sh -c 'chown -R www-data:www-data /app'
 	docker-compose exec -T mysql sh -c 'while ! mysqladmin ping -h"mysql" --silent; do sleep 1; done'
 	docker-compose exec -T app sh -c 'php craft setup/security-key'
 	docker-compose exec -T app sh -c 'echo DB_DRIVER=mysql >> .env'
@@ -100,10 +103,8 @@ up: clone down composer-install
 	docker-compose exec -T app sh -c 'php craft migrate/up'
 	docker-compose exec -T app sh -c 'php craft queue/run'
 	docker-compose exec -T app sh -c 'cat .env'
-	rm -rf storage/logs
-
 cli:
-	docker-compose exec -T app sh
+	docker-compose exec app sh
 
 test:
 	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install

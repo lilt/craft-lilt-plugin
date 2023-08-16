@@ -6,9 +6,6 @@ services:
     image: happy-lager:latest
     networks:
       - e2e-network
-    volumes:
-      - ./happy-lager-main:/app
-      - ./happy-lager-main/plugin-src:/tmp/craft-lilt-plugin
     depends_on:
       - mysql
       - mockserver

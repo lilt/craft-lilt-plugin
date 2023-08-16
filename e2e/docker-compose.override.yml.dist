@@ -3,9 +3,8 @@ version: "3.7"
 services:
 #  app:
 #    volumes:
-#      - ./../lilt/craft-lilt-plugin/:/app/vendor/lilt/craft-lilt-plugin
-#      - ./happy-lager-main/storage/logs:/app/storage/logs
-#      - ./happy-lager-override/migrations:/app/migrations
+#      - ./happy-lager-main:/app
+#      - ./happy-lager-main/plugin-src:/tmp/craft-lilt-plugin
 #    ports:
 #       - "88:8080"
 #
