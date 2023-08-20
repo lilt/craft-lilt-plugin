@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+  app:
+    build: ./happy-lager-main
+    image: happy-lager:latest
+    networks:
+      - e2e-network
+    depends_on:
+      - mysql
+      - mockserver
+
+  mysql:
+    image: mysql:5.7
+    platform: linux/x86_64
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: "craft-lilt"
+      MYSQL_PASSWORD: "craft-lilt"
+    networks:
+      - e2e-network
+
+  mockserver:
+    image: mockserver/mockserver:latest
+    environment:
+      MOCKSERVER_CORS_ALLOW_ORIGIN: "*"
+      MOCKSERVER_CORS_ALLOW_METHODS: "CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, PATCH, TRACE"
+    networks:
+      - e2e-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:1080/status" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  redis:
+    image: redis:5-alpine
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+networks:
+  e2e-network:
+    name: e2e-network
+    external: false

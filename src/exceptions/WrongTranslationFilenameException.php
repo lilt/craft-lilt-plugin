@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
+
+declare(strict_types=1);
+
+namespace lilthq\craftliltplugin\exceptions;
+
+use RuntimeException;
+
+class WrongTranslationFilenameException extends RuntimeException
+{
+}

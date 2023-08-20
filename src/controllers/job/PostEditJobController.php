@@ -50,7 +50,7 @@ class PostEditJobController extends AbstractPostJobController
             $job->targetSiteIds,
             $job->sourceSiteId,
             $job->translationWorkflow,
-            $job->versions
+            $job->getVersions()
         );
 
         Craftliltplugin::getInstance()->editJobHandler->__invoke(
@@ -61,6 +61,10 @@ class PostEditJobController extends AbstractPostJobController
 
         Craft::$app->getSession()->setFlash(
             'cp-notice',
+            'Translate job saved successfully.'
+        );
+
+        Craft::$app->getSession()->setNotice(
             'Translate job saved successfully.'
         );
 

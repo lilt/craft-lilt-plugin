@@ -3,8 +3,8 @@
 
 export
 
-PHP_VERSION?=8.0
-MYSQL_VERSION?=5.7
+PHP_VERSION?=8.1
+MYSQL_VERSION?=8.0
 
 up:
 	docker-compose up -d
@@ -34,7 +34,7 @@ composer-install:
 quality:
 	docker-compose exec -T -u www-data cli-app sh -c "curl -L -s https://phar.phpunit.de/phpcpd.phar --output phpcpd.phar"
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/phpcs"
-	docker-compose exec -T -u www-data cli-app sh -c "php phpcpd.phar src"
+	docker-compose exec -T -u www-data cli-app sh -c "php phpcpd.phar src --exclude /craft-lilt-plugin/src/migrations"
 
 quality-fix:
 	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/phpcbf"

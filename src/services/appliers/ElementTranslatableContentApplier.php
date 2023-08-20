@@ -15,8 +15,10 @@ use craft\errors\InvalidFieldException;
 use craft\services\Drafts as DraftRepository;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
-use lilthq\craftliltplugin\exeptions\DraftNotFoundException;
+use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exceptions\DraftNotFoundException;
 use lilthq\craftliltplugin\records\I18NRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\appliers\field\ApplyContentCommand;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
 use Throwable;
@@ -89,15 +91,18 @@ class ElementTranslatableContentApplier
                 $fieldData,
                 $content,
                 $translationApplyCommand->getSourceSiteId(),
-                $translationApplyCommand->getTargetSiteId()
+                $translationApplyCommand->getTargetSiteId(),
+                $translationApplyCommand->getJob(),
+                $translationApplyCommand->getTranslationRecord()
             );
 
             $result = $this->fieldContentApplier->apply(
                 $command
             );
 
-            if (!$result->isApplied()) {
-                //TODO: is it possible?
+            if (!$result->isApplied() && $result->isCharLimitReached()) {
+                $translationApplyCommand->getTranslationRecord()->status = TranslationRecord::STATUS_NEEDS_ATTENTION;
+                $translationApplyCommand->getTranslationRecord()->save();
             }
 
             if ($result->isApplied() && $result->getFieldValue()) {
@@ -124,23 +129,19 @@ class ElementTranslatableContentApplier
             }
         }
 
-        /* Craft::$app->elements->invalidateCachesForElement($draftElement);
-
-        $draftElement = Craft::$app->elements->getElementById(
-            $draftElement->id,
-            null,
-            $translationApplyCommand->getTargetSiteId()
-        ); */
-
         /** @since setIsFresh in craft only since 3.7.14 */
         if (method_exists($draftElement, 'setIsFresh')) {
-            // TODO: It was added because of: Calling unknown method: setIsFresh()
             $draftElement->setIsFresh();
         }
 
-        Craft::$app->elements->saveElement(
-            $draftElement
-        );
+        Craft::$app
+            ->elements
+            ->saveElement(
+                $draftElement,
+                true,
+                false,
+                false
+            );
 
         return $draftElement;
     }
@@ -160,21 +161,10 @@ class ElementTranslatableContentApplier
         TranslationApplyCommand $translationApplyCommand,
         array $newAttributes
     ): ElementInterface {
-
-        # TODO: double check how to create draft from draft
-        #$source = $translationApplyCommand->getElement()->getIsDraft() ? Craft::$app->elements->getElementById(
-        #    $translationApplyCommand->getElement()->getCanonicalId()
-        #) : $translationApplyCommand->getElement();
-
         /** Element will be created from original one, we can't create draft from draft */
         $createFrom = $translationApplyCommand->getElement()->getIsDraft() ? Craft::$app->elements->getElementById(
             $translationApplyCommand->getElement()->getCanonicalId()
         ) : $translationApplyCommand->getElement();
-
-        //TODO: we also can copy draft, but then we have to fetch it with related site
-        //$clonedEntry = Craft::$app->getElements()->duplicateElement
-
-//        $translationApplyCommand->getJob()->getAuthor()->getId()
 
         $draft = $this->draftRepository->createDraft(
             $createFrom,
@@ -187,9 +177,8 @@ class ElementTranslatableContentApplier
                 ),
                 $translationApplyCommand->getTargetLanguage()
             ),
-            $notes = null,
-            $newAttributes,
-            $provisional = false
+            null,
+            $newAttributes
         );
 
         $draftElement = Craft::$app->elements->getElementById(
@@ -201,10 +190,7 @@ class ElementTranslatableContentApplier
         );
 
         if (!$draftElement) {
-            //TODO: freshly created not found? Is it possible?
             throw new DraftNotFoundException();
-            //TODO: some issue
-            //return $draft;
         }
 
         return $draftElement;

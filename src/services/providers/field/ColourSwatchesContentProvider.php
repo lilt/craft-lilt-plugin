@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services\providers\field;
 
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\services\providers\command\ProvideContentCommand;
 use percipioglobal\colourswatches\fields\ColourSwatches;
 
 class ColourSwatchesContentProvider extends AbstractContentProvider

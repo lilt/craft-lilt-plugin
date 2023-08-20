@@ -6,6 +6,7 @@ namespace lilthq\craftliltplugin\services\providers\field;
 
 use craft\errors\InvalidFieldException;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\services\providers\command\ProvideContentCommand;
 
 class PlainTextContentProvider extends AbstractContentProvider
 {

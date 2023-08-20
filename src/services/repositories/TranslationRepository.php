@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @link      https://github.com/lilt
+ * @copyright Copyright (c) 2022 Lilt Devs
+ */
+
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\repositories;
@@ -43,7 +48,7 @@ class TranslationRepository
         $translation = new Translation($config);
         Craft::$app->getElements()->saveElement($translation);
 
-        $translationRecord =  new TranslationRecord(
+        $translationRecord = new TranslationRecord(
             array_merge(
                 [
                     'id' => $translation->id,
@@ -54,6 +59,8 @@ class TranslationRepository
         );
 
         $translationRecord->save();
+
+        Craft::$app->getElements()->invalidateCachesForElement($translation);
 
         return $translationRecord;
     }
@@ -160,6 +167,10 @@ class TranslationRepository
         return TranslationRecord::findOne(['translatedDraftId' => $translatedDraftId]);
     }
 
+    /**
+     * @param int $jobId
+     * @return TranslationRecord[][]
+     */
     public function findUnprocessedByJobIdMapped(int $jobId): array
     {
         $result = TranslationRecord::findAll(

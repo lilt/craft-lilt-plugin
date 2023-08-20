@@ -7,6 +7,7 @@ namespace lilthq\craftliltplugin\services\providers\field;
 use craft\errors\InvalidFieldException;
 use fruitstudios\linkit\fields\LinkitField;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\services\providers\command\ProvideContentCommand;
 
 class LinkitContentProvider extends AbstractContentProvider
 {

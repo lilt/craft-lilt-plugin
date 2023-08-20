@@ -1,0 +1,7 @@
+node_modules
+cypress/videos
+.idea
+*.env.json
+happy-lager-main/
+!happy-lager-override/composer.lock
+*.override.yml

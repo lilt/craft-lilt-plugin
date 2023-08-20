@@ -18,45 +18,49 @@
     {% if element.id is defined and element.id > 0 %}
     <div class="field">
         <div class="heading">
-            <label id="slug-label" for="slug">Job ID</label>
+            <label id="meta-settings-job-id-label" for="meta-settings-job-id">Job ID</label>
         </div>
-        <div class="ltr">{{element.id}}</div>
+        <div class="ltr" id="meta-settings-job-id">{{element.id}}</div>
     </div>
     {% endif %}
 
     {% if element.liltJobId is defined and element.liltJobId is not null %}
     <div class="field">
         <div class="heading">
-            <label id="slug-label" for="slug">Lilt ID</label>
+            <label id="meta-settings-lilt-id-label" for="meta-settings-lilt-id">Lilt ID</label>
         </div>
-        <div class="ltr">{{element.liltJobId}}</div>
+        <div id="meta-settings-lilt-id" class="ltr">{{element.liltJobId}}</div>
     </div>
     {% endif %}
 
     {% if element.sourceSiteId is defined and element.sourceSiteId is not null %}
     <div class="field">
         <div class="heading">
-            <label id="slug-label" for="slug">Source Site</label>
+            <label id="meta-settings-source-site-label" for="meta-settings-source-site">Source Site</label>
         </div>
-        <div class="ltr">{{ element.sourceSiteIdHtml | raw }}</div>
+        <div id="meta-settings-source-site" class="ltr">{{ element.sourceSiteIdHtml | raw }}</div>
     </div>
     {% endif %}
 
     {% if element.targetSiteIds is defined and element.targetSiteIds is not null and element.targetSiteIds is not empty %}
     <div class="field">
         <div class="heading">
-            <label id="slug-label" for="slug">Target Site(s)</label>
+            <label id="meta-settings-target-sites-label" for="meta-settings-target-sites">Target Site(s)</label>
         </div>
-        <div class="ltr" style="padding-top: 10px; padding-bottom: 10px">{{ element.targetSiteIdsHtml | raw }}</div>
+        <div id="meta-settings-target-sites" class="ltr" style="padding-top: 10px; padding-bottom: 10px">{{ element.targetSiteIdsHtml | raw }}</div>
     </div>
     {% endif %}
 
     {% if element.translationWorkflow is defined and element.translationWorkflow is not null %}
     <div class="field">
         <div class="heading">
-            <label id="slug-label" for="slug" style="white-space: nowrap;">Translation workflow</label>
+            <label id="meta-settings-translation-workflow-label" for="meta-settings-translation-workflow" style="white-space: nowrap;">Translation workflow</label>
         </div>
-        <div class="ltr" style="padding-top: 10px; padding-bottom: 10px">{{ element.translationWorkflowLabel}}</div>
+        <div id="meta-settings-translation-workflow" class="ltr" style="padding-top: 10px; padding-bottom: 10px">{{ element.translationWorkflowLabel}}</div>
     </div>
     {% endif %}
+
+    <div class="field" style="padding: 14px 24px">
+            <a style="color: grey; text-align: center;width: 100%;" href="{{ url('craft-lilt-plugin/report/data/' ~ element.id) }}">Download Diagnostic Data</a>
+    </div>
 {% endblock %}

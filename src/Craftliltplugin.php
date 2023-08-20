@@ -39,6 +39,8 @@ use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
+use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
+use lilthq\craftliltplugin\services\handlers\UpdateTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
@@ -47,16 +49,17 @@ use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorTranslationRepository;
+use lilthq\craftliltplugin\services\repositories\external\PackagistRepository;
 use lilthq\craftliltplugin\services\repositories\I18NRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use lilthq\craftliltplugin\services\ServiceInitializer;
 use yii\base\ActionEvent;
 use yii\base\Controller;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
-use yii\log\Logger;
 use yii\web\Response;
 
 /**
@@ -102,6 +105,10 @@ use yii\web\Response;
  * @property RefreshJobStatusHandler $refreshJobStatusHandler
  * @property CreateDraftHandler $createDraftHandler
  * @property CopySourceTextHandler $copySourceTextHandler
+ * @property UpdateJobStatusHandler $updateJobStatusHandler
+ * @property SettingsRepository $settingsRepository
+ * @property UpdateTranslationsConnectorIds $updateTranslationsConnectorIds
+ * @property PackagistRepository $packagistRepository
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin
@@ -308,6 +315,11 @@ class Craftliltplugin extends Plugin
     public function getConnectorKey(): ?string
     {
         return $this->connectorKey;
+    }
+
+    public function getUserAgent(): string
+    {
+        return sprintf('lilthq/craft-lilt-plugin:%s', Craftliltplugin::getInstance()->getVersion());
     }
 
     public static function getInstance(): Craftliltplugin

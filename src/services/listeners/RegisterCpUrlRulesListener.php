@@ -63,6 +63,12 @@ class RegisterCpUrlRulesListener implements ListenerInterface
         $event->rules['POST craft-lilt-plugin/job/translation/review']
             = CraftliltpluginParameters::TRANSLATION_REVIEW_ACTION;
 
+        $event->rules['GET craft-lilt-plugin/report/data']
+            = CraftliltpluginParameters::REPORT_DATA;
+
+        $event->rules['GET craft-lilt-plugin/report/data/<jobId:\d+>']
+            = CraftliltpluginParameters::REPORT_DATA;
+
         return $event;
     }
 }

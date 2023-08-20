@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+#  app:
+#    volumes:
+#      - ./happy-lager-main:/app
+#      - ./happy-lager-main/plugin-src:/tmp/craft-lilt-plugin
+#    ports:
+#       - "88:8080"
+#
+#  mysql:
+#    ports:
+#      - "3333:3306"
+
+#  mockserver:
+#    ports:
+#      - "1080:1080"

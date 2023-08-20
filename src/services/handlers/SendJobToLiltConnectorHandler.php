@@ -21,6 +21,7 @@ use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use Throwable;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
@@ -70,15 +71,20 @@ class SendJobToLiltConnectorHandler
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
                 //Create draft with & update all values to source element
                 $draft = Craftliltplugin::getInstance()->createDraftHandler->create(
-                    $element,
-                    $job->title,
-                    $job->sourceSiteId,
-                    $targetSiteId
+                    new CreateDraftCommand(
+                        $element,
+                        $job->title,
+                        $job->sourceSiteId,
+                        $targetSiteId,
+                        $job->translationWorkflow
+                    )
                 );
 
                 $content = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
                     $draft
                 );
+
+                $slug = !empty($element->slug) ? $element->slug : 'no-slug-available';
 
                 $result = $this->createJobFile(
                     $content,
@@ -88,7 +94,8 @@ class SendJobToLiltConnectorHandler
                     Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
                         [$targetSiteId]
                     ),
-                    null //TODO: $job->dueDate is not in use
+                    null, //TODO: $job->dueDate is not in use
+                    $slug
                 );
 
                 if (!$result) {
@@ -97,7 +104,7 @@ class SendJobToLiltConnectorHandler
                     throw new \RuntimeException('Translations not created, upload failed');
                 }
 
-                $translation = $translationsMapped[$elementId][$targetSiteId] ?? null;
+                $translation = $translationsMapped[$versionId][$targetSiteId] ?? null;
                 if ($translation === null) {
                     $translation = Craftliltplugin::getInstance()->translationRepository->create(
                         $job->id,
@@ -138,7 +145,7 @@ class SendJobToLiltConnectorHandler
                 'liltJobId' => $jobLilt->getId(),
             ])),
             FetchJobStatusFromConnector::PRIORITY,
-            FetchJobStatusFromConnector::DELAY_IN_SECONDS
+            10 //10 seconds for fist job
         );
     }
 
@@ -148,13 +155,18 @@ class SendJobToLiltConnectorHandler
         int $jobId,
         string $sourceLanguage,
         array $targetSiteLanguages,
-        ?DateTimeInterface $dueDate
+        ?DateTimeInterface $dueDate,
+        string $slug
     ): bool {
         $contentString = json_encode($content);
 
+        if (!empty($slug)) {
+            $slug = substr($slug, 0, 150);
+        }
+
         return Craftliltplugin::getInstance()->connectorJobsFileRepository->addFileToJob(
             $jobId,
-            'element_' . $entryId . '.json+html',
+            'element_' . $entryId . '_' . $slug . '.json+html',
             $contentString,
             $sourceLanguage,
             $targetSiteLanguages,

@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\TranslationQuery;
 use lilthq\craftliltplugin\models\TranslationModelTrait;
+use lilthq\craftliltplugin\records\TranslationNotificationsRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 /**
@@ -108,6 +109,7 @@ class Translation extends Element
             TranslationRecord::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
             TranslationRecord::STATUS_PUBLISHED => ['label' => 'Published', 'color' => 'green'],
             TranslationRecord::STATUS_FAILED => ['label' => 'Failed', 'color' => 'red'],
+            TranslationRecord::STATUS_NEEDS_ATTENTION => ['label' => 'Needs Attention', 'color' => 'red'],
         ];
     }
 
@@ -207,12 +209,30 @@ class Translation extends Element
         ];
     }
 
+    public function toJson(): string
+    {
+        return json_encode([
+            'draftId' => $this->translatedDraftId,
+            'translationId' => $this->id,
+            'sourceContent' => !empty($this->sourceContent) ? base64_encode($this->sourceContent) : null,
+            'sourceSiteId' => $this->sourceSiteId,
+            'targetSiteId' => $this->targetSiteId,
+        ]);
+    }
+
     public function getActionsHtml(): string
     {
+        $dataSourceContent = '';
+        if (!empty($this->sourceContent)) {
+            $dataSourceContent = 'data-source-content="' . base64_encode($this->sourceContent) . '"';
+        }
+
         return '
                 <span 
                     class="lilt-review-translation" 
                     title="Review" 
+                    data-json="' . base64_encode($this->toJson()) . '"
+                    ' . $dataSourceContent . '
                     data-id="' . $this->id . '" data-title="' . $this->title . '" 
                     data-icon="view" 
                     style="margin-right: 5px;color: #2563eb; cursor: pointer;font-size: 14pt;">
@@ -293,5 +313,38 @@ class Translation extends Element
     public function getIsEditable(): bool
     {
         return true;
+    }
+
+    public function getHtmlAttributes(string $context): array
+    {
+        $notifications = [];
+
+        if ($this->status === TranslationRecord::STATUS_NEEDS_ATTENTION) {
+            $notifications = TranslationNotificationsRecord::findAll(['translationId' => $this->id]);
+
+            $notifications = array_map(function (TranslationNotificationsRecord $translationNotificationsRecord) {
+                return [
+                    'reason' => $translationNotificationsRecord->getReason(),
+                    'fieldId' => $translationNotificationsRecord->fieldId,
+                    'sourceContent' => $translationNotificationsRecord->sourceContent,
+                    'targetContent' => $translationNotificationsRecord->targetContent,
+                ];
+            }, $notifications);
+        }
+
+        $notificationsString = json_encode($notifications);
+        $attributes = [
+            'data-notifications' => $notificationsString,
+            'data-has-notifications' => !empty($notifications),
+            'data-target-site-language' => $this->targetSiteLanguage,
+            'data-target-site-id' => $this->targetSiteId,
+            'data-translated-draft-id' => $this->translatedDraftId,
+        ];
+
+        if (!empty($this->sourceContent)) {
+            $attributes['data-source-content'] = base64_encode($this->sourceContent);
+        }
+
+        return $attributes;
     }
 }

@@ -35,6 +35,7 @@ class TranslationRecord extends ActiveRecord
     public const STATUS_IN_PROGRESS = 'in-progress';
     public const STATUS_PUBLISHED = 'published';
     public const STATUS_FAILED = 'failed';
+    public const STATUS_NEEDS_ATTENTION = 'needs-attention';
 
     /**
      * @inheritdoc

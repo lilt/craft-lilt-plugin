@@ -58,10 +58,41 @@
             disabled: liltConfigDisabled
         }) }}
 
-        <div class="buttons">
+        <div class="field">
+        {{ forms.checkbox({
+            label: 'Enable entries for target site on translation publish',
+            name: 'enableEntriesForTargetSites',
+            id: 'enableEntriesForTargetSites',
+            checked: enableEntriesForTargetSites,
+            errors: model is defined? model.getErrors('enableEntriesForTargetSites') : [],
+            disabled: liltConfigDisabled
+        }) }}
+        </div>
+
+        <div class="field">
+        {{ forms.checkbox({
+            label: 'Copy slug from source entries to target',
+            name: 'copyEntriesSlugFromSourceToTarget',
+            id: 'copyEntriesSlugFromSourceToTarget',
+            checked: copyEntriesSlugFromSourceToTarget,
+            errors: model is defined? model.getErrors('copyEntriesSlugFromSourceToTarget') : [],
+            disabled: liltConfigDisabled
+        }) }}
+        </div>
+
+        {{ forms.textField({
+            name: 'liltConfigDisabled',
+            id: 'liltConfigDisabled',
+            value: liltConfigDisabled,
+            class: 'hidden'
+        }) }}
+
+        <div class="buttons" style="z-index: 2;">
             <button type="submit" class="btn submit">{{ 'Update configuration'|t('craft-lilt-plugin') }}</button>
             <div class="utility-status"></div>
         </div>
+
+        <a style="color: grey" href="{{ url('admin/craft-lilt-plugin/report/data') }}">Download Diagnostic Data</a>
 
     </form>
 </div>

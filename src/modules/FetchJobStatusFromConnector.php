@@ -2,7 +2,7 @@
 
 /**
  * @link      https://github.com/lilt
- * @copyright Copyright (c) 2022 Lilt Devs
+ * @copyright Copyright (c) 2023 Lilt Devs
  */
 
 declare(strict_types=1);
@@ -16,20 +16,15 @@ use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
-use yii\queue\RetryableJobInterface;
+use lilthq\craftliltplugin\records\TranslationRecord;
 
-class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterface
+class FetchJobStatusFromConnector extends AbstractRetryJob
 {
-    public const DELAY_IN_SECONDS = 10;
-    public const PRIORITY = null;
-    public const TTR = 60 * 5; // 5 minutes
+    public const DELAY_IN_SECONDS = 5 * 60;
+    public const PRIORITY = 1024;
+    public const TTR = 60 * 30;
 
     private const RETRY_COUNT = 3;
-
-    /**
-     * @var int $jobId
-     */
-    public $jobId;
 
     /**
      * @var int $liltJobId
@@ -42,6 +37,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
     public function execute($queue): void
     {
         $jobRecord = JobRecord::findOne(['id' => $this->jobId]);
+        $job = Job::findOne(['id' => $this->jobId]);
 
         if (!$jobRecord) {
             // job was removed, we are done here
@@ -49,11 +45,12 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
         }
 
         if (empty($this->liltJobId)) {
-            //looks like job is
+            //looks like job is not sent
             Queue::push(
                 new SendJobToConnector(['jobId' => $this->jobId]),
                 SendJobToConnector::PRIORITY,
-                SendJobToConnector::DELAY_IN_SECONDS
+                SendJobToConnector::getDelay(),
+                SendJobToConnector::TTR
             );
 
             $this->markAsDone($queue);
@@ -78,6 +75,12 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
             );
 
             $jobRecord->save();
+
+            TranslationRecord::updateAll(
+                ['status' => TranslationRecord::STATUS_FAILED],
+                ['jobId' => $jobRecord->id]
+            );
+
             $this->markAsDone($queue);
             return;
         }
@@ -90,8 +93,9 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
                         'liltJobId' => $this->liltJobId,
                     ]
                 )),
-                self::DELAY_IN_SECONDS,
-                self::DELAY_IN_SECONDS
+                self::PRIORITY,
+                self::getDelay(),
+                self::TTR
             );
 
             return;
@@ -102,45 +106,76 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
 
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
 
-            Queue::push(
-                new FetchVerifiedJobTranslationsFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                ),
-                FetchVerifiedJobTranslationsFromConnector::PRIORITY,
-                FetchVerifiedJobTranslationsFromConnector::DELAY_IN_SECONDS
+            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
+                $this->jobId
             );
+
+            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
+
+            foreach ($translations as $translation) {
+                Queue::push(
+                    new FetchTranslationFromConnector(
+                        [
+                            'jobId' => $this->jobId,
+                            'liltJobId' => $this->liltJobId,
+                            'translationId' => $translation->id,
+                        ]
+                    ),
+                    FetchTranslationFromConnector::PRIORITY,
+                    10, //10 seconds for first job
+                    FetchTranslationFromConnector::TTR
+                );
+            }
         }
 
         if ($jobRecord->isInstantFlow()) {
             #LILT_TRANSLATION_WORKFLOW_INSTANT
 
-            if ($liltJob->getStatus() === JobResponse::STATUS_FAILED) {
+            if (
+                $liltJob->getStatus() === JobResponse::STATUS_FAILED
+                || $liltJob->getStatus() === JobResponse::STATUS_CANCELED
+            ) {
                 $jobRecord->status = Job::STATUS_FAILED;
-            } elseif ($liltJob->getStatus() === JobResponse::STATUS_CANCELED) {
-                $jobRecord->status = Job::STATUS_FAILED;
+
+                TranslationRecord::updateAll(
+                    ['status' => TranslationRecord::STATUS_FAILED],
+                    ['jobId' => $jobRecord->id]
+                );
+
+                $this->markAsDone($queue);
+
+                return;
             }
 
-            Queue::push(
-                new FetchInstantJobTranslationsFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                ),
-                FetchInstantJobTranslationsFromConnector::PRIORITY,
-                FetchInstantJobTranslationsFromConnector::DELAY_IN_SECONDS
+            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
+                $this->jobId
             );
+
+            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
+
+            foreach ($translations as $translation) {
+                Queue::push(
+                    new FetchTranslationFromConnector(
+                        [
+                            'jobId' => $this->jobId,
+                            'liltJobId' => $this->liltJobId,
+                            'translationId' => $translation->id,
+                        ]
+                    ),
+                    FetchTranslationFromConnector::PRIORITY,
+                    10, //10 seconds for first job
+                    FetchTranslationFromConnector::TTR
+                );
+            }
         }
 
         $jobRecord->save();
-        $this->markAsDone($queue);
 
         Craft::$app->elements->invalidateCachesForElementType(
             Job::class
         );
+
+        $this->markAsDone($queue);
     }
 
     /**
@@ -148,7 +183,7 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Updating lilt job');
+        return Craft::t('app', 'Fetching lilt job status');
     }
 
     /**
@@ -171,13 +206,27 @@ class FetchJobStatusFromConnector extends BaseJob implements RetryableJobInterfa
         );
     }
 
-    public function getTtr(): int
+    public function canRetry(): bool
     {
-        return self::TTR;
+        return $this->attempt < self::RETRY_COUNT;
     }
 
-    public function canRetry($attempt, $error): bool
+    public function getRetryJob(): BaseJob
     {
-        return $attempt < self::RETRY_COUNT;
+        return new self([
+            'jobId' => $this->jobId,
+            'liltJobId' => $this->liltJobId,
+            'attempt' => $this->attempt + 1
+        ]);
+    }
+
+    public static function getDelay(): int
+    {
+        $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
+        if (!empty($envDelay) || $envDelay === '0') {
+            return (int) $envDelay;
+        }
+
+        return self::DELAY_IN_SECONDS;
     }
 }

@@ -10,6 +10,7 @@ use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exceptions\WrongTranslationFilenameException;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 class TranslationFailedHandler
@@ -24,9 +25,13 @@ class TranslationFailedHandler
     ): ?TranslationRecord {
         $translationTargetLanguage = $this->getTargetLanguage($translationResponse);
 
-        $elementId = Craftliltplugin::getInstance()
-            ->connectorTranslationRepository
-            ->getElementIdFromTranslationResponse($translationResponse);
+        try {
+            $elementId = Craftliltplugin::getInstance()
+                ->connectorTranslationRepository
+                ->getElementIdFromTranslationResponse($translationResponse);
+        } catch (WrongTranslationFilenameException $ex) {
+            return null;
+        }
 
         $element = Craft::$app->elements->getElementById(
             $elementId,
