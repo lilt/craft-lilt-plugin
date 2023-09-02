@@ -12,7 +12,6 @@ use craft\db\Table;
 use craft\db\Table as DbTable;
 use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
-use craft\elements\MatrixBlock;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidFieldException;
 use craft\helpers\Db;
@@ -21,11 +20,23 @@ use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
+use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use Throwable;
 use yii\base\Exception;
 
 class CreateDraftHandler
 {
+    /**
+     * @var CopyFieldsHandler
+     */
+    public $copyFieldsHandler;
+
+    public function __construct(
+        CopyFieldsHandler $copyFieldsHandler
+    ) {
+        $this->copyFieldsHandler = $copyFieldsHandler;
+    }
+
     /**
      * @throws Exception
      * @throws Throwable
@@ -74,7 +85,7 @@ class CreateDraftHandler
             $targetSiteId
         );
 
-        $this->copyEntryContent($element, $draft);
+        $this->copyFieldsHandler->copy($element, $draft);
 
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
@@ -203,102 +214,6 @@ class CreateDraftHandler
                 [],
                 false
             );
-        }
-    }
-
-    /**
-     * @param ElementInterface $from
-     * @param ElementInterface|null $to
-     *
-     * @throws ElementNotFoundException
-     * @throws Exception
-     * @throws InvalidFieldException
-     * @throws Throwable
-     */
-    private function copyEntryContent(ElementInterface $from, ElementInterface $to): void
-    {
-        // copy title
-        $to->title = $from->title;
-
-        $fieldLayout = $from->getFieldLayout();
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
-
-        foreach ($fields as $field) {
-            // Check if the field is of Neo type and the required classes and methods are available
-            if (
-                get_class($field) === CraftliltpluginParameters::BENF_NEO_FIELD
-                && class_exists('benf\neo\Plugin')
-                && method_exists('benf\neo\Plugin', 'getInstance')
-            ) {
-                // Get the Neo plugin instance
-                /** @var \benf\neo\Plugin $neoPluginInstance */
-                $neoPluginInstance = call_user_func(['benf\neo\Plugin', 'getInstance']);
-
-                // Get the Neo plugin Fields service
-                /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
-                $neoPluginFieldsService = $neoPluginInstance->get('fields');
-
-                // Clear current neo field value
-                $neoField = $to->getFieldValue($field->handle);
-                foreach ($neoField as $block) {
-                    Craft::$app->getElements()->deleteElement($block);
-                }
-                Craft::$app->getElements()->saveElement($to);
-
-                // Duplicate the blocks for the field
-                $neoPluginFieldsService->duplicateBlocks($field, $from, $to);
-
-                continue;
-            }
-
-            // Check if the field is of Super Table type and the required classes and methods are available
-            if (
-                get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE
-                && class_exists('verbb\supertable\SuperTable')
-                && method_exists('verbb\supertable\SuperTable', 'getInstance')
-            ) {
-                // Get the Super Table plugin instance
-                $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
-
-                // Get the Super Table plugin service
-                /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
-                $superTablePluginService = $superTablePluginInstance->getService();
-
-                // Clear current Supertable field value
-                $supertableField = $to->getFieldValue($field->handle);
-                foreach ($supertableField as $block) {
-                    Craft::$app->getElements()->deleteElement($block);
-                }
-                Craft::$app->getElements()->saveElement($to);
-
-                // Duplicate the blocks for the field
-                $superTablePluginService->duplicateBlocks($field, $from, $to);
-
-                continue;
-            }
-
-            // Check if the field is of Matrix type
-            if (get_class($field) === CraftliltpluginParameters::CRAFT_FIELDS_MATRIX) {
-                $blocksQuery = $to->getFieldValue($field->handle);
-
-                /**
-                 * @var MatrixBlock[] $blocks
-                 */
-                $blocks = $blocksQuery->all();
-
-                Craft::$app->matrix->duplicateBlocks($field, $from, $to, false, false);
-                Craft::$app->matrix->saveField($field, $to);
-
-                foreach ($blocks as $block) {
-                    if ($block instanceof MatrixBlock) {
-                        Craft::$app->getElements()->deleteElement($block, true);
-                    }
-                }
-
-                continue;
-            }
-
-            $field->copyValue($from, $to);
         }
     }
 }
