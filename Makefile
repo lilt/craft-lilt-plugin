@@ -88,4 +88,5 @@ test-craft-versions: prepare-container
 		"./craft-versions.sh ${CRAFT_VERSION}"
 
 require-guzzle-v6:
-	docker-compose exec -T -u www-data cli-app sh -c "php composer.phar require guzzlehttp/guzzle:6.5.5 -W"
+	docker-compose exec -T -u www-data cli-app sh -c "php composer.phar require guzzlehttp/guzzle:^6.0 -W --no-scripts || true"
+	docker-compose exec -T -u www-data cli-app sh -c 'if ! php composer.phar show -i | grep "guzzlehttp/guzzle" | grep "6."; then echo "Guzzle version 6 is not present."; exit 1; fi'
