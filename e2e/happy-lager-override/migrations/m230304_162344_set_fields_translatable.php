@@ -28,6 +28,11 @@ class m230304_162344_set_fields_translatable extends Migration
                 /**
                  * @var Matrix $field
                  */
+                $field->propagationMethod = Matrix::PROPAGATION_METHOD_LANGUAGE;
+
+                /**
+                 * @var Matrix $field
+                 */
                 foreach ($field->getBlockTypeFields() as $matrixField) {
                     $matrixField->translationMethod = Field::TRANSLATION_METHOD_SITE;
                     Craft::$app->getFields()->saveField($matrixField);

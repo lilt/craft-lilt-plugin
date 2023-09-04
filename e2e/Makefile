@@ -1,8 +1,27 @@
 CYPRESS_CACHE_FOLDER?=/e2e/.cache
 DB_DATABASE?=craft-lilt
 
-install: clone
+cli-dev:
+	docker run -u www-data --rm -it \
+		-v ${PWD}/happy-lager-main:/app \
+		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
+		craftcms/cli:8.0-dev \
+		sh
+
+composer-install:
 	docker run --rm \
+		-v ${PWD}/happy-lager-main:/app \
+		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
+		composer:latest \
+		composer require --ignore-platform-reqs "lilt/craft-lilt-plugin":"^999.9.9"
+
+reset: cp composer-install
+	docker-compose exec -T app sh -c 'php craft db/restore happylager.sql'
+	docker-compose exec -T app sh -c 'php craft plugin/install craft-lilt-plugin'
+
+
+install: clone
+	docker run -u www-data --rm \
 		-v ${PWD}/happy-lager-main:/app \
 		-v ${PWD}/happy-lager-main/plugin-src:/tmp/craft-lilt-plugin \
 		composer:latest \
@@ -23,19 +42,48 @@ mup: #migrate app up
 mdown: #migrate app down
 	docker-compose exec -T app sh -c 'php craft migrate/down'
 
+cp:
+	rm -rf happy-lager-main/plugin-src
+	mkdir happy-lager-main/plugin-src
+	cp -R ../resources happy-lager-main/plugin-src/resources
+	cp -R ../composer.json happy-lager-main/plugin-src/composer.json
+	cp -R ../src happy-lager-main/plugin-src/src
+
 clone:
 	rm -rf happy-lager-main
 	git clone https://github.com/craftcms/demo.git happy-lager-main
 	rm -rf happy-lager-main/.git
-	cp -R happy-lager-override/* happy-lager-main
+	cp happy-lager-override/.dockerignore happy-lager-main/
+	cp -R happy-lager-override/* happy-lager-main/
 	rm -rf happy-lager-main/plugin-src
 	mkdir happy-lager-main/plugin-src
 	cp -R ../resources happy-lager-main/plugin-src/resources
 	cp -R ../src happy-lager-main/plugin-src/src
 	cp -R ../composer.json happy-lager-main/plugin-src/composer.json
 
-up: clone down
+wait-service:
+	@echo "Waiting for the service to be up and running on port 8080..."
+	@retries=100; \
+	while ! nc -z localhost 8080 && [ $$retries -gt 0 ]; do \
+		echo "Port 8080 is not open (remaining retries: $$retries). Retrying in 1 second..."; \
+		sleep 1; \
+		retries=$$((retries-1)); \
+	done
+	@echo "Service seems to be up on port 8080 or max retries reached!"
+	@echo "Waiting for the service to start responding without a 503..."
+	@retries=100; \
+	while [ $$(wget -q -O - http://localhost:8080 2> /dev/null | grep -c "503 Service Unavailable") -eq 1 ] && [ $$retries -gt 0 ]; do \
+		echo "Service still returning 503 (remaining retries: $$retries). Retrying in 1 second..."; \
+		sleep 1; \
+		retries=$$((retries-1)); \
+	done
+	@echo "Service is up and running or max retries reached!"
+
+up: clone down composer-install
 	docker-compose up --build -d
+	docker-compose ps
+	docker-compose exec -T app sh -c 'chmod -R 777 /app'
+	docker-compose exec -T app sh -c 'chown -R www-data:www-data /app'
 	docker-compose exec -T mysql sh -c 'while ! mysqladmin ping -h"mysql" --silent; do sleep 1; done'
 	docker-compose exec -T app sh -c 'php craft setup/security-key'
 	docker-compose exec -T app sh -c 'echo DB_DRIVER=mysql >> .env'
@@ -54,9 +102,9 @@ up: clone down
 	docker-compose exec -T app sh -c 'php craft up'
 	docker-compose exec -T app sh -c 'php craft migrate/up'
 	docker-compose exec -T app sh -c 'php craft queue/run'
-
+	docker-compose exec -T app sh -c 'cat .env'
 cli:
-	docker-compose exec -T app sh
+	docker-compose exec app sh
 
 test:
 	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install
@@ -65,7 +113,6 @@ test:
 								  --env-file .env.test \
   								  --entrypoint=cypress \
   								  cypress/included:12.2.0 run --headless --config-file /e2e/cypress.config.js --record false
-
 
 test-instant:
 	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install

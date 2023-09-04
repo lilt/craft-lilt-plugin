@@ -128,7 +128,7 @@ class CreateDraftHandler
     public function markFieldsAsChanged(ElementInterface $element): void
     {
         $fieldLayout = $element->getFieldLayout();
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
 
         foreach ($fields as $field) {
             if (
@@ -168,10 +168,16 @@ class CreateDraftHandler
         $userId = Craft::$app->getUser()->getId();
         $timestamp = Db::prepareDateForDb(new DateTime());
 
+        if ($element->getId() === null) {
+            //field wasn't created yet
+            return;
+        }
+
         $insert = [
             'elementId' => $element->getId(),
             'siteId' => $element->getSite()->id,
             'fieldId' => $field->id,
+            'propagated' => $element->propagating,
         ];
 
         $update = [
@@ -199,6 +205,7 @@ class CreateDraftHandler
                 'elementId' => $element->id,
                 'siteId' => $element->siteId,
                 'attribute' => $attribute,
+                'propagated' => $element->propagating,
             ];
 
             $update = [

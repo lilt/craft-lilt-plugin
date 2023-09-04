@@ -63,11 +63,11 @@ describe(
                 'Failed',
             );
 
-        cy.get('#translations-list th[data-title="Title"] div.element').
+        cy.get('#translations-list th[data-title="Translation"] div.element').
             invoke('attr', 'data-type').
             should('equal', 'lilthq\\craftliltplugin\\elements\\Translation');
 
-        cy.get('#translations-list th[data-title="Title"] div.element').
+        cy.get('#translations-list th[data-title="Translation"] div.element').
             invoke('attr', 'data-status').
             should('equal', 'failed');
 

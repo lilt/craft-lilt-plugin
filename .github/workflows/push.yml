@@ -2,56 +2,11 @@ name: Tests
 on:
   push:
     branches:
-      - 3.x #CraftCMS v3 | PHP 7.2
+      - 4.x #CraftCMS v4
   pull_request:
     branches:
       - "*"
 jobs:
-  tests-php-72:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        id: step_one
-        run: |
-          echo "PHP_VERSION=7.2" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Tests
-        run: make test
-
-  tests-php-73:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        id: step_one
-        run: |
-          echo "PHP_VERSION=7.3" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Tests
-        run: make test
-
-  tests-php-74:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        id: step_one
-        run: |
-          echo "PHP_VERSION=7.4" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Tests
-        run: make test
-
   tests-php-80:
     runs-on: ubuntu-latest
     steps:
@@ -64,23 +19,6 @@ jobs:
         run: make up
       - name: Composer install
         run: make composer-install
-      - name: Tests
-        run: make test
-
-  tests-php-72-guzzle-6:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        id: step_one
-        run: |
-          echo "PHP_VERSION=7.2" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Require Guzzle v6
-        run: make require-guzzle-v6
       - name: Tests
         run: make test
 
@@ -100,7 +38,7 @@ jobs:
       - name: Tests
         run: make test
 
-  tests-php-latest:
+  tests-php-81:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

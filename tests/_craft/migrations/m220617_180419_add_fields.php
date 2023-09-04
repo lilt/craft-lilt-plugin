@@ -8,6 +8,7 @@ use benf\neo\Field as NeoField;
 use Craft;
 use craft\db\Migration;
 use craft\db\Query;
+use craft\fieldlayoutelements\CustomField;
 use craft\fields\Checkboxes;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
@@ -59,23 +60,41 @@ class m220617_180419_add_fields extends Migration
         $groupId = (int)$group['id'];
 
         $fieldLayout = $entryType->getFieldLayout();
-        $tab = $fieldLayout->getTabs()[0];
+        $tabs = $fieldLayout->getTabs();
 
-        $newFields = [
-            $this->createPlaintextField($groupId),
-            $this->createRedactorField($groupId),
-            $this->createMatrixField($groupId),
-            $this->createCheckboxesField($groupId),
-            $this->createLightswitchField($groupId),
-            $this->createSuperTableField($groupId),
-            $this->createTableField($groupId),
-            $this->createNeoField($groupId),
-            $this->createLinkitField($groupId),
-            $this->createColourSwatches($groupId),
-        ];
+        $newFields[] = $this->createPlaintextField($groupId);
+        $newFields[] = $this->createRedactorField($groupId);
+        $newFields[] = $this->createMatrixField($groupId);
+        $newFields[] = $this->createCheckboxesField($groupId);
+        $newFields[] = $this->createLightswitchField($groupId);
 
-        $tab->setFields(
-            array_merge($fieldLayout->getFields(), $newFields)
+        if (TEST_SUPERTABLE_PLUGIN) {
+            $newFields[] = $this->createSuperTableField($groupId);
+        }
+
+        $newFields[] = $this->createTableField($groupId);
+        $newFields[] = $this->createNeoField($groupId);
+
+        if (TEST_LINKIT_PLUGIN) {
+            $newFields[] = $this->createLinkitField($groupId);
+        }
+
+        if (TEST_COLOUR_SWATCHES_PLUGIN) {
+            $newFields[] = $this->createColourSwatches($groupId);
+        }
+
+        $tab = $tabs[0];
+
+        $customFields = [];
+        foreach ($newFields as $item) {
+            $customField = new CustomField();
+            $customField->setField($item);
+
+            $customFields[] = $customField;
+        }
+
+        $tab->setElements(
+            $customFields
         );
 
         $result = Craft::$app->fields->saveLayout($fieldLayout) && $result;
@@ -103,7 +122,7 @@ class m220617_180419_add_fields extends Migration
                 'maxTopBlocks' => '',
                 'maxLevels' => '',
                 'wasModified' => false,
-                'propagationMethod' => 'all',
+                'propagationMethod' => NeoField::PROPAGATION_METHOD_SITE_GROUP,
                 #'propagationKeyFormat' => NULL,
             ]
         );
@@ -111,6 +130,7 @@ class m220617_180419_add_fields extends Migration
         $field->setBlockTypes(
             [
                 'new1' => [
+                    'description' => '',
                     'name' => 'first block type',
                     'handle' => 'firstBlockType',
                     'sortOrder' => 1,
@@ -122,6 +142,7 @@ class m220617_180419_add_fields extends Migration
                     'fieldLayoutId' => $firstBlockLayoutId
                 ],
                 'new2' => [
+                    'description' => '',
                     'name' => 'second block type',
                     'handle' => 'secondBlockType',
                     'sortOrder' => 2,
@@ -164,7 +185,7 @@ class m220617_180419_add_fields extends Migration
                 'minRows' => '',
                 'maxRows' => '',
                 'contentTable' => '{{%stc_supertable}}',
-                'propagationMethod' => 'all',
+                'propagationMethod' => SuperTableField::PROPAGATION_METHOD_SITE_GROUP,
                 'propagationKeyFormat' => null,
                 'staticField' => '',
                 'columns' => [
@@ -300,7 +321,7 @@ class m220617_180419_add_fields extends Migration
                 'minBlocks' => '',
                 'maxBlocks' => '',
                 'contentTable' => '{{%matrixcontent_matrix}}',
-                'propagationMethod' => 'all',
+                'propagationMethod' => Matrix::PROPAGATION_METHOD_SITE_GROUP,
                 'propagationKeyFormat' => null,
                 'blockTypes' => [
                     'new1' => [
@@ -737,17 +758,17 @@ Helper text to guide the author.',
                 'elements' => [
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $redactor->uid
                     ],
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $lightswitch->uid
                     ],
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $matrix->uid
                     ],
                 ]
@@ -776,33 +797,38 @@ Helper text to guide the author.',
 
         $plainText = Craft::$app->fields->getFieldByHandle('plainText');
         $table = Craft::$app->fields->getFieldByHandle('table');
-        $supertable = Craft::$app->fields->getFieldByHandle('supertable');
 
-        $fieldLayout->setTabs([
+        $firstTab = [
             [
                 'name' => 'First Tab',
                 'elements' => [
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $plainText->uid
                     ],
                     [
                         'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
+                        'required' => false,
                         'fieldUid' => $table->uid
-                    ],
-                    [
-                        'type' => 'craft\\fieldlayoutelements\\CustomField',
-                        'required' => 'false',
-                        'fieldUid' => $supertable->uid
                     ],
                 ]
             ]
-        ]);
+        ];
+
+        if (TEST_SUPERTABLE_PLUGIN) {
+            $supertable = Craft::$app->fields->getFieldByHandle('supertable');
+            $firstTab[0]['elements'][] = [
+                'type' => 'craft\\fieldlayoutelements\\CustomField',
+                'required' => false,
+                'fieldUid' => $supertable->uid
+            ];
+        }
+
+        $fieldLayout->setTabs($firstTab);
         $fieldLayout->type = 'secondBlockType';
 
-        $saved = Craft::$app->fields->saveLayout($fieldLayout);
+        Craft::$app->fields->saveLayout($fieldLayout);
         $fieldLayoutData = (new Query())
             ->select("id")
             ->from("{{%fieldlayouts}}")

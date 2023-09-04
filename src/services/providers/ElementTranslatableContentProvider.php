@@ -42,7 +42,7 @@ class ElementTranslatableContentProvider
             return $content;
         }
 
-        $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+        $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
 
         foreach ($fields as $field) {
             $fieldData = Craft::$app->fields->getFieldById((int) $field->id);

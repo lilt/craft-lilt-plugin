@@ -40,9 +40,6 @@ modules:
         redactor:
           class: '\craft\redactor\Plugin'
           handle: redactor
-        linkit:
-          class: '\craft\redactor\Plugin'
-          handle: linkit
       cleanup: true
       transaction: true
       dbSetup: {clean: true, setupCraft: true, applyMigrations: true}

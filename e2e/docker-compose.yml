@@ -33,7 +33,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
-    restart: on-failure
+    restart: unless-stopped
+
+  redis:
+    image: redis:5-alpine
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
 
 networks:
   e2e-network:

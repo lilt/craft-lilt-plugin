@@ -63,7 +63,7 @@ class PublishDraftHandler
                 $draftElementLanguageToUpdate->mergingCanonicalChanges = true;
 
                 $fieldLayout = $draftElementLanguageToUpdate->getFieldLayout();
-                $fields = $fieldLayout ? $fieldLayout->getFields() : [];
+                $fields = $fieldLayout ? $fieldLayout->getCustomFields() : [];
                 foreach ($fields as $field) {
                     // Check if the field is of Super Table type and the required classes and methods are available
                     if (
@@ -75,7 +75,7 @@ class PublishDraftHandler
                         $superTablePluginInstance = call_user_func(['verbb\supertable\SuperTable', 'getInstance']);
 
                         // Get the Super Table plugin service
-                        /** @var \verbb\supertable\services\SuperTableService $superTablePluginService */
+                        /** @var \verbb\supertable\services\Service $superTablePluginService */
                         $superTablePluginService = $superTablePluginInstance->getService();
 
                         // Duplicate the blocks for the field
@@ -104,6 +104,10 @@ class PublishDraftHandler
                         // Clear current neo field value
                         $neoField = $draftElementLanguageToUpdate->getFieldValue($field->handle);
                         foreach ($neoField as $block) {
+                            if (!$block instanceof ElementInterface) {
+                                continue;
+                            }
+
                             Craft::$app->getElements()->deleteElement($block);
                         }
                         Craft::$app->getElements()->saveElement($draftElementLanguageToUpdate);

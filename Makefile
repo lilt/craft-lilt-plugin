@@ -4,7 +4,7 @@
 export
 
 PHP_VERSION?=8.1
-MYSQL_VERSION?=5.7
+MYSQL_VERSION?=8.0
 
 up:
 	docker-compose up -d
@@ -76,7 +76,7 @@ unit: codecept-build
 test: functional integration unit
 
 prepare-container:
-	PHP_VERSION=7.2 docker-compose up -d
+	PHP_VERSION=8.0 docker-compose up -d
 	docker-compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
 	docker-compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
 	docker-compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"

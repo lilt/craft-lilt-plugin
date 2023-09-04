@@ -36,12 +36,22 @@ class GetSettingsFormControllerCest
         );
 
         # connectorApiKey
-        $connectorApiKeyRecord = new SettingRecord(['name' => 'connector_api_key']);
+        $connectorApiKeyRecord = SettingRecord::findOne(['name' => 'connector_api_key']);
+
+        if($connectorApiKeyRecord === null) {
+            $connectorApiKeyRecord = new SettingRecord(['name' => 'connector_api_key']);
+        }
+
         $connectorApiKeyRecord->value = 'this-is-connector-api-key';
         $connectorApiKeyRecord->save();
 
         # connectorApiUrl
-        $connectorApiUrlRecord = new SettingRecord(['name' => 'connector_api_url']);
+        $connectorApiUrlRecord = SettingRecord::findOne(['name' => 'connector_api_url']);
+
+        if($connectorApiUrlRecord === null) {
+            $connectorApiUrlRecord = new SettingRecord(['name' => 'connector_api_url']);
+        }
+
         $connectorApiUrlRecord->value = 'http://wiremock/api/v1.0/this-is-connector-api-url';
         $connectorApiUrlRecord->save();
 

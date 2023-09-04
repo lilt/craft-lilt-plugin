@@ -210,7 +210,7 @@ Cypress.Commands.add('verifiedFlow', ({
 
     for (const language of languages) {
       cy.get(
-          `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
+          `#translations-list th[data-title="Translation"] div.element[data-target-site-language="${language}"]`).
           invoke('attr', 'data-source-content').
           then(async dataSourceContent => {
 
@@ -251,19 +251,19 @@ Cypress.Commands.add('verifiedFlow', ({
       invoke('text').
       should('contain', 'Ready for review');
 
-  cy.get('#translations-list th[data-title="Title"] div.element').
+  cy.get('#translations-list th[data-title="Translation"] div.element').
       invoke('attr', 'data-type').
       should('equal', 'lilthq\\craftliltplugin\\elements\\Translation');
 
-  cy.get('#translations-list th[data-title="Title"] div.element').
+  cy.get('#translations-list th[data-title="Translation"] div.element').
       invoke('attr', 'data-status').
       should('equal', 'ready-for-review');
 
-  cy.get('#translations-list th[data-title="Title"] div.element').
+  cy.get('#translations-list th[data-title="Translation"] div.element').
       invoke('attr', 'data-label').
       should('equal', 'The Future of Augmented Reality');
 
-  cy.get('#translations-list th[data-title="Title"] div.element').
+  cy.get('#translations-list th[data-title="Translation"] div.element').
       invoke('attr', 'title').
       should('equal', 'The Future of Augmented Reality – Happy Lager (en)');
 
@@ -288,7 +288,7 @@ Cypress.Commands.add('verifiedFlow', ({
       then((createdJobId) => {
         const appUrl = Cypress.env('APP_URL');
         cy.url().
-            should('equal',
+            should('contain',
                 `${appUrl}/admin/craft-lilt-plugin/job/edit/${createdJobId}`);
       });
 

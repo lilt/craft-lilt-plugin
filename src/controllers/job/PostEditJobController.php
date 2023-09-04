@@ -21,7 +21,7 @@ use yii\web\Response;
 
 class PostEditJobController extends AbstractPostJobController
 {
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     /**
      * @throws InvalidConfigException
@@ -61,6 +61,10 @@ class PostEditJobController extends AbstractPostJobController
 
         Craft::$app->getSession()->setFlash(
             'cp-notice',
+            'Translate job saved successfully.'
+        );
+
+        Craft::$app->getSession()->setNotice(
             'Translate job saved successfully.'
         );
 
