@@ -112,8 +112,7 @@ describe(
         cy.get('.data').find('tr td[data-attr="status"]').should('have.length', 1)
       })
 
-      it(
-          'can see job in the list with status filter', async () => {
+      it('can see job in the list with status filter',() => {
         const appUrl = Cypress.env('APP_URL');
         cy.visit(`${appUrl}/admin/craft-lilt-plugin/jobs`)
 
@@ -123,5 +122,19 @@ describe(
             get(`div[data-label="${jobTitle}"]`).
             invoke('attr','data-status').
             should('equal', 'ready-for-review')
+      })
+
+      it('can download job diagnostic data', () => {
+        cy.openJob(jobTitle);
+
+        cy.get('#lilt-download-diagnostic-data').click();
+        cy.wait(5000);
+
+        cy.exec('ls cypress/downloads').then((result) => {
+            const files = result.stdout.split('\n');
+
+            const zipFiles = files.filter(file => file.endsWith('.zip'));
+            expect(zipFiles).to.have.length.greaterThan(0);
+        });
       })
     });

@@ -20,7 +20,7 @@ use craft\helpers\Json;
 
 class GetReportDataController extends AbstractJobController
 {
-    protected $allowAnonymous = false;
+    protected int|bool|array $allowAnonymous = false;
 
     private $savePath;
 
