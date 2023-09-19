@@ -58,14 +58,9 @@ class CreateDraftHandler
             $element->getCanonicalId()
         ) : $element;
 
-        $creatorId = Craft::$app->user->getId();
-        if ($creatorId === null) {
-            $creatorId = $element->authorId;
-        }
-
         $draft = Craft::$app->drafts->createDraft(
             $createFrom,
-            $creatorId ?? 0,
+            $command->getAuthorId(),
             sprintf(
                 '%s [%s -> %s] ' . (new DateTime())->format('H:i:s'),
                 $jobTitle,
