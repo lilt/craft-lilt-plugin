@@ -16,7 +16,9 @@ use lilthq\craftliltplugin\assets\JobFormAsset;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use RuntimeException;
 use yii\base\InvalidConfigException;
+use yii\web\IdentityInterface;
 use yii\web\Response;
 
 class AbstractJobController extends Controller
@@ -34,9 +36,19 @@ class AbstractJobController extends Controller
         $job->title = $bodyParams['title'];
         $job->sourceSiteId = (int)$bodyParams['sourceSite'];
         $job->versions = $bodyParams['versions'] ?? [];
-        $job->authorId = !empty($bodyParams['author'][0]) ? (int)$bodyParams['author'][0] : null;
+        $job->authorId = !empty($bodyParams['author'][0]) ? (int) $bodyParams['author'][0] : null;
         $job->translationWorkflow = $bodyParams['translationWorkflow'];
         $job->elementIds = json_decode($bodyParams['entries'], false) ?? [];
+
+        if (empty($job->authorId)) {
+            $userIdentity = Craft::$app->getUser()->getIdentity();
+
+            if (!$userIdentity instanceof IdentityInterface || empty($userIdentity->getId())) {
+                throw new RuntimeException("can't create job: author id is empty");
+            }
+
+            $job->authorId = (int) $userIdentity->getId();
+        }
 
         //TODO: due date not using right now
         //$job->dueDate = DateTimeHelper::toDateTime($this->request->getBodyParam('dueDate')) ?: null;
