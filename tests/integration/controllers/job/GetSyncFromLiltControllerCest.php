@@ -48,10 +48,8 @@ class GetSyncFromLiltControllerCest extends AbstractIntegrationCest
      * @throws \craft\errors\InvalidFieldException
      * @throws ModuleException
      */
-    public function testSyncSuccess(IntegrationTester $I, $scenario): void
+    public function testSyncSuccess(IntegrationTester $I): void
     {
-        $scenario->skip('Content is not getting updated and missing in source content');
-
         $I->amLoggedInAs(
             Craft::$app->getUsers()->getUserById(1)
         );
