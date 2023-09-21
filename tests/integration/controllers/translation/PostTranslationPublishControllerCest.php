@@ -89,7 +89,8 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
                 $job->title,
                 $job->siteId,
                 Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU'),
-                'instant'
+                'instant',
+                $job->authorId
             )
         );
 
@@ -206,7 +207,8 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
                 $job->title,
                 $job->siteId,
                 Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU'),
-                'instant'
+                'instant',
+                $job->authorId
             )
         );
 

@@ -16,7 +16,9 @@ namespace lilthq\craftliltplugin\controllers\job;
 use Craft;
 use craft\helpers\UrlHelper;
 use lilthq\craftliltplugin\elements\Job;
+use RuntimeException;
 use yii\base\InvalidConfigException;
+use yii\web\IdentityInterface;
 use yii\web\Response;
 
 class GetJobCreateFormController extends AbstractJobController
@@ -46,20 +48,16 @@ class GetJobCreateFormController extends AbstractJobController
             $job->sourceSiteId = (int) $sourceSiteId;
         }
 
+        $userIdentity = Craft::$app->getUser()->getIdentity();
+        if (!$userIdentity instanceof IdentityInterface || empty($userIdentity->getId())) {
+            throw new RuntimeException("can't create job: author id is empty");
+        }
+
+        $job->authorId = (int)$userIdentity->getId();
+
         return $this->renderJobForm(
             $job,
             [
-                /*'formActions' => [
-                    [
-                        "label" => "Create and continue editing",
-                        "redirect" => "{cpEditUrl}",
-                        "shortcut" => true,
-                        "retainScroll" => true,
-                        "eventData" => [
-                            "autosave" => false
-                        ]
-                    ]
-                ],*/
                 'crumbs' => [
                     [
                         'label' => 'Lilt Plugin',
@@ -70,7 +68,6 @@ class GetJobCreateFormController extends AbstractJobController
                         'url' => UrlHelper::cpUrl('admin/craft-lilt-plugin/jobs')
                     ],
                 ],
-                'author' => Craft::$app->getUser()->getIdentity()
             ]
         );
     }

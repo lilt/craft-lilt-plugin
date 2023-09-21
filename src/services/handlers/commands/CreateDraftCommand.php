@@ -18,19 +18,22 @@ class CreateDraftCommand
     private $sourceSiteId;
     private $targetSiteId;
     private $flow;
+    private $authorId;
 
     public function __construct(
         ElementInterface $element,
         string $jobTitle,
         int $sourceSiteId,
         int $targetSiteId,
-        string $flow
+        string $flow,
+        int $authorId
     ) {
         $this->element = $element;
         $this->jobTitle = $jobTitle;
         $this->sourceSiteId = $sourceSiteId;
         $this->targetSiteId = $targetSiteId;
         $this->flow = $flow;
+        $this->authorId = $authorId;
     }
 
     public function getElement(): ElementInterface
@@ -56,5 +59,10 @@ class CreateDraftCommand
     public function getFlow(): string
     {
         return $this->flow;
+    }
+
+    public function getAuthorId(): int
+    {
+        return $this->authorId;
     }
 }

@@ -76,7 +76,8 @@ class SendJobToLiltConnectorHandler
                         $job->title,
                         $job->sourceSiteId,
                         $targetSiteId,
-                        $job->translationWorkflow
+                        $job->translationWorkflow,
+                        $job->authorId
                     )
                 );
 
