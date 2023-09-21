@@ -53,7 +53,8 @@ class CraftLiltPluginHelper extends Module
                         $job->title,
                         $job->sourceSiteId,
                         $targetSiteId,
-                        $job->translationWorkflow
+                        $job->translationWorkflow,
+                        $job->authorId
                     )
                 );
             }
