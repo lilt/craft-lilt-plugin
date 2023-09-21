@@ -43,7 +43,7 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
      * @throws InvalidFieldException
      * @throws ModuleException
      */
-    public function testRetrySuccess(IntegrationTester $I, $scenario): void
+    public function testRetrySuccess(IntegrationTester $I): void
     {
         $I->setQueueEachTranslationFileSeparately(0);
 
