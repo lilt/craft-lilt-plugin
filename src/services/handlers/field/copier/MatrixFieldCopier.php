@@ -33,8 +33,6 @@ class MatrixFieldCopier implements FieldCopierInterface
             return false;
         }
 
-        $this->removeBlocks($to, $field);
-
         $serializedValue = $field->serializeValue($from->getFieldValue($field->handle), $from);
 
         $prepared = [];
@@ -46,35 +44,5 @@ class MatrixFieldCopier implements FieldCopierInterface
         $to->setFieldValues([$field->handle => $prepared]);
 
         return true;
-    }
-
-    /**
-     * @param ElementInterface $to
-     * @param FieldInterface|Matrix $field
-     * @return void
-     * @throws InvalidFieldException
-     * @throws \Throwable
-     */
-    private function removeBlocks(ElementInterface $to, FieldInterface $field): void
-    {
-        /**
-         * @var MatrixBlockQuery $blocksQuery
-         */
-        $blocksQuery = $to->getFieldValue($field->handle);
-
-        /**
-         * @var MatrixBlock[] $blocks
-         */
-        $blocks = $blocksQuery->all();
-
-        foreach ($blocks as $block) {
-            if (!$block instanceof MatrixBlock) {
-                continue;
-            }
-
-            Craft::$app->getElements()->deleteElement($block, true);
-        }
-
-        Craft::$app->matrix->saveField($field, $to);
     }
 }
