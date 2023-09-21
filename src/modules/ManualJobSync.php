@@ -19,6 +19,7 @@ use Exception;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
 
 class ManualJobSync extends BaseJob
 {
@@ -58,7 +59,7 @@ class ManualJobSync extends BaseJob
 
         // Release all previously queued jobs for lilt plugin jobs
         foreach ($jobsInfo as $jobInfo) {
-            $jobDetails = Craft::$app->getQueue()->getJobDetails((string) $jobInfo['id']);
+            $jobDetails = Craft::$app->getQueue()->getJobDetails((string)$jobInfo['id']);
 
             if ($jobDetails['status'] === Queue::STATUS_RESERVED) {
                 //we don't need to do anything with job in progress
@@ -117,7 +118,7 @@ class ManualJobSync extends BaseJob
                         'id' => $jobInfo['id'],
                     ], [], false);
 
-                    $queue->retry((string) $jobInfo['id']);
+                    $queue->retry((string)$jobInfo['id']);
                     $jobsInProgress[$queueJob->jobId] = $queueJob;
                 } catch (Exception $ex) {
                     Craft::error(
@@ -170,19 +171,39 @@ class ManualJobSync extends BaseJob
             }
 
             if (!empty($jobRecord->liltJobId)) {
-                // job is already on lilt side, we just need to fetch status again
-                CraftHelpersQueue::push(
-                    (new FetchJobStatusFromConnector(
-                        [
-                            'jobId' => $jobRecord->id,
-                            'liltJobId' => $jobRecord->liltJobId,
-                        ]
-                    )),
-                    FetchJobStatusFromConnector::PRIORITY,
-                    0
+                $translationRecords = TranslationRecord::findAll(['jobId' => $jobRecord->id]);
+                $connectorTranslationIds = array_map(
+                    static function (TranslationRecord $translationRecord) {
+                        return $translationRecord->connectorTranslationId;
+                    },
+                    $translationRecords
                 );
 
-                continue;
+                $translationStatuses = array_map(
+                    static function (TranslationRecord $translationRecord) {
+                        return $translationRecord->status;
+                    },
+                    $translationRecords
+                );
+
+                if (
+                    !in_array(null, $connectorTranslationIds)
+                    && !in_array(TranslationRecord::STATUS_FAILED, $translationStatuses)
+                ) {
+                    // job is already on lilt side, we just need to fetch status again
+                    CraftHelpersQueue::push(
+                        (new FetchJobStatusFromConnector(
+                            [
+                                'jobId' => $jobRecord->id,
+                                'liltJobId' => $jobRecord->liltJobId,
+                            ]
+                        )),
+                        FetchJobStatusFromConnector::PRIORITY,
+                        0
+                    );
+
+                    continue;
+                }
             }
 
             //Sending job to lilt
