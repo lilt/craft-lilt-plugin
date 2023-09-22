@@ -40,8 +40,6 @@ class NeoFieldCopier implements FieldCopierInterface
             return false;
         }
 
-        $this->removeBlocks($to, $field);
-
         $serializedValue = $field->serializeValue($from->getFieldValue($field->handle), $from);
 
         $prepared = [];
@@ -53,44 +51,5 @@ class NeoFieldCopier implements FieldCopierInterface
         $to->setFieldValues([$field->handle => $prepared]);
 
         return true;
-    }
-
-    /**
-     * @param ElementInterface $to
-     * @param FieldInterface|Field $field
-     * @return void
-     * @throws InvalidFieldException
-     * @throws \Throwable
-     */
-    private function removeBlocks(ElementInterface $to, FieldInterface $field): void
-    {
-        /**
-         * @var BlockQuery $blocksQuery
-         */
-        $blocksQuery = $to->getFieldValue($field->handle);
-
-        /**
-         * @var Block[] $blocks
-         */
-        $blocks = $blocksQuery->all();
-
-        foreach ($blocks as $block) {
-            if (!$block instanceof Block) {
-                continue;
-            }
-
-            Craft::$app->getElements()->deleteElement($block, true);
-        }
-
-        // Get the Neo plugin instance
-        /** @var \benf\neo\Plugin $neoPluginInstance */
-        $neoPluginInstance = call_user_func(['benf\neo\Plugin', 'getInstance']);
-
-        // Get the Neo plugin Fields service
-        /** @var \benf\neo\services\Fields $neoPluginFieldsService  */
-        $neoPluginFieldsService = $neoPluginInstance->get('fields');
-
-        //Save field value
-        $neoPluginFieldsService->saveValue($field, $to);
     }
 }

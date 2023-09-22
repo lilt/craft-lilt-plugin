@@ -30,6 +30,10 @@ install: clone
 backup-db:
 	docker-compose exec -T app sh -c 'php craft db/backup'
 
+refresh:
+	docker-compose exec -T app sh -c 'rm -rf /app/vendor/lilt/craft-lilt-plugin'
+	docker-compose exec -T app sh -c 'composer require --ignore-platform-reqs "lilt/craft-lilt-plugin":"^999.9.9"'
+
 build:
 	docker build -f happy-lager-main/Dockerfile happy-lager-main -t happy-lager
 

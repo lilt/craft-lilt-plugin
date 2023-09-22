@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\handlers;
 
+use Craft;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\exceptions\WrongTranslationFilenameException;
@@ -25,9 +26,14 @@ class UpdateTranslationsConnectorIds
 
         foreach ($connectorTranslations->getResults() as $translationResponse) {
             try {
-                $elementId = Craftliltplugin::getInstance(
-                )->connectorTranslationRepository->getElementIdFromTranslationResponse($translationResponse);
+                $elementId = Craftliltplugin::getInstance()
+                    ->connectorTranslationRepository
+                    ->getElementIdFromTranslationResponse($translationResponse);
             } catch (WrongTranslationFilenameException $ex) {
+                Craft::error(
+                    sprintf("Can't get element id from file: %s", $translationResponse->getName())
+                );
+
                 continue;
             }
 

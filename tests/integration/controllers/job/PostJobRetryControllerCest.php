@@ -43,10 +43,8 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
      * @throws InvalidFieldException
      * @throws ModuleException
      */
-    public function testRetrySuccess(IntegrationTester $I, $scenario): void
+    public function testRetrySuccess(IntegrationTester $I): void
     {
-        $scenario->skip('Content is not getting updated and missing in source content');
-
         $I->amLoggedInAs(
             Craft::$app->getUsers()->getUserById(1)
         );

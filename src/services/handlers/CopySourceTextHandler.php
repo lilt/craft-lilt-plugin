@@ -53,7 +53,8 @@ class CopySourceTextHandler
                         $job->title,
                         $job->sourceSiteId,
                         $targetSiteId,
-                        $job->translationWorkflow
+                        $job->translationWorkflow,
+                        $job->authorId
                     )
                 );
 
