@@ -275,6 +275,20 @@ class ServiceInitializer
                 ],
         ]);
 
+        $pluginInstance->setComponents([
+            'sendJobToLiltConnectorHandler' => function () use ($pluginInstance) {
+                return new SendJobToLiltConnectorHandler(
+                    $pluginInstance->connectorJobRepository,
+                    $pluginInstance->jobLogsRepository,
+                    $pluginInstance->translationRepository,
+                    $pluginInstance->connectorJobsFileRepository,
+                    $pluginInstance->createDraftHandler,
+                    $pluginInstance->elementTranslatableContentProvider,
+                    $pluginInstance->languageMapper
+                );
+            }
+        ]);
+
         $pluginInstance->listenerRegister->register();
         $pluginInstance->loadI18NHandler->__invoke();
     }

@@ -74,6 +74,7 @@ class CraftliltpluginParameters
     public const TRANSLATION_WORKFLOW_VERIFIED = SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED;
     public const TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT = 'COPY_SOURCE_TEXT';
 
+    public const SETTING_SPLIT_JOB_FILE_UPLOAD = 'split_job_file_upload';
 
     public static function getTranslationWorkflows(): array
     {

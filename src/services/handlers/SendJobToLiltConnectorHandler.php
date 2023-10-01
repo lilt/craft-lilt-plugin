@@ -14,20 +14,86 @@ use craft\errors\ElementNotFoundException;
 use craft\helpers\Queue;
 use DateTimeInterface;
 use LiltConnectorSDK\ApiException;
-use LiltConnectorSDK\Model\JobResponse;
-use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
+use lilthq\craftliltplugin\services\mappers\LanguageMapper;
+use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
+use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
+use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
+use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
+use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use Throwable;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
 
 class SendJobToLiltConnectorHandler
 {
+    /**
+     * @var ConnectorJobRepository
+     */
+    public $connectorJobRepository;
+
+    /**
+     * @var JobLogsRepository
+     */
+    public $jobLogsRepository;
+
+    /**
+     * @var TranslationRepository
+     */
+    public $translationRepository;
+
+    /**
+     * @var ConnectorFileRepository
+     */
+    public $connectorJobsFileRepository;
+
+    /**
+     * @var CreateDraftHandler
+     */
+    public $createDraftHandler;
+
+    /**
+     * @var ElementTranslatableContentProvider
+     */
+    public $elementTranslatableContentProvider;
+
+    /**
+     * @var LanguageMapper
+     */
+    public $languageMapper;
+
+    /**
+     * @param ConnectorJobRepository $connectorJobRepository
+     * @param JobLogsRepository $jobLogsRepository
+     * @param TranslationRepository $translationRepository
+     * @param ConnectorFileRepository $connectorJobsFileRepository
+     * @param CreateDraftHandler $createDraftHandler
+     * @param ElementTranslatableContentProvider $elementTranslatableContentProvider
+     * @param LanguageMapper $languageMapper
+     */
+    public function __construct(
+        ConnectorJobRepository $connectorJobRepository,
+        JobLogsRepository $jobLogsRepository,
+        TranslationRepository $translationRepository,
+        ConnectorFileRepository $connectorJobsFileRepository,
+        CreateDraftHandler $createDraftHandler,
+        ElementTranslatableContentProvider $elementTranslatableContentProvider,
+        LanguageMapper $languageMapper
+    ) {
+        $this->connectorJobRepository = $connectorJobRepository;
+        $this->jobLogsRepository = $jobLogsRepository;
+        $this->translationRepository = $translationRepository;
+        $this->connectorJobsFileRepository = $connectorJobsFileRepository;
+        $this->createDraftHandler = $createDraftHandler;
+        $this->elementTranslatableContentProvider = $elementTranslatableContentProvider;
+        $this->languageMapper = $languageMapper;
+    }
+
+
     /**
      * @throws Throwable
      * @throws ElementNotFoundException
@@ -37,19 +103,19 @@ class SendJobToLiltConnectorHandler
      */
     public function __invoke(Job $job): void
     {
-        $jobLilt = Craftliltplugin::getInstance()->connectorJobRepository->create(
+        $jobLilt = $this->connectorJobRepository->create(
             $job->title,
             strtoupper($job->translationWorkflow)
         );
 
-        Craftliltplugin::getInstance()->jobLogsRepository->create(
+        $this->jobLogsRepository->create(
             $job->id,
             Craft::$app->getUser()->getId(),
             sprintf('Lilt job created (id: %d)', $jobLilt->getId())
         );
 
         $elementIdsToTranslate = $job->getElementIds();
-        $translations = Craftliltplugin::getInstance()->translationRepository->findRecordsByJobId($job->id);
+        $translations = $this->translationRepository->findRecordsByJobId($job->id);
         /**
          * @var TranslationRecord[][] $translationsMapped
          */
@@ -70,7 +136,7 @@ class SendJobToLiltConnectorHandler
 
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
                 //Create draft with & update all values to source element
-                $draft = Craftliltplugin::getInstance()->createDraftHandler->create(
+                $draft = $this->createDraftHandler->create(
                     new CreateDraftCommand(
                         $element,
                         $job->title,
@@ -81,7 +147,7 @@ class SendJobToLiltConnectorHandler
                     )
                 );
 
-                $content = Craftliltplugin::getInstance()->elementTranslatableContentProvider->provide(
+                $content = $this->elementTranslatableContentProvider->provide(
                     $draft
                 );
 
@@ -91,8 +157,8 @@ class SendJobToLiltConnectorHandler
                     $content,
                     $versionId,
                     $jobLilt->getId(),
-                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
-                    Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+                    $this->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
+                    $this->languageMapper->getLanguagesBySiteIds(
                         [$targetSiteId]
                     ),
                     null, //TODO: $job->dueDate is not in use
@@ -107,7 +173,7 @@ class SendJobToLiltConnectorHandler
 
                 $translation = $translationsMapped[$versionId][$targetSiteId] ?? null;
                 if ($translation === null) {
-                    $translation = Craftliltplugin::getInstance()->translationRepository->create(
+                    $translation = $this->translationRepository->create(
                         $job->id,
                         $elementId,
                         $versionId,
@@ -132,9 +198,9 @@ class SendJobToLiltConnectorHandler
 
         $this->updateJob($job, $jobLilt->getId(), Job::STATUS_IN_PROGRESS);
 
-        Craftliltplugin::getInstance()->connectorJobRepository->start($jobLilt->getId());
+        $this->connectorJobRepository->start($jobLilt->getId());
 
-        Craftliltplugin::getInstance()->jobLogsRepository->create(
+        $this->jobLogsRepository->create(
             $job->id,
             Craft::$app->getUser()->getId(),
             'Job uploaded to Lilt Platform'
@@ -165,7 +231,7 @@ class SendJobToLiltConnectorHandler
             $slug = substr($slug, 0, 150);
         }
 
-        return Craftliltplugin::getInstance()->connectorJobsFileRepository->addFileToJob(
+        return $this->connectorJobsFileRepository->addFileToJob(
             $jobId,
             'element_' . $entryId . '_' . $slug . '.json+html',
             $contentString,
