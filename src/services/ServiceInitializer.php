@@ -36,6 +36,7 @@ use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
+use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
@@ -279,6 +280,17 @@ class ServiceInitializer
             'sendJobToLiltConnectorHandler' => function () use ($pluginInstance) {
                 return new SendJobToLiltConnectorHandler(
                     $pluginInstance->connectorJobRepository,
+                    $pluginInstance->jobLogsRepository,
+                    $pluginInstance->translationRepository,
+                    $pluginInstance->languageMapper,
+                    $pluginInstance->sendTranslationToLiltConnectorHandler
+                );
+            }
+        ]);
+
+        $pluginInstance->setComponents([
+            'sendTranslationToLiltConnectorHandler' => function () use ($pluginInstance) {
+                return new SendTranslationToLiltConnectorHandler(
                     $pluginInstance->jobLogsRepository,
                     $pluginInstance->translationRepository,
                     $pluginInstance->connectorJobsFileRepository,
