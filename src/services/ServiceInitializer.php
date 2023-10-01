@@ -283,7 +283,8 @@ class ServiceInitializer
                     $pluginInstance->jobLogsRepository,
                     $pluginInstance->translationRepository,
                     $pluginInstance->languageMapper,
-                    $pluginInstance->sendTranslationToLiltConnectorHandler
+                    $pluginInstance->sendTranslationToLiltConnectorHandler,
+                    $pluginInstance->settingsRepository
                 );
             }
         ]);

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\repositories;
 
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 
 class SettingsRepository
@@ -34,6 +35,19 @@ class SettingsRepository
         }
         $connectorApiUrlRecord->value = $connectorApiUrl;
         $connectorApiUrlRecord->save();
+    }
+
+    public function isSplitJobFileUploadEnabled(): bool
+    {
+        $settingValue = SettingRecord::findOne(
+            ['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]
+        );
+
+        if (empty($settingValue) || empty($settingValue->value)) {
+            return false;
+        }
+
+        return (bool)$settingValue->value;
     }
 
     public function save(string $name, string $value): bool

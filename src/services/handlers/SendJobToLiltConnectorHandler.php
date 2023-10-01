@@ -15,12 +15,14 @@ use craft\helpers\Queue;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
+use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\SendTranslationCommand;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use Throwable;
 use yii\base\Exception;
@@ -54,24 +56,32 @@ class SendJobToLiltConnectorHandler
     public $sendTranslationToLiltConnectorHandler;
 
     /**
+     * @var SettingsRepository
+     */
+    public $settingsRepository;
+
+    /**
      * @param ConnectorJobRepository $connectorJobRepository
      * @param JobLogsRepository $jobLogsRepository
      * @param TranslationRepository $translationRepository
      * @param LanguageMapper $languageMapper
      * @param SendTranslationToLiltConnectorHandler $sendTranslationToLiltConnectorHandler
+     * @param SettingsRepository $settingsRepository
      */
     public function __construct(
         ConnectorJobRepository $connectorJobRepository,
         JobLogsRepository $jobLogsRepository,
         TranslationRepository $translationRepository,
         LanguageMapper $languageMapper,
-        SendTranslationToLiltConnectorHandler $sendTranslationToLiltConnectorHandler
+        SendTranslationToLiltConnectorHandler $sendTranslationToLiltConnectorHandler,
+        SettingsRepository $settingsRepository
     ) {
         $this->connectorJobRepository = $connectorJobRepository;
         $this->jobLogsRepository = $jobLogsRepository;
         $this->translationRepository = $translationRepository;
         $this->languageMapper = $languageMapper;
         $this->sendTranslationToLiltConnectorHandler = $sendTranslationToLiltConnectorHandler;
+        $this->settingsRepository = $settingsRepository;
     }
 
 
@@ -84,6 +94,8 @@ class SendJobToLiltConnectorHandler
      */
     public function __invoke(Job $job): void
     {
+        $isSplitJobFileUploadEnabled = $this->settingsRepository->isSplitJobFileUploadEnabled();
+
         $jobLilt = $this->connectorJobRepository->create(
             $job->title,
             strtoupper($job->translationWorkflow)
@@ -110,21 +122,43 @@ class SendJobToLiltConnectorHandler
             }
 
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
+                $translation = $translationsMapped[$versionId][$targetSiteId] ?? null;
+                if ($isSplitJobFileUploadEnabled) {
+                    Queue::push(
+                        new SendTranslationToConnector([
+                            'jobId' => $job->id,
+                            'translationId' => $translation->id ?? null,
+                            'elementId' => $elementId,
+                            'versionId' => $versionId,
+                            'targetSiteId' => $targetSiteId,
+                        ]),
+                        SendTranslationToConnector::PRIORITY,
+                        SendTranslationToConnector::getDelay(),
+                        SendTranslationToConnector::TTR
+                    );
+
+                    continue;
+                }
+
                 $this->sendTranslationToLiltConnectorHandler->send(
                     new SendTranslationCommand(
                         $elementId,
                         $versionId,
                         $targetSiteId,
                         $element,
-                        $jobLilt,
+                        $jobLilt->getId(),
                         $job,
-                        $translationsMapped[$versionId][$targetSiteId] ?? null
+                        $translation
                     )
                 );
             }
         }
 
         $this->updateJob($job, $jobLilt->getId(), Job::STATUS_IN_PROGRESS);
+
+        if ($isSplitJobFileUploadEnabled) {
+            return;
+        }
 
         $this->connectorJobRepository->start($jobLilt->getId());
 
@@ -168,7 +202,7 @@ class SendJobToLiltConnectorHandler
 
     /**
      * @param Job $job
-     * @return array|\lilthq\craftliltplugin\records\TranslationRecord[][]
+     * @return array|TranslationRecord[][]
      */
     private function getTranslationsMapped(Job $job): array
     {

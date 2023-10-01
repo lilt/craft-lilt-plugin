@@ -32,9 +32,9 @@ class SendTranslationCommand
     private $element;
 
     /**
-     * @var LiltJob
+     * @var int
      */
-    private $liltJob;
+    private $liltJobId;
 
     /**
      * @var Job
@@ -51,7 +51,7 @@ class SendTranslationCommand
      * @param int $versionId
      * @param int $targetSiteId
      * @param ElementInterface $element
-     * @param LiltJob $liltJob
+     * @param int $liltJobId
      * @param Job $job
      * @param TranslationRecord|null $translationRecord
      */
@@ -60,7 +60,7 @@ class SendTranslationCommand
         int $versionId,
         int $targetSiteId,
         ElementInterface $element,
-        LiltJob $liltJob,
+        int $liltJobId,
         Job $job,
         ?TranslationRecord $translationRecord
     ) {
@@ -68,7 +68,7 @@ class SendTranslationCommand
         $this->versionId = $versionId;
         $this->targetSiteId = $targetSiteId;
         $this->element = $element;
-        $this->liltJob = $liltJob;
+        $this->liltJobId = $liltJobId;
         $this->job = $job;
         $this->translationRecord = $translationRecord;
     }
@@ -106,11 +106,11 @@ class SendTranslationCommand
     }
 
     /**
-     * @return LiltJob
+     * @return int
      */
-    public function getLiltJob(): LiltJob
+    public function getLiltJobId(): int
     {
-        return $this->liltJob;
+        return $this->liltJobId;
     }
 
     /**

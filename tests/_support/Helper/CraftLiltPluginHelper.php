@@ -16,8 +16,10 @@ use Craft;
 use craft\queue\BaseJob;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use lilthq\craftliltplugin\services\handlers\commands\CreateJobCommand;
@@ -174,6 +176,17 @@ class CraftLiltPluginHelper extends Module
                 $appliedContent
             );
         }
+    }
+
+    public function setEnableSplitJobFileUpload(int $value): void
+    {
+        $settingRecord = SettingRecord::findOne(['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]);
+        if (!$settingRecord) {
+            $settingRecord = new SettingRecord(['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]);
+        }
+
+        $settingRecord->value = $value;
+        $settingRecord->save();
     }
 
     public function assertI18NRecordsExist(int $targetSiteId, array $expectedTranslations): void

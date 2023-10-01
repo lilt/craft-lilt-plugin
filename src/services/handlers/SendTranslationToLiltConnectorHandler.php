@@ -100,7 +100,7 @@ class SendTranslationToLiltConnectorHandler
         $element = $sendTranslationCommand->getElement();
         $versionId = $sendTranslationCommand->getVersionId();
         $elementId = $sendTranslationCommand->getElementId();
-        $liltJob = $sendTranslationCommand->getLiltJob();
+        $liltJobId = $sendTranslationCommand->getLiltJobId();
         $translation = $sendTranslationCommand->getTranslationRecord();
         $targetSiteId = $sendTranslationCommand->getTargetSiteId();
 
@@ -125,7 +125,7 @@ class SendTranslationToLiltConnectorHandler
         $result = $this->createJobFile(
             $content,
             $versionId,
-            $liltJob->getId(),
+            $liltJobId,
             $this->languageMapper->getLanguageBySiteId((int)$job->sourceSiteId),
             $this->languageMapper->getLanguagesBySiteIds(
                 [$targetSiteId]
@@ -135,7 +135,7 @@ class SendTranslationToLiltConnectorHandler
         );
 
         if (!$result) {
-            $this->updateJob($job, $liltJob->getId(), Job::STATUS_FAILED);
+            $this->updateJob($job, $liltJobId, Job::STATUS_FAILED);
 
             throw new \RuntimeException('Translations not created, upload failed');
         }
@@ -157,7 +157,7 @@ class SendTranslationToLiltConnectorHandler
         $translation->markAttributeDirty('translatedDraftId');
 
         if (!$translation->save()) {
-            $this->updateJob($job, $liltJob->getId(), Job::STATUS_FAILED);
+            $this->updateJob($job, $liltJobId, Job::STATUS_FAILED);
 
             throw new \RuntimeException('Translations not created, upload failed');
         }
