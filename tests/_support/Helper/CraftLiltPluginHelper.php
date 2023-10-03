@@ -16,13 +16,13 @@ use Craft;
 use craft\queue\BaseJob;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use lilthq\craftliltplugin\services\handlers\commands\CreateJobCommand;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use yii\base\InvalidArgumentException;
 
 class CraftLiltPluginHelper extends Module
@@ -178,11 +178,15 @@ class CraftLiltPluginHelper extends Module
         }
     }
 
-    public function setEnableSplitJobFileUpload(int $value): void
+    public function setQueueEachTranslationFileSeparately(int $value): void
     {
-        $settingRecord = SettingRecord::findOne(['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]);
+        $settingRecord = SettingRecord::findOne(
+            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
+        );
         if (!$settingRecord) {
-            $settingRecord = new SettingRecord(['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]);
+            $settingRecord = new SettingRecord(
+                ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
+            );
         }
 
         $settingRecord->value = $value;

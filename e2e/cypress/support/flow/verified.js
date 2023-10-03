@@ -17,6 +17,7 @@ Cypress.Commands.add('verifiedFlow', ({
   languages = ['de'],
   batchPublishing = false, //publish all translations at once with publish button
   entryId = 24,
+  splitSend = true,
 }) => {
   const isMockserverEnabled = Cypress.env('MOCKSERVER_ENABLED');
 
@@ -26,6 +27,7 @@ Cypress.Commands.add('verifiedFlow', ({
 
   cy.setConfigurationOption('enableEntries', enableAfterPublish);
   cy.setConfigurationOption('copySlug', copySlug);
+  cy.setConfigurationOption('splitSend', splitSend);
 
   if (copySlug) {
     // update slug on entry and enable slug copy option

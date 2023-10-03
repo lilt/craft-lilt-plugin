@@ -83,8 +83,12 @@ Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
     const options = {
         enableEntries: {
             id: 'enableEntriesForTargetSites',
-        }, copySlug: {
+        },
+        copySlug: {
             id: 'copyEntriesSlugFromSourceToTarget',
+        },
+        splitSend: {
+            id: 'queueEachTranslationFileSeparately',
         },
     };
 
@@ -339,7 +343,7 @@ Cypress.Commands.add('waitForJobStatus',
     (status = 'ready-for-review', maxAttempts = 15, attempts = 0,
      waitPerIteration = 3000) => {
         if (attempts > maxAttempts) {
-            throw new Error('Timed out waiting for jpb status to be ' + status);
+            throw new Error('Timed out waiting for job status to be ' + status);
         }
         cy.get('#create-job-form').invoke('attr', 'data-job-status').then(async $jobStatus => {
             if ($jobStatus !== status) {

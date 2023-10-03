@@ -10,11 +10,11 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\migrations;
 
 use craft\db\Migration;
-use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 
 // @codingStandardsIgnoreStart
-class m231001_174918_enable_split_job_file_upload extends Migration
+class m231001_174918_queue_each_translation_file_separately extends Migration
 // @codingStandardsIgnoreEnd
 {
     /**
@@ -23,11 +23,11 @@ class m231001_174918_enable_split_job_file_upload extends Migration
     public function safeUp()
     {
         $settingRecord = SettingRecord::findOne(
-            ['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]
+            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
         );
         if (!$settingRecord) {
             $settingRecord = new SettingRecord(
-                ['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]
+                ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
             );
         }
 
@@ -41,11 +41,11 @@ class m231001_174918_enable_split_job_file_upload extends Migration
     public function safeDown()
     {
         $settingRecord = SettingRecord::findOne(
-            ['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]
+            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
         );
         if (!$settingRecord) {
             $settingRecord = new SettingRecord(
-                ['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]
+                ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
             );
         }
 

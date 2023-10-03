@@ -60,7 +60,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJobSuccess(IntegrationTester $I): void
     {
-        $I->setEnableSplitJobFileUpload(0);
+        $I->setQueueEachTranslationFileSeparately(0);
 
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
@@ -184,7 +184,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
 
     public function testSendCopySourceFlow(IntegrationTester $I): void
     {
-        $I->setEnableSplitJobFileUpload(0);
+        $I->setQueueEachTranslationFileSeparately(0);
 
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
@@ -302,7 +302,7 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I): void
     {
-        $I->setEnableSplitJobFileUpload(0);
+        $I->setQueueEachTranslationFileSeparately(0);
 
         $element = Entry::find()
             ->where(['authorId' => 1])

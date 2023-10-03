@@ -94,7 +94,7 @@ class SendJobToLiltConnectorHandler
      */
     public function __invoke(Job $job): void
     {
-        $isSplitJobFileUploadEnabled = $this->settingsRepository->isSplitJobFileUploadEnabled();
+        $isQueueEachTranslationFileSeparately = $this->settingsRepository->isQueueEachTranslationFileSeparately();
 
         $jobLilt = $this->connectorJobRepository->create(
             $job->title,
@@ -123,7 +123,7 @@ class SendJobToLiltConnectorHandler
 
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
                 $translation = $translationsMapped[$versionId][$targetSiteId] ?? null;
-                if ($isSplitJobFileUploadEnabled) {
+                if ($isQueueEachTranslationFileSeparately) {
                     Queue::push(
                         new SendTranslationToConnector([
                             'jobId' => $job->id,
@@ -156,7 +156,7 @@ class SendJobToLiltConnectorHandler
 
         $this->updateJob($job, $jobLilt->getId(), Job::STATUS_IN_PROGRESS);
 
-        if ($isSplitJobFileUploadEnabled) {
+        if ($isQueueEachTranslationFileSeparately) {
             return;
         }
 

@@ -9,13 +9,14 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\repositories;
 
-use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 
 class SettingsRepository
 {
     public const ENABLE_ENTRIES_FOR_TARGET_SITES = 'enable_entries_for_target_sites';
     public const COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET = 'copy_entries_slug_from_source_to_target';
+
+    public const QUEUE_EACH_TRANSLATION_FILE_SEPARATELY = 'queue_each_translation_file_separately';
 
     public function saveLiltApiConnectionConfiguration(string $connectorApiUrl, string $connectorApiKey): void
     {
@@ -37,10 +38,10 @@ class SettingsRepository
         $connectorApiUrlRecord->save();
     }
 
-    public function isSplitJobFileUploadEnabled(): bool
+    public function isQueueEachTranslationFileSeparately(): bool
     {
         $settingValue = SettingRecord::findOne(
-            ['name' => CraftliltpluginParameters::SETTING_SPLIT_JOB_FILE_UPLOAD]
+            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
         );
 
         if (empty($settingValue) || empty($settingValue->value)) {
@@ -52,12 +53,12 @@ class SettingsRepository
 
     public function save(string $name, string $value): bool
     {
-        $enableEntriesForTargetSites = SettingRecord::findOne(['name' => $name]);
-        if (!$enableEntriesForTargetSites) {
-            $enableEntriesForTargetSites = new SettingRecord(['name' => $name]);
+        $settingRecord = SettingRecord::findOne(['name' => $name]);
+        if (!$settingRecord) {
+            $settingRecord = new SettingRecord(['name' => $name]);
         }
 
-        $enableEntriesForTargetSites->value = $value;
-        return $enableEntriesForTargetSites->save();
+        $settingRecord->value = $value;
+        return $settingRecord->save();
     }
 }

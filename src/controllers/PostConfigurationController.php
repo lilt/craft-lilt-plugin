@@ -17,7 +17,6 @@ use LiltConnectorSDK\Api\SettingsApi;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use LiltConnectorSDK\Configuration as LiltConnectorConfiguration;
-use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugin\utilities\Configuration;
 use Throwable;
@@ -76,7 +75,7 @@ class PostConfigurationController extends AbstractJobController
             );
         }
 
-        $liltConfigDisabled = (bool) $request->getBodyParam('liltConfigDisabled');
+        $liltConfigDisabled = (bool)$request->getBodyParam('liltConfigDisabled');
 
         if ($liltConfigDisabled) {
             Craft::$app->getSession()->setFlash(
@@ -91,12 +90,22 @@ class PostConfigurationController extends AbstractJobController
 
         Craftliltplugin::getInstance()->settingsRepository->save(
             SettingsRepository::ENABLE_ENTRIES_FOR_TARGET_SITES,
-            $request->getBodyParam('enableEntriesForTargetSites')
+            $request->getBodyParam('enableEntriesForTargetSites') ?? '0'
         );
 
         Craftliltplugin::getInstance()->settingsRepository->save(
             SettingsRepository::COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET,
-            $request->getBodyParam('copyEntriesSlugFromSourceToTarget')
+            $request->getBodyParam('copyEntriesSlugFromSourceToTarget') ?? '0'
+        );
+
+        $queueEachTranslationFileSeparately = $request->getBodyParam('queueEachTranslationFileSeparately');
+        if (empty($queueEachTranslationFileSeparately)) {
+            $queueEachTranslationFileSeparately = 0;
+        }
+
+        Craftliltplugin::getInstance()->settingsRepository->save(
+            SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY,
+            (string)$queueEachTranslationFileSeparately
         );
 
         $settingsRequest = new SettingsRequest();
