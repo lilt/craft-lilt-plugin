@@ -48,6 +48,82 @@ Cypress.Commands.add('instantFlow', ({
 
     cy.wrap(mockServerClient.mockAnyResponse({
       'httpRequest': {
+        'method': 'GET', 'path': '/jobs/777', 'headers': [
+          {
+            'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
+          }],
+      }, 'httpResponse': {
+        'statusCode': 200, 'body': JSON.stringify({
+          'id': 777,
+          'status': 'complete',
+          'errorMsg': '',
+          'createdAt': '2019-08-24T14:15:22Z',
+          'updatedAt': '2019-08-24T14:15:22Z',
+        }),
+      }, 'times': {
+        'remainingTimes': 1, 'unlimited': false,
+      },
+    }));
+
+    let translationsResult = [];
+
+    for (const language of languages) {
+      const siteId = siteLanguages[language];
+      const translationId = 777000 + siteId;
+
+      const translationResult = {
+        'createdAt': '2022-05-29T11:31:58',
+        'errorMsg': null,
+        'id': translationId,
+        'name': '777_element_' + 24 + '_slug_for_' + language + '.json+html',
+        'status': 'mt_complete',
+        'trgLang': language,
+        'trgLocale': '',
+        'updatedAt': '2022-06-02T23:01:42',
+      };
+      translationsResult.push(translationResult);
+
+      cy.wrap(mockServerClient.mockAnyResponse({
+        'httpRequest': {
+          'method': 'GET',
+          'path': `/translations/${translationId}`,
+          'headers': [
+            {
+              'name': 'Authorization',
+              'values': ['Bearer this_is_apy_key'],
+            }],
+        }, 'httpResponse': {
+          'statusCode': 200, 'body': JSON.stringify(translationResult),
+        }, 'times': {
+          'remainingTimes': 1, 'unlimited': false,
+        },
+      }));
+    }
+
+    cy.wrap(mockServerClient.mockAnyResponse({
+      'httpRequest': {
+        'method': 'GET', 'path': '/translations', 'headers': [
+          {
+            'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
+          }], 'queryStringParameters': [
+          {
+            'name': 'limit', 'values': ['100'],
+          }, {
+            'name': 'start', 'values': ['00'],
+          }, {
+            'name': 'job_id', 'values': ['777'],
+          }],
+      }, 'httpResponse': {
+        'statusCode': 200, 'body': JSON.stringify({
+          'limit': 100, 'start': 0, 'results': translationsResult,
+        }),
+      }, 'times': {
+        'remainingTimes': 1, 'unlimited': false,
+      },
+    }));
+
+    cy.wrap(mockServerClient.mockAnyResponse({
+      'httpRequest': {
         'method': 'GET', 'path': '/settings',
       }, 'httpResponse': {
         'statusCode': 200, 'body': JSON.stringify({
@@ -128,85 +204,14 @@ Cypress.Commands.add('instantFlow', ({
       invoke('text').
       should('contain', 'In Progress');
 
-  cy.waitForTranslationDrafts();
+  cy.waitForTranslationDrafts(
+      jobTitle,
+      100,
+      0,
+      1000
+  );
 
   if (isMockserverEnabled) {
-    cy.wrap(mockServerClient.mockAnyResponse({
-      'httpRequest': {
-        'method': 'GET', 'path': '/jobs/777', 'headers': [
-          {
-            'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
-          }],
-      }, 'httpResponse': {
-        'statusCode': 200, 'body': JSON.stringify({
-          'id': 777,
-          'status': 'complete',
-          'errorMsg': '',
-          'createdAt': '2019-08-24T14:15:22Z',
-          'updatedAt': '2019-08-24T14:15:22Z',
-        }),
-      }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
-      },
-    }));
-
-    let translationsResult = [];
-
-    for (const language of languages) {
-      const siteId = siteLanguages[language];
-      const translationId = 777000 + siteId;
-
-      const translationResult = {
-        'createdAt': '2022-05-29T11:31:58',
-        'errorMsg': null,
-        'id': translationId,
-        'name': '777_element_' + 24 + '_slug_for_' + language + '.json+html',
-        'status': 'mt_complete',
-        'trgLang': language,
-        'trgLocale': '',
-        'updatedAt': '2022-06-02T23:01:42',
-      };
-      translationsResult.push(translationResult);
-
-      cy.wrap(mockServerClient.mockAnyResponse({
-        'httpRequest': {
-          'method': 'GET',
-          'path': `/translations/${translationId}`,
-          'headers': [
-            {
-              'name': 'Authorization',
-              'values': ['Bearer this_is_apy_key'],
-            }],
-        }, 'httpResponse': {
-          'statusCode': 200, 'body': JSON.stringify(translationResult),
-        }, 'times': {
-          'remainingTimes': 1, 'unlimited': false,
-        },
-      }));
-    }
-
-    cy.wrap(mockServerClient.mockAnyResponse({
-      'httpRequest': {
-        'method': 'GET', 'path': '/translations', 'headers': [
-          {
-            'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
-          }], 'queryStringParameters': [
-          {
-            'name': 'limit', 'values': ['100'],
-          }, {
-            'name': 'start', 'values': ['00'],
-          }, {
-            'name': 'job_id', 'values': ['777'],
-          }],
-      }, 'httpResponse': {
-        'statusCode': 200, 'body': JSON.stringify({
-          'limit': 100, 'start': 0, 'results': translationsResult,
-        }),
-      }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
-      },
-    }));
-
     for (const language of languages) {
       cy.get(
           `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
