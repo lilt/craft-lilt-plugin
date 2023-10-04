@@ -80,6 +80,17 @@
         }) }}
         </div>
 
+        <div class="field">
+        {{ forms.checkbox({
+            label: 'Queue each translation file separately',
+            name: 'queueEachTranslationFileSeparately',
+            id: 'queueEachTranslationFileSeparately',
+            checked: queueEachTranslationFileSeparately,
+            errors: model is defined? model.getErrors('queueEachTranslationFileSeparately') : [],
+            disabled: liltConfigDisabled
+        }) }}
+        </div>
+
         {{ forms.textField({
             name: 'liltConfigDisabled',
             id: 'liltConfigDisabled',
