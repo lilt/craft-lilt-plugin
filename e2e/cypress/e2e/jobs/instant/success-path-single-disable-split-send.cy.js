@@ -1,7 +1,7 @@
 const {generateJobData} = require('../../../support/job/generator.js');
 
 describe(
-    '[Verified] Success path for job with single target language',
+    '[Instant] Success path for job with single target language',
     () => {
       const entryLabel  = 'The Future of Augmented Reality';
       const entryId     = 24;
@@ -9,7 +9,7 @@ describe(
       it('with copy slug disabled & enable after publish disabled', () => {
         const {jobTitle, slug} = generateJobData();
 
-        cy.verifiedFlow({
+        cy.instantFlow({
           slug,
           entryLabel,
           jobTitle,
@@ -17,6 +17,7 @@ describe(
           copySlug: false,
           enableAfterPublish: false,
           languages: ["de"],
+          splitSend: false,
         })
       });
     });

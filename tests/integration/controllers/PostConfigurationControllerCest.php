@@ -11,6 +11,7 @@ use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use PHPUnit\Framework\Assert;
 
@@ -55,14 +56,17 @@ class PostConfigurationControllerCest extends AbstractIntegrationCest
                 'liltTranslationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
                 'enableEntriesForTargetSites' => true,
                 'copyEntriesSlugFromSourceToTarget' => true,
+                'queueEachTranslationFileSeparately' => false,
             ]
         );
 
         $connectorApiKeyRecord = SettingRecord::findOne(['name' => 'connector_api_key']);
         $connectorApiUrlRecord = SettingRecord::findOne(['name' => 'connector_api_url']);
+        $queueEachTranslationFileSeparately = SettingRecord::findOne(['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]);
 
         Assert::assertSame('this-is-connector-api-key', $connectorApiKeyRecord->value);
         Assert::assertSame('http://wiremock/api/v1.0/this-is-connector-api-url', $connectorApiUrlRecord->value);
+        Assert::assertSame('0', $queueEachTranslationFileSeparately->value);
     }
 
     public function _after(IntegrationTester $I): void

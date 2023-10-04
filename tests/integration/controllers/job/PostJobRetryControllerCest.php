@@ -45,6 +45,8 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
      */
     public function testRetrySuccess(IntegrationTester $I, $scenario): void
     {
+        $I->setQueueEachTranslationFileSeparately(0);
+
         $I->amLoggedInAs(
             Craft::$app->getUsers()->getUserById(1)
         );

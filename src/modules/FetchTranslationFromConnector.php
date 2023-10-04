@@ -80,6 +80,27 @@ class FetchTranslationFromConnector extends AbstractRetryJob
         }
         $translationRecord->refresh();
 
+        if (empty($translationRecord->connectorTranslationId)) {
+            Craft::error(
+                sprintf(
+                    "Connector translation id is empty for translation:"
+                    . "%d source site: %d target site: %d lilt job: %d",
+                    $translationRecord->id,
+                    $translationRecord->sourceSiteId,
+                    $translationRecord->targetSiteId,
+                    $job->liltJobId
+                )
+            );
+
+            $translationRecord->status = TranslationRecord::STATUS_FAILED;
+            $translationRecord->save();
+
+            $mutex->release($mutexKey);
+            $this->markAsDone($queue);
+
+            return;
+        }
+
         $translationFromConnector = Craftliltplugin::getInstance()->connectorTranslationRepository->findById(
             $translationRecord->connectorTranslationId
         );
@@ -98,8 +119,11 @@ class FetchTranslationFromConnector extends AbstractRetryJob
                 ]
             );
 
+            Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
+
             $mutex->release($mutexKey);
             $this->markAsDone($queue);
+
             return;
         }
 
@@ -226,17 +250,20 @@ class FetchTranslationFromConnector extends AbstractRetryJob
      */
     private function isTranslationFinished($job, TranslationResponse $translationFromConnector): bool
     {
-        return ($job->isInstantFlow() && $translationFromConnector->getStatus(
-        ) === TranslationResponse::STATUS_MT_COMPLETE)
-            || ($job->isVerifiedFlow() && $translationFromConnector->getStatus(
-            ) === TranslationResponse::STATUS_EXPORT_COMPLETE);
+        return (
+                $job->isInstantFlow()
+                && $translationFromConnector->getStatus() === TranslationResponse::STATUS_MT_COMPLETE)
+            || (
+                $job->isVerifiedFlow()
+                && $translationFromConnector->getStatus() === TranslationResponse::STATUS_EXPORT_COMPLETE
+            );
     }
 
     public static function getDelay(string $flow = CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT): int
     {
         $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
         if (!empty($envDelay) || $envDelay === '0') {
-            return (int) $envDelay;
+            return (int)$envDelay;
         }
 
         return strtolower($flow) === strtolower(CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT) ?
