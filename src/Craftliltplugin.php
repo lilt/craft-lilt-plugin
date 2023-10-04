@@ -37,6 +37,7 @@ use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
+use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
@@ -85,6 +86,7 @@ use yii\web\Response;
  * @property CreateJobHandler $createJobHandler
  * @property EditJobHandler $editJobHandler
  * @property SendJobToLiltConnectorHandler $sendJobToLiltConnectorHandler
+ * @property SendTranslationToLiltConnectorHandler $sendTranslationToLiltConnectorHandler
  * @property SyncJobFromLiltConnectorHandler $syncJobFromLiltConnectorHandler
  * @property PublishDraftHandler $publishDraftsHandler
  * @property Configuration $connectorConfiguration

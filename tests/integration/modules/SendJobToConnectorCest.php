@@ -24,7 +24,9 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\ExpectedElementContent;
@@ -58,6 +60,8 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJobSuccess(IntegrationTester $I): void
     {
+        $I->setQueueEachTranslationFileSeparately(0);
+
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
@@ -180,6 +184,8 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
 
     public function testSendCopySourceFlow(IntegrationTester $I): void
     {
+        $I->setQueueEachTranslationFileSeparately(0);
+
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
@@ -294,8 +300,10 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
     /**
      * @throws ModuleException
      */
-    public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I, $scenario): void
+    public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I): void
     {
+        $I->setQueueEachTranslationFileSeparately(0);
+
         $element = Entry::find()
             ->where(['authorId' => 1])
             ->orderBy(['id' => SORT_DESC])

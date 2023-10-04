@@ -17,6 +17,7 @@ describe(
           copySlug: false,
           enableAfterPublish: false,
           languages: ["de"],
+          splitSend: false
         })
       });
     });

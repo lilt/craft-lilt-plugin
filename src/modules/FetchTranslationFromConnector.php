@@ -84,11 +84,11 @@ class FetchTranslationFromConnector extends AbstractRetryJob
             Craft::error(
                 sprintf(
                     "Connector translation id is empty for translation:"
-                    . "%d source site: &d target site: %d lilt job: %d",
+                    . "%d source site: %d target site: %d lilt job: %d",
                     $translationRecord->id,
                     $translationRecord->sourceSiteId,
                     $translationRecord->targetSiteId,
-                    $job->liltJobId,
+                    $job->liltJobId
                 )
             );
 

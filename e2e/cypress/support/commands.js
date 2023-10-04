@@ -91,8 +91,12 @@ Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
   const options = {
     enableEntries: {
       id: 'enableEntriesForTargetSites',
-    }, copySlug: {
+    },
+    copySlug: {
       id: 'copyEntriesSlugFromSourceToTarget',
+    },
+    splitSend: {
+      id: 'queueEachTranslationFileSeparately',
     },
   };
 
@@ -145,7 +149,7 @@ Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
     cy.get('#connectorApiUrl').clear().type(apiUrl);
   }
 
-  if(apiKey) {
+  if (apiKey) {
     cy.get('#connectorApiKey').clear().type('this_is_apy_key');
   }
 
@@ -387,30 +391,42 @@ Cypress.Commands.add('waitForJobStatus',
  *
  * @memberof cy
  * @method waitForTranslationDrafts
+ * @param {string} jobTitle
  * @param {int} maxAttempts
  * @param {int} attempts
  * @param {int} waitPerIteration
  * @returns undefined
  */
 Cypress.Commands.add('waitForTranslationDrafts',
-    (maxAttempts = 100, attempts = 0, waitPerIteration = 1000) => {
-      if (attempts > maxAttempts) {
-        throw new Error('Timed out waiting for report to be generated');
-      }
-      cy.get('#translations-list th[data-title="Translation"] div.element').
-          invoke('attr', 'data-translated-draft-id').
-          then(async translatedDraftId => {
-            cy.log('TransladtedDraftId');
-            cy.log(translatedDraftId);
+  (jobTitle, maxAttempts = 100, attempts = 0, waitPerIteration = 1000) => {
+    if (attempts > maxAttempts) {
+      throw new Error('Timed out waiting for translation drafts');
+    }
+    cy.clearCraftCache();
+    cy.openJob(jobTitle);
 
-            if (translatedDraftId === '' || translatedDraftId === undefined) {
-              cy.wait(waitPerIteration);
-              cy.reload();
-              cy.waitForTranslationDrafts(maxAttempts, attempts + 1,
-                  waitPerIteration);
-            }
-          });
+    cy.get('#translations-list th[data-title="Translation"] div.element').then($elements => {
+      // Filter out elements that have a data-translated-draft-id attribute
+      const elementsWithoutDraftId = $elements.filter((index, element) => {
+        return !element.getAttribute('data-translated-draft-id');
+      });
+
+      cy.log(`Checked ${$elements.length} elements, found ${elementsWithoutDraftId.length} without a draft id.`);
+
+      if (elementsWithoutDraftId.length > 0) {
+        cy.log(`empty translation draft id`);
+        cy.wait(waitPerIteration);
+        cy.clearAllLocalStorage();
+        cy.reload(true);
+        cy.waitForTranslationDrafts(
+          jobTitle,
+          maxAttempts,
+          attempts + 1,
+          waitPerIteration
+        );
+      }
     });
+  });
 
 /**
  * Publish single translation for job
@@ -676,19 +692,14 @@ Cypress.Commands.add('copySourceTextFlow', ({
 
   cy.get('#author-label').invoke('text').should('equal', 'Author');
 
-  cy.get('#meta-settings-source-site').
-      invoke('text').
-      should('equal', 'en');
+  cy.get('#meta-settings-source-site').invoke('text').should('equal', 'en');
 
   for (const language of languages) {
     cy.get(
-        `#meta-settings-target-sites .target-languages-list span[data-language="${language}"]`).
-        should('be.visible');
+      `#meta-settings-target-sites .target-languages-list span[data-language="${language}"]`).should('be.visible');
   }
 
-  cy.get('#meta-settings-translation-workflow').
-      invoke('text').
-      should('equal', 'Copy source text');
+  cy.get('#meta-settings-translation-workflow').invoke('text').should('equal', 'Copy source text');
 
   cy.get('#meta-settings-job-id').
       invoke('text').
@@ -854,4 +865,15 @@ Cypress.Commands.add('releaseQueueManager', () => {
           should('not.exist');
     }
   });
+});
+
+/**
+ * @memberof cy
+ * @method clearCraftCache
+ * @returns undefined
+ */
+Cypress.Commands.add('clearCraftCache', () => {
+  const appUrl = Cypress.env('APP_URL');
+  cy.visit(`${appUrl}/admin/utilities/clear-caches`);
+  cy.contains('button', 'Clear caches').click();
 });
