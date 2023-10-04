@@ -41,3 +41,5 @@ composer.lock
 /tests/_support/_generated
 
 docker-compose.override.yml
+
+e2e/cypress/screenshots

@@ -11,6 +11,8 @@ namespace lilthq\craftliltplugin\migrations;
 
 use craft\db\Migration;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\SettingRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 
 class Install extends Migration
 {
@@ -168,6 +170,18 @@ class Install extends Migration
             'CASCADE',
             null
         );
+
+        $settingRecord = SettingRecord::findOne(
+            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
+        );
+        if (!$settingRecord) {
+            $settingRecord = new SettingRecord(
+                ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
+            );
+        }
+
+        $settingRecord->value = 1;
+        $settingRecord->save();
     }
 
     /**

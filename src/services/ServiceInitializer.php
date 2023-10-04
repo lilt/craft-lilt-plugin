@@ -36,6 +36,7 @@ use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
+use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
@@ -273,6 +274,32 @@ class ServiceInitializer
                     'draftRepository' => Craft::$app->getDrafts(),
                     'fieldContentApplier' => $pluginInstance->fieldContentApplier,
                 ],
+        ]);
+
+        $pluginInstance->setComponents([
+            'sendJobToLiltConnectorHandler' => function () use ($pluginInstance) {
+                return new SendJobToLiltConnectorHandler(
+                    $pluginInstance->connectorJobRepository,
+                    $pluginInstance->jobLogsRepository,
+                    $pluginInstance->translationRepository,
+                    $pluginInstance->languageMapper,
+                    $pluginInstance->sendTranslationToLiltConnectorHandler,
+                    $pluginInstance->settingsRepository
+                );
+            }
+        ]);
+
+        $pluginInstance->setComponents([
+            'sendTranslationToLiltConnectorHandler' => function () use ($pluginInstance) {
+                return new SendTranslationToLiltConnectorHandler(
+                    $pluginInstance->jobLogsRepository,
+                    $pluginInstance->translationRepository,
+                    $pluginInstance->connectorJobsFileRepository,
+                    $pluginInstance->createDraftHandler,
+                    $pluginInstance->elementTranslatableContentProvider,
+                    $pluginInstance->languageMapper
+                );
+            }
         ]);
 
         $pluginInstance->listenerRegister->register();

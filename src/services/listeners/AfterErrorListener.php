@@ -18,6 +18,7 @@ use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
 use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
+use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use yii\base\Event;
@@ -31,6 +32,7 @@ class AfterErrorListener implements ListenerInterface
         FetchVerifiedJobTranslationsFromConnector::class,
         FetchTranslationFromConnector::class,
         SendJobToConnector::class,
+        SendTranslationToConnector::class,
     ];
 
     public function register(): void

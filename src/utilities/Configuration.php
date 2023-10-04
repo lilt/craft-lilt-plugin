@@ -11,6 +11,7 @@ use Exception;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\records\SettingRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 
 class Configuration extends Utility
 {
@@ -86,6 +87,11 @@ class Configuration extends Utility
         );
         $copyEntriesSlugFromSourceToTarget = (bool) ($copyEntriesSlugFromSourceToTargetRecord->value ?? false);
 
+        $queueEachTranslationFileSeparately = SettingRecord::findOne(
+            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY,]
+        );
+        $queueEachTranslationFileSeparately = (bool) ($queueEachTranslationFileSeparately->value ?? false);
+
         return Craft::$app->getView()->renderTemplate(
             'craft-lilt-plugin/_components/utilities/configuration.twig',
             [
@@ -99,6 +105,7 @@ class Configuration extends Utility
                 'liltConfigDisabled' => (int) $liltConfigDisabled,
                 'enableEntriesForTargetSites' => $enableEntriesForTargetSites,
                 'copyEntriesSlugFromSourceToTarget' => $copyEntriesSlugFromSourceToTarget,
+                'queueEachTranslationFileSeparately' => $queueEachTranslationFileSeparately,
             ]
         );
     }

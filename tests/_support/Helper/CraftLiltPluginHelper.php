@@ -18,9 +18,11 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\I18NRecord;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use lilthq\craftliltplugin\services\handlers\commands\CreateJobCommand;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use yii\base\InvalidArgumentException;
 
 class CraftLiltPluginHelper extends Module
@@ -174,6 +176,21 @@ class CraftLiltPluginHelper extends Module
                 $appliedContent
             );
         }
+    }
+
+    public function setQueueEachTranslationFileSeparately(int $value): void
+    {
+        $settingRecord = SettingRecord::findOne(
+            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
+        );
+        if (!$settingRecord) {
+            $settingRecord = new SettingRecord(
+                ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
+            );
+        }
+
+        $settingRecord->value = $value;
+        $settingRecord->save();
     }
 
     public function assertI18NRecordsExist(int $targetSiteId, array $expectedTranslations): void
