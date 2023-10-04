@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 4.3.0 - 2023-10-04
+### Added
+- Queue each translation file transfer separately
+
 ## 4.2.2 - 2023-09-22
 ### Fixed
 - Empty user id on draft creation
