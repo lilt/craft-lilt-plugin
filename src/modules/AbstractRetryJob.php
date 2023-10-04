@@ -71,6 +71,10 @@ abstract class AbstractRetryJob extends BaseJob
 
     protected function getMutexKey(): string
     {
-        return __CLASS__ . '_' . __FUNCTION__ . '_' . $this->jobId;
+        $additional = '';
+        if ($this->hasProperty('translationId') && !empty($this->translationId)) {
+            $additional .= sprintf('_%s', $this->translationId);
+        }
+        return __CLASS__ . '_' . __FUNCTION__ . '_' . $this->jobId . $additional;
     }
 }

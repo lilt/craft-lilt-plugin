@@ -6,7 +6,7 @@ describe(
       const entryLabel  = 'The Future of Augmented Reality';
       const entryId     = 24;
 
-      it('with copy slug disabled & enable after publish disabled', () => {
+      it('with copy slug disabled & enable after publish enabled', () => {
         const {jobTitle, slug} = generateJobData();
 
         cy.verifiedFlow({
@@ -15,9 +15,8 @@ describe(
           jobTitle,
           entryId,
           copySlug: false,
-          enableAfterPublish: false,
-          languages: ["de"],
-          splitSend: false
+          enableAfterPublish: true,
+          languages: ["de"]
         })
       });
     });
