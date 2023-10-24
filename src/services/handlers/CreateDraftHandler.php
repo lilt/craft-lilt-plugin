@@ -163,6 +163,10 @@ class CreateDraftHandler
         $userId = Craft::$app->getUser()->getId();
         $timestamp = Db::prepareDateForDb(new DateTime());
 
+        if (empty($element->getId())) {
+            return;
+        }
+
         $insert = [
             'elementId' => $element->getId(),
             'siteId' => $element->getSite()->id,
