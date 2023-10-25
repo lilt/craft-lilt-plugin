@@ -185,7 +185,13 @@ class FetchTranslationFromConnector extends AbstractRetryJob
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Fetching translations');
+        return Craft::t(
+            'app',
+            sprintf(
+                'Fetching translations: %d',
+                $this->translationId
+            )
+        );
     }
 
     /**

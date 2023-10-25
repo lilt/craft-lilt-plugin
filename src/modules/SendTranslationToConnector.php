@@ -22,7 +22,7 @@ use Throwable;
 
 class SendTranslationToConnector extends AbstractRetryJob
 {
-    public const DELAY_IN_SECONDS = 0;
+    public const DELAY_IN_SECONDS = 1;
     public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
@@ -44,7 +44,7 @@ class SendTranslationToConnector extends AbstractRetryJob
     public $targetSiteId;
 
     /**
-     * @var int|null
+     * @var int
      */
     public $translationId;
 
@@ -89,6 +89,17 @@ class SendTranslationToConnector extends AbstractRetryJob
         $element = Craft::$app->elements->getElementById($this->versionId, null, $command->getJob()->sourceSiteId);
 
         $translationRecord = TranslationRecord::findOne(['id' => $this->translationId]);
+
+        if (empty($translationRecord)) {
+            // Translation should always exist
+            throw new \RuntimeException(
+                sprintf(
+                    'Can\'t find translation for element %d with target site %d',
+                    $this->versionId,
+                    $this->translationId
+                )
+            );
+        }
 
         Craftliltplugin::getInstance()
             ->sendTranslationToLiltConnectorHandler
@@ -135,6 +146,33 @@ class SendTranslationToConnector extends AbstractRetryJob
                 FetchJobStatusFromConnector::PRIORITY,
                 10
             );
+
+            $this->markAsDone($queue);
+            $this->release();
+
+            return;
+        }
+
+        foreach ($translations as $translation) {
+            if (!empty($translation->sourceContent)) {
+                continue;
+            }
+
+            // Starting download of next translation without content
+            Queue::push(
+                (new SendTranslationToConnector([
+                    'jobId' => $command->getJob()->id,
+                    'translationId' => $translation->id,
+                    'elementId' => $translation->elementId,
+                    'versionId' => $translation->versionId,
+                    'targetSiteId' => $translation->targetSiteId,
+                ])),
+                SendTranslationToConnector::PRIORITY,
+                SendTranslationToConnector::getDelay()
+            );
+
+            // Skip all others, we go one by one
+            break;
         }
 
         $this->markAsDone($queue);
@@ -146,7 +184,13 @@ class SendTranslationToConnector extends AbstractRetryJob
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Sending translation to lilt');
+        return Craft::t(
+            'app',
+            sprintf(
+                'Sending translation to lilt: %d',
+                $this->translationId
+            )
+        );
     }
 
     /**
