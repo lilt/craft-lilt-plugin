@@ -78,7 +78,10 @@ class SendJobToConnector extends AbstractRetryJob
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Sending jobs to lilt');
+        return Craft::t('app', sprintf(
+            'Sending job to lilt: %d',
+            $this->jobId
+        ));
     }
 
     /**

@@ -13,6 +13,7 @@ use Craft;
 use craft\errors\ElementNotFoundException;
 use craft\helpers\Queue;
 use LiltConnectorSDK\ApiException;
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\SendTranslationToConnector;
@@ -123,11 +124,37 @@ class SendJobToLiltConnectorHandler
 
             foreach ($job->getTargetSiteIds() as $targetSiteId) {
                 $translation = $translationsMapped[$versionId][$targetSiteId] ?? null;
+
+                if (empty($translation) || empty($translation->id)) {
+                    // let's create translation, looks like it is lost
+                    Craft::warning(
+                        [
+                            'message' => 'Force create translation, it was not created before!',
+                            'versionId' => $versionId,
+                            'targetSiteId' => $targetSiteId,
+                            'jobId' => $job->id,
+                            'file' => __FILE__,
+                            'line' => __LINE__,
+                        ]
+                    );
+
+                    $translation = Craftliltplugin::getInstance()->translationRepository->create(
+                        $job->id,
+                        $elementId,
+                        $versionId,
+                        $job->sourceSiteId,
+                        $targetSiteId,
+                        TranslationRecord::STATUS_IN_PROGRESS
+                    );
+                }
+
                 if ($isQueueEachTranslationFileSeparately) {
+                    // Queue Each Translation File Separately
+
                     Queue::push(
                         new SendTranslationToConnector([
                             'jobId' => $job->id,
-                            'translationId' => $translation->id ?? null,
+                            'translationId' => $translation->id,
                             'elementId' => $elementId,
                             'versionId' => $versionId,
                             'targetSiteId' => $targetSiteId,
@@ -137,9 +164,11 @@ class SendJobToLiltConnectorHandler
                         SendTranslationToConnector::TTR
                     );
 
-                    continue;
+                    // we pushed one translation to be published, all others will be published one by one
+                    break 2;
                 }
 
+                // Queue All Translation File Together
                 $this->sendTranslationToLiltConnectorHandler->send(
                     new SendTranslationCommand(
                         $elementId,
