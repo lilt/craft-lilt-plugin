@@ -374,9 +374,12 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
 
         $jobActual = Job::findOne(['id' => $job->id]);
 
-        Assert::assertEmpty(
-            TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id])
-        );
+        $translations = TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id]);
+
+        Assert::assertNotEmpty($translations);
+        Assert::assertNotEmpty(TranslationRecord::STATUS_FAILED, $translations[0]->status);
+        Assert::assertEmpty($translations[0]->sourceContent);
+        Assert::assertEmpty($translations[0]->targetContent);
 
         Assert::assertSame(Job::STATUS_FAILED, $jobActual->status);
     }
