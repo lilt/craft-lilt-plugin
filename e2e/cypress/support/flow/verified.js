@@ -63,7 +63,7 @@ Cypress.Commands.add('verifiedFlow', ({
           'updatedAt': '2019-08-24T14:15:22Z',
         }),
       }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
+        'unlimited': true,
       },
     }));
 
@@ -120,7 +120,7 @@ Cypress.Commands.add('verifiedFlow', ({
           'limit': 100, 'start': 0, 'results': translationsResult,
         }),
       }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
+        'unlimited': true,
       },
     }));
 
