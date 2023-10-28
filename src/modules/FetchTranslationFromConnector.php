@@ -81,6 +81,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
         $translationRecord->refresh();
 
         if (empty($translationRecord->connectorTranslationId)) {
+            //TODO: we can push message to fix connector id
             Craft::error(
                 sprintf(
                     "Connector translation id is empty for translation:"
@@ -168,6 +169,8 @@ class FetchTranslationFromConnector extends AbstractRetryJob
                     ]
                 ]
             );
+
+            Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
 
             $mutex->release($mutexKey);
             $this->markAsDone($queue);

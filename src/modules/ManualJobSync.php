@@ -61,11 +61,6 @@ class ManualJobSync extends BaseJob
         foreach ($jobsInfo as $jobInfo) {
             $jobDetails = Craft::$app->getQueue()->getJobDetails((string)$jobInfo['id']);
 
-            if ($jobDetails['status'] === Queue::STATUS_RESERVED) {
-                //we don't need to do anything with job in progress
-                continue;
-            }
-
             if (!in_array(get_class($jobDetails['job']), self::SUPPORTED_JOBS)) {
                 continue;
             }
@@ -76,6 +71,13 @@ class ManualJobSync extends BaseJob
             $queueJob = $jobDetails['job'];
             if (!in_array($queueJob->jobId, $this->jobIds)) {
                 //don't need to do anything, not in the list
+                continue;
+            }
+
+            if ($jobDetails['status'] === Queue::STATUS_RESERVED) {
+                //we don't need to do anything with job in progress
+                $jobsInProgress[$queueJob->jobId] = $queueJob;
+
                 continue;
             }
 

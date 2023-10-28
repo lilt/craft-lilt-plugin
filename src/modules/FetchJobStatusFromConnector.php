@@ -101,6 +101,8 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 self::TTR
             );
 
+            $this->markAsDone($queue);
+
             return;
         }
 
@@ -158,6 +160,8 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 self::getDelay(),
                 self::TTR
             );
+
+            $this->markAsDone($queue);
 
             return;
         }

@@ -135,9 +135,10 @@ class SendTranslationToLiltConnectorHandler
         );
 
         if (!$result) {
-            $this->updateJob($job, $liltJobId, Job::STATUS_FAILED);
-            $translation->status = TranslationRecord::STATUS_FAILED;
-            $translation->save();
+            //TODO: we need to move it out with try catch to set if it was called manually
+//            $this->updateJob($job, $liltJobId, Job::STATUS_FAILED);
+//            $translation->status = TranslationRecord::STATUS_FAILED;
+//            $translation->save();
 
             throw new \RuntimeException('Translations not created, upload failed');
         }
