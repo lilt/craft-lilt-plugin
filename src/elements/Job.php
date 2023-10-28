@@ -392,6 +392,11 @@ class Job extends Element
     #    return "<a href='".UrlHelper::cpUrl('craft-lilt-plugin/job/' . $this->id)."'>$this->title</a>";
     #}
 
+    public function getFilesCount(): int
+    {
+        return count($this->getTargetSiteIds()) * count($this->getElementIds());
+    }
+
     public function getTargetSiteIds(): array
     {
         return $this->targetSiteIds;

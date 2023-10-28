@@ -60,6 +60,9 @@ class AfterErrorListener implements ListenerInterface
         return in_array($jobClass, self::SUPPORTED_JOBS);
     }
 
+    /**
+     * @var ExecEvent $event
+     */
     public function __invoke(Event $event): Event
     {
         if (!$this->isEventEligible($event)) {
@@ -115,6 +118,15 @@ class AfterErrorListener implements ListenerInterface
 
             return $event;
         }
+
+        Craft::error(
+            sprintf(
+                'Job %s %s failed due to: %s',
+                get_class($queueJob),
+                $queueJob->getDescription(),
+                $event->error->getMessage()
+            )
+        );
 
         Craft::$app->queue->release(
             (string)$event->id
