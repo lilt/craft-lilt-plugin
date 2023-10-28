@@ -117,19 +117,6 @@ class SendTranslationToConnector extends AbstractRetryJob
             );
         }
 
-        Craftliltplugin::getInstance()->jobLogsRepository->create(
-            $translationRecord->jobId,
-            Craft::$app->getUser()->getId(),
-            sprintf(
-                'Sent translation %d to lilt (element %d to %s)',
-                $translationRecord->id,
-                $translationRecord->elementId,
-                Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
-                    $translationRecord->targetSiteId
-                )
-            )
-        );
-
         if (empty($translationRecord->sourceContent)) {
             Craftliltplugin::getInstance()
                 ->sendTranslationToLiltConnectorHandler
@@ -144,6 +131,19 @@ class SendTranslationToConnector extends AbstractRetryJob
                         $translationRecord
                     )
                 );
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $translationRecord->jobId,
+                Craft::$app->getUser()->getId(),
+                sprintf(
+                    'Sent translation %d to lilt (element %d to %s)',
+                    $translationRecord->id,
+                    $translationRecord->elementId,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $translationRecord->targetSiteId
+                    )
+                )
+            );
         }
 
         $translations = Craftliltplugin::getInstance()
