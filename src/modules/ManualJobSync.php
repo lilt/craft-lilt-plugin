@@ -206,6 +206,43 @@ class ManualJobSync extends BaseJob
 
                     continue;
                 }
+
+                $allDone = true;
+                foreach ($translationRecords as $translationRecord) {
+                    if(!empty($translationRecord->sourceContent)){
+                        continue;
+                    }
+
+                    $allDone = false;
+
+                    CraftHelpersQueue::push(
+                        new SendTranslationToConnector([
+                            'jobId' => $translationRecord->jobId,
+                            'translationId' => $translationRecord->id,
+                            'elementId' => $translationRecord->elementId,
+                            'versionId' => $translationRecord->versionId,
+                            'targetSiteId' => $translationRecord->targetSiteId,
+                        ]),
+                        SendTranslationToConnector::PRIORITY,
+                        SendTranslationToConnector::getDelay(),
+                        SendTranslationToConnector::TTR
+                    );
+                }
+
+                if($allDone) {
+                    CraftHelpersQueue::push(
+                        (new FetchJobStatusFromConnector(
+                            [
+                                'jobId' => $jobRecord->id,
+                                'liltJobId' => $jobRecord->liltJobId,
+                            ]
+                        )),
+                        FetchJobStatusFromConnector::PRIORITY,
+                        0
+                    );
+                }
+
+                continue;
             }
 
             //Sending job to lilt
