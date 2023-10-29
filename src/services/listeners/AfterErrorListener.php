@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\services\listeners;
 
 use Craft;
 use craft\queue\Queue;
+use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
@@ -143,6 +144,16 @@ class AfterErrorListener implements ListenerInterface
         Craft::$app->queue->release(
             (string)$event->id
         );
+
+        if ($event->error instanceof ApiException && $event->error->getCode() === 500) {
+            \craft\helpers\Queue::push(
+                $queueJob,
+                $queueJob::PRIORITY,
+                $queueJob::getDelay()
+            );
+
+            return $event;
+        }
 
         ++$queueJob->attempt;
 
