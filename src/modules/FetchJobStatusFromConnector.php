@@ -84,6 +84,14 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 ['jobId' => $jobRecord->id]
             );
 
+            Craft::error([
+                "message" => sprintf(
+                    'Set job %d and translations to status failed due to failed/cancel status from lilt',
+                    $jobRecord->id,
+                ),
+                "jobRecord" => $jobRecord,
+            ]);
+
             $this->markAsDone($queue);
             return;
         }
@@ -140,6 +148,14 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
 
                 $jobRecord->status = Job::STATUS_FAILED;
                 $jobRecord->save();
+
+                Craft::error([
+                    "message" => sprintf(
+                        'Set job %d and translations to status failed due to failed status for translation from lilt',
+                        $jobRecord->id,
+                    ),
+                    "jobRecord" => $jobRecord,
+                ]);
 
                 Craft::$app->elements->invalidateCachesForElementType(TranslationRecord::class);
                 Craft::$app->elements->invalidateCachesForElementType(Job::class);
@@ -206,6 +222,14 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                     ['status' => TranslationRecord::STATUS_FAILED],
                     ['jobId' => $jobRecord->id]
                 );
+
+                Craft::error([
+                    "message" => sprintf(
+                        'Set job %d and translations to status failed due to failed/cancel status from lilt',
+                        $jobRecord->id,
+                    ),
+                    "jobRecord" => $jobRecord,
+                ]);
 
                 $this->markAsDone($queue);
 

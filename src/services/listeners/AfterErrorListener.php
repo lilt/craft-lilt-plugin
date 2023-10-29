@@ -76,6 +76,16 @@ class AfterErrorListener implements ListenerInterface
 
         $jobRecord = JobRecord::findOne(['id' => $queueJob->jobId]);
 
+        Craft::error([
+            "message" =>  sprintf(
+                'Job %s failed due to: %s',
+                get_class($queueJob),
+                $event->error->getMessage()
+            ),
+            "queueJob" => $queueJob,
+            "jobRecord" => $jobRecord
+        ]);
+
         if (!$queueJob->canRetry()) {
             $jobRecord->status = Job::STATUS_FAILED;
             $jobRecord->save();
@@ -91,6 +101,18 @@ class AfterErrorListener implements ListenerInterface
             Craft::$app->queue->release(
                 (string)$event->id
             );
+
+            Craft::error([
+                "message" =>  sprintf(
+                    '[%s] Mark lilt job %d (%d) as failed due to: %s',
+                    get_class($queueJob),
+                    $jobRecord->liltJobId,
+                    $jobRecord->id,
+                    $event->error->getMessage()
+                ),
+                "queueJob" => $queueJob,
+                "jobRecord" => $jobRecord
+            ]);
 
             if (property_exists($queueJob, 'attempt')) {
                 Craftliltplugin::getInstance()->jobLogsRepository->create(
@@ -118,15 +140,6 @@ class AfterErrorListener implements ListenerInterface
 
             return $event;
         }
-
-        Craft::error(
-            sprintf(
-                'Job %s %s failed due to: %s',
-                get_class($queueJob),
-                $queueJob->getDescription(),
-                $event->error->getMessage()
-            )
-        );
 
         Craft::$app->queue->release(
             (string)$event->id
