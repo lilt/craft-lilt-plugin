@@ -164,8 +164,7 @@ class SendJobToLiltConnectorHandler
                         SendTranslationToConnector::TTR
                     );
 
-                    // we pushed one translation to be published, all others will be published one by one
-                    break 2;
+                    continue;
                 }
 
                 // Queue All Translation File Together

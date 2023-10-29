@@ -187,28 +187,6 @@ class SendTranslationToConnector extends AbstractRetryJob
             return;
         }
 
-        foreach ($translations as $translation) {
-            if (!empty($translation->sourceContent)) {
-                continue;
-            }
-
-            // Starting download of next translation without content
-            Queue::push(
-                (new SendTranslationToConnector([
-                    'jobId' => $command->getJob()->id,
-                    'translationId' => $translation->id,
-                    'elementId' => $translation->elementId,
-                    'versionId' => $translation->versionId,
-                    'targetSiteId' => $translation->targetSiteId,
-                ])),
-                SendTranslationToConnector::PRIORITY,
-                SendTranslationToConnector::getDelay()
-            );
-
-            // Skip all others, we go one by one
-            break;
-        }
-
         $this->markAsDone($queue);
         $this->release();
     }
