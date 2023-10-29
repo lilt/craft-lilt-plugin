@@ -161,6 +161,7 @@ class SendTranslationToConnector extends AbstractRetryJob
             !in_array(null, $sourceContents)
             && count($sourceContents) === $jobElement->getFilesCount()
         ) {
+            //TODO: here can be 400 since user can retry job again and we will try to start it
             // All translations downloaded, let's start the job
             Craftliltplugin::getInstance()->connectorJobRepository->start(
                 $command->getJob()->liltJobId

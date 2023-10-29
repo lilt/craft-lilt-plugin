@@ -62,6 +62,19 @@ class SendJobToConnector extends AbstractRetryJob
         }
 
         if ($job->isVerifiedFlow() || $job->isInstantFlow()) {
+
+            $isQueueEachTranslationFileSeparately = Craftliltplugin::getInstance()
+                ->settingsRepository
+                ->isQueueEachTranslationFileSeparately();
+
+            if($job->liltJobId !== null && $isQueueEachTranslationFileSeparately) {
+                // job is already exist, no need to send it again
+                $this->markAsDone($queue);
+                $mutex->release($mutexKey);
+
+                return;
+            }
+
             Craftliltplugin::getInstance()->sendJobToLiltConnectorHandler->__invoke($job);
         }
 
