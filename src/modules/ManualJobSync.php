@@ -44,10 +44,39 @@ class ManualJobSync extends BaseJob
      */
     public function execute($queue): void
     {
+        $mutex = Craft::$app->getMutex();
+        $mutexKey = __CLASS__ . '_' . __FUNCTION__ . '_' . join('_', $this->jobIds);
+
+        if (!$mutex->acquire($mutexKey)) {
+            Craft::error('Lilt queue manager is already running');
+
+            $this->setProgress(
+                $queue,
+                1,
+                Craft::t(
+                    'app',
+                    'Syncing finished',
+                )
+            );
+
+            return;
+        }
+
         $jobRecords = JobRecord::findAll(['id' => $this->jobIds]);
 
         if (count($jobRecords) === 0) {
             // job was removed, we are done here
+            $mutex->release($mutexKey);
+
+            $this->setProgress(
+                $queue,
+                1,
+                Craft::t(
+                    'app',
+                    'Syncing finished',
+                )
+            );
+
             return;
         }
 
@@ -173,6 +202,7 @@ class ManualJobSync extends BaseJob
             }
 
             if (!empty($jobRecord->liltJobId)) {
+                // Job is already created, let's see if it has all translation sent
                 $translationRecords = TranslationRecord::findAll(['jobId' => $jobRecord->id]);
                 $connectorTranslationIds = array_map(
                     static function (TranslationRecord $translationRecord) {
@@ -209,7 +239,7 @@ class ManualJobSync extends BaseJob
 
                 $allDone = true;
                 foreach ($translationRecords as $translationRecord) {
-                    if(!empty($translationRecord->sourceContent)){
+                    if (!empty($translationRecord->sourceContent)) {
                         continue;
                     }
 
@@ -229,7 +259,7 @@ class ManualJobSync extends BaseJob
                     );
                 }
 
-                if($allDone) {
+                if ($allDone) {
                     CraftHelpersQueue::push(
                         (new FetchJobStatusFromConnector(
                             [
@@ -264,6 +294,8 @@ class ManualJobSync extends BaseJob
                 ]
             )
         );
+
+        $mutex->release($mutexKey);
     }
 
     /**

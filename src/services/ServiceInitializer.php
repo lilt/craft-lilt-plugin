@@ -37,6 +37,7 @@ use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
+use lilthq\craftliltplugin\services\handlers\StartQueueManagerHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
@@ -92,6 +93,7 @@ class ServiceInitializer
             'updateJobStatusHandler' => UpdateJobStatusHandler::class,
             'updateTranslationsConnectorIds' => UpdateTranslationsConnectorIds::class,
             'packagistRepository' => PackagistRepository::class,
+            'startQueueManagerHandler' => StartQueueManagerHandler::class,
             'listenerRegister' => [
                 'class' => ListenerRegister::class,
                 'availableListeners' => CraftliltpluginParameters::LISTENERS,
