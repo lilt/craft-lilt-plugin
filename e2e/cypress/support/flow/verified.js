@@ -97,7 +97,7 @@ Cypress.Commands.add('verifiedFlow', ({
         }, 'httpResponse': {
           'statusCode': 200, 'body': JSON.stringify(translationResult),
         }, 'times': {
-          'remainingTimes': 1, 'unlimited': false,
+          'unlimited': true,
         },
       }));
     }
@@ -241,7 +241,7 @@ Cypress.Commands.add('verifiedFlow', ({
                 'statusCode': 200,
                 'body': JSON.stringify(translatedContent),
               }, 'times': {
-                'remainingTimes': 1, 'unlimited': false,
+                'unlimited': true,
               },
             }));
           });
