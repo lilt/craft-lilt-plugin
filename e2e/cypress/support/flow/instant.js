@@ -97,7 +97,7 @@ Cypress.Commands.add('instantFlow', ({
         }, 'httpResponse': {
           'statusCode': 200, 'body': JSON.stringify(translationResult),
         }, 'times': {
-          'remainingTimes': 1, 'unlimited': false,
+          'unlimited': true,
         },
       }));
     }
@@ -241,7 +241,7 @@ Cypress.Commands.add('instantFlow', ({
                 'statusCode': 200,
                 'body': JSON.stringify(translatedContent),
               }, 'times': {
-                'remainingTimes': 1, 'unlimited': false,
+                'unlimited': true,
               },
             }));
           });
