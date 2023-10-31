@@ -38,6 +38,7 @@ use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
+use lilthq\craftliltplugin\services\handlers\StartQueueManagerHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
@@ -111,6 +112,7 @@ use yii\web\Response;
  * @property SettingsRepository $settingsRepository
  * @property UpdateTranslationsConnectorIds $updateTranslationsConnectorIds
  * @property PackagistRepository $packagistRepository
+ * @property StartQueueManagerHandler $startQueueManagerHandler
  * @property ServiceInitializer $serviceInitializer
  */
 class Craftliltplugin extends Plugin
@@ -238,6 +240,9 @@ class Craftliltplugin extends Plugin
             'serviceInitializer' => ServiceInitializer::class
         ]);
         $this->serviceInitializer->run();
+
+        // Run queue manager
+        $this->startQueueManagerHandler->handle();
 
         Craft::info(
             Craft::t(
