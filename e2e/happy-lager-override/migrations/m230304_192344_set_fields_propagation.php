@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace craft\contentmigrations;
 
 use Craft;
-use craft\base\Field;
 use craft\db\Migration;
 use craft\fields\Matrix;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;

@@ -16,6 +16,7 @@ use craft\queue\BaseJob;
 use craft\queue\Queue;
 use craft\helpers\Queue as CraftHelpersQueue;
 use Exception;
+use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -44,10 +45,39 @@ class ManualJobSync extends BaseJob
      */
     public function execute($queue): void
     {
+        $mutex = Craft::$app->getMutex();
+        $mutexKey = __CLASS__ . '_' . __FUNCTION__ . '_' . join('_', $this->jobIds);
+
+        if (!$mutex->acquire($mutexKey)) {
+            Craft::error('Lilt queue manager is already running');
+
+            $this->setProgress(
+                $queue,
+                1,
+                Craft::t(
+                    'app',
+                    'Syncing finished',
+                )
+            );
+
+            return;
+        }
+
         $jobRecords = JobRecord::findAll(['id' => $this->jobIds]);
 
         if (count($jobRecords) === 0) {
             // job was removed, we are done here
+            $mutex->release($mutexKey);
+
+            $this->setProgress(
+                $queue,
+                1,
+                Craft::t(
+                    'app',
+                    'Syncing finished',
+                )
+            );
+
             return;
         }
 
@@ -61,11 +91,6 @@ class ManualJobSync extends BaseJob
         foreach ($jobsInfo as $jobInfo) {
             $jobDetails = Craft::$app->getQueue()->getJobDetails((string)$jobInfo['id']);
 
-            if ($jobDetails['status'] === Queue::STATUS_RESERVED) {
-                //we don't need to do anything with job in progress
-                continue;
-            }
-
             if (!in_array(get_class($jobDetails['job']), self::SUPPORTED_JOBS)) {
                 continue;
             }
@@ -76,6 +101,13 @@ class ManualJobSync extends BaseJob
             $queueJob = $jobDetails['job'];
             if (!in_array($queueJob->jobId, $this->jobIds)) {
                 //don't need to do anything, not in the list
+                continue;
+            }
+
+            if ($jobDetails['status'] === Queue::STATUS_RESERVED) {
+                //we don't need to do anything with job in progress
+                $jobsInProgress[$queueJob->jobId] = $queueJob;
+
                 continue;
             }
 
@@ -171,6 +203,27 @@ class ManualJobSync extends BaseJob
             }
 
             if (!empty($jobRecord->liltJobId)) {
+                // Check if job was started on lilt side
+                $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
+                    $jobRecord->liltJobId
+                );
+
+                if ($liltJob->getStatus() !== JobResponse::STATUS_DRAFT) {
+                    CraftHelpersQueue::push(
+                        (new FetchJobStatusFromConnector(
+                            [
+                                'jobId' => $jobRecord->id,
+                                'liltJobId' => $jobRecord->liltJobId,
+                            ]
+                        )),
+                        FetchJobStatusFromConnector::PRIORITY,
+                        0
+                    );
+
+                    return;
+                }
+
+                // Job is already created, let's see if it has all translation sent
                 $translationRecords = TranslationRecord::findAll(['jobId' => $jobRecord->id]);
                 $connectorTranslationIds = array_map(
                     static function (TranslationRecord $translationRecord) {
@@ -204,6 +257,43 @@ class ManualJobSync extends BaseJob
 
                     continue;
                 }
+
+                $allDone = true;
+                foreach ($translationRecords as $translationRecord) {
+                    if (!empty($translationRecord->sourceContent)) {
+                        continue;
+                    }
+
+                    $allDone = false;
+
+                    CraftHelpersQueue::push(
+                        new SendTranslationToConnector([
+                            'jobId' => $translationRecord->jobId,
+                            'translationId' => $translationRecord->id,
+                            'elementId' => $translationRecord->elementId,
+                            'versionId' => $translationRecord->versionId,
+                            'targetSiteId' => $translationRecord->targetSiteId,
+                        ]),
+                        SendTranslationToConnector::PRIORITY,
+                        SendTranslationToConnector::getDelay(),
+                        SendTranslationToConnector::TTR
+                    );
+                }
+
+                if ($allDone) {
+                    CraftHelpersQueue::push(
+                        (new FetchJobStatusFromConnector(
+                            [
+                                'jobId' => $jobRecord->id,
+                                'liltJobId' => $jobRecord->liltJobId,
+                            ]
+                        )),
+                        FetchJobStatusFromConnector::PRIORITY,
+                        0
+                    );
+                }
+
+                continue;
             }
 
             //Sending job to lilt
@@ -225,6 +315,8 @@ class ManualJobSync extends BaseJob
                 ]
             )
         );
+
+        $mutex->release($mutexKey);
     }
 
     /**

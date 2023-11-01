@@ -81,6 +81,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
         $translationRecord->refresh();
 
         if (empty($translationRecord->connectorTranslationId)) {
+            //TODO: we can push message to fix connector id
             Craft::error(
                 sprintf(
                     "Connector translation id is empty for translation:"
@@ -119,6 +120,15 @@ class FetchTranslationFromConnector extends AbstractRetryJob
                 ]
             );
 
+            Craft::error([
+                "message" => sprintf(
+                    'Set translation %d to status failed, got status failed from lilt platform',
+                    $translationRecord->id,
+                ),
+                "translationRecord" => $translationRecord,
+            ]);
+
+
             Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
 
             $mutex->release($mutexKey);
@@ -153,25 +163,14 @@ class FetchTranslationFromConnector extends AbstractRetryJob
             );
         } catch (Exception $ex) {
             Craft::error([
-                'message' => "Can't fetch translation!",
+                'message' => "Can't fetch translation due to error",
                 'exception_message' => $ex->getMessage(),
                 'exception_trace' => $ex->getTrace(),
                 'exception' => $ex,
+                'job' => $job->toArray()
             ]);
 
-            Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
-                $translationFromConnector,
-                $job,
-                [
-                    $translationRecord->elementId => [
-                        $translationRecord->targetSiteId => $translationRecord
-                    ]
-                ]
-            );
-
-            $mutex->release($mutexKey);
-            $this->markAsDone($queue);
-            return;
+            throw $ex;
         }
 
         Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
@@ -185,7 +184,13 @@ class FetchTranslationFromConnector extends AbstractRetryJob
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Fetching translations');
+        return Craft::t(
+            'app',
+            sprintf(
+                'Fetching translations: %d',
+                $this->translationId
+            )
+        );
     }
 
     /**

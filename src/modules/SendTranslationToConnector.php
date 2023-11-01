@@ -14,7 +14,9 @@ use craft\errors\InvalidFieldException;
 use craft\helpers\Queue;
 use craft\queue\BaseJob;
 use LiltConnectorSDK\ApiException;
+use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\SendTranslationCommand;
@@ -22,7 +24,7 @@ use Throwable;
 
 class SendTranslationToConnector extends AbstractRetryJob
 {
-    public const DELAY_IN_SECONDS = 0;
+    public const DELAY_IN_SECONDS = 1;
     public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
@@ -44,7 +46,7 @@ class SendTranslationToConnector extends AbstractRetryJob
     public $targetSiteId;
 
     /**
-     * @var int|null
+     * @var int
      */
     public $translationId;
 
@@ -89,20 +91,61 @@ class SendTranslationToConnector extends AbstractRetryJob
         $element = Craft::$app->elements->getElementById($this->versionId, null, $command->getJob()->sourceSiteId);
 
         $translationRecord = TranslationRecord::findOne(['id' => $this->translationId]);
+        $jobElement = Job::findOne(['id' => $this->jobId]);
 
-        Craftliltplugin::getInstance()
-            ->sendTranslationToLiltConnectorHandler
-            ->send(
-                new SendTranslationCommand(
-                    $this->elementId,
+        if (empty($translationRecord)) {
+            // Translation should always exist
+            throw new \RuntimeException(
+                sprintf(
+                    'Can\'t find translation %d for element %d with target site %s',
+                    $this->translationId,
                     $this->versionId,
-                    $this->targetSiteId,
-                    $element,
-                    $command->getJob()->liltJobId,
-                    $command->getJob(),
-                    $translationRecord
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $this->targetSiteId
+                    )
                 )
             );
+        }
+
+        if (empty($jobElement)) {
+            // Translation should always exist
+            throw new \RuntimeException(
+                sprintf(
+                    'Can\'t find job %d for element %d',
+                    $this->jobId,
+                    $this->versionId,
+                )
+            );
+        }
+
+        if (empty($translationRecord->sourceContent)) {
+            Craftliltplugin::getInstance()
+                ->sendTranslationToLiltConnectorHandler
+                ->send(
+                    new SendTranslationCommand(
+                        $this->elementId,
+                        $this->versionId,
+                        $this->targetSiteId,
+                        $element,
+                        $command->getJob()->liltJobId,
+                        $command->getJob(),
+                        $translationRecord
+                    )
+                );
+
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $translationRecord->jobId,
+                Craft::$app->getUser()->getId(),
+                sprintf(
+                    'Sent translation %d to lilt (element %d to %s)',
+                    $translationRecord->id,
+                    $translationRecord->elementId,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $translationRecord->targetSiteId
+                    )
+                )
+            );
+        }
 
         $translations = Craftliltplugin::getInstance()
             ->translationRepository
@@ -115,17 +158,27 @@ class SendTranslationToConnector extends AbstractRetryJob
             $translations
         );
 
-        if (!in_array(null, $sourceContents)) {
+        if (
+            !in_array(null, $sourceContents)
+            && count($sourceContents) === $jobElement->getFilesCount()
+        ) {
             // All translations downloaded, let's start the job
-            Craftliltplugin::getInstance()->connectorJobRepository->start(
+            $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
                 $command->getJob()->liltJobId
             );
 
-            Craftliltplugin::getInstance()->jobLogsRepository->create(
-                $this->jobId,
-                Craft::$app->getUser()->getId(),
-                'Job uploaded to Lilt Platform'
-            );
+            // Only start job with status draft
+            if ($liltJob->getStatus() === JobResponse::STATUS_DRAFT) {
+                Craftliltplugin::getInstance()->connectorJobRepository->start(
+                    $command->getJob()->liltJobId
+                );
+
+                Craftliltplugin::getInstance()->jobLogsRepository->create(
+                    $this->jobId,
+                    Craft::$app->getUser()->getId(),
+                    'Job uploaded to Lilt Platform'
+                );
+            }
 
             Queue::push(
                 (new FetchJobStatusFromConnector([
@@ -135,6 +188,11 @@ class SendTranslationToConnector extends AbstractRetryJob
                 FetchJobStatusFromConnector::PRIORITY,
                 10
             );
+
+            $this->markAsDone($queue);
+            $this->release();
+
+            return;
         }
 
         $this->markAsDone($queue);
@@ -146,7 +204,13 @@ class SendTranslationToConnector extends AbstractRetryJob
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Sending translation to lilt');
+        return Craft::t(
+            'app',
+            sprintf(
+                'Sending translation to lilt: %d',
+                $this->translationId
+            )
+        );
     }
 
     /**
@@ -192,6 +256,18 @@ class SendTranslationToConnector extends AbstractRetryJob
             'versionId' => $this->versionId,
             'targetSiteId' => $this->targetSiteId,
             'attempt' => $this->attempt + 1
+        ]);
+    }
+
+    protected function getMutexKey(): string
+    {
+        return join('_', [
+            __CLASS__,
+            __FUNCTION__,
+            $this->jobId,
+            $this->translationId,
+            $this->targetSiteId,
+            $this->attempt
         ]);
     }
 }
