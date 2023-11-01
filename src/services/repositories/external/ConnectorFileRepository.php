@@ -12,9 +12,13 @@ namespace lilthq\craftliltplugin\services\repositories\external;
 use Craft;
 use DateTimeInterface;
 use Exception;
+use LiltConnectorSDK\ApiException;
 
 class ConnectorFileRepository extends AbstractConnectorExternalRepository implements ConnectorFileRepositoryInterface
 {
+    /**
+     * @throws ApiException
+     */
     public function addFileToJob(
         int $jobId,
         string $fileName,
@@ -32,9 +36,28 @@ class ConnectorFileRepository extends AbstractConnectorExternalRepository implem
                 $dueDate,
                 $filePath
             );
+        } catch (ApiException $ex) {
+            Craft::warning([
+                'message' => sprintf(
+                    'Communication exception when calling JobsApi->servicesApiJobsAddFile: %s',
+                    $ex->getMessage()
+                ),
+                'exception_message' => $ex->getMessage(),
+                'exception_trace' => $ex->getTrace(),
+                'exception' => $ex,
+            ]);
+
+            if ($ex->getCode() === 500) {
+                throw $ex;
+            }
+
+            return false;
         } catch (Exception $ex) {
             Craft::error([
-                'message' => sprintf('Exception when calling JobsApi->servicesApiJobsAddFile: %s', $ex->getMessage()),
+                'message' => sprintf(
+                    'Exception when calling JobsApi->servicesApiJobsAddFile: %s',
+                    $ex->getMessage()
+                ),
                 'exception_message' => $ex->getMessage(),
                 'exception_trace' => $ex->getTrace(),
                 'exception' => $ex,

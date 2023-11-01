@@ -26,10 +26,29 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
         return $this->apiInstance->servicesApiJobsCreateJob($settings_response);
     }
 
+    /**
+     * @throws ApiException
+     */
     public function start(int $liltJobId): bool
     {
         try {
             $this->apiInstance->servicesApiJobsStartJob($liltJobId);
+        } catch (ApiException $ex) {
+            Craft::warning([
+                'message' => sprintf(
+                    'Communication exception when calling JobsApi->servicesApiJobsAddFile: %s',
+                    $ex->getMessage()
+                ),
+                'exception_message' => $ex->getMessage(),
+                'exception_trace' => $ex->getTrace(),
+                'exception' => $ex,
+            ]);
+
+            if ($ex->getCode() === 500) {
+                throw $ex;
+            }
+
+            return false;
         } catch (Exception $ex) {
             Craft::error([
                 'message' => sprintf('Exception when calling JobsApi->servicesApiJobsAddFile: %s', $ex->getMessage()),

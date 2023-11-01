@@ -17,6 +17,7 @@ class SettingsRepository
     public const COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET = 'copy_entries_slug_from_source_to_target';
 
     public const QUEUE_EACH_TRANSLATION_FILE_SEPARATELY = 'queue_each_translation_file_separately';
+    public const QUEUE_MANAGER_EXECUTED_AT = 'queue_manager_executed_at';
 
     public function saveLiltApiConnectionConfiguration(string $connectorApiUrl, string $connectorApiKey): void
     {

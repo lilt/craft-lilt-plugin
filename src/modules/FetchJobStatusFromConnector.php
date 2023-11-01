@@ -12,7 +12,9 @@ namespace lilthq\craftliltplugin\modules;
 use Craft;
 use craft\helpers\Queue;
 use craft\queue\BaseJob;
+use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
+use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -33,6 +35,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
 
     /**
      * @inheritdoc
+     * @throws ApiException
      */
     public function execute($queue): void
     {
@@ -59,13 +62,13 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
         }
 
         $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
-        $isTranslationFinished = $liltJob->getStatus() !== JobResponse::STATUS_PROCESSING
+        $isJobFinished = $liltJob->getStatus() !== JobResponse::STATUS_PROCESSING
             && $liltJob->getStatus() !== JobResponse::STATUS_QUEUED;
 
-        $isTranslationFailed = $liltJob->getStatus() === JobResponse::STATUS_CANCELED
+        $isJobFailed = $liltJob->getStatus() === JobResponse::STATUS_CANCELED
             || $liltJob->getStatus() === JobResponse::STATUS_FAILED;
 
-        if ($isTranslationFailed) {
+        if ($isJobFailed) {
             $jobRecord->status = Job::STATUS_FAILED;
 
             Craftliltplugin::getInstance()->jobLogsRepository->create(
@@ -81,11 +84,19 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 ['jobId' => $jobRecord->id]
             );
 
+            Craft::error([
+                "message" => sprintf(
+                    'Set job %d and translations to status failed due to failed/cancel status from lilt',
+                    $jobRecord->id,
+                ),
+                "jobRecord" => $jobRecord,
+            ]);
+
             $this->markAsDone($queue);
             return;
         }
 
-        if (!$isTranslationFinished) {
+        if (!$isJobFinished) {
             Queue::push(
                 (new FetchJobStatusFromConnector(
                     [
@@ -97,6 +108,76 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 self::getDelay(),
                 self::TTR
             );
+
+            $this->markAsDone($queue);
+
+            return;
+        }
+
+        $connectorTranslations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
+            $job->liltJobId
+        );
+
+        $connectorTranslationsStatuses = array_map(
+            function (TranslationResponse $connectorTranslation) {
+                return $connectorTranslation->getStatus();
+            },
+            $connectorTranslations->getResults()
+        );
+
+        $translationFinished =
+            $this->isTranslationsFinished($job, $connectorTranslationsStatuses);
+
+        if (!$translationFinished) {
+            if (
+                in_array(TranslationResponse::STATUS_EXPORT_FAILED, $connectorTranslationsStatuses)
+                || in_array(TranslationResponse::STATUS_IMPORT_FAILED, $connectorTranslationsStatuses)
+            ) {
+                // job failed
+
+                Craftliltplugin::getInstance()->jobLogsRepository->create(
+                    $jobRecord->id,
+                    null,
+                    'Job is failed, one of translations in failed status'
+                );
+
+                TranslationRecord::updateAll(
+                    ['status' => TranslationRecord::STATUS_FAILED],
+                    ['jobId' => $jobRecord->id]
+                );
+
+                $jobRecord->status = Job::STATUS_FAILED;
+                $jobRecord->save();
+
+                Craft::error([
+                    "message" => sprintf(
+                        'Set job %d and translations to status failed due to failed status for translation from lilt',
+                        $jobRecord->id,
+                    ),
+                    "jobRecord" => $jobRecord,
+                ]);
+
+                Craft::$app->elements->invalidateCachesForElementType(TranslationRecord::class);
+                Craft::$app->elements->invalidateCachesForElementType(Job::class);
+
+                $this->markAsDone($queue);
+
+                return;
+            }
+
+            Queue::push(
+                (new FetchJobStatusFromConnector(
+                    [
+                        'jobId' => $this->jobId,
+                        'liltJobId' => $this->liltJobId,
+                    ]
+                )),
+                self::PRIORITY,
+                self::getDelay(),
+                self::TTR
+            );
+
+            $this->markAsDone($queue);
 
             return;
         }
@@ -142,6 +223,14 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                     ['jobId' => $jobRecord->id]
                 );
 
+                Craft::error([
+                    "message" => sprintf(
+                        'Set job %d and translations to status failed due to failed/cancel status from lilt',
+                        $jobRecord->id,
+                    ),
+                    "jobRecord" => $jobRecord,
+                ]);
+
                 $this->markAsDone($queue);
 
                 return;
@@ -183,7 +272,10 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Fetching lilt job status');
+        return Craft::t(
+            'app',
+            sprintf('Fetching lilt job status: %d', $this->liltJobId)
+        );
     }
 
     /**
@@ -224,9 +316,29 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
     {
         $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
         if (!empty($envDelay) || $envDelay === '0') {
-            return (int) $envDelay;
+            return (int)$envDelay;
         }
 
         return self::DELAY_IN_SECONDS;
+    }
+
+    /**
+     * @param Job $job
+     * @param array $connectorTranslationsStatuses
+     * @return bool
+     */
+    private function isTranslationsFinished(Job $job, array $connectorTranslationsStatuses): bool
+    {
+        $connectorTranslationsStatuses = array_unique($connectorTranslationsStatuses);
+
+        return (
+                $job->isInstantFlow()
+                && count($connectorTranslationsStatuses) === 1
+                && $connectorTranslationsStatuses[0] === TranslationResponse::STATUS_MT_COMPLETE)
+            || (
+                $job->isVerifiedFlow()
+                && count($connectorTranslationsStatuses) === 1
+                && $connectorTranslationsStatuses[0] === TranslationResponse::STATUS_EXPORT_COMPLETE
+            );
     }
 }

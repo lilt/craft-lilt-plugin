@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\handlers\field\copier;
 
-use benf\neo\elements\Block;
-use benf\neo\elements\db\BlockQuery;
-use benf\neo\Field;
-use Craft;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\errors\ElementNotFoundException;

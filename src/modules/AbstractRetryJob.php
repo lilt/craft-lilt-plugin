@@ -13,6 +13,7 @@ use Craft;
 use craft\queue\BaseJob;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
+use RuntimeException;
 
 abstract class AbstractRetryJob extends BaseJob
 {
@@ -40,8 +41,14 @@ abstract class AbstractRetryJob extends BaseJob
 
     protected function getCommand(): ?Command
     {
-        if (!Craft::$app->getMutex()->acquire($this->getMutexKey())) {
-            Craft::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
+        if (
+            !Craft::$app->getMutex()->acquire(
+                $this->getMutexKey()
+            )
+        ) {
+            $msg = sprintf('Job %s is already processing %s', __CLASS__, $this->getMutexKey());
+
+            Craft::error($msg);
 
             return null;
         }
