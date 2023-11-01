@@ -16,6 +16,7 @@ use craft\queue\BaseJob;
 use craft\queue\Queue;
 use craft\helpers\Queue as CraftHelpersQueue;
 use Exception;
+use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -202,6 +203,26 @@ class ManualJobSync extends BaseJob
             }
 
             if (!empty($jobRecord->liltJobId)) {
+                // Check if job was started on lilt side
+                $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
+                    $jobRecord->liltJobId
+                );
+
+                if ($liltJob->getStatus() !== JobResponse::STATUS_DRAFT) {
+                    CraftHelpersQueue::push(
+                        (new FetchJobStatusFromConnector(
+                            [
+                                'jobId' => $jobRecord->id,
+                                'liltJobId' => $jobRecord->liltJobId,
+                            ]
+                        )),
+                        FetchJobStatusFromConnector::PRIORITY,
+                        0
+                    );
+
+                    return;
+                }
+
                 // Job is already created, let's see if it has all translation sent
                 $translationRecords = TranslationRecord::findAll(['jobId' => $jobRecord->id]);
                 $connectorTranslationIds = array_map(

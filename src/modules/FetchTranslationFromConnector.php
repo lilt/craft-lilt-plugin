@@ -170,21 +170,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
                 'job' => $job->toArray()
             ]);
 
-            Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
-                $translationFromConnector,
-                $job,
-                [
-                    $translationRecord->elementId => [
-                        $translationRecord->targetSiteId => $translationRecord
-                    ]
-                ]
-            );
-
-            Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
-
-            $mutex->release($mutexKey);
-            $this->markAsDone($queue);
-            return;
+            throw $ex;
         }
 
         Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);

@@ -71,10 +71,8 @@ class GetSendToLiltControllerCest extends AbstractIntegrationCest
         $I->assertJobInQueue($expectQueueJob);
     }
 
-    public function testSendToLilt_InProgress(IntegrationTester $I, $scenario): void
+    public function testSendToLilt_InProgress(IntegrationTester $I): void
     {
-        $scenario->skip('queue manager is pushed, need to fix test');
-
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
