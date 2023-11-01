@@ -14,6 +14,7 @@ use craft\errors\InvalidFieldException;
 use craft\helpers\Queue;
 use craft\queue\BaseJob;
 use LiltConnectorSDK\ApiException;
+use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\models\TranslationModel;
@@ -161,17 +162,23 @@ class SendTranslationToConnector extends AbstractRetryJob
             !in_array(null, $sourceContents)
             && count($sourceContents) === $jobElement->getFilesCount()
         ) {
-            //TODO: here can be 400 since user can retry job again and we will try to start it
             // All translations downloaded, let's start the job
-            Craftliltplugin::getInstance()->connectorJobRepository->start(
+            $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById(
                 $command->getJob()->liltJobId
             );
 
-            Craftliltplugin::getInstance()->jobLogsRepository->create(
-                $this->jobId,
-                Craft::$app->getUser()->getId(),
-                'Job uploaded to Lilt Platform'
-            );
+            // Only start job with status draft
+            if ($liltJob->getStatus() === JobResponse::STATUS_DRAFT) {
+                Craftliltplugin::getInstance()->connectorJobRepository->start(
+                    $command->getJob()->liltJobId
+                );
+
+                Craftliltplugin::getInstance()->jobLogsRepository->create(
+                    $this->jobId,
+                    Craft::$app->getUser()->getId(),
+                    'Job uploaded to Lilt Platform'
+                );
+            }
 
             Queue::push(
                 (new FetchJobStatusFromConnector([

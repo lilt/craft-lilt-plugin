@@ -14,7 +14,7 @@ use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 
 class StartQueueManagerHandler
 {
-    private const DEFAULT_TIME_TO_WAIT = 3600;
+    private const DEFAULT_TIME_TO_WAIT = 3600 * 5; // every 5 hours
     private const ENV_NAME = 'CRAFT_LILT_PLUGIN_QUEUE_MANAGER_WAIT_TIME_IN_SECONDS';
 
     private function isEligibleForRun(): bool
@@ -71,9 +71,13 @@ class StartQueueManagerHandler
         }
 
         $lastExecutedAt = (int)$queueManagerExecutedAt->value;
-        $timeToWait = (int)(getenv(self::ENV_NAME) ?? self::DEFAULT_TIME_TO_WAIT);
 
-        if ($lastExecutedAt < time() - $timeToWait) {
+        $timeToWait = getenv(self::ENV_NAME);
+        if (empty($timeToWait)) {
+            $timeToWait = self::DEFAULT_TIME_TO_WAIT;
+        }
+
+        if ($lastExecutedAt < time() - (int) $timeToWait) {
             $queueManagerExecutedAt->value = time();
             $queueManagerExecutedAt->save();
 

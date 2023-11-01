@@ -214,6 +214,9 @@ Cypress.Commands.add('instantFlow', ({
   );
 
   if (isMockserverEnabled) {
+
+    cy.log('Setting up mocks for translations download');
+
     for (const language of languages) {
       cy.get(
           `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
