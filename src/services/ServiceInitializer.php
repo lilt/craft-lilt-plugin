@@ -98,6 +98,9 @@ class ServiceInitializer
                 'class' => ListenerRegister::class,
                 'availableListeners' => CraftliltpluginParameters::LISTENERS,
             ],
+            'settingsRepository' => [
+                'class' => SettingsRepository::class,
+            ],
         ]);
 
         $pluginInstance->setComponents([
@@ -153,7 +156,7 @@ class ServiceInitializer
         ]);
 
         $getProvidersMap = static function () use ($pluginInstance) {
-            return [
+            $providersMap = [
                 CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentProvider(),
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
@@ -179,6 +182,13 @@ class ServiceInitializer
                 #SuperTable Plugin
                 CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new ElementQueryContentProvider(),
             ];
+
+            //TODO: make it in proper way
+            if (Craftliltplugin::getInstance()->settingsRepository->ignoreDropdowns()) {
+                unset($providersMap[CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN]);
+            }
+
+            return $providersMap;
         };
 
         $pluginInstance->set(
@@ -260,10 +270,6 @@ class ServiceInitializer
                 [
                     'class' => ConnectorFileRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
-                ],
-            'settingsRepository' =>
-                [
-                    'class' => SettingsRepository::class,
                 ],
             'editJobHandler' =>
                 [
