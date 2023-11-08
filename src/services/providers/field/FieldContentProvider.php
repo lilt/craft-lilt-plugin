@@ -25,7 +25,7 @@ class FieldContentProvider
     {
         $fieldClass = get_class($provideContentCommand->getField());
 
-        if (!isset($this->providersMap[$fieldClass])) {
+        if (!isset($this->providersMap[$fieldClass]) || empty($this->providersMap[$fieldClass])) {
             return null;
         }
 
