@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\repositories;
 
+use Craft;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 
 class SettingsRepository
@@ -18,6 +20,8 @@ class SettingsRepository
 
     public const QUEUE_EACH_TRANSLATION_FILE_SEPARATELY = 'queue_each_translation_file_separately';
     public const QUEUE_MANAGER_EXECUTED_AT = 'queue_manager_executed_at';
+
+    public const IGNORE_DROPDOWNS = 'ignore_dropdowns';
 
     public function saveLiltApiConnectionConfiguration(string $connectorApiUrl, string $connectorApiKey): void
     {
@@ -43,6 +47,24 @@ class SettingsRepository
     {
         $settingValue = SettingRecord::findOne(
             ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
+        );
+
+        if (empty($settingValue) || empty($settingValue->value)) {
+            return false;
+        }
+
+        return (bool)$settingValue->value;
+    }
+
+    public function ignoreDropdowns(): bool
+    {
+        $tableSchema = Craft::$app->getDb()->schema->getTableSchema(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
+        if ($tableSchema === null) {
+            return false;
+        }
+
+        $settingValue = SettingRecord::findOne(
+            ['name' => SettingsRepository::IGNORE_DROPDOWNS]
         );
 
         if (empty($settingValue) || empty($settingValue->value)) {
