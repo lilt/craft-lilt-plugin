@@ -61,6 +61,15 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             return;
         }
 
+        $mutex = Craft::$app->getMutex();
+        $mutexKey = $this->getMutexKey();
+        if (!$mutex->acquire($mutexKey)) {
+            Craft::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
+
+            $this->markAsDone($queue);
+            return;
+        }
+
         $liltJob = Craftliltplugin::getInstance()->connectorJobRepository->findOneById($this->liltJobId);
         $isJobFinished = $liltJob->getStatus() !== JobResponse::STATUS_PROCESSING
             && $liltJob->getStatus() !== JobResponse::STATUS_QUEUED;
@@ -314,6 +323,10 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
 
     public static function getDelay(): int
     {
+        if (!Craft::$app->config->general->devMode) {
+            return self::DELAY_IN_SECONDS;
+        }
+
         $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
         if (!empty($envDelay) || $envDelay === '0') {
             return (int)$envDelay;
