@@ -9,6 +9,7 @@ use Exception;
 use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\SettingsResponse;
+use LiltConnectorSDK\ObjectSerializer;
 
 class ConnectorJobRepository extends AbstractConnectorExternalRepository
 {
@@ -68,6 +69,41 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
      */
     public function findOneById(int $liltJobId): JobResponse
     {
-        return $this->apiInstance->servicesApiJobsGetJobById($liltJobId);
+        $cacheKey = __METHOD__ . ':' . $liltJobId;
+
+        try {
+            $data = Craft::$app->cache->get($cacheKey);
+
+            if ($data) {
+                /**
+                 * @var JobResponse $response
+                 */
+                $response = ObjectSerializer::deserialize($data, JobResponse::class);
+
+                return $response;
+            }
+        } catch (Exception $ex) {
+            Craft::error([
+                "message" => sprintf(
+                    'Deserialize error for lilt job %d: %s ',
+                    $liltJobId,
+                    $ex->getMessage()
+                ),
+                "FILE" => __FILE__,
+                "LINE" => __LINE__,
+            ]);
+        }
+
+        $response = $this->apiInstance->servicesApiJobsGetJobById($liltJobId);
+
+        $data = $response->__toString();
+
+        Craft::$app->cache->add(
+            $cacheKey,
+            $data,
+            10
+        );
+
+        return $response;
     }
 }
