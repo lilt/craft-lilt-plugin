@@ -10,6 +10,7 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\SettingsResponse;
 use LiltConnectorSDK\ObjectSerializer;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class ConnectorJobRepository extends AbstractConnectorExternalRepository
 {
@@ -70,17 +71,48 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
     public function findOneById(int $liltJobId): JobResponse
     {
         $cacheKey = __METHOD__ . ':' . $liltJobId;
+        $cache = CraftliltpluginParameters::getResponseCache();
+
+        if (!empty($cache)) {
+            $response = $this->getResponseFromCache($cacheKey, $liltJobId);
+
+            if (!empty($response)) {
+                return $response;
+            }
+        }
+
+        $response = $this->apiInstance->servicesApiJobsGetJobById($liltJobId);
+
+        $data = $response->__toString();
+
+        if (!empty($cache)) {
+            Craft::$app->cache->add(
+                $cacheKey,
+                $data,
+                $cache
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param string $cacheKey
+     * @param int $liltJobId
+     * @return JobResponse
+     */
+    private function getResponseFromCache(string $cacheKey, int $liltJobId): ?JobResponse
+    {
+        $response = null;
 
         try {
-            $data = Craft::$app->cache->get($cacheKey);
+            $dataFromCache = Craft::$app->cache->get($cacheKey);
 
-            if ($data) {
+            if ($dataFromCache) {
                 /**
                  * @var JobResponse $response
                  */
-                $response = ObjectSerializer::deserialize($data, JobResponse::class);
-
-                return $response;
+                $response = ObjectSerializer::deserialize($dataFromCache, JobResponse::class);
             }
         } catch (Exception $ex) {
             Craft::error([
@@ -93,16 +125,6 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
                 "LINE" => __LINE__,
             ]);
         }
-
-        $response = $this->apiInstance->servicesApiJobsGetJobById($liltJobId);
-
-        $data = $response->__toString();
-
-        Craft::$app->cache->add(
-            $cacheKey,
-            $data,
-            10
-        );
 
         return $response;
     }
