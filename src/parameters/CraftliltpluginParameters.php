@@ -61,6 +61,8 @@ class CraftliltpluginParameters
     public const LINKIT_FIELD = 'fruitstudios\linkit\fields\LinkitField';
     public const COLOUR_SWATCHES_FIELD = 'percipioglobal\colourswatches\fields\ColourSwatches';
 
+    public const LENZ_LINKFIELD = 'lenz\linkfield\fields\LinkField';
+
     public const LISTENERS = [
         AfterDraftAppliedListener::class,
         RegisterCpUrlRulesListener::class,
