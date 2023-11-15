@@ -17,6 +17,7 @@ use lilthq\craftliltplugin\services\appliers\field\BaseOptionFieldContentApplier
 use lilthq\craftliltplugin\services\appliers\field\ColourSwatchesContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\ElementQueryContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\LenzLinkFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\LightswitchContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\LinkitContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
@@ -50,6 +51,7 @@ use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvid
 use lilthq\craftliltplugin\services\providers\field\ColourSwatchesContentProvider;
 use lilthq\craftliltplugin\services\providers\field\ElementQueryContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\LenzLinkFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\LightswitchContentProvider;
 use lilthq\craftliltplugin\services\providers\field\LinkitContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
@@ -162,7 +164,6 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentProvider(),
 
-                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentProvider(),
                 CraftliltpluginParameters::COLOUR_SWATCHES_FIELD => new ColourSwatchesContentProvider(),
 
                 # Options
@@ -170,6 +171,11 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentProvider(),
+
+                # Links
+                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentProvider(),
+                CraftliltpluginParameters::LENZ_LINKFIELD => new LenzLinkFieldContentProvider(),
+
 
                 ### ELEMENT QUERY PROVIDERS
 
@@ -220,7 +226,6 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentApplier(),
 
-                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentApplier(),
                 CraftliltpluginParameters::COLOUR_SWATCHES_FIELD => new ColourSwatchesContentApplier(),
 
                 ### Options
@@ -228,6 +233,10 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentApplier(),
+
+                ### Links
+                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentApplier(),
+                CraftliltpluginParameters::LENZ_LINKFIELD => new LenzLinkFieldContentApplier(),
 
                 ### ELEMENT QUERY APPLIERS
 

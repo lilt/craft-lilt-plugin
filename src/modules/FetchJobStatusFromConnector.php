@@ -101,6 +101,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 "jobRecord" => $jobRecord,
             ]);
 
+            $mutex->release($mutexKey);
             $this->markAsDone($queue);
             return;
         }
@@ -118,6 +119,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 self::TTR
             );
 
+            $mutex->release($mutexKey);
             $this->markAsDone($queue);
 
             return;
@@ -169,6 +171,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 Craft::$app->elements->invalidateCachesForElementType(TranslationRecord::class);
                 Craft::$app->elements->invalidateCachesForElementType(Job::class);
 
+                $mutex->release($mutexKey);
                 $this->markAsDone($queue);
 
                 return;
@@ -186,6 +189,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 self::TTR
             );
 
+            $mutex->release($mutexKey);
             $this->markAsDone($queue);
 
             return;
@@ -240,6 +244,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                     "jobRecord" => $jobRecord,
                 ]);
 
+                $mutex->release($mutexKey);
                 $this->markAsDone($queue);
 
                 return;
@@ -273,6 +278,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             Job::class
         );
 
+        $mutex->release($mutexKey);
         $this->markAsDone($queue);
     }
 

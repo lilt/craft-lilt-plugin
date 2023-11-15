@@ -9,6 +9,8 @@ use Exception;
 use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\SettingsResponse;
+use LiltConnectorSDK\ObjectSerializer;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class ConnectorJobRepository extends AbstractConnectorExternalRepository
 {
@@ -68,6 +70,62 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
      */
     public function findOneById(int $liltJobId): JobResponse
     {
-        return $this->apiInstance->servicesApiJobsGetJobById($liltJobId);
+        $cacheKey = __METHOD__ . ':' . $liltJobId;
+        $cache = CraftliltpluginParameters::getResponseCache();
+
+        if (!empty($cache)) {
+            $response = $this->getResponseFromCache($cacheKey, $liltJobId);
+
+            if (!empty($response)) {
+                return $response;
+            }
+        }
+
+        $response = $this->apiInstance->servicesApiJobsGetJobById($liltJobId);
+
+        $data = $response->__toString();
+
+        if (!empty($cache)) {
+            Craft::$app->cache->add(
+                $cacheKey,
+                $data,
+                $cache
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param string $cacheKey
+     * @param int $liltJobId
+     * @return JobResponse
+     */
+    private function getResponseFromCache(string $cacheKey, int $liltJobId): ?JobResponse
+    {
+        $response = null;
+
+        try {
+            $dataFromCache = Craft::$app->cache->get($cacheKey);
+
+            if ($dataFromCache) {
+                /**
+                 * @var JobResponse $response
+                 */
+                $response = ObjectSerializer::deserialize($dataFromCache, JobResponse::class);
+            }
+        } catch (Exception $ex) {
+            Craft::error([
+                "message" => sprintf(
+                    'Deserialize error for lilt job %d: %s ',
+                    $liltJobId,
+                    $ex->getMessage()
+                ),
+                "FILE" => __FILE__,
+                "LINE" => __LINE__,
+            ]);
+        }
+
+        return $response;
     }
 }

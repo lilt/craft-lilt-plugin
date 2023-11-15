@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 4.4.2 - 2023-11-15
+### Fixed
+- Lock release issue after queue message processing
+
+### Added
+- Support for the [Typed Link Field plugin](https://plugins.craftcms.com/typedlinkfield)
+
 ## 4.4.1 - 2023-11-08
 ### Added
 - Ignore dropdowns setting
