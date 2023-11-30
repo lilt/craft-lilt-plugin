@@ -60,6 +60,8 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJobSuccess(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         $I->setQueueEachTranslationFileSeparately(0);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -184,6 +186,8 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
 
     public function testSendCopySourceFlow(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         $I->setQueueEachTranslationFileSeparately(0);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -302,6 +306,8 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         $I->setQueueEachTranslationFileSeparately(0);
 
         $element = Entry::find()
