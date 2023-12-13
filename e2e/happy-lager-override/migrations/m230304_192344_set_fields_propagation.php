@@ -19,6 +19,8 @@ class m230304_192344_set_fields_propagation extends Migration
      */
     public function safeUp()
     {
+        // TODO: seems like not working for craft cms v3
+        return;
         $fields = Craft::$app->getFields()->getAllFields();
 
         foreach ($fields as $field) {
