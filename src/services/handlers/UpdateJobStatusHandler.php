@@ -54,7 +54,7 @@ class UpdateJobStatusHandler
             Craft::error([
                 "message" =>  sprintf(
                     'Set job %d and translations to status failed',
-                    $jobRecord->id,
+                    $jobRecord->id
                 ),
                 "jobRecord" => $jobRecord,
             ], 'lilt');
@@ -68,7 +68,7 @@ class UpdateJobStatusHandler
             Craft::warning([
                 "message" =>  sprintf(
                     'Set job %d and translations to status needs attention',
-                    $jobRecord->id,
+                    $jobRecord->id
                 ),
                 "jobRecord" => $jobRecord,
             ], 'lilt');

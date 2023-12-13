@@ -35,7 +35,7 @@ class QueueManager extends BaseJob
                 1,
                 Craft::t(
                     'app',
-                    'Finished lilt queue manager',
+                    'Finished lilt queue manager'
                 )
             );
 
@@ -61,7 +61,7 @@ class QueueManager extends BaseJob
                 1,
                 Craft::t(
                     'app',
-                    'Finished lilt queue manager',
+                    'Finished lilt queue manager'
                 )
             );
 
@@ -90,7 +90,7 @@ class QueueManager extends BaseJob
             1,
             Craft::t(
                 'app',
-                'Finished lilt queue manager',
+                'Finished lilt queue manager'
             )
         );
 

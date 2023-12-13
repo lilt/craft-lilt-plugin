@@ -123,7 +123,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
             Craft::error([
                 "message" => sprintf(
                     'Set translation %d to status failed, got status failed from lilt platform',
-                    $translationRecord->id,
+                    $translationRecord->id
                 ),
                 "translationRecord" => $translationRecord,
             ]);
