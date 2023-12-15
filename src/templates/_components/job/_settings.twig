@@ -61,6 +61,6 @@
     {% endif %}
 
     <div class="field" style="padding: 14px 24px">
-            <a style="color: grey; text-align: center;width: 100%;" href="{{ url('craft-lilt-plugin/report/data/' ~ element.id) }}">Download Diagnostic Data</a>
+        <a id="lilt-download-diagnostic-data" target="_blank" style="color: grey; text-align: center;width: 100%;" href="{{ url('craft-lilt-plugin/report/data/' ~ element.id) }}">Download Diagnostic Data</a>
     </div>
 {% endblock %}

@@ -50,12 +50,28 @@ class UpdateJobStatusHandler
             );
 
             $jobRecord->save();
+
+            Craft::error([
+                "message" =>  sprintf(
+                    'Set job %d and translations to status failed',
+                    $jobRecord->id
+                ),
+                "jobRecord" => $jobRecord,
+            ], 'lilt');
         } elseif (in_array(TranslationRecord::STATUS_IN_PROGRESS, $statuses, true)) {
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
             $jobRecord->save();
         } elseif (in_array(TranslationRecord::STATUS_NEEDS_ATTENTION, $statuses, true)) {
             $jobRecord->status = Job::STATUS_NEEDS_ATTENTION;
             $jobRecord->save();
+
+            Craft::warning([
+                "message" =>  sprintf(
+                    'Set job %d and translations to status needs attention',
+                    $jobRecord->id
+                ),
+                "jobRecord" => $jobRecord,
+            ], 'lilt');
         } else {
             $jobRecord->status = Job::STATUS_READY_FOR_REVIEW;
             $jobRecord->save();

@@ -9,12 +9,19 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\repositories;
 
+use Craft;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 
 class SettingsRepository
 {
     public const ENABLE_ENTRIES_FOR_TARGET_SITES = 'enable_entries_for_target_sites';
     public const COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET = 'copy_entries_slug_from_source_to_target';
+
+    public const QUEUE_EACH_TRANSLATION_FILE_SEPARATELY = 'queue_each_translation_file_separately';
+    public const QUEUE_MANAGER_EXECUTED_AT = 'queue_manager_executed_at';
+
+    public const IGNORE_DROPDOWNS = 'ignore_dropdowns';
 
     public function saveLiltApiConnectionConfiguration(string $connectorApiUrl, string $connectorApiKey): void
     {
@@ -36,14 +43,45 @@ class SettingsRepository
         $connectorApiUrlRecord->save();
     }
 
-    public function save(string $name, string $value): bool
+    public function isQueueEachTranslationFileSeparately(): bool
     {
-        $enableEntriesForTargetSites = SettingRecord::findOne(['name' => $name]);
-        if (!$enableEntriesForTargetSites) {
-            $enableEntriesForTargetSites = new SettingRecord(['name' => $name]);
+        $settingValue = SettingRecord::findOne(
+            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY]
+        );
+
+        if (empty($settingValue) || empty($settingValue->value)) {
+            return false;
         }
 
-        $enableEntriesForTargetSites->value = $value;
-        return $enableEntriesForTargetSites->save();
+        return (bool)$settingValue->value;
+    }
+
+    public function ignoreDropdowns(): bool
+    {
+        $tableSchema = Craft::$app->getDb()->schema->getTableSchema(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
+        if ($tableSchema === null) {
+            return false;
+        }
+
+        $settingValue = SettingRecord::findOne(
+            ['name' => SettingsRepository::IGNORE_DROPDOWNS]
+        );
+
+        if (empty($settingValue) || empty($settingValue->value)) {
+            return false;
+        }
+
+        return (bool)$settingValue->value;
+    }
+
+    public function save(string $name, string $value): bool
+    {
+        $settingRecord = SettingRecord::findOne(['name' => $name]);
+        if (!$settingRecord) {
+            $settingRecord = new SettingRecord(['name' => $name]);
+        }
+
+        $settingRecord->value = $value;
+        return $settingRecord->save();
     }
 }

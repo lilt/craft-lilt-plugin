@@ -80,6 +80,28 @@ class FetchTranslationFromConnector extends AbstractRetryJob
         }
         $translationRecord->refresh();
 
+        if (empty($translationRecord->connectorTranslationId)) {
+            //TODO: we can push message to fix connector id
+            Craft::error(
+                sprintf(
+                    "Connector translation id is empty for translation:"
+                    . "%d source site: %d target site: %d lilt job: %d",
+                    $translationRecord->id,
+                    $translationRecord->sourceSiteId,
+                    $translationRecord->targetSiteId,
+                    $job->liltJobId
+                )
+            );
+
+            $translationRecord->status = TranslationRecord::STATUS_FAILED;
+            $translationRecord->save();
+
+            $mutex->release($mutexKey);
+            $this->markAsDone($queue);
+
+            return;
+        }
+
         $translationFromConnector = Craftliltplugin::getInstance()->connectorTranslationRepository->findById(
             $translationRecord->connectorTranslationId
         );
@@ -98,8 +120,20 @@ class FetchTranslationFromConnector extends AbstractRetryJob
                 ]
             );
 
+            Craft::error([
+                "message" => sprintf(
+                    'Set translation %d to status failed, got status failed from lilt platform',
+                    $translationRecord->id
+                ),
+                "translationRecord" => $translationRecord,
+            ]);
+
+
+            Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
+
             $mutex->release($mutexKey);
             $this->markAsDone($queue);
+
             return;
         }
 
@@ -129,25 +163,14 @@ class FetchTranslationFromConnector extends AbstractRetryJob
             );
         } catch (Exception $ex) {
             Craft::error([
-                'message' => "Can't fetch translation!",
+                'message' => "Can't fetch translation due to error",
                 'exception_message' => $ex->getMessage(),
                 'exception_trace' => $ex->getTrace(),
                 'exception' => $ex,
+                'job' => $job->toArray()
             ]);
 
-            Craftliltplugin::getInstance()->translationFailedHandler->__invoke(
-                $translationFromConnector,
-                $job,
-                [
-                    $translationRecord->elementId => [
-                        $translationRecord->targetSiteId => $translationRecord
-                    ]
-                ]
-            );
-
-            $mutex->release($mutexKey);
-            $this->markAsDone($queue);
-            return;
+            throw $ex;
         }
 
         Craftliltplugin::getInstance()->updateJobStatusHandler->update($job->id);
@@ -161,7 +184,13 @@ class FetchTranslationFromConnector extends AbstractRetryJob
      */
     protected function defaultDescription(): ?string
     {
-        return Craft::t('app', 'Fetching translations');
+        return Craft::t(
+            'app',
+            sprintf(
+                'Fetching translations: %d',
+                $this->translationId
+            )
+        );
     }
 
     /**
@@ -226,17 +255,20 @@ class FetchTranslationFromConnector extends AbstractRetryJob
      */
     private function isTranslationFinished($job, TranslationResponse $translationFromConnector): bool
     {
-        return ($job->isInstantFlow() && $translationFromConnector->getStatus(
-        ) === TranslationResponse::STATUS_MT_COMPLETE)
-            || ($job->isVerifiedFlow() && $translationFromConnector->getStatus(
-            ) === TranslationResponse::STATUS_EXPORT_COMPLETE);
+        return (
+                $job->isInstantFlow()
+                && $translationFromConnector->getStatus() === TranslationResponse::STATUS_MT_COMPLETE)
+            || (
+                $job->isVerifiedFlow()
+                && $translationFromConnector->getStatus() === TranslationResponse::STATUS_EXPORT_COMPLETE
+            );
     }
 
     public static function getDelay(string $flow = CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT): int
     {
         $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
         if (!empty($envDelay) || $envDelay === '0') {
-            return (int) $envDelay;
+            return (int)$envDelay;
         }
 
         return strtolower($flow) === strtolower(CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT) ?

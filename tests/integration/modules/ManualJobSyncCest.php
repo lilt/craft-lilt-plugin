@@ -6,20 +6,34 @@ namespace lilthq\craftliltplugintests\integration\modules;
 
 use Craft;
 use craft\db\Table;
+use craft\elements\Entry;
 use craft\helpers\Db;
 use craft\queue\Queue;
 use IntegrationTester;
+use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\ManualJobSync;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
+use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
+use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
 
 class ManualJobSyncCest extends AbstractIntegrationCest
 {
+    public function _fixtures(): array
+    {
+        return [
+            'entries' => [
+                'class' => EntriesFixture::class,
+            ]
+        ];
+    }
+
     public function testNoJobs(IntegrationTester $I): void
     {
         $I->runQueue(
@@ -318,5 +332,149 @@ class ManualJobSyncCest extends AbstractIntegrationCest
         $jobDetails = Craft::$app->queue->getJobDetails((string) $queueId);
         Assert::assertEquals(Queue::STATUS_WAITING, $jobDetails['status']);
         Assert::assertEquals(0, $jobDetails['delay']);
+    }
+
+    public function testStartedJob(IntegrationTester $I): void
+    {
+        $job = $I->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [123, 456, 789],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT,
+            'status' => Job::STATUS_IN_PROGRESS,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
+
+        $I->expectJobGetRequest(
+            777,
+            200,
+            [
+                'status' => JobResponse::STATUS_COMPLETE
+            ]
+        );
+
+        $I->executeQueue(
+            ManualJobSync::class,
+            [
+                'jobIds' => [$job->id],
+            ]
+        );
+
+        $jobInfos = Craft::$app->queue->getJobInfo();
+        Assert::assertNotEmpty($jobInfos);
+
+        $I->assertJobInQueue(
+            new FetchJobStatusFromConnector(
+                [
+                    'jobId' => $job->id,
+                    'liltJobId' => $job->liltJobId,
+                ]
+            )
+        );
+    }
+
+    public function testNotStartedJobWithNotSentTranslations(IntegrationTester $I): void
+    {
+        $element = Entry::findOne(['authorId' => 1]);
+
+        /**
+         * @var TranslationRecord[] $translations
+         */
+        [$job, $translations] = $I->createJobWithTranslations([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT,
+            'status' => Job::STATUS_IN_PROGRESS,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
+
+        foreach ($translations as $translation) {
+            $translation->sourceContent = "";
+            $translation->save();
+        }
+
+        $I->expectJobGetRequest(
+            777,
+            200,
+            [
+                'status' => JobResponse::STATUS_DRAFT
+            ]
+        );
+
+        $I->executeQueue(
+            ManualJobSync::class,
+            [
+                'jobIds' => [$job->id],
+            ]
+        );
+
+        foreach ($translations as $translation) {
+            $I->assertJobInQueue(
+                new SendTranslationToConnector([
+                    'jobId' => $translation->jobId,
+                    'translationId' => $translation->id,
+                    'elementId' => $translation->elementId,
+                    'versionId' => $translation->versionId,
+                    'targetSiteId' => $translation->targetSiteId,
+                ])
+            );
+        }
+
+        $jobInfos = Craft::$app->queue->getJobInfo();
+        Assert::assertNotEmpty($jobInfos);
+    }
+    public function testNotStartedJobWithSentTranslations(IntegrationTester $I): void
+    {
+        $element = Entry::findOne(['authorId' => 1]);
+
+        /**
+         * @var TranslationRecord[] $translations
+         */
+        [$job, $translations] = $I->createJobWithTranslations([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT,
+            'status' => Job::STATUS_IN_PROGRESS,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
+
+        $I->expectJobGetRequest(
+            777,
+            200,
+            [
+                'status' => JobResponse::STATUS_DRAFT
+            ]
+        );
+
+        $I->executeQueue(
+            ManualJobSync::class,
+            [
+                'jobIds' => [$job->id],
+            ]
+        );
+
+        $jobInfos = Craft::$app->queue->getJobInfo();
+        Assert::assertNotEmpty($jobInfos);
+
+        $I->assertJobInQueue(
+            new FetchJobStatusFromConnector(
+                [
+                    'jobId' => $job->id,
+                    'liltJobId' => $job->liltJobId,
+                ]
+            ),
+            $job->status
+        );
     }
 }

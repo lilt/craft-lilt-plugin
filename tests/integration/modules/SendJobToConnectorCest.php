@@ -24,7 +24,9 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use lilthq\tests\fixtures\ExpectedElementContent;
@@ -56,8 +58,12 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      * @throws ModuleException
      * @throws InvalidConfigException
      */
-    public function testCreateJob(IntegrationTester $I, $scenario): void
+    public function testCreateJobSuccess(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
+        $I->setQueueEachTranslationFileSeparately(0);
+
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
@@ -178,8 +184,12 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
         $I->assertJobInQueue($expectQueueJob);
     }
 
-    public function testSendCopySourceFlow(IntegrationTester $I, $scenario): void
+    public function testSendCopySourceFlow(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
+        $I->setQueueEachTranslationFileSeparately(0);
+
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
 
@@ -294,8 +304,12 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
     /**
      * @throws ModuleException
      */
-    public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I, $scenario): void
+    public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
+        $I->setQueueEachTranslationFileSeparately(0);
+
         $element = Entry::find()
             ->where(['authorId' => 1])
             ->orderBy(['id' => SORT_DESC])
@@ -366,11 +380,14 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
 
         $jobActual = Job::findOne(['id' => $job->id]);
 
-        Assert::assertEmpty(
-            TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id])
-        );
+        $translations = TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id]);
 
-        Assert::assertSame(Job::STATUS_FAILED, $jobActual->status);
+        Assert::assertNotEmpty($translations);
+        Assert::assertEmpty($translations[0]->sourceContent);
+        Assert::assertEmpty($translations[0]->targetContent);
+
+        Assert::assertSame(TranslationRecord::STATUS_IN_PROGRESS, $translations[0]->status);
+        Assert::assertSame(Job::STATUS_NEW, $jobActual->status);
     }
 
     /**

@@ -67,10 +67,11 @@ class SyncJobFromLiltConnectorHandler
                     $this->processTranslation($translationDto, $job);
                 } catch (Exception $ex) {
                     Craft::error([
-                        'message' => "Can't process translation!",
+                        'message' => "Can't process translation due to error",
                         'exception_message' => $ex->getMessage(),
                         'exception_trace' => $ex->getTrace(),
                         'exception' => $ex,
+                        'job' => $job->toArray(),
                     ]);
 
                     Craftliltplugin::getInstance()->translationFailedHandler->__invoke(

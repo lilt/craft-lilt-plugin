@@ -17,6 +17,7 @@ use lilthq\craftliltplugin\services\appliers\field\BaseOptionFieldContentApplier
 use lilthq\craftliltplugin\services\appliers\field\ColourSwatchesContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\ElementQueryContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\FieldContentApplier;
+use lilthq\craftliltplugin\services\appliers\field\LenzLinkFieldContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\LightswitchContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\LinkitContentApplier;
 use lilthq\craftliltplugin\services\appliers\field\PlainTextContentApplier;
@@ -27,10 +28,17 @@ use lilthq\craftliltplugin\services\handlers\CreateDraftHandler;
 use lilthq\craftliltplugin\services\handlers\CreateJobHandler;
 use lilthq\craftliltplugin\services\handlers\CreateTranslationsHandler;
 use lilthq\craftliltplugin\services\handlers\EditJobHandler;
+use lilthq\craftliltplugin\services\handlers\field\copier\DefaultFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\MatrixFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\NeoFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\copier\SuperTableFieldCopier;
+use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
+use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
+use lilthq\craftliltplugin\services\handlers\StartQueueManagerHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
@@ -43,6 +51,7 @@ use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvid
 use lilthq\craftliltplugin\services\providers\field\ColourSwatchesContentProvider;
 use lilthq\craftliltplugin\services\providers\field\ElementQueryContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
+use lilthq\craftliltplugin\services\providers\field\LenzLinkFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\LightswitchContentProvider;
 use lilthq\craftliltplugin\services\providers\field\LinkitContentProvider;
 use lilthq\craftliltplugin\services\providers\field\PlainTextContentProvider;
@@ -83,18 +92,37 @@ class ServiceInitializer
             'translationFailedHandler' => TranslationFailedHandler::class,
             'createTranslationsHandler' => CreateTranslationsHandler::class,
             'refreshJobStatusHandler' => RefreshJobStatusHandler::class,
-            'createDraftHandler' => CreateDraftHandler::class,
             'updateJobStatusHandler' => UpdateJobStatusHandler::class,
             'updateTranslationsConnectorIds' => UpdateTranslationsConnectorIds::class,
             'packagistRepository' => PackagistRepository::class,
+            'startQueueManagerHandler' => StartQueueManagerHandler::class,
             'listenerRegister' => [
                 'class' => ListenerRegister::class,
                 'availableListeners' => CraftliltpluginParameters::LISTENERS,
+            ],
+            'settingsRepository' => [
+                'class' => SettingsRepository::class,
             ],
         ]);
 
         $pluginInstance->setComponents([
             'connectorConfiguration' => $pluginInstance->connectorConfigurationProvider->provide(),
+        ]);
+
+        $pluginInstance->setComponents([
+            'createDraftHandler' => function () {
+                return new CreateDraftHandler(
+                    new CopyFieldsHandler(
+                        [
+                            CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldCopier(),
+                            CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldCopier(),
+                            CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableFieldCopier(),
+
+                            CopyFieldsHandler::DEFAULT_FIELD_COPIER => new DefaultFieldCopier()
+                        ]
+                    )
+                );
+            },
         ]);
 
         $pluginInstance->setComponents([
@@ -130,13 +158,12 @@ class ServiceInitializer
         ]);
 
         $getProvidersMap = static function () use ($pluginInstance) {
-            return [
+            $providersMap = [
                 CraftliltpluginParameters::CRAFT_FIELDS_PLAINTEXT => new PlainTextContentProvider(),
                 CraftliltpluginParameters::CRAFT_REDACTOR_FIELD => new RedactorPluginFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentProvider(),
 
-                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentProvider(),
                 CraftliltpluginParameters::COLOUR_SWATCHES_FIELD => new ColourSwatchesContentProvider(),
 
                 # Options
@@ -144,6 +171,11 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentProvider(),
                 CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentProvider(),
+
+                # Links
+                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentProvider(),
+                CraftliltpluginParameters::LENZ_LINKFIELD => new LenzLinkFieldContentProvider(),
+
 
                 ### ELEMENT QUERY PROVIDERS
 
@@ -156,6 +188,13 @@ class ServiceInitializer
                 #SuperTable Plugin
                 CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new ElementQueryContentProvider(),
             ];
+
+            //TODO: make it in proper way
+            if (Craftliltplugin::getInstance()->settingsRepository->ignoreDropdowns()) {
+                unset($providersMap[CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN]);
+            }
+
+            return $providersMap;
         };
 
         $pluginInstance->set(
@@ -187,7 +226,6 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_TABLE => new TableContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_LIGHTSWITCH => new LightswitchContentApplier(),
 
-                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentApplier(),
                 CraftliltpluginParameters::COLOUR_SWATCHES_FIELD => new ColourSwatchesContentApplier(),
 
                 ### Options
@@ -195,6 +233,10 @@ class ServiceInitializer
                 CraftliltpluginParameters::CRAFT_FIELDS_DROPDOWN => new BaseOptionFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_MULTISELECT => new BaseOptionFieldContentApplier(),
                 CraftliltpluginParameters::CRAFT_FIELDS_CHECKBOXES => new BaseOptionFieldContentApplier(),
+
+                ### Links
+                CraftliltpluginParameters::LINKIT_FIELD => new LinkitContentApplier(),
+                CraftliltpluginParameters::LENZ_LINKFIELD => new LenzLinkFieldContentApplier(),
 
                 ### ELEMENT QUERY APPLIERS
 
@@ -238,10 +280,6 @@ class ServiceInitializer
                     'class' => ConnectorFileRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
                 ],
-            'settingsRepository' =>
-                [
-                    'class' => SettingsRepository::class,
-                ],
             'editJobHandler' =>
                 [
                     'class' => EditJobHandler::class,
@@ -253,6 +291,32 @@ class ServiceInitializer
                     'draftRepository' => Craft::$app->getDrafts(),
                     'fieldContentApplier' => $pluginInstance->fieldContentApplier,
                 ],
+        ]);
+
+        $pluginInstance->setComponents([
+            'sendJobToLiltConnectorHandler' => function () use ($pluginInstance) {
+                return new SendJobToLiltConnectorHandler(
+                    $pluginInstance->connectorJobRepository,
+                    $pluginInstance->jobLogsRepository,
+                    $pluginInstance->translationRepository,
+                    $pluginInstance->languageMapper,
+                    $pluginInstance->sendTranslationToLiltConnectorHandler,
+                    $pluginInstance->settingsRepository
+                );
+            }
+        ]);
+
+        $pluginInstance->setComponents([
+            'sendTranslationToLiltConnectorHandler' => function () use ($pluginInstance) {
+                return new SendTranslationToLiltConnectorHandler(
+                    $pluginInstance->jobLogsRepository,
+                    $pluginInstance->translationRepository,
+                    $pluginInstance->connectorJobsFileRepository,
+                    $pluginInstance->createDraftHandler,
+                    $pluginInstance->elementTranslatableContentProvider,
+                    $pluginInstance->languageMapper
+                );
+            }
         ]);
 
         $pluginInstance->listenerRegister->register();

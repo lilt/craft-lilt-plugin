@@ -79,7 +79,7 @@ jobs:
         run: make up
       - name: Composer install
         run: make composer-install
-      - name: Require Guzzle v6.5.5
+      - name: Require Guzzle v6
         run: make require-guzzle-v6
       - name: Tests
         run: make test

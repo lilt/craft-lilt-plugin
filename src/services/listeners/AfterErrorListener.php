@@ -11,6 +11,7 @@ namespace lilthq\craftliltplugin\services\listeners;
 
 use Craft;
 use craft\queue\Queue;
+use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
@@ -19,6 +20,7 @@ use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
 use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
+use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use yii\base\Event;
@@ -32,6 +34,7 @@ class AfterErrorListener implements ListenerInterface
         FetchVerifiedJobTranslationsFromConnector::class,
         FetchTranslationFromConnector::class,
         SendJobToConnector::class,
+        SendTranslationToConnector::class,
     ];
 
     public function register(): void
@@ -58,6 +61,9 @@ class AfterErrorListener implements ListenerInterface
         return in_array($jobClass, self::SUPPORTED_JOBS);
     }
 
+    /**
+     * @var ExecEvent $event
+     */
     public function __invoke(Event $event): Event
     {
         if (!$this->isEventEligible($event)) {
@@ -70,6 +76,16 @@ class AfterErrorListener implements ListenerInterface
         $queueJob = $event->job;
 
         $jobRecord = JobRecord::findOne(['id' => $queueJob->jobId]);
+
+        Craft::error([
+            "message" =>  sprintf(
+                'Job %s failed due to: %s',
+                get_class($queueJob),
+                $event->error->getMessage()
+            ),
+            "queueJob" => $queueJob,
+            "jobRecord" => $jobRecord
+        ]);
 
         if (!$queueJob->canRetry()) {
             $jobRecord->status = Job::STATUS_FAILED;
@@ -86,6 +102,18 @@ class AfterErrorListener implements ListenerInterface
             Craft::$app->queue->release(
                 (string)$event->id
             );
+
+            Craft::error([
+                "message" =>  sprintf(
+                    '[%s] Mark lilt job %d (%d) as failed due to: %s',
+                    get_class($queueJob),
+                    $jobRecord->liltJobId,
+                    $jobRecord->id,
+                    $event->error->getMessage()
+                ),
+                "queueJob" => $queueJob,
+                "jobRecord" => $jobRecord
+            ]);
 
             if (property_exists($queueJob, 'attempt')) {
                 Craftliltplugin::getInstance()->jobLogsRepository->create(
@@ -117,6 +145,16 @@ class AfterErrorListener implements ListenerInterface
         Craft::$app->queue->release(
             (string)$event->id
         );
+
+        if ($event->error instanceof ApiException && $event->error->getCode() === 500) {
+            \craft\helpers\Queue::push(
+                $queueJob,
+                $queueJob::PRIORITY,
+                $queueJob::getDelay()
+            );
+
+            return $event;
+        }
 
         ++$queueJob->attempt;
 
