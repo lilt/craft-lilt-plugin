@@ -13,6 +13,7 @@ use Craft;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\services\listeners\AfterDraftAppliedListener;
 use lilthq\craftliltplugin\services\listeners\AfterErrorListener;
+use lilthq\craftliltplugin\services\listeners\QueueBeforePushListener;
 use lilthq\craftliltplugin\services\listeners\RegisterCpAlertsListener;
 use lilthq\craftliltplugin\services\listeners\RegisterDefaultTableAttributesListener;
 use lilthq\craftliltplugin\services\listeners\RegisterElementTypesListener;
@@ -60,6 +61,8 @@ class CraftliltpluginParameters
     public const LINKIT_FIELD = 'fruitstudios\linkit\fields\LinkitField';
     public const COLOUR_SWATCHES_FIELD = 'percipioglobal\colourswatches\fields\ColourSwatches';
 
+    public const LENZ_LINKFIELD = 'lenz\linkfield\fields\LinkField';
+
     public const LISTENERS = [
         AfterDraftAppliedListener::class,
         RegisterCpUrlRulesListener::class,
@@ -68,12 +71,14 @@ class CraftliltpluginParameters
         RegisterTableAttributesListener::class,
         AfterErrorListener::class,
         RegisterCpAlertsListener::class,
+        QueueBeforePushListener::class,
     ];
 
     public const TRANSLATION_WORKFLOW_INSTANT = SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT;
     public const TRANSLATION_WORKFLOW_VERIFIED = SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED;
     public const TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT = 'COPY_SOURCE_TEXT';
 
+    public const DEFAULT_CACHE_RESPONSE_IN_SECONDS = 60;
     public static function getTranslationWorkflows(): array
     {
         return [
@@ -93,5 +98,16 @@ class CraftliltpluginParameters
                     strtolower(self::TRANSLATION_WORKFLOW_COPY_SOURCE_TEXT)
                 )
         ];
+    }
+
+    public static function getResponseCache(): int
+    {
+        $envCache = getenv('CRAFT_LILT_PLUGIN_CACHE_RESPONSE_IN_SECONDS');
+        $cache =
+            !empty($envCache) || $envCache === '0' ?
+                (int)$envCache :
+                CraftliltpluginParameters::DEFAULT_CACHE_RESPONSE_IN_SECONDS;
+
+        return $cache;
     }
 }

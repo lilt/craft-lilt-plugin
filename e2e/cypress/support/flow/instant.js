@@ -63,7 +63,7 @@ Cypress.Commands.add('instantFlow', ({
           'updatedAt': '2019-08-24T14:15:22Z',
         }),
       }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
+        'unlimited': true,
       },
     }));
 
@@ -97,7 +97,7 @@ Cypress.Commands.add('instantFlow', ({
         }, 'httpResponse': {
           'statusCode': 200, 'body': JSON.stringify(translationResult),
         }, 'times': {
-          'remainingTimes': 1, 'unlimited': false,
+          'unlimited': true,
         },
       }));
     }
@@ -120,7 +120,7 @@ Cypress.Commands.add('instantFlow', ({
           'limit': 100, 'start': 0, 'results': translationsResult,
         }),
       }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
+        'unlimited': true,
       },
     }));
 
@@ -214,6 +214,9 @@ Cypress.Commands.add('instantFlow', ({
   );
 
   if (isMockserverEnabled) {
+
+    cy.log('Setting up mocks for translations download');
+
     for (const language of languages) {
       cy.get(
           `#translations-list th[data-title="Title"] div.element[data-target-site-language="${language}"]`).
@@ -241,7 +244,7 @@ Cypress.Commands.add('instantFlow', ({
                 'statusCode': 200,
                 'body': JSON.stringify(translatedContent),
               }, 'times': {
-                'remainingTimes': 1, 'unlimited': false,
+                'unlimited': true,
               },
             }));
           });

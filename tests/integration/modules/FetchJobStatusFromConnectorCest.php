@@ -40,6 +40,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteSuccessVerified(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -171,6 +173,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteSuccessInstant(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -208,7 +212,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 11111,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'export_complete',
+                    'status' => 'mt_complete',
                     'trgLang' => 'es',
                     'trgLocale' => 'ES',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -218,7 +222,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 22222,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'export_complete',
+                    'status' => 'mt_complete',
                     'trgLang' => 'de',
                     'trgLocale' => 'DE',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -228,7 +232,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 33333,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'export_complete',
+                    'status' => 'mt_complete',
                     'trgLang' => 'ru',
                     'trgLocale' => 'RU',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -302,6 +306,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteJobNotFound(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -326,6 +332,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteSuccessProcessing(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -375,6 +383,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteSuccessQueued(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);

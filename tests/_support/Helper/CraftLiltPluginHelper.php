@@ -14,6 +14,7 @@ namespace Helper;
 use Codeception\Module;
 use Craft;
 use craft\queue\BaseJob;
+use craft\queue\QueueInterface;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\I18NRecord;
@@ -370,6 +371,13 @@ class CraftLiltPluginHelper extends Module
         Craft::$app->getQueue()->push($job);
 
         Craft::$app->getQueue()->run();
+    }
+
+    public function clearQueue(): void
+    {
+        /** @var QueueInterface $queue */
+        $queue = Craft::$app->getQueue();
+        $queue->releaseAll();
     }
 
     public function executeQueue(string $queueItem, array $params = []): void

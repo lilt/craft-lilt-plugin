@@ -60,6 +60,8 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJobSuccess(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         $I->setQueueEachTranslationFileSeparately(0);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -184,6 +186,8 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
 
     public function testSendCopySourceFlow(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         $I->setQueueEachTranslationFileSeparately(0);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -302,6 +306,8 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
      */
     public function testCreateJobWithUnexpectedStatusFromConnector(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         $I->setQueueEachTranslationFileSeparately(0);
 
         $element = Entry::find()
@@ -374,11 +380,14 @@ class SendJobToConnectorCest extends AbstractIntegrationCest
 
         $jobActual = Job::findOne(['id' => $job->id]);
 
-        Assert::assertEmpty(
-            TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id])
-        );
+        $translations = TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id]);
 
-        Assert::assertSame(Job::STATUS_FAILED, $jobActual->status);
+        Assert::assertNotEmpty($translations);
+        Assert::assertEmpty($translations[0]->sourceContent);
+        Assert::assertEmpty($translations[0]->targetContent);
+
+        Assert::assertSame(TranslationRecord::STATUS_IN_PROGRESS, $translations[0]->status);
+        Assert::assertSame(Job::STATUS_NEW, $jobActual->status);
     }
 
     /**

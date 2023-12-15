@@ -63,7 +63,7 @@ Cypress.Commands.add('verifiedFlow', ({
           'updatedAt': '2019-08-24T14:15:22Z',
         }),
       }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
+        'unlimited': true,
       },
     }));
 
@@ -97,7 +97,7 @@ Cypress.Commands.add('verifiedFlow', ({
         }, 'httpResponse': {
           'statusCode': 200, 'body': JSON.stringify(translationResult),
         }, 'times': {
-          'remainingTimes': 1, 'unlimited': false,
+          'unlimited': true,
         },
       }));
     }
@@ -120,7 +120,7 @@ Cypress.Commands.add('verifiedFlow', ({
           'limit': 100, 'start': 0, 'results': translationsResult,
         }),
       }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
+        'unlimited': true,
       },
     }));
 
@@ -241,7 +241,7 @@ Cypress.Commands.add('verifiedFlow', ({
                 'statusCode': 200,
                 'body': JSON.stringify(translatedContent),
               }, 'times': {
-                'remainingTimes': 1, 'unlimited': false,
+                'unlimited': true,
               },
             }));
           });

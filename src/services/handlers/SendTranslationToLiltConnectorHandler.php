@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
+use craft\base\ElementInterface;
 use craft\errors\ElementNotFoundException;
 use craft\helpers\Queue;
 use DateTimeInterface;
@@ -104,17 +105,7 @@ class SendTranslationToLiltConnectorHandler
         $translation = $sendTranslationCommand->getTranslationRecord();
         $targetSiteId = $sendTranslationCommand->getTargetSiteId();
 
-        //Create draft with & update all values to source element
-        $draft = $this->createDraftHandler->create(
-            new CreateDraftCommand(
-                $element,
-                $job->title,
-                $job->sourceSiteId,
-                $targetSiteId,
-                $job->translationWorkflow,
-                $job->authorId
-            )
-        );
+        $draft = $this->createDraft($translation, $element, $job, $targetSiteId);
 
         $content = $this->elementTranslatableContentProvider->provide(
             $draft
@@ -135,7 +126,10 @@ class SendTranslationToLiltConnectorHandler
         );
 
         if (!$result) {
-            $this->updateJob($job, $liltJobId, Job::STATUS_FAILED);
+            //TODO: we need to move it out with try catch to set if it was called manually
+//            $this->updateJob($job, $liltJobId, Job::STATUS_FAILED);
+//            $translation->status = TranslationRecord::STATUS_FAILED;
+//            $translation->save();
 
             throw new \RuntimeException('Translations not created, upload failed');
         }
@@ -209,5 +203,68 @@ class SendTranslationToLiltConnectorHandler
 
         $jobRecord->update();
         Craft::$app->getCache()->flush();
+    }
+
+    /**
+     * @param TranslationRecord $translation
+     * @param ElementInterface $element
+     * @param Job $job
+     * @param int $targetSiteId
+     * @return ElementInterface|null
+     * @throws ElementNotFoundException
+     * @throws Exception
+     * @throws Throwable
+     */
+    private function createDraft(
+        TranslationRecord $translation,
+        ElementInterface $element,
+        Job $job,
+        int $targetSiteId
+    ): ElementInterface {
+        if (!empty($translation->translatedDraftId)) {
+            $draft = Craft::$app->elements->getElementById(
+                $translation->translatedDraftId,
+                'craft\elements\Entry',
+                $targetSiteId
+            );
+
+            if (!empty($draft)) {
+                return $draft;
+            }
+
+            Craft::warning([
+                'message' => 'Draft was not found for job, fallback to create bew one',
+                'jobId' => $job->id,
+                'translationId' => $translation->id,
+            ]);
+        }
+
+        //Create draft with & update all values to source element
+        $draft = $this->createDraftHandler->create(
+            new CreateDraftCommand(
+                $element,
+                $job->title,
+                $job->sourceSiteId,
+                $targetSiteId,
+                $job->translationWorkflow,
+                $job->authorId
+            )
+        );
+
+        $translation->translatedDraftId = $draft->id;
+        $translation->markAttributeDirty('sourceContent');
+        $translation->markAttributeDirty('translatedDraftId');
+
+        if (!$translation->save()) {
+            throw new \RuntimeException(
+                sprintf(
+                    "Can't save draft id on translation %d for job %d",
+                    $translation->id,
+                    $translation->jobId
+                )
+            );
+        }
+
+        return $draft;
     }
 }

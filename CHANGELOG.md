@@ -4,8 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 3.6.1 - 2023-09-19
+## 3.7.0 - 2023-12-15
+### Added
+- Support for the [Typed Link Field plugin](https://plugins.craftcms.com/typedlinkfield)
+- Queue manager
+- Queue each translation file transfer separately
+- Ignore dropdowns setting
+
 ### Fixed
+- Download translations triggered only after all of them are done
+- Lock release issue after queue message processing
+- Rise condition of queue messages
 - Empty user id on draft creation 
 
 ## 3.6.0 - 2023-05-24
