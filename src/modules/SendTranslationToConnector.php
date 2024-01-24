@@ -113,7 +113,7 @@ class SendTranslationToConnector extends AbstractRetryJob
                 sprintf(
                     'Can\'t find job %d for element %d',
                     $this->jobId,
-                    $this->versionId,
+                    $this->versionId
                 )
             );
         }
