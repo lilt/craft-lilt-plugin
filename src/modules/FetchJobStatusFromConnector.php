@@ -96,7 +96,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             Craft::error([
                 "message" => sprintf(
                     'Set job %d and translations to status failed due to failed/cancel status from lilt',
-                    $jobRecord->id
+                    $jobRecord->id,
                 ),
                 "jobRecord" => $jobRecord,
             ]);
@@ -177,77 +177,6 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 return;
             }
 
-        if (!$isJobFinished) {
-            Queue::push(
-                (new FetchJobStatusFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                )),
-                self::PRIORITY,
-                self::getDelay(),
-                self::TTR
-            );
-
-            $mutex->release($mutexKey);
-            $this->markAsDone($queue);
-
-            return;
-        }
-
-        $connectorTranslations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
-            $job->liltJobId
-        );
-
-        $connectorTranslationsStatuses = array_map(
-            function (TranslationResponse $connectorTranslation) {
-                return $connectorTranslation->getStatus();
-            },
-            $connectorTranslations->getResults()
-        );
-
-        $translationFinished =
-            $this->isTranslationsFinished($job, $connectorTranslationsStatuses);
-
-        if (!$translationFinished) {
-            if (
-                in_array(TranslationResponse::STATUS_EXPORT_FAILED, $connectorTranslationsStatuses)
-                || in_array(TranslationResponse::STATUS_IMPORT_FAILED, $connectorTranslationsStatuses)
-            ) {
-                // job failed
-
-                Craftliltplugin::getInstance()->jobLogsRepository->create(
-                    $jobRecord->id,
-                    null,
-                    'Job is failed, one of translations in failed status'
-                );
-
-                TranslationRecord::updateAll(
-                    ['status' => TranslationRecord::STATUS_FAILED],
-                    ['jobId' => $jobRecord->id]
-                );
-
-                $jobRecord->status = Job::STATUS_FAILED;
-                $jobRecord->save();
-
-                Craft::error([
-                    "message" => sprintf(
-                        'Set job %d and translations to status failed due to failed status for translation from lilt',
-                        $jobRecord->id
-                    ),
-                    "jobRecord" => $jobRecord,
-                ]);
-
-                Craft::$app->elements->invalidateCachesForElementType(TranslationRecord::class);
-                Craft::$app->elements->invalidateCachesForElementType(Job::class);
-
-                $mutex->release($mutexKey);
-                $this->markAsDone($queue);
-
-                return;
-            }
-
             Queue::push(
                 (new FetchJobStatusFromConnector(
                     [
@@ -310,7 +239,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 Craft::error([
                     "message" => sprintf(
                         'Set job %d and translations to status failed due to failed/cancel status from lilt',
-                        $jobRecord->id
+                        $jobRecord->id,
                     ),
                     "jobRecord" => $jobRecord,
                 ]);
