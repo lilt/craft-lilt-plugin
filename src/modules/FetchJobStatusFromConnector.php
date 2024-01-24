@@ -96,7 +96,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             Craft::error([
                 "message" => sprintf(
                     'Set job %d and translations to status failed due to failed/cancel status from lilt',
-                    $jobRecord->id,
+                    $jobRecord->id
                 ),
                 "jobRecord" => $jobRecord,
             ]);
@@ -163,7 +163,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 Craft::error([
                     "message" => sprintf(
                         'Set job %d and translations to status failed due to failed status for translation from lilt',
-                        $jobRecord->id,
+                        $jobRecord->id
                     ),
                     "jobRecord" => $jobRecord,
                 ]);
@@ -239,7 +239,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 Craft::error([
                     "message" => sprintf(
                         'Set job %d and translations to status failed due to failed/cancel status from lilt',
-                        $jobRecord->id,
+                        $jobRecord->id
                     ),
                     "jobRecord" => $jobRecord,
                 ]);

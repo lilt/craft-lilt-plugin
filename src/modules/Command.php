@@ -9,11 +9,8 @@ use lilthq\craftliltplugin\records\JobRecord;
 
 class Command
 {
-    /** @var Job */
-    private $job;
-
-    /** @var JobRecord */
-    private $jobRecord;
+    private Job $job;
+    private JobRecord $jobRecord;
 
     /**
      * @param Job $job
