@@ -32,7 +32,7 @@ class ConnectorTranslationRepository extends AbstractConnectorExternalRepository
         }
 
         $response = $this->apiInstance->servicesApiDeliveriesGetDeliveriesByJobId(
-            100,
+            1000,
             "00",
             $jobId
         );

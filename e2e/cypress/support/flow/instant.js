@@ -109,7 +109,7 @@ Cypress.Commands.add('instantFlow', ({
             'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
           }], 'queryStringParameters': [
           {
-            'name': 'limit', 'values': ['100'],
+            'name': 'limit', 'values': ['1000'],
           }, {
             'name': 'start', 'values': ['00'],
           }, {
@@ -117,7 +117,7 @@ Cypress.Commands.add('instantFlow', ({
           }],
       }, 'httpResponse': {
         'statusCode': 200, 'body': JSON.stringify({
-          'limit': 100, 'start': 0, 'results': translationsResult,
+          'limit': 1000, 'start': 0, 'results': translationsResult,
         }),
       }, 'times': {
         'unlimited': true,

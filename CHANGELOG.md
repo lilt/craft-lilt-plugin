@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 4.4.3 - 2023-11-15
+### Changed
+- Change translation limit for get translation request 
+
 ## 4.4.2 - 2023-11-15
 ### Fixed
 - Lock release issue after queue message processing
