@@ -423,7 +423,7 @@ class ManualJobSyncCest extends AbstractIntegrationCest
                     'elementId' => $translation->elementId,
                     'versionId' => $translation->versionId,
                     'targetSiteId' => $translation->targetSiteId,
-                ]),
+                ])
             );
         }
 
