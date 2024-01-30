@@ -109,7 +109,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
         $I->expectTranslationsGetRequest(
             777,
             0,
-            100,
+            1000,
             HttpCode::OK,
             $responseBody
         );
@@ -240,7 +240,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
         $I->expectTranslationsGetRequest(
             777,
             0,
-            100,
+            1000,
             HttpCode::OK,
             $responseBody
         );
