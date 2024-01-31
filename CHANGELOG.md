@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 4.4.3 - 2023-11-15
+## 4.4.4 - 2024-01-31
+### Changed
+- Change translations batch size
+
+## 4.4.3 - 2024-01-30
 ### Changed
 - Change translation limit for get translation request 
 
