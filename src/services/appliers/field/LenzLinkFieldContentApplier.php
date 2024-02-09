@@ -32,11 +32,20 @@ class LenzLinkFieldContentApplier extends AbstractContentApplier implements Appl
         $fieldValue = $command->getElement()->getFieldValue(
             $field->handle
         );
+
         $fieldValue->customText = $content[$fieldKey];
 
-        $command->getElement()->setFieldValue($field->handle, $fieldValue);
+        $serialized = $field->serializeValue($fieldValue, $command->getElement());
+        $command->getElement()->setFieldValues([$field->handle => $serialized]);
 
-        return ApplyContentResult::applied();
+        $this->forceSave($command);
+
+        return ApplyContentResult::applied(
+            [],
+            $command->getElement()->getFieldValue(
+                $command->getField()->handle
+            )
+        );
     }
 
     public function support(ApplyContentCommand $command): bool
