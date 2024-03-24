@@ -85,11 +85,18 @@ class FetchTranslationFromConnector extends AbstractRetryJob
             Craft::error(
                 sprintf(
                     "Connector translation id is empty for translation:"
-                    . "%d source site: %d target site: %d lilt job: %d",
+                    . "%d source site: %d (%s) target site: %d (%s) lilt job: %d element: %d",
                     $translationRecord->id,
                     $translationRecord->sourceSiteId,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $translationRecord->sourceSiteId
+                    ),
                     $translationRecord->targetSiteId,
-                    $job->liltJobId
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $translationRecord->targetSiteId
+                    ),
+                    $job->liltJobId,
+                    $translationRecord->elementId
                 )
             );
 
@@ -123,7 +130,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
             Craft::error([
                 "message" => sprintf(
                     'Set translation %d to status failed, got status failed from lilt platform',
-                    $translationRecord->id,
+                    $translationRecord->id
                 ),
                 "translationRecord" => $translationRecord,
             ]);

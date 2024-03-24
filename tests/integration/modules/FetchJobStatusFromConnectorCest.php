@@ -40,6 +40,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteSuccessVerified(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -171,6 +173,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteSuccessInstant(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -302,6 +306,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteJobNotFound(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -326,6 +332,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteSuccessProcessing(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
@@ -375,6 +383,8 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      */
     public function testExecuteSuccessQueued(IntegrationTester $I): void
     {
+        $I->clearQueue();
+
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $user = Craft::$app->getUsers()->getUserById(1);
