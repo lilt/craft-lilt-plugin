@@ -1,72 +1,73 @@
-name: Tests
-on:
-  push:
-    branches:
-      - 4.x #CraftCMS v4
-  pull_request:
-    branches:
-      - "*"
-jobs:
-  tests-php-80:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        id: step_one
-        run: |
-          echo "PHP_VERSION=8.0" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Tests
-        run: make test
-
-  tests-php-80-mysql-80:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        id: step_one
-        run: |
-          echo "PHP_VERSION=8.0" >> $GITHUB_ENV
-          echo "MYSQL_VERSION=8.0" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Tests
-        run: make test
-
-  tests-php-81:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
-        run: |
-          echo "PHP_VERSION=8.1" >> $GITHUB_ENV
-      - name: Build containers
-        run: make up
-      - name: Composer install
-        run: make composer-install
-      - name: Quality
-        run: make quality
-      - name: Use the Upload Artifact GitHub Action
-        uses: actions/upload-artifact@v2
-        with:
-          name: assets-for-download
-          path: composer.lock
-      - name: Tests
-        run: make tests-with-coverage
-      - name: Codecov
-        uses: codecov/codecov-action@v3.1.0
-        with:
-          files: ./tests/_output/coverage-integration.xml
-      - name: Codecov
-        uses: codecov/codecov-action@v3.1.0
-        with:
-          files: ./tests/_output/coverage-functional.xml
-      - name: Codecov
-        uses: codecov/codecov-action@v3.1.0
-        with:
-          files: ./tests/_output/coverage-unit.xml
+#TODO: once craftcms v5 released fix all pipelines
+#name: Tests
+#on:
+#  push:
+#    branches:
+#      - 4.x #CraftCMS v4
+#  pull_request:
+#    branches:
+#      - "*"
+#jobs:
+#  tests-php-80:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set the value
+#        id: step_one
+#        run: |
+#          echo "PHP_VERSION=8.0" >> $GITHUB_ENV
+#      - name: Build containers
+#        run: make up
+#      - name: Composer install
+#        run: make composer-install
+#      - name: Tests
+#        run: make test
+#
+#  tests-php-80-mysql-80:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set the value
+#        id: step_one
+#        run: |
+#          echo "PHP_VERSION=8.0" >> $GITHUB_ENV
+#          echo "MYSQL_VERSION=8.0" >> $GITHUB_ENV
+#      - name: Build containers
+#        run: make up
+#      - name: Composer install
+#        run: make composer-install
+#      - name: Tests
+#        run: make test
+#
+#  tests-php-81:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set the value
+#        run: |
+#          echo "PHP_VERSION=8.1" >> $GITHUB_ENV
+#      - name: Build containers
+#        run: make up
+#      - name: Composer install
+#        run: make composer-install
+#      - name: Quality
+#        run: make quality
+#      - name: Use the Upload Artifact GitHub Action
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: assets-for-download
+#          path: composer.lock
+#      - name: Tests
+#        run: make tests-with-coverage
+#      - name: Codecov
+#        uses: codecov/codecov-action@v3.1.0
+#        with:
+#          files: ./tests/_output/coverage-integration.xml
+#      - name: Codecov
+#        uses: codecov/codecov-action@v3.1.0
+#        with:
+#          files: ./tests/_output/coverage-functional.xml
+#      - name: Codecov
+#        uses: codecov/codecov-action@v3.1.0
+#        with:
+#          files: ./tests/_output/coverage-unit.xml

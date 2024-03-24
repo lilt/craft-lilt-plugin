@@ -35,6 +35,8 @@ class Translation extends Element
 {
     use TranslationModelTrait;
 
+    public $actions = null;
+
     public ?int $id = null;
     public ?string $uid = null;
     public ?string $title = null;
@@ -270,7 +272,7 @@ class Translation extends Element
             . "</span>";
     }
 
-    protected function tableAttributeHtml(string $attribute): string
+    protected function attributeHtml(string $attribute): string
     {
         switch ($attribute) {
             case 'sourceSiteId':
@@ -285,7 +287,7 @@ class Translation extends Element
                 return $this->getTargetSiteNameHtml();
         }
 
-        return parent::tableAttributeHtml($attribute);
+        return parent::attributeHtml($attribute);
     }
 
     public static function sources(string $context = null): array

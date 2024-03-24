@@ -14,65 +14,6 @@ Craft.LiltElementIndex = Craft.BaseElementIndex.extend({
 
     return true;
   },
-  //TODO: we need to find better way for it
-  getViewParams: function() {
-    var criteria = {
-      siteId: this.siteId,
-      search: this.searchText,
-      offset: this.settings.batchSize * (this.page - 1),
-      limit: this.settings.batchSize,
-    };
-
-    // Only set drafts/draftOf/trashed params when needed, so we don't potentially override a source's criteria
-    if (
-        this.settings.canHaveDrafts &&
-        (this.drafts || (this.settings.context === 'index' && !this.status))
-    ) {
-      criteria.drafts = this.drafts || null;
-      criteria.savedDraftsOnly = true;
-      if (!this.drafts) {
-        criteria.draftOf = false;
-      }
-    }
-    if (this.trashed) {
-      criteria.trashed = true;
-    }
-
-    if (!Garnish.hasAttr(this.$source, 'data-override-status')) {
-      criteria.status = this.status;
-    }
-
-    $.extend(criteria, this.settings.criteria);
-
-    var params = {
-      context: this.settings.context,
-      elementType: this.elementType,
-      source: this.instanceState.selectedSource,
-      criteria: criteria,
-      disabledElementIds: this.settings.disabledElementIds,
-      viewState: $.extend({}, this.getSelectedSourceState()),
-      paginated: this._isViewPaginated() ? 1 : 0,
-      showEntryVersions: this.settings.showEntryVersions
-    };
-
-    // Possible that the order/sort isn't entirely accurate if we're sorting by Score
-    params.viewState.order = this.getSelectedSortAttribute();
-    params.viewState.sort = this.getSelectedSortDirection();
-
-    if (this.getSelectedSortAttribute() === 'structure') {
-      if (typeof this.instanceState.collapsedElementIds === 'undefined') {
-        this.instanceState.collapsedElementIds = [];
-      }
-      params.collapsedElementIds = this.instanceState.collapsedElementIds;
-    }
-
-    // Give plugins a chance to hook in here
-    this.trigger('registerViewParams', {
-      params: params,
-    });
-
-    return params;
-  },
   getDefaultSort: function() {
     return ['elements.dateCreated', 'desc'];
   },
@@ -272,5 +213,61 @@ Craft.LiltElementIndex = Craft.BaseElementIndex.extend({
   getSortDirectionOption: function(dir) {
     return [];
   },
+  getSourceLabel: function () {
+    // CraftCMS v5 required change to check for empty sources
+    if(this.$sources === undefined) {
+      return
+    }
+    return this.$source.data('label');
+  },
+  updateSourceVisibility: function () {
+    this.$visibleSources = $();
 
+    // CraftCMS v5 required change to check for empty sources
+    if(this.$sources === undefined) {
+      return
+    }
+
+    for (let i = 0; i < this.$sources.length; i++) {
+      const $source = this.$sources.eq(i);
+
+      if (
+          !Garnish.hasAttr($source, 'data-disabled') &&
+          (typeof $source.data('sites') === 'undefined' ||
+              $source
+                  .data('sites')
+                  .toString()
+                  .split(',')
+                  .some((siteId) => {
+                    if (siteId == this.siteId) {
+                      return true;
+                    }
+                    // maybe UUIDs were used
+                    if (siteId != parseInt(siteId)) {
+                      const site = Craft.sites.find(
+                          (site) => site.id == this.siteId
+                      );
+                      if (site && siteId == site.uid) {
+                        return true;
+                      }
+                    }
+
+                    return false;
+                  }))
+      ) {
+        $source.parent().removeClass('hidden');
+        this.$visibleSources = this.$visibleSources.add($source);
+      } else {
+        $source.parent().addClass('hidden');
+
+        // Is this the currently selected source?
+        if (this.$source && this.$source.get(0) === $source.get(0)) {
+          this.$source = null;
+          this.$rootSource = null;
+          this.sourceKey = null;
+          this.rootSourceKey = null;
+        }
+      }
+    }
+  },
 });

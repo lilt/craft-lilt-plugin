@@ -22,6 +22,7 @@ use lilthq\craftliltplugin\services\listeners\RegisterCpUrlRulesListener;
 
 class CraftliltpluginParameters
 {
+    public const PLUGIN_PATH = 'craft-lilt-plugin';
     public const REPORT_DATA = 'craft-lilt-plugin/get-report-data/invoke';
     public const TRANSLATION_REVIEW_ACTION = 'craft-lilt-plugin/translation/post-translation-review/invoke';
     public const TRANSLATION_PUBLISH_ACTION = 'craft-lilt-plugin/translation/post-translation-publish/invoke';

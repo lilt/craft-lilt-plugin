@@ -24,7 +24,7 @@ class TranslationQuery extends ElementQuery
 
     public $jobId;
 
-    public function status($value): self
+    public function status($value): static
     {
         $this->status = $value;
 
@@ -86,7 +86,7 @@ class TranslationQuery extends ElementQuery
         $this->joinElementTable('lilt_translations');
 
         /** GET TITLE */
-        $this->query->innerJoin(Table::CONTENT . ' content', [
+        $this->query->innerJoin(Table::ELEMENTS_SITES . ' content', [
             'and',
             '[[content.elementId]] = [[lilt_translations.elementId]]',
             '[[content.siteId]] = [[lilt_translations.sourceSiteId]]'
