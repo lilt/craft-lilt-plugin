@@ -434,24 +434,23 @@ class Job extends Element
         return $html;
     }
 
-    protected function tableAttributeHtml(string $attribute): string
+    protected function attributeHtml(string $attribute): string
     {
         switch ($attribute) {
             case 'sourceSiteId':
                 return $this->getSourceSiteIdHtml();
-
             case 'status':
                 return $this->getStatusHtml();
+            case 'targetSiteIds':
+                return $this->getTargetSiteIdsHtml();
             //TODO: due date not in use at the moment
             //case 'dueDate':
             //    return $this->dueDate->format(
             //        Craft::$app->locale->getDateFormat('short', 'php')
             //    );
-            case 'targetSiteIds':
-                return $this->getTargetSiteIdsHtml();
         }
 
-        return parent::tableAttributeHtml($attribute);
+        return parent::attributeHtml($attribute);
     }
 
     public function getStatus(): ?string
@@ -466,7 +465,7 @@ class Job extends Element
 
     public function getUrl(): string
     {
-        return CraftliltpluginParameters::JOB_EDIT_PATH . '/' . $this->id;
+        return CraftliltpluginParameters::JOB_EDIT_PATH . '/getUrl/' . $this->id;
     }
 
     public function getTranslationWorkflowLabel(): string

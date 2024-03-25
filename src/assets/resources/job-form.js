@@ -228,14 +228,16 @@ CraftliltPlugin.JobForm = Garnish.Base.extend({
           });
 
     } catch (e) {
-      console.log(e);
+      console.log("Can't preloadElementIndex due to error:",e);
     }
 
   },
   createElementIndex: function(settings) {
     Craft.elementIndex = new Craft.LiltElementIndex(
         'lilthq\\craftliltplugin\\elements\\TranslateEntry',
-        $('#entries-to-translate'), settings);
+        $('#entries-to-translate'),
+        settings
+    );
   },
   preloadVersions: function() {
     if (!this.$selectedVersions || !this.$selectedVersions.length > 0) {

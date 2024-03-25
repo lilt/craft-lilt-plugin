@@ -23,7 +23,7 @@ class JobQuery extends ElementQuery
     public mixed $dateCreated = null;
     public mixed $dateUpdated = null;
 
-    public function status($value): self
+    public function status($value): static
     {
         $this->status = $value;
 

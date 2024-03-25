@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\providers\field;
 
+use craft\errors\InvalidFieldException;
 use lilthq\craftliltplugin\services\providers\command\ProvideContentCommand;
 
 class FieldContentProvider
@@ -33,6 +34,19 @@ class FieldContentProvider
             return null;
         }
 
-        return $this->providersMap[$fieldClass]->provide($provideContentCommand);
+        try {
+            return $this->providersMap[$fieldClass]->provide($provideContentCommand);
+        } catch (InvalidFieldException $ex) {
+            \Craft::error(
+                sprintf(
+                    "Can't get field value %s for element %s: %s",
+                    $ex->getMessage(),
+                    $provideContentCommand->getField()->handle,
+                    $provideContentCommand->getElement()->getId()
+                )
+            );
+
+            return null;
+        }
     }
 }
