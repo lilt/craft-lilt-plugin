@@ -196,14 +196,21 @@ class SendJobToLiltConnectorHandler
             'Job uploaded to Lilt Platform'
         );
 
-        Queue::push(
-            (new FetchJobStatusFromConnector([
-                'jobId' => $job->id,
-                'liltJobId' => $jobLilt->getId(),
-            ])),
-            FetchJobStatusFromConnector::PRIORITY,
-            10 //10 seconds for fist job
+        $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+            SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
         );
+
+        if (!$queueDisableAutomaticSync) {
+            // push fetch status job from connector
+            Queue::push(
+                (new FetchJobStatusFromConnector([
+                    'jobId' => $job->id,
+                    'liltJobId' => $jobLilt->getId(),
+                ])),
+                FetchJobStatusFromConnector::PRIORITY,
+                10 //10 seconds for fist job
+            );
+        }
     }
 
     /**

@@ -17,8 +17,8 @@ class SettingsRepository
 {
     public const ENABLE_ENTRIES_FOR_TARGET_SITES = 'enable_entries_for_target_sites';
     public const COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET = 'copy_entries_slug_from_source_to_target';
-
     public const QUEUE_EACH_TRANSLATION_FILE_SEPARATELY = 'queue_each_translation_file_separately';
+    public const QUEUE_DISABLE_AUTOMATIC_SYNC = 'queue_disable_automatic_sync';
     public const QUEUE_MANAGER_EXECUTED_AT = 'queue_manager_executed_at';
 
     public const IGNORE_DROPDOWNS = 'ignore_dropdowns';
@@ -54,6 +54,25 @@ class SettingsRepository
         }
 
         return (bool)$settingValue->value;
+    }
+
+    public function get(string $name): ?string
+    {
+        $tableSchema = Craft::$app->getDb()->schema->getTableSchema(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
+        if ($tableSchema === null) {
+            return null;
+        }
+
+
+        $settingValue = SettingRecord::findOne(
+            ['name' => $name]
+        );
+
+        if (empty($settingValue) || empty($settingValue->value)) {
+            return null;
+        }
+
+        return $settingValue->value;
     }
 
     public function ignoreDropdowns(): bool

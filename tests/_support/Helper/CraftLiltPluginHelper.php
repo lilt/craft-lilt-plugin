@@ -126,7 +126,7 @@ class CraftLiltPluginHelper extends Module
 
         $key = get_class($expectedJob) . '_' . json_encode($expectedJob);
 
-        $this->assertArrayHasKey($key, $jobInfos);
+        $this->assertArrayHasKey($key, $jobInfos, 'No job found in array: ' . json_encode($jobInfos));
         $this->assertEquals($expectedJob, $jobInfos[$key]);
     }
 
@@ -136,7 +136,7 @@ class CraftLiltPluginHelper extends Module
 
         $key = get_class($expectedJob) . '_' . json_encode($expectedJob);
 
-        $this->assertArrayNotHasKey($key, $jobInfos, $message);
+        $this->assertArrayNotHasKey($key, $jobInfos, $message . ': ' . json_encode($jobInfos));
     }
 
     public function assertJobIdNotInQueue(int $jobId, string $message = ''): void
@@ -191,6 +191,31 @@ class CraftLiltPluginHelper extends Module
         }
 
         $settingRecord->value = $value;
+        $settingRecord->save();
+    }
+    public function enableOption(string $name): void
+    {
+        $this->setOption($name, 1);
+    }
+
+    public function disableOption(string $name): void
+    {
+        $this->setOption($name, 0);
+    }
+
+
+    private function setOption(string $name, int $value): void
+    {
+        $settingRecord = SettingRecord::findOne(
+            ['name' => SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC]
+        );
+        if (!$settingRecord) {
+            $settingRecord = new SettingRecord(
+                ['name' => SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC]
+            );
+        }
+
+        $settingRecord->value = (string) $value;
         $settingRecord->save();
     }
 

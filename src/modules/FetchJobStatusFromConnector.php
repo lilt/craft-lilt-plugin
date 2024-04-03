@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 
 class FetchJobStatusFromConnector extends AbstractRetryJob
 {
@@ -107,17 +108,23 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
         }
 
         if (!$isJobFinished) {
-            Queue::push(
-                (new FetchJobStatusFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                )),
-                self::PRIORITY,
-                self::getDelay(),
-                self::TTR
+            $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+                SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
             );
+
+            if (!$queueDisableAutomaticSync) {
+                Queue::push(
+                    (new FetchJobStatusFromConnector(
+                        [
+                            'jobId' => $this->jobId,
+                            'liltJobId' => $this->liltJobId,
+                        ]
+                    )),
+                    self::PRIORITY,
+                    self::getDelay(),
+                    self::TTR
+                );
+            }
 
             $mutex->release($mutexKey);
             $this->markAsDone($queue);
@@ -177,17 +184,23 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 return;
             }
 
-            Queue::push(
-                (new FetchJobStatusFromConnector(
-                    [
-                        'jobId' => $this->jobId,
-                        'liltJobId' => $this->liltJobId,
-                    ]
-                )),
-                self::PRIORITY,
-                self::getDelay(),
-                self::TTR
+            $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+                SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
             );
+
+            if (!$queueDisableAutomaticSync) {
+                Queue::push(
+                    (new FetchJobStatusFromConnector(
+                        [
+                            'jobId' => $this->jobId,
+                            'liltJobId' => $this->liltJobId,
+                        ]
+                    )),
+                    self::PRIORITY,
+                    self::getDelay(),
+                    self::TTR
+                );
+            }
 
             $mutex->release($mutexKey);
             $this->markAsDone($queue);
