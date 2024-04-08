@@ -19,6 +19,8 @@ class AbstractIntegrationCest
     {
         WireMock::create('wiremock', 80)->reset();
         Db::truncateTable(Craft::$app->queue->tableName);
+
+        $I->clearQueue();
     }
     public function _after(IntegrationTester $I): void
     {
