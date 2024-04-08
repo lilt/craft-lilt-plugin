@@ -86,8 +86,43 @@ jobs:
           "4.4.16",
           "4.4.16.1",
           "4.4.17",
+          # TODO: check this, seems like bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582189269?pr=146
+          # "4.5.0",
+          # "4.5.1",
+          "4.5.2",
+          "4.5.3",
+          "4.5.4",
+          "4.5.5",
+          "4.5.6",
+          "4.5.6.1",
+          "4.5.7",
+          "4.5.8",
+          "4.5.9",
+          "4.5.10",
+          "4.5.11",
+          "4.5.11.1",
+          "4.5.12",
+          "4.5.13",
+          "4.5.14",
+          "4.6.0",
+          "4.6.1",
+          "4.7.0",
+          "4.7.1",
+          # TODO: check this, bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582193181?pr=146
+          # "4.7.2",
+          "4.7.2.1",
+          "4.7.3",
+          "4.7.4",
+          "4.8.0",
+          "4.8.1",
+          "4.8.2",
+          "4.8.3",
+          "4.8.4",
+          "4.8.5",
+          "4.8.6",
+          "4.8.7",
         ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set the value
