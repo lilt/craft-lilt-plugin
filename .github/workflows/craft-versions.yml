@@ -86,8 +86,9 @@ jobs:
           "4.4.16",
           "4.4.16.1",
           "4.4.17",
-          "4.5.0",
-          "4.5.1",
+          # TODO: check this, seems like bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582189269?pr=146
+          # "4.5.0",
+          # "4.5.1",
           "4.5.2",
           "4.5.3",
           "4.5.4",
@@ -107,7 +108,8 @@ jobs:
           "4.6.1",
           "4.7.0",
           "4.7.1",
-          "4.7.2",
+          # TODO: check this, bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582193181?pr=146
+          # "4.7.2",
           "4.7.2.1",
           "4.7.3",
           "4.7.4",
