@@ -17,7 +17,9 @@ use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
 use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
@@ -41,6 +43,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
     public function testExecuteSuccessVerified(IntegrationTester $I): void
     {
         $I->clearQueue();
+        $I->disableOption(SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC);
 
         Db::truncateTable(Craft::$app->queue->tableName);
 
@@ -174,6 +177,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
     public function testExecuteSuccessInstant(IntegrationTester $I): void
     {
         $I->clearQueue();
+        $I->disableOption(SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC);
 
         Db::truncateTable(Craft::$app->queue->tableName);
 
@@ -307,6 +311,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
     public function testExecuteJobNotFound(IntegrationTester $I): void
     {
         $I->clearQueue();
+        $I->disableOption(SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC);
 
         Db::truncateTable(Craft::$app->queue->tableName);
 
@@ -333,6 +338,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
     public function testExecuteSuccessProcessing(IntegrationTester $I): void
     {
         $I->clearQueue();
+        $I->disableOption(SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC);
 
         Db::truncateTable(Craft::$app->queue->tableName);
 
@@ -381,9 +387,55 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      * @throws Exception
      * @throws ModuleException
      */
+    public function testExecuteSuccessProcessingAutomaticSyncDisabled(IntegrationTester $I): void
+    {
+        $I->clearQueue();
+        $I->enableOption(SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC);
+
+        Db::truncateTable(Craft::$app->queue->tableName);
+
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $job = $I->createJob([
+            'title' => 'Awesome test job',
+            'elementIds' => [999],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
+
+        $I->expectJobGetRequest(
+            777,
+            200,
+            [
+                'status' => JobResponse::STATUS_PROCESSING
+            ]
+        );
+
+        $I->runQueue(
+            FetchJobStatusFromConnector::class,
+            [
+                'liltJobId' => 777,
+                'jobId' => $job->id,
+            ]
+        );
+
+        $totalJobs = Craft::$app->queue->getJobInfo();
+        Assert::assertCount(0, $totalJobs);
+    }
+
+    /**
+     * @throws Exception
+     * @throws ModuleException
+     */
     public function testExecuteSuccessQueued(IntegrationTester $I): void
     {
         $I->clearQueue();
+        $I->disableOption(SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC);
 
         Db::truncateTable(Craft::$app->queue->tableName);
 

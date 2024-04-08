@@ -92,6 +92,11 @@ class Configuration extends Utility
         );
         $queueEachTranslationFileSeparately = (bool) ($queueEachTranslationFileSeparately->value ?? false);
 
+        $queueDisableAutomaticSync = SettingRecord::findOne(
+            ['name' => SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC,]
+        );
+        $queueDisableAutomaticSync = (bool) ($queueDisableAutomaticSync->value ?? false);
+
         return Craft::$app->getView()->renderTemplate(
             'craft-lilt-plugin/_components/utilities/configuration.twig',
             [
@@ -106,6 +111,7 @@ class Configuration extends Utility
                 'enableEntriesForTargetSites' => $enableEntriesForTargetSites,
                 'copyEntriesSlugFromSourceToTarget' => $copyEntriesSlugFromSourceToTarget,
                 'queueEachTranslationFileSeparately' => $queueEachTranslationFileSeparately,
+                'queueDisableAutomaticSync' => $queueDisableAutomaticSync,
             ]
         );
     }
