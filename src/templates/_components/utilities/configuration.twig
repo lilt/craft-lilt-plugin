@@ -91,6 +91,17 @@
         }) }}
         </div>
 
+        <div class="field">
+        {{ forms.checkbox({
+            label: 'Disable automatic synchronization of sent translation jobs',
+            name: 'queueDisableAutomaticSync',
+            id: 'queueDisableAutomaticSync',
+            checked: queueDisableAutomaticSync,
+            errors: model is defined? model.getErrors('queueDisableAutomaticSync') : [],
+            disabled: liltConfigDisabled
+        }) }}
+        </div>
+
         {{ forms.textField({
             name: 'liltConfigDisabled',
             id: 'liltConfigDisabled',

@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-20.04 ]
         scenario: [
           "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",

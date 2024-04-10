@@ -20,6 +20,7 @@ use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\SendTranslationCommand;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use Throwable;
 
 class SendTranslationToConnector extends AbstractRetryJob
@@ -113,7 +114,7 @@ class SendTranslationToConnector extends AbstractRetryJob
                 sprintf(
                     'Can\'t find job %d for element %d',
                     $this->jobId,
-                    $this->versionId,
+                    $this->versionId
                 )
             );
         }
@@ -180,14 +181,20 @@ class SendTranslationToConnector extends AbstractRetryJob
                 );
             }
 
-            Queue::push(
-                (new FetchJobStatusFromConnector([
-                    'jobId' => $command->getJob()->id,
-                    'liltJobId' => $command->getJob()->liltJobId,
-                ])),
-                FetchJobStatusFromConnector::PRIORITY,
-                10
+            $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+                SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
             );
+
+            if (!$queueDisableAutomaticSync) {
+                Queue::push(
+                    (new FetchJobStatusFromConnector([
+                        'jobId' => $command->getJob()->id,
+                        'liltJobId' => $command->getJob()->liltJobId,
+                    ])),
+                    FetchJobStatusFromConnector::PRIORITY,
+                    10
+                );
+            }
 
             $this->markAsDone($queue);
             $this->release();

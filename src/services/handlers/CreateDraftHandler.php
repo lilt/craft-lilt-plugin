@@ -82,6 +82,19 @@ class CreateDraftHandler
 
         $this->copyFieldsHandler->copy($element, $draft);
 
+        $result = Craft::$app->elements->saveElement($draft, true, false, false);
+        if (!$result) {
+            Craft::error(
+                sprintf(
+                    "Can't save freshly created draft %d for site %s",
+                    $draft->id,
+                    Craftliltplugin::getInstance()->languageMapper->getLanguageBySiteId(
+                        $targetSiteId
+                    )
+                )
+            );
+        }
+
         $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
             ['name' => 'copy_entries_slug_from_source_to_target']
         );
