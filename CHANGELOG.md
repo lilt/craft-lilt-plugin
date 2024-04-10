@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.8.0 - 2024-04-10
+### Added
+- Introduced a new configuration setting that allows the disabling of automatic synchronization for jobs that are currently in progress
+
 ## 3.7.0 - 2023-12-15
 ### Added
 - Support for the [Typed Link Field plugin](https://plugins.craftcms.com/typedlinkfield)
