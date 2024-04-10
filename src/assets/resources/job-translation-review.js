@@ -475,11 +475,11 @@ $(document).ready(function() {
                 criteria: {
                   jobId: jQuery('#create-job-form').data('job-id'),
                 },
+                batchSize: 1000,
                 selectable: true,
                 multiSelect: true,
                 checkboxMode: true,
                 onUpdateElements: function() {
-
                   const elements = CraftliltPlugin.elementIndexTranslation.view.getAllElements().get();
 
                   console.log(elements)

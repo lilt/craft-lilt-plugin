@@ -8,7 +8,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Introduced a new configuration setting that allows the disabling of automatic synchronization for jobs that are currently in progress
 
-## 4.4.3 - 2023-11-15
+## 4.4.5 - 2024-02-09
+### Fixed
+- Translation of nested link field
+
+## 4.4.4 - 2024-01-31
+### Changed
+- Change translations batch size
+
+## 4.4.3 - 2024-01-30
 ### Changed
 - Change translation limit for get translation request 
 
