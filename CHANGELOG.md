@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 - Introduced a new configuration setting that allows the disabling of automatic synchronization for jobs that are currently in progress
 
+### Fixed 
+- Download translations triggered only after all of them are done
+- Lock release issue after queue message processing
+- Rise condition of queue messages
+
 ## 4.4.5 - 2024-02-09
 ### Fixed
 - Translation of nested link field
