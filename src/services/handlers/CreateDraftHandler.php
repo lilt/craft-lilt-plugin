@@ -18,9 +18,9 @@ use craft\helpers\Db;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
-use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
 use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use Throwable;
 use yii\base\Exception;
 
@@ -95,10 +95,9 @@ class CreateDraftHandler
             );
         }
 
-        $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(
-            ['name' => 'copy_entries_slug_from_source_to_target']
-        );
-        $isCopySlugEnabled = (bool)($copyEntriesSlugFromSourceToTarget->value ?? false);
+        $isCopySlugEnabled = Craftliltplugin::getInstance()
+            ->settingsRepository
+            ->getBool(SettingsRepository::COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET);
 
         if ($isCopySlugEnabled) {
             $draft->slug = $element->slug;

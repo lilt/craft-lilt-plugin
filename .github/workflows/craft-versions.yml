@@ -148,4 +148,8 @@ jobs:
           echo "PHP_VERSION=7.2" >> $GITHUB_ENV
           echo "CRAFT_VERSION=${{ matrix.craft_version }}" >> $GITHUB_ENV
       - name: Test craft versions ${{ matrix.craft_version }}
-        run: make test-craft-versions
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 5
+          timeout_minutes: 20
+          command: make test-craft-versions

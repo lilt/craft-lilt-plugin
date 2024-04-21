@@ -1,6 +1,7 @@
 {% import '_includes/forms' as forms %}
 
 {% set isJobInProgress = (constant('STATUS_IN_PROGRESS', element) is same as element.getStatus()) %}
+{% set isJobPublishing = (constant('STATUS_PUBLISHING', element) is same as element.getStatus()) %}
 <div id="translations-list">
     <div class="content-pane" id="translations-element-index">
         <div class="main">

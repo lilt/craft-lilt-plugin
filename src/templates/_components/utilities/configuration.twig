@@ -102,6 +102,17 @@
         }) }}
         </div>
 
+        <div class="field">
+        {{ forms.checkbox({
+            label: 'Publish translations asynchronously',
+            name: 'publishTranslationsAsync',
+            id: 'publishTranslationsAsync',
+            checked: publishTranslationsAsync,
+            errors: model is defined? model.getErrors('publishTranslationsAsync') : [],
+            disabled: liltConfigDisabled
+        }) }}
+        </div>
+
         {{ forms.textField({
             name: 'liltConfigDisabled',
             id: 'liltConfigDisabled',
