@@ -32,6 +32,8 @@ class Configuration extends Utility
 
     public static function contentHtml(): string
     {
+        $settingsRepository = Craftliltplugin::getInstance()->settingsRepository;
+
         //TODO: move to service settings logic
         $liltConfigDisabled = false;
         $settingsResult = null;
@@ -78,25 +80,6 @@ class Configuration extends Utility
         $connectorApiUrl = $connectorApiUrlRecord->value
             ?? \LiltConnectorSDK\Configuration::getDefaultConfiguration()->getHost();
 
-        $enableEntriesForTargetSitesRecord = SettingRecord::findOne(['name' => 'enable_entries_for_target_sites']);
-        $enableEntriesForTargetSites = (bool) ($enableEntriesForTargetSitesRecord->value
-            ?? false);
-
-        $copyEntriesSlugFromSourceToTargetRecord = SettingRecord::findOne(
-            ['name' => 'copy_entries_slug_from_source_to_target']
-        );
-        $copyEntriesSlugFromSourceToTarget = (bool) ($copyEntriesSlugFromSourceToTargetRecord->value ?? false);
-
-        $queueEachTranslationFileSeparately = SettingRecord::findOne(
-            ['name' => SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY,]
-        );
-        $queueEachTranslationFileSeparately = (bool) ($queueEachTranslationFileSeparately->value ?? false);
-
-        $queueDisableAutomaticSync = SettingRecord::findOne(
-            ['name' => SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC,]
-        );
-        $queueDisableAutomaticSync = (bool) ($queueDisableAutomaticSync->value ?? false);
-
         return Craft::$app->getView()->renderTemplate(
             'craft-lilt-plugin/_components/utilities/configuration.twig',
             [
@@ -107,11 +90,22 @@ class Configuration extends Utility
                 'connectorApiKey' => $connectorApiKey,
                 'connectorApiUrl' => $connectorApiUrl,
                 'formActionUrl' => UrlHelper::cpUrl('craft-lilt-plugin/settings/lilt-configuration'),
-                'liltConfigDisabled' => (int) $liltConfigDisabled,
-                'enableEntriesForTargetSites' => $enableEntriesForTargetSites,
-                'copyEntriesSlugFromSourceToTarget' => $copyEntriesSlugFromSourceToTarget,
-                'queueEachTranslationFileSeparately' => $queueEachTranslationFileSeparately,
-                'queueDisableAutomaticSync' => $queueDisableAutomaticSync,
+                'liltConfigDisabled' => (int)$liltConfigDisabled,
+                'enableEntriesForTargetSites' => $settingsRepository->getBool(
+                    SettingsRepository::ENABLE_ENTRIES_FOR_TARGET_SITES
+                ),
+                'copyEntriesSlugFromSourceToTarget' => $settingsRepository->getBool(
+                    SettingsRepository::COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET
+                ),
+                'queueEachTranslationFileSeparately' => $settingsRepository->getBool(
+                    SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY
+                ),
+                'queueDisableAutomaticSync' => $settingsRepository->getBool(
+                    SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
+                ),
+                'publishTranslationsAsync' => $settingsRepository->getBool(
+                    SettingsRepository::PUBLISH_TRANSLATIONS_ASYNC
+                ),
             ]
         );
     }

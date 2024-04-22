@@ -203,4 +203,13 @@ class TranslationRepository
             $translationRecord->toArray()
         );
     }
+
+    public function updateTranslationStatusById(int $id, string $status): bool
+    {
+        return TranslationRecord::updateAll([
+                "status" => $status,
+            ], [
+                "id" => $id
+            ]) > 0;
+    }
 }

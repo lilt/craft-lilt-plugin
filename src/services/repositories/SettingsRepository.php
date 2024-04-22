@@ -20,6 +20,7 @@ class SettingsRepository
     public const QUEUE_EACH_TRANSLATION_FILE_SEPARATELY = 'queue_each_translation_file_separately';
     public const QUEUE_DISABLE_AUTOMATIC_SYNC = 'queue_disable_automatic_sync';
     public const QUEUE_MANAGER_EXECUTED_AT = 'queue_manager_executed_at';
+    public const PUBLISH_TRANSLATIONS_ASYNC = 'publish_translations_async';
 
     public const IGNORE_DROPDOWNS = 'ignore_dropdowns';
 
@@ -54,6 +55,19 @@ class SettingsRepository
         }
 
         return (bool)$settingValue->value;
+    }
+
+    public function getBool(string $name): bool
+    {
+        $tableSchema = Craft::$app->getDb()->schema->getTableSchema(CraftliltpluginParameters::SETTINGS_TABLE_NAME);
+        if ($tableSchema === null) {
+            return false;
+        }
+
+        $queueDisableAutomaticSync = SettingRecord::findOne(
+            ['name' => $name]
+        );
+        return (bool) ($queueDisableAutomaticSync->value ?? false);
     }
 
     public function get(string $name): ?string

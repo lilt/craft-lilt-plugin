@@ -2,6 +2,7 @@
 {% import '_includes/forms' as forms %}
 
 {% set isJobInProgress = constant('STATUS_IN_PROGRESS', element) is same as element.getStatus() %}
+{% set isJobPublishing = (constant('STATUS_PUBLISHING', element) is same as element.getStatus()) %}
 {% set isDraftJob = constant('STATUS_DRAFT', element) is same as element.getStatus() %}
 {% set isNewJob = constant('STATUS_NEW', element) is same as element.getStatus() %}
 {% set isFailed = constant('STATUS_FAILED', element) is same as element.getStatus() %}
@@ -148,11 +149,11 @@
                             redirect: hashedCpEditUrl,
                         },
                     }) }}
-                {% elseif not isJobReadyForReview and not isJobInProgress %}
+                {% elseif not isJobReadyForReview and not isJobInProgress and not isJobPublishing %}
                     <button type="submit" data-icon="language" class="btn submit">{{ 'Save job'|t('app') }}</button>
                 {% endif %}
             {% endblock %}
-            {% if formActions ?? false and not isJobInProgress %}
+            {% if formActions ?? false and not isJobInProgress and not isJobPublishing %}
                 <button type="button" class="btn submit menubtn"></button>
                 {% include '_layouts/components/form-action-menu' %}
             {% endif %}

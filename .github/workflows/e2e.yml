@@ -16,10 +16,15 @@ jobs:
           "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-single.cy.js",
+          "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple-async-publishing.cy.js",
+          "cypress/e2e/jobs/copy-source-text-flow/success-path-single-async-publishing.cy.js",
           "cypress/e2e/jobs/instant/success-path-multiple.cy.js",
           "cypress/e2e/jobs/instant/success-path-multiple-copy-slug.cy.js",
           "cypress/e2e/jobs/instant/success-path-multiple-copy-slug-and-enable-after-publish.cy.js",
           "cypress/e2e/jobs/instant/success-path-multiple-enable-after-publish.cy.js",
+          "cypress/e2e/jobs/instant/success-path-single.cy.js",
+          "cypress/e2e/jobs/instant/success-path-multiple-async-publish.cy.js",
+          "cypress/e2e/jobs/instant/success-path-single-async-publishing.cy.js",
           "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing.cy.js",
           "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-copy-slug.cy.js",
           "cypress/e2e/jobs/verified/success-path-multiple-bulk-publishing-copy-slug-and-enable-after-publish.cy.js",
@@ -29,7 +34,9 @@ jobs:
           "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-copy-slug-and-enable-after-publish.cy.js",
           "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-enable-after-publish.cy.js",
           "cypress/e2e/jobs/verified/success-path-single.cy.js",
-          "cypress/e2e/jobs/instant/success-path-single.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-bulk-async-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-multiple-single-async-publishing.cy.js",
+          "cypress/e2e/jobs/verified/success-path-single-async-publishing.cy.js",
         ]
     runs-on: ubuntu-latest
     steps:

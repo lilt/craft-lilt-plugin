@@ -105,6 +105,7 @@ class Translation extends Element
     {
         return [
             TranslationRecord::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
+            TranslationRecord::STATUS_PUBLISHING => ['label' => 'Publishing', 'color' => 'blue'],
             TranslationRecord::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
             TranslationRecord::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
             TranslationRecord::STATUS_PUBLISHED => ['label' => 'Published', 'color' => 'green'],

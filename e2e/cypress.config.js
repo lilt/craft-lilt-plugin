@@ -10,4 +10,10 @@ export default defineConfig({
       // implement node event listeners here
     },
   },
+  retries: {
+    // Configure retry attempts for `cypress run`
+    runMode: 5,
+    // Configure retry attempts for `cypress open`
+    openMode: 0
+  }
 });

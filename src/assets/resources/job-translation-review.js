@@ -43,12 +43,14 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
     const translationIsReviewed = translationRow.data('is-reviewed');
     const translationIsPublished = translationRow.data('is-published');
     const translationTitle = translationRow.data('title');
+    const translationStatus = translationRow.data('status');
 
     return {
       translationId,
       translationTitle,
       translationIsPublished,
       translationIsReviewed,
+      translationStatus,
     };
   },
   loadTranslationData: function(translationId) {
@@ -114,7 +116,7 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
     });
 
     const {
-      translationIsReviewed, translationIsPublished,
+      translationIsReviewed, translationIsPublished, translationStatus
     } = this.getTranslationData(translationId);
 
     if (translationIsReviewed === 1) {
@@ -124,6 +126,12 @@ CraftliltPlugin.TranslationReview = Garnish.Base.extend({
     }
 
     if (translationIsPublished === 1) {
+      this.$modalFooterButtonsPublish.addClass('disabled');
+    } else {
+      this.$modalFooterButtonsPublish.removeClass('disabled');
+    }
+
+    if (translationStatus === "publishing") {
       this.$modalFooterButtonsPublish.addClass('disabled');
     } else {
       this.$modalFooterButtonsPublish.removeClass('disabled');
@@ -599,6 +607,7 @@ $(document).ready(function() {
                         const status = $(this).find('span.translation-status').data('status');
                         if (status === 'published' || status === 'failed' ||
                             status === 'new' ||
+                            status === 'publishing' ||
                             status === 'in-progress') {
                           disabledIds.push($(this).data('id'));
                         } else {
