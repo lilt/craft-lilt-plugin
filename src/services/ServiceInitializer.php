@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services;
 
 use Craft;
-use fruitstudios\linkit\fields\LinkitField;
 use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
 use LiltConnectorSDK\Api\SettingsApi;
@@ -34,6 +33,7 @@ use lilthq\craftliltplugin\services\handlers\field\copier\NeoFieldCopier;
 use lilthq\craftliltplugin\services\handlers\field\copier\SuperTableFieldCopier;
 use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
+use lilthq\craftliltplugin\services\handlers\PublishDraftAsyncHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
@@ -269,6 +269,11 @@ class ServiceInitializer
                 [
                     'class' => PublishDraftHandler::class,
                     'draftRepository' => Craft::$app->getDrafts(),
+                ],
+            'publishDraftsHandlerAsync' =>
+                [
+                    'class' => PublishDraftAsyncHandler::class,
+                    'translationRepository' => $pluginInstance->translationRepository
                 ],
             'connectorTranslationRepository' =>
                 [

@@ -13,6 +13,7 @@ CraftliltPlugin.EntryEditWarning = Garnish.Base.extend({
       'statuses[1]': ['in-progress'],
       'statuses[2]': ['ready-for-review'],
       'statuses[3]': ['ready-to-publish'],
+      'statuses[4]': ['publishing'],
     });
 
     const container = jQuery('<div />').

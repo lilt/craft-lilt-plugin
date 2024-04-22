@@ -33,6 +33,7 @@ class TranslationRecord extends ActiveRecord
     public const STATUS_READY_FOR_REVIEW = 'ready-for-review';
     public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
     public const STATUS_IN_PROGRESS = 'in-progress';
+    public const STATUS_PUBLISHING = 'publishing';
     public const STATUS_PUBLISHED = 'published';
     public const STATUS_FAILED = 'failed';
     public const STATUS_NEEDS_ATTENTION = 'needs-attention';

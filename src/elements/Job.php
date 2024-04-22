@@ -41,6 +41,7 @@ class Job extends Element
     public const STATUS_NEW = 'new';
     public const STATUS_DRAFT = 'draft';
     public const STATUS_IN_PROGRESS = 'in-progress';
+    public const STATUS_PUBLISHING = 'publishing';
     public const STATUS_READY_FOR_REVIEW = 'ready-for-review';
     public const STATUS_READY_TO_PUBLISH = 'ready-to-publish';
     public const STATUS_COMPLETE = 'complete';
@@ -231,6 +232,7 @@ class Job extends Element
             self::STATUS_NEW => ['label' => 'New', 'color' => 'orange'],
             self::STATUS_DRAFT => ['label' => 'Draft', 'color' => ''],
             self::STATUS_IN_PROGRESS => ['label' => 'In Progress', 'color' => 'blue'],
+            self::STATUS_PUBLISHING => ['label' => 'Publishing', 'color' => 'blue'],
             self::STATUS_READY_FOR_REVIEW => ['label' => 'Ready for review', 'color' => 'yellow'],
             self::STATUS_READY_TO_PUBLISH => ['label' => 'Ready to publish', 'color' => 'purple'],
             self::STATUS_COMPLETE => ['label' => 'Complete', 'color' => 'green'],
@@ -295,6 +297,16 @@ class Job extends Element
                 'criteria' => [
                     'status' => [
                         self::STATUS_IN_PROGRESS
+                    ]
+                ],
+                'defaultSort' => ['dateCreated', 'desc']
+            ],
+            [
+                'key' => 'publishing',
+                'label' => 'Publishing',
+                'criteria' => [
+                    'status' => [
+                        self::STATUS_PUBLISHING
                     ]
                 ],
                 'defaultSort' => ['dateCreated', 'desc']

@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugintests\integration\controllers\translation;
 
-use Codeception\Exception\ModuleException;
 use Craft;
 use craft\elements\Entry;
 use IntegrationTester;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\modules\PublishTranslation;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\JobRecord;
-use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\appliers\TranslationApplyCommand;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
@@ -32,21 +32,10 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
         ];
     }
 
-    /**
-     * @throws ModuleException
-     */
     public function testCopySlugSettingEnabled(IntegrationTester $I): void
     {
         // enable copy slug
-        $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(['name' => 'connector_api_url']);
-        if($copyEntriesSlugFromSourceToTarget === null) {
-            $copyEntriesSlugFromSourceToTarget = new SettingRecord(
-                ['name' => 'copy_entries_slug_from_source_to_target']
-            );
-        }
-
-        $copyEntriesSlugFromSourceToTarget->value = 1;
-        $copyEntriesSlugFromSourceToTarget->save();
+        $I->enableOption(SettingsRepository::COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET);
 
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
@@ -150,26 +139,12 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
 
         $I->assertTranslationStatus($translationToSubmit->id, TranslationRecord::STATUS_PUBLISHED);
         $I->assertJobStatus($job->id, Job::STATUS_COMPLETE);
-
-        $copyEntriesSlugFromSourceToTarget->delete();
     }
 
-    /**
-     * @throws ModuleException
-     */
     public function testCopySlugSettingDisabled(IntegrationTester $I): void
     {
         // enable copy slug
-        $copyEntriesSlugFromSourceToTarget = SettingRecord::findOne(['name' => 'connector_api_url']);
-
-        if($copyEntriesSlugFromSourceToTarget === null) {
-            $copyEntriesSlugFromSourceToTarget = new SettingRecord(
-                ['name' => 'copy_entries_slug_from_source_to_target']
-            );
-        }
-
-        $copyEntriesSlugFromSourceToTarget->value = 0;
-        $copyEntriesSlugFromSourceToTarget->save();
+        $I->disableOption(SettingsRepository::COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET);
 
         $user = Craft::$app->getUsers()->getUserById(1);
         $I->amLoggedInAs($user);
@@ -273,8 +248,95 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
 
         $I->assertTranslationStatus($translationToSubmit->id, TranslationRecord::STATUS_PUBLISHED);
         $I->assertJobStatus($job->id, Job::STATUS_COMPLETE);
+    }
 
-        $copyEntriesSlugFromSourceToTarget->delete();
+    public function testAsyncPublishing(IntegrationTester $I): void
+    {
+        // enable copy slug
+        $I->enableOption(SettingsRepository::PUBLISH_TRANSLATIONS_ASYNC);
+
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $siteIds = Craftliltplugin::getInstance()->languageMapper->getSiteIdsByLanguages(['ru-RU', 'de-DE', 'es-ES']);
+
+        $element = Craft::$app->getElements()->getElementById(
+            Entry::findOne(['authorId' => 1])->id,
+            Entry::class,
+            Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-EN')
+        );
+        $element->title = 'This is new title and it should be changed after publishing';
+        $element->slug = 'this-is-new-slug-it-should-be-updated';
+        Craft::$app->getElements()->saveElement($element);
+
+        $entryRu = Craft::$app->getElements()->getElementById(
+            $element->id,
+            Entry::class,
+            Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU')
+        );
+        Assert::assertSame('Some example title', $entryRu->title);
+
+        /**
+         * @var Job $job
+         * @var TranslationRecord $translations
+         */
+        [$job, $translations] = $I->createJobWithTranslations([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => $siteIds,
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
+
+        $draft = Craftliltplugin::getInstance()->createDraftHandler->create(
+            new CreateDraftCommand(
+                Craft::$app->getElements()->getElementById(
+                    $element->id,
+                    Entry::class,
+                    Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-EN')
+                ),
+                $job->title,
+                $job->siteId,
+                Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU'),
+                'instant',
+                $job->authorId
+            )
+        );
+
+
+        $I->sendAjaxPostRequest(
+            sprintf('?p=admin/actions/%s', CraftliltpluginParameters::TRANSLATION_PUBLISH_ACTION),
+            [
+                'csrf' => Craft::$app->getRequest()->getCsrfToken(true),
+                'translationIds' => array_map(function (TranslationRecord $translationRecord) {
+                    return $translationRecord->id;
+                }, $translations),
+            ]
+        );
+
+        $I->seeResponseCodeIs(200);
+
+        Craft::$app->elements->invalidateCachesForElement($element);
+
+        foreach ($translations as $translation) {
+            $I->assertJobInQueue(
+                (new PublishTranslation(
+                    [
+                        'jobId' => $translation->jobId,
+                        'draftId' => $translation->translatedDraftId,
+                        'targetSiteId' => $translation->targetSiteId,
+                        'translationId' => $translation->id,
+                    ]
+                ))
+            );
+
+            $I->assertTranslationStatus($translation->id, TranslationRecord::STATUS_PUBLISHING);
+        }
+
+        $I->assertJobStatus($job->id, Job::STATUS_PUBLISHING);
     }
 
     public function testPublishTranslationJobStatusStaysSame(IntegrationTester $I): void
@@ -356,6 +418,4 @@ class PostTranslationPublishControllerCest extends AbstractIntegrationCest
         $I->assertTranslationStatus($translationToSubmit->id, TranslationRecord::STATUS_PUBLISHED);
         $I->assertJobStatus($job->id, Job::STATUS_READY_TO_PUBLISH);
     }
-
-    // TODO: do we need a test case when all fields are translated?
 }

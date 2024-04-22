@@ -98,6 +98,9 @@ Cypress.Commands.add('setConfigurationOption', (option, enabled) => {
     splitSend: {
       id: 'queueEachTranslationFileSeparately',
     },
+    publishTranslationsAsync: {
+      id: 'publishTranslationsAsync',
+    },
   };
 
   if (!options[option]) {
@@ -642,9 +645,11 @@ Cypress.Commands.add('copySourceTextFlow', ({
   languages = ['de'],
   batchPublishing = false, //publish all translations at once with publish button
   entryId = 24,
+                                              publishTranslationsAsync = false,
 }) => {
   cy.setConfigurationOption('enableEntries', enableAfterPublish);
   cy.setConfigurationOption('copySlug', copySlug);
+  cy.setConfigurationOption('publishTranslationsAsync', publishTranslationsAsync);
 
   if (copySlug) {
     // update slug on entry and enable slug copy option

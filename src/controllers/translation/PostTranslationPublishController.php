@@ -10,11 +10,13 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\translation;
 
 use Craft;
-use craft\base\ElementInterface;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\handlers\commands\PublishDraftCommand;
+use lilthq\craftliltplugin\services\handlers\PublishDraftAsyncHandler;
+use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use Throwable;
 use yii\web\Response;
 
@@ -42,36 +44,41 @@ class PostTranslationPublishController extends AbstractJobController
             return (new Response())->setStatusCode(404);
         }
 
+        $publishHandler = $this->getPublishHandler();
+
         foreach ($translations as $translation) {
-            Craftliltplugin::getInstance()->publishDraftsHandler->__invoke(
-                $translation->translatedDraftId,
-                $translation->targetSiteId
+            $publishHandler->__invoke(
+                new PublishDraftCommand(
+                    $translation->translatedDraftId,
+                    $translation->targetSiteId,
+                    $translation->jobId,
+                    $translation->id
+                )
             );
         }
 
-        $updated = TranslationRecord::updateAll(
-            ['status' => TranslationRecord::STATUS_PUBLISHED],
-            ['id' => $translationIds]
+        Craftliltplugin::getInstance()->refreshJobStatusHandler->__invoke(
+            $translations[0]->jobId
         );
 
-        if ($updated) {
-            foreach ($translations as $translation) {
-                Craftliltplugin::getInstance()->jobLogsRepository->create(
-                    $translation->jobId,
-                    Craft::$app->getUser()->getId(),
-                    sprintf('Translation (id: %d) published', $translation->id)
-                );
-            }
+        return $this->asJson([
+            'success' => true
+        ]);
+    }
 
-            Craftliltplugin::getInstance()->refreshJobStatusHandler->__invoke(
-                $translations[0]->jobId
-            );
+    /**
+     * @return PublishDraftAsyncHandler|PublishDraftHandler
+     */
+    private function getPublishHandler()
+    {
+        if (
+            Craftliltplugin::getInstance()
+                ->settingsRepository
+                ->getBool(SettingsRepository::PUBLISH_TRANSLATIONS_ASYNC)
+        ) {
+            return Craftliltplugin::getInstance()->publishDraftsHandlerAsync;
         }
 
-        Craft::$app->elements->invalidateCachesForElementType(Translation::class);
-
-        return $this->asJson([
-            'success' => $updated === 1
-        ]);
+        return Craftliltplugin::getInstance()->publishDraftsHandler;
     }
 }

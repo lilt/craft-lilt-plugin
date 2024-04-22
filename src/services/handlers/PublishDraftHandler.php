@@ -13,7 +13,12 @@ use Craft;
 use craft\base\ElementInterface;
 use craft\errors\InvalidElementException;
 use craft\services\Drafts as DraftRepository;
+use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\elements\Translation;
+use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
+use lilthq\craftliltplugin\records\TranslationRecord;
+use lilthq\craftliltplugin\services\handlers\commands\PublishDraftCommand;
 use Throwable;
 use yii\base\Exception;
 
@@ -27,12 +32,12 @@ class PublishDraftHandler
     /**
      * @throws Throwable
      */
-    public function __invoke(int $draftId, int $targetSiteId): void
+    public function __invoke(PublishDraftCommand $command): void
     {
         $draftElement = Craft::$app->elements->getElementById(
-            $draftId,
+            $command->getDraftId(),
             null,
-            $targetSiteId
+            $command->getTargetSiteId()
         );
 
         if (!$draftElement) {
@@ -44,12 +49,28 @@ class PublishDraftHandler
             ?? false);
 
         $element = $this->apply($draftElement);
-        if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($targetSiteId)) {
-            $element->setEnabledForSite([$targetSiteId => true]);
+        if ($enableEntriesForTargetSites && !$draftElement->getEnabledForSite($command->getTargetSiteId())) {
+            $element->setEnabledForSite([$command->getTargetSiteId() => true]);
         }
 
         Craft::$app->getElements()->saveElement($element, true, false, false);
         Craft::$app->getElements()->invalidateCachesForElement($element);
+
+        // finish publishing
+        $updated = TranslationRecord::updateAll(
+            ['status' => TranslationRecord::STATUS_PUBLISHED],
+            ['id' => $command->getTranslationId()]
+        );
+
+        Craft::$app->getElements()->invalidateCachesForElementType(Translation::class);
+
+        if ($updated) {
+            Craftliltplugin::getInstance()->jobLogsRepository->create(
+                $command->getJobId(),
+                Craft::$app->getUser()->getId(),
+                sprintf('Translation (id: %d) published', $command->getTranslationId())
+            );
+        }
     }
 
     // copied from \craft\controllers\EntryRevisionsController::actionPublishDraft

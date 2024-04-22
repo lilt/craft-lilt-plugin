@@ -18,12 +18,12 @@ use lilthq\craftliltplugin\records\TranslationRecord;
 
 class RefreshJobStatusHandler
 {
-    public function __invoke(int $jobId): void
+    public function __invoke(int $jobId): bool
     {
         $jobRecord = JobRecord::findOne(['id' => $jobId]);
 
         if (!$jobRecord) {
-            return;
+            return false;
         }
 
         $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId($jobId);
@@ -34,7 +34,7 @@ class RefreshJobStatusHandler
             }, $translations)
         );
 
-        if ($uniqueStatuses === [TranslationRecord::STATUS_PUBLISHED]) {
+        if ($uniqueStatuses === [TranslationRecord::STATUS_PUBLISHED] && $jobRecord->status != Job::STATUS_COMPLETE) {
             $jobRecord->status = Job::STATUS_COMPLETE;
             $jobRecord->save();
 
@@ -43,9 +43,32 @@ class RefreshJobStatusHandler
                 Craft::$app->getUser()->getId(),
                 'Job published'
             );
+
+            Craft::$app->elements->invalidateCachesForElementType(
+                Job::class
+            );
+
+            return true;
         }
 
-        if ($uniqueStatuses === [TranslationRecord::STATUS_READY_TO_PUBLISH]) {
+        if (
+            $uniqueStatuses === [TranslationRecord::STATUS_PUBLISHING]
+            && $jobRecord->status != Job::STATUS_PUBLISHING
+        ) {
+            $jobRecord->status = Job::STATUS_PUBLISHING;
+            $jobRecord->save();
+
+            Craft::$app->elements->invalidateCachesForElementType(
+                Job::class
+            );
+
+            return true;
+        }
+
+        if (
+            $uniqueStatuses === [TranslationRecord::STATUS_READY_TO_PUBLISH]
+            && $jobRecord->status != Job::STATUS_READY_TO_PUBLISH
+        ) {
             $jobRecord->status = Job::STATUS_READY_TO_PUBLISH;
             $jobRecord->save();
 
@@ -54,10 +77,15 @@ class RefreshJobStatusHandler
                 Craft::$app->getUser()->getId(),
                 'Job reviewed'
             );
+
+            Craft::$app->elements->invalidateCachesForElementType(
+                Job::class
+            );
+
+            return true;
         }
 
-        Craft::$app->elements->invalidateCachesForElementType(
-            Job::class
-        );
+
+        return false;
     }
 }
