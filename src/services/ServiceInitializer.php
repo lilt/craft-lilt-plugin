@@ -124,6 +124,23 @@ class ServiceInitializer
                 );
             },
         ]);
+        $pluginInstance->setComponents([
+            'publishDraftsHandler' => function () use ($pluginInstance) {
+                return new PublishDraftHandler(
+                    new CopyFieldsHandler(
+                        [
+                            CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldCopier(),
+                            CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldCopier(),
+                            CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableFieldCopier(),
+
+                            CopyFieldsHandler::DEFAULT_FIELD_COPIER => new DefaultFieldCopier()
+                        ]
+                    ),
+                    Craft::$app->getDrafts(),
+                    $pluginInstance->settingsRepository
+                );
+            },
+        ]);
 
         $pluginInstance->setComponents([
             'connectorTranslationsApi' =>
@@ -264,11 +281,6 @@ class ServiceInitializer
                 [
                     'class' => ConnectorJobRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
-                ],
-            'publishDraftsHandler' =>
-                [
-                    'class' => PublishDraftHandler::class,
-                    'draftRepository' => Craft::$app->getDrafts(),
                 ],
             'publishDraftsHandlerAsync' =>
                 [
