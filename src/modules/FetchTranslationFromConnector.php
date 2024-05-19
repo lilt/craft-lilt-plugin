@@ -29,7 +29,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
     public const PRIORITY = 2048;
     public const TTR = 60 * 30;
 
-    private const RETRY_COUNT = 3;
+    private const RETRY_COUNT = 10;
 
     /**
      * @var int $liltJobId

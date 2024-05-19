@@ -54,7 +54,7 @@ up: clone down
 	docker-compose exec -T app sh -c 'php craft project-config/rebuild'
 	docker-compose exec -T app sh -c 'php craft up'
 	docker-compose exec -T app sh -c 'php craft migrate/up'
-	docker-compose exec -T app sh -c 'php craft queue/run'
+	docker-compose exec -T app sh -c 'nohup ./queue_listen.sh > queue.log 2>&1 &'
 
 cli:
 	docker-compose exec -T app sh
