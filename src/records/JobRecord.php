@@ -26,6 +26,7 @@ use yii\db\ActiveQueryInterface;
  * @property int $sourceSiteLanguage [int(11) unsigned]
  * @property string $targetSiteIds [json]
  * @property string $dueDate [datetime]
+ * @property int $attempt [int(11) unsigned]
  *
  * @property-read ActiveQueryInterface $element
  * @property string $translationWorkflow [varchar(50)]

@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\controllers\job\PostCreateJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
+use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -63,44 +64,29 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
         [$job, $translations] = $I->createJobWithTranslations([
             'title' => 'Awesome test job',
             'elementIds' => [$element->id],
-            'targetSiteIds' => [Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('es-ES')],
+            'targetSiteIds' => [
+                Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('es-ES'),
+                Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('ru-RU'),
+                Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('de-DE'),
+            ],
             'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
             'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED,
             'versions' => [],
             'authorId' => 1,
         ]);
 
+        foreach ($translations as $translationRecord) {
+            $translationRecord->status = Job::STATUS_FAILED;
+            $translationRecord->save();
+        }
+
         $jobRecord = JobRecord::findOne(['id' => $job->id]);
         $jobRecord->status = Job::STATUS_FAILED;
         $jobRecord->save();
 
-        $expectQueueJob = new FetchJobStatusFromConnector([
-            'liltJobId' => 777,
+        $expectQueueJob = new SendJobToConnector([
             'jobId' => $job->id
         ]);
-
-        $I->expectJobCreateRequest(
-            [
-                'project_prefix' => 'Awesome test job',
-                'lilt_translation_workflow' => 'VERIFIED',
-            ],
-            200,
-            ['id' => 777,]
-        );
-
-        $expectedUrl = sprintf(
-            '/api/v1.0/jobs/777/files?name=%s'
-            . '&srclang=en-US'
-            . '&trglang=es-ES' .
-            '&due=',
-            urlencode(
-                sprintf('element_%d_first-entry-user-1.json+html', $element->getId())
-            )
-        );
-        $expectedBody = ExpectedElementContent::getExpectedBody($element);
-
-        $I->expectJobTranslationsRequest($expectedUrl, $expectedBody, HttpCode::OK);
-        $I->expectJobStartRequest(777, HttpCode::OK);
 
         $I->sendAjaxPostRequest(
             sprintf(
@@ -111,22 +97,16 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
         );
 
         $translations = array_map(static function (TranslationRecord $translationRecord) use ($element) {
-            $expectedDraftBody = ExpectedElementContent::getExpectedBody(
-                Craft::$app->elements->getElementById(
-                    $translationRecord->translatedDraftId,
-                    null,
-                    $translationRecord->targetSiteId
-                )
-            );
-
             Assert::assertSame(Job::STATUS_IN_PROGRESS, $translationRecord->status);
             Assert::assertSame($element->id, $translationRecord->versionId);
-            Assert::assertEquals($expectedDraftBody, $translationRecord->sourceContent);
+            Assert::assertNull($translationRecord->sourceContent);
+            Assert::assertNull($translationRecord->translatedDraftId);
+            Assert::assertNull($translationRecord->connectorTranslationId);
+
             Assert::assertSame(
                 Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
                 $translationRecord->sourceSiteId
             );
-            Assert::assertNotNull($translationRecord->translatedDraftId);
 
             return [
                 'versionId' => $translationRecord->versionId,
@@ -139,12 +119,18 @@ class PostJobRetryControllerCest extends AbstractIntegrationCest
             ];
         }, TranslationRecord::findAll(['jobId' => $job->id, 'elementId' => $element->id]));
 
-        Assert::assertCount(1, $translations);
+        $expectedLanguages = ['es-ES', 'ru-RU', 'de-DE'];
+        $actualLanguages = Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
+            array_column($translations, 'targetSiteId')
+        );
+
+        sort($expectedLanguages);
+        sort($actualLanguages);
+
+        Assert::assertCount(3, $translations);
         Assert::assertEquals(
-            ['es-ES'],
-            Craftliltplugin::getInstance()->languageMapper->getLanguagesBySiteIds(
-                array_column($translations, 'targetSiteId')
-            )
+            $expectedLanguages,
+            $actualLanguages
         );
 
         $I->assertJobInQueue($expectQueueJob);

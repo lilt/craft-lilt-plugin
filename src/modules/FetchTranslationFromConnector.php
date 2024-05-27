@@ -76,7 +76,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
         }
 
         if (empty($translationRecord->connectorTranslationId)) {
-            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
+            Craftliltplugin::getInstance()->resolveTranslationsConnectorIds->update($job);
         }
         $translationRecord->refresh();
 
