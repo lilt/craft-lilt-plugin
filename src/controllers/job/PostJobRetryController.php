@@ -46,7 +46,7 @@ class PostJobRetryController extends Controller
                 sprintf('Job retried (previous Lilt Job ID: %d)', $job->liltJobId)
             );
 
-            Craftliltplugin::getInstance()->sendJobToLiltConnectorHandler->__invoke($job);
+            Craftliltplugin::getInstance()->resendJobHandler->__invoke($job->id);
         }
 
 
