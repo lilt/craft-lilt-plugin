@@ -38,6 +38,7 @@ return [
 
     // Whether crawlers should be allowed to index pages and following links
     'disallowRobots' => !$isProd,
+    'runQueueAutomatically' => false,
 
     'aliases' => [
         '@assetBasePath' => App::env('ASSET_BASE_PATH') ?: "./assets",

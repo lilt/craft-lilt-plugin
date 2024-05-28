@@ -32,6 +32,7 @@ class Install extends Migration
 
         $this->createTable(CraftliltpluginParameters::JOB_TABLE_NAME, [
             'id' => $this->primaryKey()->unsigned(),
+            'attempt' => $this->integer()->notNull()->defaultValue(0),
             'title' => $this->string()->null(),
             'authorId' => $this->integer()->null(),
             'liltJobId' => $this->integer()->null(),

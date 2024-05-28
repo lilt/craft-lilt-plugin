@@ -29,7 +29,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
     public const PRIORITY = 2048;
     public const TTR = 60 * 30;
 
-    private const RETRY_COUNT = 3;
+    private const RETRY_COUNT = 10;
 
     /**
      * @var int $liltJobId
@@ -76,7 +76,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
         }
 
         if (empty($translationRecord->connectorTranslationId)) {
-            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
+            Craftliltplugin::getInstance()->resolveTranslationsConnectorIds->update($job);
         }
         $translationRecord->refresh();
 

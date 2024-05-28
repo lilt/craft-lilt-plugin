@@ -58,6 +58,7 @@ class EditJobHandler
         $job->elementIds = $command->getEntries();
         $job->translationWorkflow = $command->getTranslationWorkflow();
         $job->versions = $command->getVersions();
+        $job->attempt = 0;
 
         $jobRecord->setAttributes($job->getAttributes(), false);
 
