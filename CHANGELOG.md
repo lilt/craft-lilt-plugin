@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.9.0 - 2024-04-10
+### Added
+- Attempts to job to retry if connectors are not available or the job is failed 
+
 ## 3.8.0 - 2024-04-10
 ### Added
 - Introduced a new configuration setting that allows the disabling of automatic synchronization for jobs that are currently in progress
