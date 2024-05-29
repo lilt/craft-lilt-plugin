@@ -12,12 +12,14 @@ use craft\helpers\Db;
 use IntegrationTester;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\SettingsResponse;
+use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
-use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
+use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\elements\Translation;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
-use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
-use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
+use lilthq\craftliltplugin\modules\SendJobToConnector;
+use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
@@ -82,7 +84,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 11111,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'export_complete',
+                    'status' => TranslationResponse::STATUS_EXPORT_COMPLETE,
                     'trgLang' => 'es',
                     'trgLocale' => 'ES',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -92,7 +94,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 22222,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'export_complete',
+                    'status' => TranslationResponse::STATUS_EXPORT_COMPLETE,
                     'trgLang' => 'de',
                     'trgLocale' => 'DE',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -102,7 +104,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 33333,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'export_complete',
+                    'status' => TranslationResponse::STATUS_EXPORT_COMPLETE,
                     'trgLang' => 'ru',
                     'trgLocale' => 'RU',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -174,6 +176,170 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
      * @throws Exception
      * @throws ModuleException
      */
+    public function testExecuteSuccessVerifiedDuplicate(IntegrationTester $I): void
+    {
+        $I->clearQueue();
+        $I->disableOption(SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC);
+
+        Db::truncateTable(Craft::$app->queue->tableName);
+
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $element = Entry::find()
+            ->where(['authorId' => 1])
+            ->orderBy(['id' => SORT_DESC])
+            ->one();
+
+        [$job, $translations] = $I->createJobWithTranslations([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_VERIFIED,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
+
+        $I->expectJobGetRequest(
+            777,
+            200,
+            [
+                'status' => JobResponse::STATUS_COMPLETE
+            ]
+        );
+
+        $responseBody = [
+            'limit' => 25,
+            'results' => [
+                0 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 11111,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_EXPORT_COMPLETE,
+                    'trgLang' => 'es',
+                    'trgLocale' => 'ES',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+                1 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 22222,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_EXPORT_COMPLETE,
+                    'trgLang' => 'de',
+                    'trgLocale' => 'DE',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+                2 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 33333,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_IMPORT_COMPLETE,
+                    'trgLang' => 'ru',
+                    'trgLocale' => 'RU',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+                3 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 44444,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_IMPORT_COMPLETE,
+                    'trgLang' => 'ru',
+                    'trgLocale' => 'RU',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+                4 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 55555,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_EXPORT_COMPLETE,
+                    'trgLang' => 'ru',
+                    'trgLocale' => 'RU',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+                5 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 66666,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_IMPORT_COMPLETE,
+                    'trgLang' => 'ru',
+                    'trgLocale' => 'RU',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+            ],
+            'start' => 0,
+        ];
+
+        $I->expectTranslationsGetRequest(
+            777,
+            0,
+            1000,
+            HttpCode::OK,
+            $responseBody
+        );
+
+        $I->runQueue(
+            FetchJobStatusFromConnector::class,
+            [
+                'liltJobId' => $job->liltJobId,
+                'jobId' => $job->id,
+            ]
+        );
+
+        $totalJobs = Craft::$app->queue->getJobInfo();
+
+        Assert::assertCount(3, $totalJobs);
+        $I->assertJobInQueue(
+            new FetchTranslationFromConnector([
+                'jobId' => $job->id,
+                'translationId' => $translations[0]->id,
+                'liltJobId' => 777
+            ])
+        );
+
+        $I->assertJobInQueue(
+            new FetchTranslationFromConnector([
+                'jobId' => $job->id,
+                'translationId' => $translations[1]->id,
+                'liltJobId' => 777
+            ])
+        );
+
+        $I->assertJobInQueue(
+            new FetchTranslationFromConnector([
+                'jobId' => $job->id,
+                'translationId' => $translations[2]->id,
+                'liltJobId' => 777
+            ])
+        );
+
+        $translationAssertions = [
+            'es-ES' => 11111,
+            'de-DE' => 22222,
+            'ru-RU' => 55555,
+        ];
+        foreach ($translationAssertions as $language => $expectedConnectorTranslationId) {
+            $translationEs = TranslationRecord::findOne([
+                'jobId' => $job->id,
+                'elementId' => $element->id,
+                'targetSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($language)
+            ]);
+
+            Assert::assertSame($expectedConnectorTranslationId, $translationEs->connectorTranslationId);
+        }
+    }
+
+    /**
+     * @throws Exception
+     * @throws ModuleException
+     */
     public function testExecuteSuccessInstant(IntegrationTester $I): void
     {
         $I->clearQueue();
@@ -216,7 +382,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 11111,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'mt_complete',
+                    'status' => TranslationResponse::STATUS_MT_COMPLETE,
                     'trgLang' => 'es',
                     'trgLocale' => 'ES',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -226,7 +392,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 22222,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'mt_complete',
+                    'status' => TranslationResponse::STATUS_MT_COMPLETE,
                     'trgLang' => 'de',
                     'trgLocale' => 'DE',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -236,7 +402,7 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
                     'errorMsg' => null,
                     'id' => 33333,
                     'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
-                    'status' => 'mt_complete',
+                    'status' => TranslationResponse::STATUS_MT_COMPLETE,
                     'trgLang' => 'ru',
                     'trgLocale' => 'RU',
                     'updatedAt' => '2022-06-02T23:01:42',
@@ -301,6 +467,132 @@ class FetchJobStatusFromConnectorCest extends AbstractIntegrationCest
             ]);
 
             Assert::assertSame($expectedConnectorTranslationId, $translationEs->connectorTranslationId);
+        }
+    }
+
+    /**
+     * @throws Exception
+     * @throws ModuleException
+     */
+    public function testExecuteSuccessInstantRetry(IntegrationTester $I): void
+    {
+        $I->clearQueue();
+        $I->disableOption(SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC);
+
+        Db::truncateTable(Craft::$app->queue->tableName);
+
+        $user = Craft::$app->getUsers()->getUserById(1);
+        $I->amLoggedInAs($user);
+
+        $element = Entry::find()
+            ->where(['authorId' => 1])
+            ->orderBy(['id' => SORT_DESC])
+            ->one();
+
+        [$job, $translations] = $I->createJobWithTranslations([
+            'title' => 'Awesome test job',
+            'elementIds' => [$element->id],
+            'targetSiteIds' => '*',
+            'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+            'translationWorkflow' => SettingsResponse::LILT_TRANSLATION_WORKFLOW_INSTANT,
+            'versions' => [],
+            'authorId' => 1,
+            'liltJobId' => 777,
+        ]);
+
+        $I->expectJobGetRequest(
+            777,
+            200,
+            [
+                'status' => JobResponse::STATUS_FAILED
+            ]
+        );
+
+        $responseBody = [
+            'limit' => 25,
+            'results' => [
+                0 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 11111,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_MT_COMPLETE,
+                    'trgLang' => 'es',
+                    'trgLocale' => 'ES',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+                1 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 22222,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_MT_COMPLETE,
+                    'trgLang' => 'de',
+                    'trgLocale' => 'DE',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+                2 => [
+                    'createdAt' => '2022-05-29T11:31:58',
+                    'errorMsg' => null,
+                    'id' => 33333,
+                    'name' => sprintf('497058_element_%d_first-entry-user-1.json+html', $element->id),
+                    'status' => TranslationResponse::STATUS_MT_COMPLETE,
+                    'trgLang' => 'ru',
+                    'trgLocale' => 'RU',
+                    'updatedAt' => '2022-06-02T23:01:42',
+                ],
+            ],
+            'start' => 0,
+        ];
+
+        $I->expectTranslationsGetRequest(
+            777,
+            0,
+            100,
+            HttpCode::OK,
+            $responseBody
+        );
+
+        $I->runQueue(
+            FetchJobStatusFromConnector::class,
+            [
+                'liltJobId' => $job->liltJobId,
+                'jobId' => $job->id,
+            ]
+        );
+
+        $totalJobs = Craft::$app->queue->getJobInfo();
+
+        Assert::assertCount(1, $totalJobs);
+        $I->assertJobInQueue(
+            new SendJobToConnector([
+                'jobId' => $job->id,
+            ])
+        );
+
+        $jobRecord = JobRecord::findOne(['id' => $job->id]);
+        Assert::assertSame(Job::STATUS_IN_PROGRESS, $jobRecord->status);
+        Assert::assertNull($jobRecord->liltJobId);
+        Assert::assertSame(1, $jobRecord->attempt);
+
+        $translationAssertions = [
+            'es-ES' => null,
+            'de-DE' => null,
+            'ru-RU' => null,
+        ];
+        foreach ($translationAssertions as $language => $expectedConnectorTranslationId) {
+            $actualTranslation = TranslationRecord::findOne([
+                'jobId' => $job->id,
+                'elementId' => $element->id,
+                'targetSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage($language)
+            ]);
+
+            Assert::assertSame($expectedConnectorTranslationId, $actualTranslation->connectorTranslationId);
+            Assert::assertSame(TranslationRecord::STATUS_IN_PROGRESS, $actualTranslation->status);
+
+            Assert::assertNull($actualTranslation->connectorTranslationId);
+            Assert::assertNull($actualTranslation->translatedDraftId);
+            Assert::assertNull($actualTranslation->sourceContent);
         }
     }
 

@@ -28,12 +28,19 @@ services:
       MOCKSERVER_CORS_ALLOW_METHODS: "CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, PATCH, TRACE"
     networks:
       - e2e-network
+
+  mockserver-healthcheck:
+    image: alpine:latest
     healthcheck:
-      test: [ "CMD-SHELL", "curl --fail http://localhost:1080/status" ]
+      test: ["CMD-SHELL", "curl --fail -XPUT http://mockserver:1080/status || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 3
-    restart: unless-stopped
+    depends_on:
+      - mockserver
+    networks:
+      - e2e-network
+    entrypoint: ["sh", "-c", "apk add --no-cache curl && while sleep 3600; do :; done"]
 
   redis:
     image: redis:5-alpine

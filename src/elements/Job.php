@@ -47,6 +47,7 @@ class Job extends Element
     public const STATUS_FAILED = 'failed';
     public const STATUS_NEEDS_ATTENTION = 'needs-attention';
 
+    public const MAX_JOB_ATTEMPTS = 5;
 
     public ?string $uid = null;
     public $authorId;
@@ -63,6 +64,9 @@ class Job extends Element
 
     public ?DateTime $dateCreated = null;
     public ?DateTime $dateUpdated = null;
+
+    public $attempt = 0;
+
 
     // @codingStandardsIgnoreStart
     private $_author;

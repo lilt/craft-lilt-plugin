@@ -11,10 +11,8 @@ namespace lilthq\craftliltplugin\services\listeners;
 
 use Craft;
 use craft\queue\Queue;
-use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
-use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use yii\base\Event;
@@ -25,8 +23,6 @@ class QueueBeforePushListener implements ListenerInterface
 {
     private const SUPPORTED_JOBS = [
         FetchJobStatusFromConnector::class,
-        FetchInstantJobTranslationsFromConnector::class,
-        FetchVerifiedJobTranslationsFromConnector::class,
         FetchTranslationFromConnector::class,
         SendJobToConnector::class,
         SendTranslationToConnector::class,

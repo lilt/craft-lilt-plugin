@@ -184,6 +184,12 @@ class SendJobToLiltConnectorHandler
 
         $this->updateJob($job, $jobLilt->getId(), Job::STATUS_IN_PROGRESS);
 
+        // Set all translations to in progress
+        TranslationRecord::updateAll(
+            ['status' => TranslationRecord::STATUS_IN_PROGRESS],
+            ['jobId' => $job->id]
+        );
+
         if ($isQueueEachTranslationFileSeparately) {
             return;
         }
