@@ -36,13 +36,14 @@ use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
+use lilthq\craftliltplugin\services\handlers\ResendJobHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\StartQueueManagerHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
-use lilthq\craftliltplugin\services\handlers\UpdateTranslationsConnectorIds;
+use lilthq\craftliltplugin\services\handlers\ResolveTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
@@ -79,6 +80,7 @@ class ServiceInitializer
 
         $pluginInstance->setComponents([
             'createJobHandler' => CreateJobHandler::class,
+            'resendJobHandler' => ResendJobHandler::class,
             'sendJobToLiltConnectorHandler' => SendJobToLiltConnectorHandler::class,
             'copySourceTextHandler' => CopySourceTextHandler::class,
             'syncJobFromLiltConnectorHandler' => SyncJobFromLiltConnectorHandler::class,
@@ -93,7 +95,7 @@ class ServiceInitializer
             'createTranslationsHandler' => CreateTranslationsHandler::class,
             'refreshJobStatusHandler' => RefreshJobStatusHandler::class,
             'updateJobStatusHandler' => UpdateJobStatusHandler::class,
-            'updateTranslationsConnectorIds' => UpdateTranslationsConnectorIds::class,
+            'resolveTranslationsConnectorIds' => ResolveTranslationsConnectorIds::class,
             'packagistRepository' => PackagistRepository::class,
             'startQueueManagerHandler' => StartQueueManagerHandler::class,
             'listenerRegister' => [

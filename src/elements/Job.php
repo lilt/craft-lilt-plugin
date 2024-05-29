@@ -43,6 +43,7 @@ class Job extends Element
     public const STATUS_FAILED = 'failed';
     public const STATUS_NEEDS_ATTENTION = 'needs-attention';
 
+    public const MAX_JOB_ATTEMPTS = 5;
 
     public $uid;
     public $authorId;
@@ -58,6 +59,9 @@ class Job extends Element
     public $translationWorkflow;
     public $dateCreated;
     public $dateUpdated;
+
+    public $attempt = 0;
+
 
     // @codingStandardsIgnoreStart
     private $_author;

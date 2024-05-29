@@ -27,7 +27,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
     public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
-    private const RETRY_COUNT = 3;
+    private const RETRY_COUNT = 10;
 
     /**
      * @var int $liltJobId
@@ -79,14 +79,39 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             || $liltJob->getStatus() === JobResponse::STATUS_FAILED;
 
         if ($isJobFailed) {
-            $jobRecord->status = Job::STATUS_FAILED;
-
             Craftliltplugin::getInstance()->jobLogsRepository->create(
                 $jobRecord->id,
                 Craft::$app->getUser()->getId(),
                 sprintf('Job failed, received status: %s', $liltJob->getStatus())
             );
 
+            if ($jobRecord->attempt < Job::MAX_JOB_ATTEMPTS) {
+                // Retry job
+                $jobRecord->attempt++;
+                $jobRecord->save();
+
+                Craftliltplugin::getInstance()->resendJobHandler->__invoke(
+                    $jobRecord->id
+                );
+
+
+                Craftliltplugin::getInstance()->jobLogsRepository->create(
+                    $jobRecord->id,
+                    Craft::$app->getUser()->getId(),
+                    sprintf(
+                        'Trying again to send job, attempt: %d/%d',
+                        $jobRecord->attempt,
+                        Job::MAX_JOB_ATTEMPTS
+                    )
+                );
+
+                $mutex->release($mutexKey);
+                $this->markAsDone($queue);
+                return;
+            }
+
+            // Job failed, set status to failed
+            $jobRecord->status = Job::STATUS_FAILED;
             $jobRecord->save();
 
             TranslationRecord::updateAll(
@@ -108,7 +133,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
         }
 
         if (!$isJobFinished) {
-            $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+            $queueDisableAutomaticSync = (bool)Craftliltplugin::getInstance()->settingsRepository->get(
                 SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
             );
 
@@ -132,15 +157,12 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             return;
         }
 
-        $connectorTranslations = Craftliltplugin::getInstance()->connectorTranslationRepository->findByJobId(
-            $job->liltJobId
-        );
-
+        $connectorTranslations = Craftliltplugin::getInstance()->resolveTranslationsConnectorIds->update($job);
         $connectorTranslationsStatuses = array_map(
             function (TranslationResponse $connectorTranslation) {
                 return $connectorTranslation->getStatus();
             },
-            $connectorTranslations->getResults()
+            $connectorTranslations
         );
 
         $translationFinished =
@@ -184,7 +206,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 return;
             }
 
-            $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+            $queueDisableAutomaticSync = (bool)Craftliltplugin::getInstance()->settingsRepository->get(
                 SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
             );
 
@@ -208,7 +230,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             return;
         }
 
-        if ($jobRecord->isVerifiedFlow()) {
+        if ($jobRecord->isVerifiedFlow() || $jobRecord->isInstantFlow()) {
             #LILT_TRANSLATION_WORKFLOW_VERIFIED
 
             $jobRecord->status = Job::STATUS_IN_PROGRESS;
@@ -216,58 +238,6 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
             $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
                 $this->jobId
             );
-
-            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
-
-            foreach ($translations as $translation) {
-                Queue::push(
-                    new FetchTranslationFromConnector(
-                        [
-                            'jobId' => $this->jobId,
-                            'liltJobId' => $this->liltJobId,
-                            'translationId' => $translation->id,
-                        ]
-                    ),
-                    FetchTranslationFromConnector::PRIORITY,
-                    10, //10 seconds for first job
-                    FetchTranslationFromConnector::TTR
-                );
-            }
-        }
-
-        if ($jobRecord->isInstantFlow()) {
-            #LILT_TRANSLATION_WORKFLOW_INSTANT
-
-            if (
-                $liltJob->getStatus() === JobResponse::STATUS_FAILED
-                || $liltJob->getStatus() === JobResponse::STATUS_CANCELED
-            ) {
-                $jobRecord->status = Job::STATUS_FAILED;
-
-                TranslationRecord::updateAll(
-                    ['status' => TranslationRecord::STATUS_FAILED],
-                    ['jobId' => $jobRecord->id]
-                );
-
-                Craft::error([
-                    "message" => sprintf(
-                        'Set job %d and translations to status failed due to failed/cancel status from lilt',
-                        $jobRecord->id
-                    ),
-                    "jobRecord" => $jobRecord,
-                ]);
-
-                $mutex->release($mutexKey);
-                $this->markAsDone($queue);
-
-                return;
-            }
-
-            $translations = Craftliltplugin::getInstance()->translationRepository->findByJobId(
-                $this->jobId
-            );
-
-            Craftliltplugin::getInstance()->updateTranslationsConnectorIds->update($job);
 
             foreach ($translations as $translation) {
                 Queue::push(
