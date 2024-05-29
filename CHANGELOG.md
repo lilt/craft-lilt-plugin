@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## 4.6.0 - 2024-05-29
 ### Added
-- Attempts to job to retry if connectors are not available or the job is failed
+- Implemented retry mechanism for jobs if connectors are unavailable or the job fails 
 
 ## 4.5.0 - 2024-04-10
 ### Added
