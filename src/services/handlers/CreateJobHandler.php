@@ -24,6 +24,7 @@ class CreateJobHandler
         $job->authorId = $command->getAuthorId();
         $job->title = $command->getTitle();
         $job->liltJobId = null;
+        $job->attempt = 0;
         $job->status = $asDraft ? Job::STATUS_DRAFT : Job::STATUS_NEW;
         $job->sourceSiteId = $command->getSourceSiteId();
 

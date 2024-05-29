@@ -36,13 +36,14 @@ use lilthq\craftliltplugin\services\handlers\EditJobHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
+use lilthq\craftliltplugin\services\handlers\ResendJobHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\StartQueueManagerHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
-use lilthq\craftliltplugin\services\handlers\UpdateTranslationsConnectorIds;
+use lilthq\craftliltplugin\services\handlers\ResolveTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
@@ -109,8 +110,9 @@ use yii\web\Response;
  * @property CreateDraftHandler $createDraftHandler
  * @property CopySourceTextHandler $copySourceTextHandler
  * @property UpdateJobStatusHandler $updateJobStatusHandler
+ * @property ResendJobHandler $resendJobHandler
  * @property SettingsRepository $settingsRepository
- * @property UpdateTranslationsConnectorIds $updateTranslationsConnectorIds
+ * @property ResolveTranslationsConnectorIds $resolveTranslationsConnectorIds
  * @property PackagistRepository $packagistRepository
  * @property StartQueueManagerHandler $startQueueManagerHandler
  * @property ServiceInitializer $serviceInitializer
