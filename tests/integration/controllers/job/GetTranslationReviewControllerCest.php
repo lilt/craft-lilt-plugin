@@ -119,7 +119,7 @@ class GetTranslationReviewControllerCest
 
         if (method_exists(Assert::class, 'assertMatchesRegularExpression')) {
             Assert::assertMatchesRegularExpression(
-                "/^http:\/\/\\\$PRIMARY_SITE_URL\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
                 $actual['variables']['originalUrl']
             );
             Assert::assertMatchesRegularExpression(
@@ -128,7 +128,7 @@ class GetTranslationReviewControllerCest
             );
         } else {
             Assert::assertRegExp(
-                "/^http:\/\/\\\$PRIMARY_SITE_URL\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
+                "/^http:\/\/test\.craftcms\.test:80\/index\.php\?p=blog\/first-entry-user-1&token=[0-9a-zA-Z\S]+$/",
                 $actual['variables']['originalUrl']
             );
             Assert::assertRegExp(
