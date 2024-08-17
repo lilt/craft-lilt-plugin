@@ -42,8 +42,7 @@ class m220617_164156_add_sites extends Migration
         }
 
         $siteEnUS->name = 'Craft test';
-        $siteEnUS->setBaseUrl('$PRIMARY_SITE_URL');
-
+        $siteEnUS->setBaseUrl('http://test.craftcms.test:80');
         Craft::$app->sites->saveSite($siteEnUS);
 
         $siteSetting = new Section_SiteSettings();
@@ -61,6 +60,7 @@ class m220617_164156_add_sites extends Migration
             $site->setName(
                 sprintf('Craft test %s', explode('-', $language)[0])
             );
+
             $site->groupId = $groups[0]->id;
             $site->setBaseUrl('@web/' . explode('-', $language)[0]);
 
@@ -72,7 +72,6 @@ class m220617_164156_add_sites extends Migration
             $siteSetting->siteId = $site->id;
             $siteSetting->enabledByDefault = true;
 
-            #$siteSetting->uriFormat = sprintf('/blog/%s', explode('-',$language)[0]);
             $siteSetting->uriFormat = sprintf('/blog/%s/{slug}', explode('-', $language)[0]);
             $siteSetting->hasUrls = true;
 

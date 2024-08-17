@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\actions\JobEdit;
 use lilthq\craftliltplugin\elements\db\TranslationQuery;
 use lilthq\craftliltplugin\models\TranslationModelTrait;
+use craft\elements\User;
 use lilthq\craftliltplugin\records\TranslationNotificationsRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
@@ -126,6 +127,16 @@ class Translation extends Element
     public function getIsReviewed(): bool
     {
         return $this->getIsPublished() || $this->status === TranslationRecord::STATUS_READY_TO_PUBLISH;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->getCpEditUrl();
+    }
+
+    public function canView(User $user): bool
+    {
+        return true;
     }
 
     public function getStatusHtml(): string

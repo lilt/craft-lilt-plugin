@@ -16,8 +16,8 @@ composer-install:
 		composer require --ignore-platform-reqs "lilt/craft-lilt-plugin":"^999.9.9"
 
 reset: cp composer-install
-	docker-compose exec -T app sh -c 'php craft db/restore happylager.sql'
-	docker-compose exec -T app sh -c 'php craft plugin/install craft-lilt-plugin'
+	docker compose exec -T app sh -c 'php craft db/restore happylager.sql'
+	docker compose exec -T app sh -c 'php craft plugin/install craft-lilt-plugin'
 
 
 install: clone
@@ -28,23 +28,23 @@ install: clone
 		composer require craftcms/cms:3.7.68 -W
 
 backup-db:
-	docker-compose exec -T app sh -c 'php craft db/backup'
+	docker compose exec -T app sh -c 'php craft db/backup'
 
 refresh:
-	docker-compose exec -T app sh -c 'rm -rf /app/vendor/lilt/craft-lilt-plugin'
-	docker-compose exec -T app sh -c 'composer require --ignore-platform-reqs "lilt/craft-lilt-plugin":"^999.9.9"'
+	docker compose exec -T app sh -c 'rm -rf /app/vendor/lilt/craft-lilt-plugin'
+	docker compose exec -T app sh -c 'composer require --ignore-platform-reqs "lilt/craft-lilt-plugin":"^999.9.9"'
 
 build:
 	docker build -f happy-lager-main/Dockerfile happy-lager-main -t happy-lager
 
 down:
-	docker-compose down --remove-orphans -v
+	docker compose down --remove-orphans -v
 
 mup: #migrate app up
-	docker-compose exec -T app sh -c 'php craft migrate/up'
+	docker compose exec -T app sh -c 'php craft migrate/up'
 
 mdown: #migrate app down
-	docker-compose exec -T app sh -c 'php craft migrate/down'
+	docker compose exec -T app sh -c 'php craft migrate/down'
 
 cp:
 	rm -rf happy-lager-main/plugin-src
@@ -84,32 +84,32 @@ wait-service:
 	@echo "Service is up and running or max retries reached!"
 
 up: clone down composer-install
-	docker-compose up --build -d
-	docker-compose ps
-	docker-compose exec -T app sh -c 'chmod -R 777 /app'
-	docker-compose exec -T app sh -c 'chown -R www-data:www-data /app'
-	docker-compose exec -T mysql sh -c 'while ! mysqladmin ping -h"mysql" --silent; do sleep 1; done'
-	docker-compose exec -T app sh -c 'php craft setup/security-key'
-	docker-compose exec -T app sh -c 'echo DB_DRIVER=mysql >> .env'
-	docker-compose exec -T app sh -c 'echo DB_SERVER=mysql >> .env'
-	docker-compose exec -T app sh -c 'echo DB_DATABASE=${DB_DATABASE} >> .env'
-	docker-compose exec -T app sh -c 'echo DB_USER=craft-lilt >> .env'
-	docker-compose exec -T app sh -c 'echo DB_PASSWORD=craft-lilt >> .env'
-	docker-compose exec -T app sh -c 'echo DB_SCHEMA=public >> .env'
-	docker-compose exec -T app sh -c 'echo DB_TABLE_PREFIX= >> .env'
-	docker-compose exec -T app sh -c 'echo CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS=1 >> .env'
-	docker-compose exec -T app sh -c 'echo CRAFT_LILT_PLUGIN_QUEUE_MANAGER_WAIT_TIME_IN_SECONDS=86400 >> .env'
-	docker-compose exec -T app sh -c 'php craft db/restore happylager.sql'
-	docker-compose exec -T app sh -c 'php craft plugin/install craft-lilt-plugin'
-	docker-compose exec -T app sh -c 'php craft plugin/install neo'
-	docker-compose exec -T app sh -c 'php craft plugin/install super-table'
-	docker-compose exec -T app sh -c 'php craft project-config/rebuild'
-	docker-compose exec -T app sh -c 'php craft up'
-	docker-compose exec -T app sh -c 'php craft migrate/up'
-	docker-compose exec -T app sh -c 'nohup ./queue_listen.sh > queue.log 2>&1 &'
-	docker-compose exec -T app sh -c 'cat .env'
+	docker compose up --build -d
+	docker compose ps
+	docker compose exec -T app sh -c 'chmod -R 777 /app'
+	docker compose exec -T app sh -c 'chown -R www-data:www-data /app'
+	docker compose exec -T mysql sh -c 'while ! mysqladmin ping -h"mysql" --silent; do sleep 1; done'
+	docker compose exec -T app sh -c 'php craft setup/security-key'
+	docker compose exec -T app sh -c 'echo DB_DRIVER=mysql >> .env'
+	docker compose exec -T app sh -c 'echo DB_SERVER=mysql >> .env'
+	docker compose exec -T app sh -c 'echo DB_DATABASE=${DB_DATABASE} >> .env'
+	docker compose exec -T app sh -c 'echo DB_USER=craft-lilt >> .env'
+	docker compose exec -T app sh -c 'echo DB_PASSWORD=craft-lilt >> .env'
+	docker compose exec -T app sh -c 'echo DB_SCHEMA=public >> .env'
+	docker compose exec -T app sh -c 'echo DB_TABLE_PREFIX= >> .env'
+	docker compose exec -T app sh -c 'echo CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS=1 >> .env'
+	docker compose exec -T app sh -c 'echo CRAFT_LILT_PLUGIN_QUEUE_MANAGER_WAIT_TIME_IN_SECONDS=86400 >> .env'
+	docker compose exec -T app sh -c 'php craft db/restore happylager.sql'
+	docker compose exec -T app sh -c 'php craft plugin/install craft-lilt-plugin'
+	docker compose exec -T app sh -c 'php craft plugin/install neo'
+	docker compose exec -T app sh -c 'php craft plugin/install super-table'
+	docker compose exec -T app sh -c 'php craft project-config/rebuild'
+	docker compose exec -T app sh -c 'php craft up'
+	docker compose exec -T app sh -c 'php craft migrate/up'
+	docker compose exec -T app sh -c 'nohup ./queue_listen.sh > queue.log 2>&1 &'
+	docker compose exec -T app sh -c 'cat .env'
 cli:
-	docker-compose exec app sh
+	docker compose exec app sh
 
 test:
 	docker run -u root -t -v ${PWD}:/e2e -w /e2e --env CYPRESS_CACHE_FOLDER=${CYPRESS_CACHE_FOLDER} node:18.12.1 npm install
