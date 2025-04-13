@@ -193,21 +193,9 @@ Cypress.Commands.add('instantFlow', ({
         }, 'httpResponse': {
           'statusCode': 503,
         }, 'times': {
-          'remainingTimes': 5, 'unlimited': false,
+          'remainingTimes': 10, 'unlimited': false,
         },
       }));
-      // cy.wrap(mockServerClient.mockAnyResponse({
-      //   'httpRequest': {
-      //     'method': 'POST', 'path': '/jobs/777/start', 'headers': [
-      //       {
-      //         'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
-      //       }],
-      //   }, 'httpResponse': {
-      //     'statusCode': 200,
-      //   }, 'times': {
-      //     'remainingTimes': 1, 'unlimited': false,
-      //   },
-      // }));
     } else {
       cy.wrap(mockServerClient.mockAnyResponse({
         'httpRequest': {
