@@ -1,0 +1,63 @@
+name: 🔁 Auto-update CraftCMS versions on new release
+
+#on:
+#  schedule:
+#    - cron: '0 * * * *' # every hour
+#  workflow_dispatch: # allow manual run
+
+on:
+  push:
+    branches:
+      - 4.x # CraftCMS v4
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  update-craft-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout this repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # needed for branch push
+
+      - name: 🛠 Setup Git config
+        run: |
+          git config user.name "GitHub Action Bot 🤖"
+          git config user.email "actions@github.com"
+
+      - name: 📦 Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq perl
+
+      - name: 🧱 Run make update
+        run: make update
+
+      - name: 📤 Commit and push changes (if any)
+        id: commit
+        run: |
+          if ! git diff --quiet; then
+            BRANCH="ci/4.x-update-craft-versions-$(date +'%Y%m%d-%H%M%S')"
+            git checkout -b "$BRANCH"
+            git add .github/workflows/tests.yml
+            git commit -m "🔄 Update CraftCMS versions matrix"
+            git push origin "$BRANCH"
+            echo "branch_name=$BRANCH" >> $GITHUB_ENV
+            echo "::set-output name=branch::$BRANCH"
+          else
+            echo "No changes to commit."
+          fi
+
+      - name: 🪄 Create pull request
+        if: steps.commit.outputs.branch != ''
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.commit.outputs.branch }}
+          title: "🔄 Update CraftCMS test matrix"
+          body: |
+            A new CraftCMS version has been released and the test matrix has been updated.
+
+            @hadomskyi please review and open branch `${{ steps.commit.outputs.branch }}`
