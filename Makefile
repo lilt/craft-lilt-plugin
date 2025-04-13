@@ -3,7 +3,7 @@
 
 export
 
-PHP_VERSION?=8.1
+PHP_VERSION?=8.0
 MYSQL_VERSION?=8.0
 
 up:
@@ -27,7 +27,7 @@ root:
 
 composer-install:
 	docker compose exec -T -u root cli-app sh -c "apk add git"
-	docker compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
+	#docker compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
 	docker compose exec -T -u root cli-app sh -c "rm -f composer.lock"
 	docker compose exec -T -u root cli-app sh -c "rm -rf vendor"
 	docker compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
@@ -93,3 +93,6 @@ test-craft-versions: prepare-container
 require-guzzle-v6:
 	docker compose exec -T -u www-data cli-app sh -c "php composer.phar require guzzlehttp/guzzle:^6.0 -W --no-scripts || true"
 	docker compose exec -T -u www-data cli-app sh -c 'if ! php composer.phar show -i | grep "guzzlehttp/guzzle" | grep "6."; then echo "Guzzle version 6 is not present."; exit 1; fi'
+
+update:
+	bash scripts/update-craft-versions.sh
