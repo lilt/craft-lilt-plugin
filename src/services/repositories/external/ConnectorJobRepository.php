@@ -46,7 +46,7 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
                 'exception' => $ex,
             ]);
 
-            if ($ex->getCode() === 500) {
+            if ($ex->getCode() >= 500 && $ex->getCode() < 600) {
                 throw $ex;
             }
 

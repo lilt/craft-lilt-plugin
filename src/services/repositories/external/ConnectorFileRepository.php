@@ -47,7 +47,7 @@ class ConnectorFileRepository extends AbstractConnectorExternalRepository implem
                 'exception' => $ex,
             ]);
 
-            if ($ex->getCode() === 500) {
+            if ($ex->getCode() >= 500 && $ex->getCode() < 600) {
                 throw $ex;
             }
 

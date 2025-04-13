@@ -30,6 +30,7 @@ jobs:
           "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-enable-after-publish.cy.js",
           "cypress/e2e/jobs/verified/success-path-single.cy.js",
           "cypress/e2e/jobs/instant/success-path-single.cy.js",
+          "cypress/e2e/jobs/instant/success-path-single-500-start.cy.js",
         ]
     runs-on: ubuntu-20.04
     steps:

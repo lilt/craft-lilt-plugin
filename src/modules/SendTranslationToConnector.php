@@ -17,6 +17,7 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exceptions\JobNotStartedException;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\SendTranslationCommand;
@@ -96,7 +97,7 @@ class SendTranslationToConnector extends AbstractRetryJob
 
         if (empty($translationRecord)) {
             // Translation should always exist
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf(
                     'Can\'t find translation %d for element %d with target site %s',
                     $this->translationId,
@@ -110,7 +111,7 @@ class SendTranslationToConnector extends AbstractRetryJob
 
         if (empty($jobElement)) {
             // Translation should always exist
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf(
                     'Can\'t find job %d for element %d',
                     $this->jobId,
@@ -170,9 +171,19 @@ class SendTranslationToConnector extends AbstractRetryJob
 
             // Only start job with status draft
             if ($liltJob->getStatus() === JobResponse::STATUS_DRAFT) {
-                Craftliltplugin::getInstance()->connectorJobRepository->start(
+                $result = Craftliltplugin::getInstance()->connectorJobRepository->start(
                     $command->getJob()->liltJobId
                 );
+                if (!$result) {
+                    Craft::error(
+                        sprintf(
+                            'Can\'t start job %d, lilt id: %d',
+                            $command->getJob()->id,
+                            $command->getJob()->liltJobId
+                        )
+                    );
+                    throw new JobNotStartedException("Can't start job", 500);
+                }
 
                 Craftliltplugin::getInstance()->jobLogsRepository->create(
                     $this->jobId,
