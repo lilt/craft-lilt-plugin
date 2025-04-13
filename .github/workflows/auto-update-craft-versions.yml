@@ -54,7 +54,7 @@ jobs:
         if: steps.commit.outputs.branch != ''
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_WORKFLOW_TOKEN }}
           branch: ${{ steps.commit.outputs.branch }}
           title: "🔄 Update CraftCMS test matrix"
           body: |

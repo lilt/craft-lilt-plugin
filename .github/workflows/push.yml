@@ -1,11 +1,11 @@
 name: Tests
-on:
-  push:
-    branches:
-      - 4.x #CraftCMS v4
-  pull_request:
-    branches:
-      - "*"
+#on:
+#  push:
+#    branches:
+#      - 4.x #CraftCMS v4
+#  pull_request:
+#    branches:
+#      - "*"
 jobs:
   tests-php-80:
     runs-on: ubuntu-20.04
