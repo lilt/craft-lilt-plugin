@@ -302,8 +302,8 @@ Cypress.Commands.add('instantFlow', ({
   } else {
     cy.waitForJobStatus('failed');
     cy.contains("Unexpected error happened while processing translations. You can contact our customer support").should('be.visible');
-    cy.contains("Unexpected error: Can't start job").should('be.visible');
-    cy.contains("Job failed after 10 attempt(s)").should('be.visible');
+    cy.contains("Unexpected error: [503] Server error: `POST http://mockserver:1080/jobs/777/start` resulted").should('be.visible');
+    cy.contains("Job failed after 3 attempt(s)").should('be.visible');
 
     cy.wrap(
       mockServerClient.retrieveRecordedRequests({
