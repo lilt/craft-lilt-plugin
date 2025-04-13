@@ -18,15 +18,15 @@ set -euo pipefail
 
 WORKFLOW_FILE=".github/workflows/craft-versions.yml"
 IGNORED_VERSIONS=(
-  # TODO: check this
   # Investigation:
   # https://github.com/craftcms/cms/issues/11083
-  #"4.0.0", contains FK bug, it tries to update field on draft (after apply draft removed, so it fails)
+  #"4.0.0" and  "4.0.0.1", contains FK bug, it tries to update field on draft (after apply draft removed, so it fails)
   "4.0.0"
-   # TODO: check this, seems like bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582189269?pr=146
+  "4.0.0.1"
+   # Seems like bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582189269?pr=146
   "4.5.0"
   "4.5.1"
-   # TODO: check this, bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582193181?pr=146
+   # Bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582193181?pr=146
   "4.7.2"
 )
 
