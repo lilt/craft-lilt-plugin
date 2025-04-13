@@ -40,7 +40,7 @@ jobs:
           if ! git diff --quiet; then
             BRANCH="ci/4.x-update-craft-versions-$(date +'%Y%m%d-%H%M%S')"
             git checkout -b "$BRANCH"
-            git add .github/workflows/tests.yml
+            git add .github/workflows/craft-versions.yml
             git commit -m "🔄 Update CraftCMS versions matrix"
             git remote set-url origin https://x-access-token:${{ secrets.GH_WORKFLOW_TOKEN }}@github.com/${{ github.repository }}
             git push origin "$BRANCH"
