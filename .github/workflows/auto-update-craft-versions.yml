@@ -46,4 +46,5 @@ jobs:
 
             @hadomskyi please review and open branch `ci/4.x-update-craft-versions-$(date +'%Y%m%d-%H%M%S')`
           branch: ci/4.x-update-craft-versions
+          base: 4.x-fix-start-job
           delete-branch: true
