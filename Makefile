@@ -7,86 +7,101 @@ PHP_VERSION?=8.1
 MYSQL_VERSION?=5.7
 
 up:
-	docker-compose up -d
-	docker-compose exec -T mysql-test sh -c 'while ! mysqladmin ping -h"mysql-test" --silent; do sleep 1; done'
+	docker compose up -d
+	docker compose exec -T mysql-test sh -c 'while ! mysqladmin ping -h"mysql-test" --silent; do sleep 1; done'
+
+create-migration:
+	docker compose exec -T -u www-data cli-app sh -c "php craft migrate/create --plugin=craft-lilt-plugin add_job_attempts"
 
 down:
-	docker-compose down -v --remove-orphans
+	docker compose down -v --remove-orphans
 
 restart: down
-	docker-compose up -d
+	docker compose up -d
 
 cli:
-	docker-compose exec -u www-data cli-app sh
+	docker compose exec -u www-data cli-app sh
 
 root:
-	docker-compose exec -u root cli-app sh
+	docker compose exec -u root cli-app sh
+
+require-craft:
+	@if [ -n "$(CRAFT_VERSION)" ]; then \
+	  echo "Installing CraftCMS version $(CRAFT_VERSION)..."; \
+	  docker compose exec -T -u www-data cli-app sh -c "php composer.phar require craftcms/cms:$(CRAFT_VERSION) -W"; \
+	else \
+	  echo "⚠️  CRAFT_VERSION is not set. Skipping CraftCMS installation."; \
+	fi
 
 composer-install:
-	docker-compose exec -T -u root cli-app sh -c "apk add git"
-	docker-compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
-	docker-compose exec -T -u root cli-app sh -c "rm -f composer.lock"
-	docker-compose exec -T -u root cli-app sh -c "rm -rf vendor"
-	docker-compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
-	docker-compose exec -T -u www-data cli-app sh -c "curl -s https://getcomposer.org/installer | php"
-	docker-compose exec -T -u www-data cli-app sh -c "php composer.phar install"
+	docker compose exec -T -u root cli-app sh -c "apk add git"
+	docker compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
+	docker compose exec -T -u root cli-app sh -c "rm -f composer.lock"
+	docker compose exec -T -u root cli-app sh -c "rm -rf vendor"
+	docker compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
+	docker compose exec -T -u www-data cli-app sh -c "curl -s https://getcomposer.org/installer | php"
+	docker compose exec -T -u www-data cli-app sh -c "php composer.phar install"
+	$(MAKE) require-craft
 
 quality:
-	docker-compose exec -T -u www-data cli-app sh -c "curl -L -s https://phar.phpunit.de/phpcpd.phar --output phpcpd.phar"
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/phpcs"
-	docker-compose exec -T -u www-data cli-app sh -c "php phpcpd.phar src --exclude /craft-lilt-plugin/src/migrations"
+	docker compose exec -T -u www-data cli-app sh -c "curl -L -s https://phar.phpunit.de/phpcpd.phar --output phpcpd.phar"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/phpcs"
+	docker compose exec -T -u www-data cli-app sh -c "php phpcpd.phar src --exclude /craft-lilt-plugin/src/migrations"
 
 quality-fix:
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/phpcbf"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/phpcbf"
 
 codecept-build:
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept build"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept build"
 
 coverage-xdebug:
-	docker-compose exec -T -u www-data cli-app sh -c "php -dxdebug.mode=coverage vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
+	docker compose exec -T -u www-data cli-app sh -c "php -dxdebug.mode=coverage vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
 
 install-pcov:
-	docker-compose exec -T -u root cli-app sh -c "apk --no-cache add pcre-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c"
-	docker-compose exec -T -u root cli-app sh -c "pecl install pcov || true"
-	docker-compose exec -T -u root cli-app sh -c "docker-php-ext-enable pcov"
+	docker compose exec -T -u root cli-app sh -c "apk --no-cache add pcre-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c"
+	docker compose exec -T -u root cli-app sh -c "pecl install pcov || true"
+	docker compose exec -T -u root cli-app sh -c "docker-php-ext-enable pcov"
 
 coverage: install-pcov
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
 
 tests-with-coverage: codecept-build install-pcov unit-coverage integration-coverage functional-coverage
 
 integration-coverage:
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration --coverage-xml=coverage-integration.xml"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration --coverage-xml=coverage-integration.xml"
 
 functional-coverage:
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional --coverage-xml=coverage-functional.xml"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional --coverage-xml=coverage-functional.xml"
 
 unit-coverage:
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run unit --coverage-xml=coverage-unit.xml"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run unit --coverage-xml=coverage-unit.xml"
 
 integration: codecept-build
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration"
 
 functional: codecept-build
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional"
 
 unit: codecept-build
-	docker-compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run unit"
+	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run unit"
 
 test: functional integration unit
 
 prepare-container:
-	PHP_VERSION=7.2 docker-compose up -d
-	docker-compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
-	docker-compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
-	docker-compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
-	docker-compose exec -T -u root cli-app sh -c "curl -s https://getcomposer.org/installer | php"
-	docker-compose exec -T -u root cli-app sh -c "cp composer.phar /bin/composer"
+	docker compose up -d
+	docker compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
+	docker compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
+	docker compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
+	docker compose exec -T -u root cli-app sh -c "curl -s https://getcomposer.org/installer | php"
+	docker compose exec -T -u root cli-app sh -c "cp composer.phar /bin/composer"
 
 test-craft-versions: prepare-container
-	docker-compose exec -T -u www-data cli-app bash -c \
+	docker compose exec -T -u www-data cli-app bash -c \
 		"./craft-versions.sh ${CRAFT_VERSION}"
 
 require-guzzle-v6:
-	docker-compose exec -T -u www-data cli-app sh -c "php composer.phar require guzzlehttp/guzzle:^6.0 -W --no-scripts || true"
-	docker-compose exec -T -u www-data cli-app sh -c 'if ! php composer.phar show -i | grep "guzzlehttp/guzzle" | grep "6."; then echo "Guzzle version 6 is not present."; exit 1; fi'
+	docker compose exec -T -u www-data cli-app sh -c "php composer.phar require guzzlehttp/guzzle:^6.0 -W --no-scripts || true"
+	docker compose exec -T -u www-data cli-app sh -c 'if ! php composer.phar show -i | grep "guzzlehttp/guzzle" | grep "6."; then echo "Guzzle version 6 is not present."; exit 1; fi'
+
+update:
+	bash scripts/update-craft-versions.sh
