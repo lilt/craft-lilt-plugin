@@ -27,6 +27,15 @@ class JobRepository
         return Job::findAll(['id' => $ids]);
     }
 
+    public function updateJobStatusById(int $id, string $status): bool
+    {
+        return JobRecord::updateAll([
+            "status" => $status,
+        ], [
+            "id" => $id
+        ]) > 0;
+    }
+
     public function saveJob(Job $job): bool
     {
         $jobRecord = new JobRecord();

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\services;
 
 use Craft;
-use fruitstudios\linkit\fields\LinkitField;
 use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
 use LiltConnectorSDK\Api\SettingsApi;
@@ -34,6 +33,7 @@ use lilthq\craftliltplugin\services\handlers\field\copier\NeoFieldCopier;
 use lilthq\craftliltplugin\services\handlers\field\copier\SuperTableFieldCopier;
 use lilthq\craftliltplugin\services\handlers\field\CopyFieldsHandler;
 use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
+use lilthq\craftliltplugin\services\handlers\PublishDraftAsyncHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
@@ -121,6 +121,23 @@ class ServiceInitializer
                             CopyFieldsHandler::DEFAULT_FIELD_COPIER => new DefaultFieldCopier()
                         ]
                     )
+                );
+            },
+        ]);
+        $pluginInstance->setComponents([
+            'publishDraftsHandler' => function () use ($pluginInstance) {
+                return new PublishDraftHandler(
+                    new CopyFieldsHandler(
+                        [
+                            CraftliltpluginParameters::CRAFT_FIELDS_MATRIX => new MatrixFieldCopier(),
+                            CraftliltpluginParameters::BENF_NEO_FIELD => new NeoFieldCopier(),
+                            CraftliltpluginParameters::CRAFT_FIELDS_SUPER_TABLE => new SuperTableFieldCopier(),
+
+                            CopyFieldsHandler::DEFAULT_FIELD_COPIER => new DefaultFieldCopier()
+                        ]
+                    ),
+                    Craft::$app->getDrafts(),
+                    $pluginInstance->settingsRepository
                 );
             },
         ]);
@@ -265,10 +282,10 @@ class ServiceInitializer
                     'class' => ConnectorJobRepository::class,
                     'apiInstance' => $pluginInstance->connectorJobsApi,
                 ],
-            'publishDraftsHandler' =>
+            'publishDraftsHandlerAsync' =>
                 [
-                    'class' => PublishDraftHandler::class,
-                    'draftRepository' => Craft::$app->getDrafts(),
+                    'class' => PublishDraftAsyncHandler::class,
+                    'translationRepository' => $pluginInstance->translationRepository
                 ],
             'connectorTranslationRepository' =>
                 [

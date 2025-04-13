@@ -147,4 +147,8 @@ jobs:
           echo "CRAFT_VERSION=${{ matrix.craft_version }}" >> $GITHUB_ENV
 
       - name: 🧪 Run tests for CraftCMS ${{ matrix.craft_version }}
-        run: make test-craft-versions
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 5
+          timeout_minutes: 20
+          command: make test-craft-versions

@@ -207,11 +207,11 @@ class CraftLiltPluginHelper extends Module
     private function setOption(string $name, int $value): void
     {
         $settingRecord = SettingRecord::findOne(
-            ['name' => SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC]
+            ['name' => $name]
         );
         if (!$settingRecord) {
             $settingRecord = new SettingRecord(
-                ['name' => SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC]
+                ['name' => $name]
             );
         }
 

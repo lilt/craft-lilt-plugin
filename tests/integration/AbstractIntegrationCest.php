@@ -7,6 +7,7 @@ namespace lilthq\craftliltplugintests\integration;
 use Craft;
 use craft\helpers\Db;
 use IntegrationTester;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use WireMock\Client\WireMock;
 use yii\db\Exception;
 
@@ -21,9 +22,15 @@ class AbstractIntegrationCest
         Db::truncateTable(Craft::$app->queue->tableName);
 
         $I->clearQueue();
+
+        $I->disableOption(SettingsRepository::COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET);
+        $I->disableOption(SettingsRepository::PUBLISH_TRANSLATIONS_ASYNC);
     }
     public function _after(IntegrationTester $I): void
     {
         $I->expectAllRequestsAreMatched();
+
+        $I->disableOption(SettingsRepository::COPY_ENTRIES_SLUG_FROM_SOURCE_TO_TARGET);
+        $I->disableOption(SettingsRepository::PUBLISH_TRANSLATIONS_ASYNC);
     }
 }

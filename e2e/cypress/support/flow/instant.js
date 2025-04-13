@@ -17,6 +17,7 @@ Cypress.Commands.add('instantFlow', ({
   batchPublishing = false, //publish all translations at once with publish button
   entryId = 24,
   splitSend = true,
+  publishTranslationsAsync = false,
   options = {
     startFailure: false,
   },
@@ -30,6 +31,7 @@ Cypress.Commands.add('instantFlow', ({
   cy.setConfigurationOption('enableEntries', enableAfterPublish);
   cy.setConfigurationOption('copySlug', copySlug);
   cy.setConfigurationOption('splitSend', splitSend);
+  cy.setConfigurationOption('publishTranslationsAsync', publishTranslationsAsync);
 
   if (copySlug) {
     // update slug on entry and enable slug copy option

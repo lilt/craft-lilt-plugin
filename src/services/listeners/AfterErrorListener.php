@@ -19,6 +19,7 @@ use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
 use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
+use lilthq\craftliltplugin\modules\PublishTranslation;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -35,6 +36,7 @@ class AfterErrorListener implements ListenerInterface
         FetchTranslationFromConnector::class,
         SendJobToConnector::class,
         SendTranslationToConnector::class,
+        PublishTranslation::class,
     ];
 
     public function register(): void

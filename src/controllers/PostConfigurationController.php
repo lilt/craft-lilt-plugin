@@ -120,6 +120,17 @@ class PostConfigurationController extends AbstractJobController
             (string)$queueDisableAutomaticSync
         );
 
+        // publishTranslationsAsync
+        $publishTranslationsAsync = $request->getBodyParam('publishTranslationsAsync');
+        if (empty($publishTranslationsAsync)) {
+            $publishTranslationsAsync = 0;
+        }
+
+        Craftliltplugin::getInstance()->settingsRepository->save(
+            SettingsRepository::PUBLISH_TRANSLATIONS_ASYNC,
+            (string)$publishTranslationsAsync
+        );
+
         $settingsRequest = new SettingsRequest();
         $settingsRequest->setProjectPrefix(
             $request->getBodyParam('projectPrefix')

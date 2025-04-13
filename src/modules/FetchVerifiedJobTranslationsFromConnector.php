@@ -183,6 +183,16 @@ class FetchVerifiedJobTranslationsFromConnector extends BaseJob implements Retry
         $mutex->release($mutexKey);
     }
 
+    public static function getDelay(): int
+    {
+        $envDelay = getenv('CRAFT_LILT_PLUGIN_QUEUE_DELAY_IN_SECONDS');
+        if (!empty($envDelay) || $envDelay === '0') {
+            return (int)$envDelay;
+        }
+
+        return self::DELAY_IN_SECONDS;
+    }
+
     /**
      * @inheritdoc
      */
