@@ -43,7 +43,7 @@ jobs:
             git checkout -b "$BRANCH"
             git add .github/workflows/craft-versions.yml
             git commit -m "🔄 Update CraftCMS versions matrix"
-            git push origin "$BRANCH"
+            git push https://x-access-token:${{ secrets.GH_WORKFLOW_TOKEN }}@github.com/${{ github.repository }} "$BRANCH"
             echo "branch_name=$BRANCH" >> $GITHUB_ENV
             echo "::set-output name=branch::$BRANCH"
           else
