@@ -18,6 +18,9 @@ Cypress.Commands.add('instantFlow', ({
   entryId = 24,
   splitSend = true,
   publishTranslationsAsync = false,
+  options = {
+    startFailure: false,
+  },
 }) => {
   const isMockserverEnabled = Cypress.env('MOCKSERVER_ENABLED');
 
@@ -50,24 +53,45 @@ Cypress.Commands.add('instantFlow', ({
   if (isMockserverEnabled) {
     cy.wrap(mockServerClient.reset());
 
-    cy.wrap(mockServerClient.mockAnyResponse({
-      'httpRequest': {
-        'method': 'GET', 'path': '/jobs/777', 'headers': [
-          {
-            'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
-          }],
-      }, 'httpResponse': {
-        'statusCode': 200, 'body': JSON.stringify({
-          'id': 777,
-          'status': 'complete',
-          'errorMsg': '',
-          'createdAt': '2019-08-24T14:15:22Z',
-          'updatedAt': '2019-08-24T14:15:22Z',
-        }),
-      }, 'times': {
-        'unlimited': true,
-      },
-    }));
+    if (options.startFailure) {
+      cy.wrap(mockServerClient.mockAnyResponse({
+        'httpRequest': {
+          'method': 'GET', 'path': '/jobs/777', 'headers': [
+            {
+              'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
+            }],
+        }, 'httpResponse': {
+          'statusCode': 200, 'body': JSON.stringify({
+            'id': 777,
+            'status': 'draft',
+            'errorMsg': '',
+            'createdAt': '2019-08-24T14:15:22Z',
+            'updatedAt': '2019-08-24T14:15:22Z',
+          }),
+        }, 'times': {
+          'unlimited': true,
+        },
+      }));
+    } else {
+      cy.wrap(mockServerClient.mockAnyResponse({
+        'httpRequest': {
+          'method': 'GET', 'path': '/jobs/777', 'headers': [
+            {
+              'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
+            }],
+        }, 'httpResponse': {
+          'statusCode': 200, 'body': JSON.stringify({
+            'id': 777,
+            'status': 'complete',
+            'errorMsg': '',
+            'createdAt': '2019-08-24T14:15:22Z',
+            'updatedAt': '2019-08-24T14:15:22Z',
+          }),
+        }, 'times': {
+          'unlimited': true,
+        },
+      }));
+    }
 
     let translationsResult = [];
 
@@ -161,18 +185,34 @@ Cypress.Commands.add('instantFlow', ({
       },
     }));
 
-    cy.wrap(mockServerClient.mockAnyResponse({
-      'httpRequest': {
-        'method': 'POST', 'path': '/jobs/777/start', 'headers': [
-          {
-            'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
-          }],
-      }, 'httpResponse': {
-        'statusCode': 200,
-      }, 'times': {
-        'remainingTimes': 1, 'unlimited': false,
-      },
-    }));
+    if (options.startFailure) {
+      cy.wrap(mockServerClient.mockAnyResponse({
+        'httpRequest': {
+          'method': 'POST', 'path': '/jobs/777/start', 'headers': [
+            {
+              'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
+            }],
+        }, 'httpResponse': {
+          'statusCode': 503,
+        }, 'times': {
+          'remainingTimes': 10, 'unlimited': false,
+        },
+      }));
+    } else {
+      cy.wrap(mockServerClient.mockAnyResponse({
+        'httpRequest': {
+          'method': 'POST', 'path': '/jobs/777/start', 'headers': [
+            {
+              'name': 'Authorization', 'values': ['Bearer this_is_apy_key'],
+            }],
+        }, 'httpResponse': {
+          'statusCode': 200,
+        }, 'times': {
+          'remainingTimes': 1, 'unlimited': false,
+        },
+      }));
+    }
+
 
     for (const language of languages) {
       cy.wrap(mockServerClient.mockAnyResponse({
@@ -208,12 +248,17 @@ Cypress.Commands.add('instantFlow', ({
       invoke('text').
       should('contain', 'In Progress');
 
+  cy.log('Waiting for translations to be ready');
+
   cy.waitForTranslationDrafts(
       jobTitle,
       100,
       0,
       1000
   );
+
+  cy.log('Done waiting for translations to be ready');
+
 
   if (isMockserverEnabled) {
 
@@ -253,8 +298,37 @@ Cypress.Commands.add('instantFlow', ({
     }
   }
 
+  if (!options.startFailure) {
 //wait for job to be in status ready-for-review
-  cy.waitForJobStatus('ready-for-review');
+    cy.waitForJobStatus('ready-for-review');
+  } else {
+    cy.waitForJobStatus('failed');
+    cy.contains("Unexpected error happened while processing translations. You can contact our customer support").should('be.visible');
+    cy.contains("Unexpected error: [503] Server error: `POST http://mockserver:1080/jobs/777/start` resulted").should('be.visible');
+    cy.contains("Job failed after 3 attempt(s)").should('be.visible');
+
+    cy.wrap(
+      mockServerClient.retrieveRecordedRequests({
+        method: 'POST',
+        path: '/jobs/777/start',
+      })
+    ).then((requests) => {
+      // You can log them to console
+      console.log('Received POST /jobs/777/start calls:', requests);
+
+      // Or print in order:
+      requests.forEach((req, index) => {
+        console.log(`Request #${index + 1}:`, {
+          body: req.body && req.body.string,
+          headers: req.headers,
+        });
+      });
+
+    });
+
+
+    return;
+  }
 
 //assert all the values
   cy.

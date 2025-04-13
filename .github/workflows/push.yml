@@ -114,7 +114,7 @@ jobs:
       - name: Quality
         run: make quality
       - name: Use the Upload Artifact GitHub Action
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: assets-for-download
           path: composer.lock

@@ -61,6 +61,7 @@ Cypress.Commands.add('createJob', (title, flow, languages = ['de']) => {
 Cypress.Commands.add('openJob', (title) => {
   const appUrl = Cypress.env('APP_URL');
   cy.visit(`${appUrl}/admin/craft-lilt-plugin`);
+  cy.wait(1000)
   cy.get('#nav-craft-lilt-plugin > a').click();
 
   cy.get(`.element[data-label="${title}"]`).click();
@@ -798,5 +799,7 @@ Cypress.Commands.add('releaseQueueManager', () => {
 Cypress.Commands.add('clearCraftCache', () => {
   const appUrl = Cypress.env('APP_URL');
   cy.visit(`${appUrl}/admin/utilities/clear-caches`);
+  cy.wait(1000);
   cy.contains('button', 'Clear caches').click();
+  cy.wait(1000);
 });

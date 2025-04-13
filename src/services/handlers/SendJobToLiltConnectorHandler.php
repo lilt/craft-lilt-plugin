@@ -15,6 +15,7 @@ use craft\helpers\Queue;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exceptions\JobNotStartedException;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -188,7 +189,17 @@ class SendJobToLiltConnectorHandler
             return;
         }
 
-        $this->connectorJobRepository->start($jobLilt->getId());
+        $result = $this->connectorJobRepository->start($jobLilt->getId());
+        if (!$result) {
+            Craft::error(
+                sprintf(
+                    'Can\'t start job %d, lilt id: %d',
+                    $jobLilt->id,
+                    $jobLilt->liltJobId
+                )
+            );
+            throw new JobNotStartedException("Can't start job", 500);
+        }
 
         $this->jobLogsRepository->create(
             $job->id,
