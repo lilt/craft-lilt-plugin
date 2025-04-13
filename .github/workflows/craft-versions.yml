@@ -1,21 +1,19 @@
-name: Tests on multiple craft versions
+name: 🧪 Tests on multiple CraftCMS versions
+
 on:
   push:
     branches:
-      - 4.x #CraftCMS v4
+      - 4.x # CraftCMS v4
   pull_request:
     branches:
       - "*"
+
 jobs:
   tests:
     strategy:
       fail-fast: false
       matrix:
         craft_version: [
-          # TODO: check this
-          # Investigation:
-          # https://github.com/craftcms/cms/issues/11083
-          #"4.0.0", contains FK bug, it tries to update field on draft (after apply draft removed, so it fails)
           "4.0.1",
           "4.0.2",
           "4.0.3",
@@ -23,7 +21,6 @@ jobs:
           "4.0.5",
           "4.0.5.1",
           "4.0.5.2",
-          "4.0.6",
           "4.0.6",
           "4.1.0",
           "4.1.0.1",
@@ -86,9 +83,6 @@ jobs:
           "4.4.16",
           "4.4.16.1",
           "4.4.17",
-          # TODO: check this, seems like bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582189269?pr=146
-          # "4.5.0",
-          # "4.5.1",
           "4.5.2",
           "4.5.3",
           "4.5.4",
@@ -104,12 +98,11 @@ jobs:
           "4.5.12",
           "4.5.13",
           "4.5.14",
+          "4.5.15",
           "4.6.0",
           "4.6.1",
           "4.7.0",
           "4.7.1",
-          # TODO: check this, bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582193181?pr=146
-          # "4.7.2",
           "4.7.2.1",
           "4.7.3",
           "4.7.4",
@@ -124,11 +117,14 @@ jobs:
         ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v2
+
+      - name: 🧾 Set environment variables
         id: step_one
         run: |
           echo "PHP_VERSION=8.1" >> $GITHUB_ENV
           echo "CRAFT_VERSION=${{ matrix.craft_version }}" >> $GITHUB_ENV
-      - name: Test craft versions ${{ matrix.craft_version }}
+
+      - name: 🧪 Run tests for CraftCMS ${{ matrix.craft_version }}
         run: make test-craft-versions

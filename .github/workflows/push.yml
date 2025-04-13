@@ -15,6 +15,7 @@ jobs:
         id: step_one
         run: |
           echo "PHP_VERSION=8.0" >> $GITHUB_ENV
+          echo "CRAFT_VERSION=4.5.15" >> $GITHUB_ENV
       - name: Build containers
         run: make up
       - name: Composer install
@@ -31,6 +32,7 @@ jobs:
         run: |
           echo "PHP_VERSION=8.0" >> $GITHUB_ENV
           echo "MYSQL_VERSION=8.0" >> $GITHUB_ENV
+          echo "CRAFT_VERSION=4.5.15" >> $GITHUB_ENV
       - name: Build containers
         run: make up
       - name: Composer install
@@ -45,6 +47,7 @@ jobs:
       - name: Set the value
         run: |
           echo "PHP_VERSION=8.1" >> $GITHUB_ENV
+          echo "CRAFT_VERSION=4.5.15" >> $GITHUB_ENV
       - name: Build containers
         run: make up
       - name: Composer install
@@ -52,7 +55,7 @@ jobs:
       - name: Quality
         run: make quality
       - name: Use the Upload Artifact GitHub Action
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: assets-for-download
           path: composer.lock
