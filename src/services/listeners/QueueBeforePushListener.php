@@ -12,6 +12,7 @@ namespace lilthq\craftliltplugin\services\listeners;
 use Craft;
 use craft\queue\Queue;
 use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
+use Exception;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
 use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
@@ -74,7 +75,11 @@ class QueueBeforePushListener implements ListenerInterface
 
         // Release all previously queued jobs for lilt plugin jobs
         foreach ($jobsInfo as $jobInfo) {
-            $jobDetails = Craft::$app->getQueue()->getJobDetails((string)$jobInfo['id']);
+            try {
+                $jobDetails = Craft::$app->getQueue()->getJobDetails((string)$jobInfo['id']);
+            } catch (Exception $e) {
+                continue;
+            }
 
             if (!in_array(get_class($jobDetails['job']), self::SUPPORTED_JOBS)) {
                 continue;

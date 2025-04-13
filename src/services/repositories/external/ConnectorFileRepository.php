@@ -37,20 +37,7 @@ class ConnectorFileRepository extends AbstractConnectorExternalRepository implem
                 $filePath
             );
         } catch (ApiException $ex) {
-            Craft::warning([
-                'message' => sprintf(
-                    'Communication exception when calling JobsApi->servicesApiJobsAddFile: %s',
-                    $ex->getMessage()
-                ),
-                'exception_message' => $ex->getMessage(),
-                'exception_trace' => $ex->getTrace(),
-                'exception' => $ex,
-            ]);
-
-            if ($ex->getCode() === 500) {
-                throw $ex;
-            }
-
+            $this->handleException($ex);
             return false;
         } catch (Exception $ex) {
             Craft::error([

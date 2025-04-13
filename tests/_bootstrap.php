@@ -4,6 +4,7 @@ use craft\test\TestSetup;
 use lilthq\craftliltplugin\Craftliltplugin;
 
 ini_set('date.timezone', 'UTC');
+date_default_timezone_set('UTC');
 
 // Use the current installation of Craft
 define('CRAFT_STORAGE_PATH', __DIR__ . '/_craft/storage');
@@ -14,27 +15,12 @@ define('CRAFT_TRANSLATIONS_PATH', __DIR__ . '/_craft/translations');
 define('CRAFT_TESTS_PATH', __DIR__ . '/_craft/tests');
 define('CRAFT_VENDOR_PATH', dirname(__DIR__) . '/vendor');
 
+define('CRAFT_ROOT_PATH', dirname(__DIR__));
+
+define('TEST_SUPERTABLE_PLUGIN', false);
+define('TEST_LINKIT_PLUGIN', false);
+define('TEST_COLOUR_SWATCHES_PLUGIN', false);
 
 $devMode = true;
 
-#include '../vendor/autoload.php';
-
-// Load dotenv?
-#if (class_exists('Dotenv\Dotenv') && file_exists('.env')) {
-#    Dotenv\Dotenv::create(__DIR__)->load();
-#}
-
 TestSetup::configureCraft();
-
-#/**
-# * @var Craft $craft
-# */
-#$craft = TestSetup::warmCraft();
-
-
-#$test = craft\test\Craft::$instance;
-#\craft\test\Craft::$instance->setupDb();
-
-#$plugins = Craft::$app->getUser()->loginByUserId(1);
-
-#$here = true;

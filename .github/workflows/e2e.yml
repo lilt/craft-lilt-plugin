@@ -31,6 +31,7 @@ jobs:
           "cypress/e2e/jobs/verified/success-path-multiple-single-publishing-enable-after-publish.cy.js",
           "cypress/e2e/jobs/verified/success-path-single.cy.js",
           "cypress/e2e/jobs/instant/success-path-single.cy.js",
+          "cypress/e2e/jobs/instant/success-path-single-500-start.cy.js",
         ]
     runs-on: ubuntu-latest
     steps:
@@ -59,7 +60,7 @@ jobs:
           docker compose cp app:/app/composer.json cypress/craft
           docker compose cp app:/app/composer.lock cypress/craft
       - name: Use the Upload Artifact GitHub Action
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: "${{ github.job }}_${{ github.run_id }}_${{ github.workflow }}_e2e_artifacts"
