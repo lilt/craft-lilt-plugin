@@ -1,11 +1,13 @@
-name: Tests on multiple craft versions
+name: 🧪 Tests on multiple CraftCMS versions
+
 on:
   push:
     branches:
-      - 4.x #CraftCMS v4
+      - 4.x # CraftCMS v4
   pull_request:
     branches:
       - "*"
+
 jobs:
   tests:
     strategy:
@@ -185,14 +187,18 @@ jobs:
           "4.14.12",
           "4.14.13",
           "4.14.14",
-          "4.14.15",        ]
+          "4.14.15"
+        ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Set the value
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v2
+
+      - name: 🧾 Set environment variables
         id: step_one
         run: |
           echo "PHP_VERSION=8.1" >> $GITHUB_ENV
           echo "CRAFT_VERSION=${{ matrix.craft_version }}" >> $GITHUB_ENV
-      - name: Test craft versions ${{ matrix.craft_version }}
+
+      - name: 🧪 Run tests for CraftCMS ${{ matrix.craft_version }}
         run: make test-craft-versions
