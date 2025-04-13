@@ -246,12 +246,17 @@ Cypress.Commands.add('instantFlow', ({
       invoke('text').
       should('contain', 'In Progress');
 
+  cy.log('Waiting for translations to be ready');
+
   cy.waitForTranslationDrafts(
       jobTitle,
       100,
       0,
       1000
   );
+
+  cy.log('Done waiting for translations to be ready');
+
 
   if (isMockserverEnabled) {
 
