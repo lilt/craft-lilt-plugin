@@ -2,43 +2,41 @@
 set -euo pipefail
 
 ################################################################################
-# This script updates the list of CraftCMS 4.x versions used in the GitHub
-# Actions workflow for plugin testing.
+# This script updates the list of CraftCMS 3.x versions used in the GitHub
+# Actions workflow for plugin testing, starting from version 3.7.0.
 #
 # Why:
-# Craft frequently releases new 4.x versions, and we want to automatically
-# test our plugin against all of them, while skipping known-broken versions.
+# Craft 3.7.0+ is still used in legacy systems, and plugin compatibility
+# must be ensured. This script automates that check matrix update.
 #
 # What it does:
-# 1. Downloads all available CraftCMS 4.* versions from Packagist.
-# 2. Filters to only include full releases (no beta/RC/dev).
+# 1. Downloads all available CraftCMS 3.* versions from Packagist.
+# 2. Filters to only include full releases (no beta/RC/dev), and >= 3.7.0.
 # 3. Skips known-broken versions listed in IGNORED_VERSIONS.
 # 4. Updates the GitHub Actions workflow file with the new list.
 ################################################################################
 
 WORKFLOW_FILE=".github/workflows/craft-versions.yml"
 IGNORED_VERSIONS=(
-  # Investigation:
-  # https://github.com/craftcms/cms/issues/11083
-  #"4.0.0" and  "4.0.0.1", contains FK bug, it tries to update field on draft (after apply draft removed, so it fails)
-  "4.0.0"
-  "4.0.0.1"
-   # Seems like bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582189269?pr=146
-  "4.5.0"
-  "4.5.1"
-   # Bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582193181?pr=146
-  "4.7.2"
+  # "3.7.40" and "3.7.40.1" contain a FK bug: https://github.com/craftcms/cms/issues/11083
+  "3.7.40"
+  "3.7.40.1"
 )
 
 echo "📦 Fetching CraftCMS versions from Packagist..."
 
 ALL_VERSIONS=$(curl -s "https://repo.packagist.org/p2/craftcms/cms.json" |
   jq -r '.packages["craftcms/cms"][] | .version' |
-  grep -E '^4\.[0-9]+(\.[0-9]+){1,2}$' |  # Only 4.x.x or 4.x.x.x
+  grep -E '^3\.[0-9]+(\.[0-9]+){1,2}$' |  # Only full releases: 3.x.x or 3.x.x.x
   sort -V)
 
 FILTERED=()
 for version in $ALL_VERSIONS; do
+  # Only include >= 3.7.0
+  if [[ "$version" < "3.7.0" ]]; then
+    continue
+  fi
+
   skip=false
   for ignored in "${IGNORED_VERSIONS[@]}"; do
     if [[ "$version" == "$ignored" ]]; then
