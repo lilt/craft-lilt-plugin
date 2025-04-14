@@ -3,7 +3,7 @@
   "name": "automation-cypress",
   "version": "1.0.0",
   "dependencies": {
-    "cypress": "^12.2.0",
+    "cypress": "^14.3.0",
     "cypress-slow-down": "^1.2.1",
     "mockserver-client": "^5.14.0"
   },
