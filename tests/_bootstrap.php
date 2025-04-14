@@ -4,6 +4,7 @@ use craft\test\TestSetup;
 use lilthq\craftliltplugin\Craftliltplugin;
 
 ini_set('date.timezone', 'UTC');
+date_default_timezone_set('UTC');
 
 // Use the current installation of Craft
 define('CRAFT_STORAGE_PATH', __DIR__ . '/_craft/storage');
@@ -13,6 +14,8 @@ define('CRAFT_MIGRATIONS_PATH', __DIR__ . '/_craft/migrations');
 define('CRAFT_TRANSLATIONS_PATH', __DIR__ . '/_craft/translations');
 define('CRAFT_TESTS_PATH', __DIR__ . '/_craft/tests');
 define('CRAFT_VENDOR_PATH', dirname(__DIR__) . '/vendor');
+
+define('CRAFT_ROOT_PATH', dirname(__DIR__));
 
 define('TEST_SUPERTABLE_PLUGIN', false);
 define('TEST_LINKIT_PLUGIN', false);

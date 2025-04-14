@@ -18,9 +18,9 @@
       "type": "path",
       "url": "/tmp/craft-lilt-plugin",
       "options": {
+        "symlink": false,
         "versions": {
-          "lilt/craft-lilt-plugin": "999.9.9",
-          "symlink": false
+          "lilt/craft-lilt-plugin": "999.9.9"
         }
       }
     }

@@ -3,7 +3,7 @@
 
 export
 
-PHP_VERSION?=8.1
+PHP_VERSION?=8.0
 MYSQL_VERSION?=8.0
 
 up:
@@ -25,6 +25,14 @@ cli:
 root:
 	docker compose exec -u root cli-app sh
 
+require-craft:
+	@if [ -n "$(CRAFT_VERSION)" ]; then \
+	  echo "Installing CraftCMS version $(CRAFT_VERSION)..."; \
+	  docker compose exec -T -u www-data cli-app sh -c "php composer.phar require craftcms/cms:$(CRAFT_VERSION) -W"; \
+	else \
+	  echo "⚠️  CRAFT_VERSION is not set. Skipping CraftCMS installation."; \
+	fi
+
 composer-install:
 	docker compose exec -T -u root cli-app sh -c "apk add git"
 	docker compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
@@ -33,6 +41,7 @@ composer-install:
 	docker compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
 	docker compose exec -T -u www-data cli-app sh -c "curl -s https://getcomposer.org/installer | php"
 	docker compose exec -T -u www-data cli-app sh -c "php composer.phar install"
+	$(MAKE) require-craft
 
 quality:
 	docker compose exec -T -u www-data cli-app sh -c "curl -L -s https://phar.phpunit.de/phpcpd.phar --output phpcpd.phar"
@@ -93,3 +102,6 @@ test-craft-versions: prepare-container
 require-guzzle-v6:
 	docker compose exec -T -u www-data cli-app sh -c "php composer.phar require guzzlehttp/guzzle:^6.0 -W --no-scripts || true"
 	docker compose exec -T -u www-data cli-app sh -c 'if ! php composer.phar show -i | grep "guzzlehttp/guzzle" | grep "6."; then echo "Guzzle version 6 is not present."; exit 1; fi'
+
+update:
+	bash scripts/update-craft-versions.sh
