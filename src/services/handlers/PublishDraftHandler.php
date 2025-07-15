@@ -65,7 +65,9 @@ class PublishDraftHandler
         }
 
         if (!Craft::$app->getElements()->saveElement($draft)) {
-            throw new InvalidElementException($draft);
+            Craft::warning([
+                'message' => "Could not propagate draft {$draft->id} for entry {$draft->canonicalId}.",
+            ]);
         }
 
         $isDerivative = $draft->getIsDerivative();
