@@ -62,33 +62,27 @@ install-pcov:
 	docker compose exec -T -u root cli-app sh -c "pecl install pcov || true"
 	docker compose exec -T -u root cli-app sh -c "docker-php-ext-enable pcov"
 
-fix-gherkin-i18n:
-	docker compose exec -T -u www-data cli-app sh -c "echo '=== Debug: Checking Gherkin.php require path ==='"
-	docker compose exec -T -u www-data cli-app sh -c "grep -n 'require.*i18n.php' vendor/behat/gherkin/src/Gherkin.php || echo 'no require found'"
-	docker compose exec -T -u www-data cli-app sh -c "echo '=== Creating correct symlink structure ==='"
-	docker compose exec -T -u www-data cli-app sh -c "if [ -f vendor/behat/gherkin/i18n.php ]; then echo 'i18n.php found, creating symlink...'; mkdir -p vendor/behat/gherkin/src/../.. && ln -sf ../../../i18n.php vendor/behat/gherkin/src/../../../i18n.php || cp vendor/behat/gherkin/i18n.php vendor/behat/gherkin/src/../../../i18n.php; echo 'symlink created, checking result:'; ls -la vendor/behat/gherkin/src/../../../i18n.php || echo 'target file not found'; else echo 'i18n.php not found in expected location'; fi"
-
 coverage: install-pcov
 	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run --coverage --coverage-xml --coverage-html"
 
-tests-with-coverage: codecept-build install-pcov fix-gherkin-i18n unit-coverage integration-coverage functional-coverage
+tests-with-coverage: codecept-build install-pcov unit-coverage integration-coverage functional-coverage
 
-integration-coverage: fix-gherkin-i18n
+integration-coverage:
 	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration --coverage-xml=coverage-integration.xml"
 
-functional-coverage: fix-gherkin-i18n
+functional-coverage:
 	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional --coverage-xml=coverage-functional.xml"
 
-unit-coverage: fix-gherkin-i18n
+unit-coverage:
 	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run unit --coverage-xml=coverage-unit.xml"
 
-integration: codecept-build fix-gherkin-i18n
+integration: codecept-build
 	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run integration"
 
-functional: codecept-build fix-gherkin-i18n
+functional: codecept-build
 	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run functional"
 
-unit: codecept-build fix-gherkin-i18n
+unit: codecept-build
 	docker compose exec -T -u www-data cli-app sh -c "php vendor/bin/codecept run unit"
 
 test: functional integration unit
