@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-20.04 ]
+        os: [ ubuntu-latest ]
         scenario: [
           "cypress/e2e/jobs/copy-source-text-flow/filters.cy.js",
           "cypress/e2e/jobs/copy-source-text-flow/success-path-multiple.cy.js",
@@ -32,7 +32,7 @@ jobs:
           "cypress/e2e/jobs/instant/success-path-single.cy.js",
           "cypress/e2e/jobs/instant/success-path-single-500-start.cy.js",
         ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set the value
