@@ -70,5 +70,13 @@
       "yiisoft/yii2-composer": true,
       "craftcms/plugin-installer": true
     }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "if [ -f vendor/behat/gherkin/i18n.php ]; then mkdir -p vendor/behat/gherkin/src/../.. && ln -sf ../../../i18n.php vendor/behat/gherkin/src/../../../i18n.php || cp vendor/behat/gherkin/i18n.php vendor/behat/gherkin/src/../../../i18n.php; fi"
+    ],
+    "post-update-cmd": [
+      "if [ -f vendor/behat/gherkin/i18n.php ]; then mkdir -p vendor/behat/gherkin/src/../.. && ln -sf ../../../i18n.php vendor/behat/gherkin/src/../../../i18n.php || cp vendor/behat/gherkin/i18n.php vendor/behat/gherkin/src/../../../i18n.php; fi"
+    ]
   }
 }
