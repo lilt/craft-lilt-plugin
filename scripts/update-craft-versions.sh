@@ -23,11 +23,13 @@ IGNORED_VERSIONS=(
   #"4.0.0" and  "4.0.0.1", contains FK bug, it tries to update field on draft (after apply draft removed, so it fails)
   "4.0.0"
   "4.0.0.1"
-   # Seems like bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582189269?pr=146
+  # Seems like bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582189269?pr=146
   "4.5.0"
   "4.5.1"
-   # Bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582193181?pr=146
+  # Bug in CraftCMS https://github.com/lilt/craft-lilt-plugin/actions/runs/8605507218/job/23582193181?pr=146
   "4.7.2"
+  # Bug in CraftCMS
+  "4.14.8"
 )
 
 echo "📦 Fetching CraftCMS versions from Packagist..."
