@@ -5,12 +5,24 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
+use craft\errors\ElementNotFoundException;
 use craft\web\Controller;
+use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
+use Throwable;
+use yii\base\Exception;
+use yii\db\StaleObjectException;
 use yii\web\Response;
 
 class PostJobRetryController extends Controller
 {
+    /**
+     * @throws ElementNotFoundException
+     * @throws Throwable
+     * @throws ApiException
+     * @throws StaleObjectException
+     * @throws Exception
+     */
     public function actionInvoke(): Response
     {
         $request = Craft::$app->getRequest();
@@ -34,7 +46,7 @@ class PostJobRetryController extends Controller
                 sprintf('Job retried (previous Lilt Job ID: %d)', $job->liltJobId)
             );
 
-            Craftliltplugin::getInstance()->sendJobToLiltConnectorHandler->__invoke($job);
+            Craftliltplugin::getInstance()->resendJobHandler->__invoke($job->id);
         }
 
 

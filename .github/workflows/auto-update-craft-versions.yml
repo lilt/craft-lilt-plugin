@@ -1,0 +1,42 @@
+name: 🔁 Auto-update CraftCMS versions on new release
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # every day at 00:00 UTC (midnight)
+  workflow_dispatch: # allow manual manual run via UI
+
+jobs:
+  update-craft-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout this repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 🛠 Setup Git config
+        run: |
+          git config user.name "GitHub Action Bot 🤖"
+          git config user.email "actions@github.com"
+
+      - name: 📦 Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq perl
+
+      - name: 🧱 Run make update
+        run: make update
+
+      - name: 🪄 Create pull request if versions file changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GH_WORKFLOW_TOKEN }}
+          commit-message: "🔄 Update CraftCMS versions matrix"
+          title: "🔄 Update CraftCMS test matrix"
+          body: |
+            A new CraftCMS version has been released and the test matrix has been updated.
+
+            @hadomskyi please review and open branch `ci/4.x-update-craft-versions-$(date +'%Y%m%d-%H%M%S')`
+          branch: ci/4.x-update-craft-versions
+          base: 4.x-fix-start-job
+          delete-branch: true

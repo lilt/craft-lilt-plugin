@@ -12,9 +12,11 @@ namespace lilthq\craftliltplugin\modules;
 use Craft;
 use craft\queue\BaseJob;
 use craft\helpers\Queue as CraftHelpersQueue;
+use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\JobRecord;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 
 class QueueManager extends BaseJob
 {
@@ -25,8 +27,17 @@ class QueueManager extends BaseJob
      */
     public function execute($queue): void
     {
+        $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+            SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
+        );
+
+        if ($queueDisableAutomaticSync) {
+            // skip because automatic sync is disabled
+            return;
+        }
+
         $mutex = Craft::$app->getMutex();
-        $mutexKey = __CLASS__ . '_' . __FUNCTION__;
+        $mutexKey = self::getMutexKey();
         if (!$mutex->acquire($mutexKey)) {
             Craft::warning('Lilt queue manager is already running');
 
@@ -35,7 +46,7 @@ class QueueManager extends BaseJob
                 1,
                 Craft::t(
                     'app',
-                    'Finished lilt queue manager',
+                    'Finished lilt queue manager'
                 )
             );
 
@@ -61,7 +72,7 @@ class QueueManager extends BaseJob
                 1,
                 Craft::t(
                     'app',
-                    'Finished lilt queue manager',
+                    'Finished lilt queue manager'
                 )
             );
 
@@ -90,7 +101,7 @@ class QueueManager extends BaseJob
             1,
             Craft::t(
                 'app',
-                'Finished lilt queue manager',
+                'Finished lilt queue manager'
             )
         );
 
@@ -103,5 +114,10 @@ class QueueManager extends BaseJob
     protected function defaultDescription(): ?string
     {
         return Craft::t('app', 'Lilt queue manager');
+    }
+
+    public static function getMutexKey(): string
+    {
+        return __CLASS__ . '_' . __FUNCTION__;
     }
 }

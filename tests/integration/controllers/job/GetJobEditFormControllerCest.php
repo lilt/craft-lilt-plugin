@@ -331,11 +331,11 @@ class GetJobEditFormControllerCest
                 'crumbs' => [
                     0 => [
                         'label' => 'Lilt Plugin',
-                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin&site=default',
+                        'url' => 'http://test.craftcms.test:80/index.php?p=admin/admin/craft-lilt-plugin&site=default',
                     ],
                     1 => [
                         'label' => 'Jobs',
-                        'url' => 'http://$PRIMARY_SITE_URL/index.php?p=admin/admin/craft-lilt-plugin/jobs&site=default',
+                        'url' => 'http://test.craftcms.test:80/index.php?p=admin/admin/craft-lilt-plugin/jobs&site=default',
                     ],
                 ],
             ],

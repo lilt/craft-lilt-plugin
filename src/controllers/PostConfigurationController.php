@@ -98,6 +98,7 @@ class PostConfigurationController extends AbstractJobController
             $request->getBodyParam('copyEntriesSlugFromSourceToTarget') ?? '0'
         );
 
+        // queueEachTranslationFileSeparately
         $queueEachTranslationFileSeparately = $request->getBodyParam('queueEachTranslationFileSeparately');
         if (empty($queueEachTranslationFileSeparately)) {
             $queueEachTranslationFileSeparately = 0;
@@ -106,6 +107,17 @@ class PostConfigurationController extends AbstractJobController
         Craftliltplugin::getInstance()->settingsRepository->save(
             SettingsRepository::QUEUE_EACH_TRANSLATION_FILE_SEPARATELY,
             (string)$queueEachTranslationFileSeparately
+        );
+
+        // queueDisableAutomaticSync
+        $queueDisableAutomaticSync = $request->getBodyParam('queueDisableAutomaticSync');
+        if (empty($queueDisableAutomaticSync)) {
+            $queueDisableAutomaticSync = 0;
+        }
+
+        Craftliltplugin::getInstance()->settingsRepository->save(
+            SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC,
+            (string)$queueDisableAutomaticSync
         );
 
         $settingsRequest = new SettingsRequest();

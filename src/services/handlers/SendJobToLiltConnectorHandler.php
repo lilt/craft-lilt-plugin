@@ -15,6 +15,7 @@ use craft\helpers\Queue;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exceptions\JobNotStartedException;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -184,11 +185,27 @@ class SendJobToLiltConnectorHandler
 
         $this->updateJob($job, $jobLilt->getId(), Job::STATUS_IN_PROGRESS);
 
+        // Set all translations to in progress
+        TranslationRecord::updateAll(
+            ['status' => TranslationRecord::STATUS_IN_PROGRESS],
+            ['jobId' => $job->id]
+        );
+
         if ($isQueueEachTranslationFileSeparately) {
             return;
         }
 
-        $this->connectorJobRepository->start($jobLilt->getId());
+        $result = $this->connectorJobRepository->start($jobLilt->getId());
+        if (!$result) {
+            Craft::error(
+                sprintf(
+                    'Can\'t start job %d, lilt id: %d',
+                    $jobLilt->id,
+                    $jobLilt->liltJobId
+                )
+            );
+            throw new JobNotStartedException("Can't start job", 500);
+        }
 
         $this->jobLogsRepository->create(
             $job->id,
@@ -196,14 +213,21 @@ class SendJobToLiltConnectorHandler
             'Job uploaded to Lilt Platform'
         );
 
-        Queue::push(
-            (new FetchJobStatusFromConnector([
-                'jobId' => $job->id,
-                'liltJobId' => $jobLilt->getId(),
-            ])),
-            FetchJobStatusFromConnector::PRIORITY,
-            10 //10 seconds for fist job
+        $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+            SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
         );
+
+        if (!$queueDisableAutomaticSync) {
+            // push fetch status job from connector
+            Queue::push(
+                (new FetchJobStatusFromConnector([
+                    'jobId' => $job->id,
+                    'liltJobId' => $jobLilt->getId(),
+                ])),
+                FetchJobStatusFromConnector::PRIORITY,
+                10 //10 seconds for fist job
+            );
+        }
     }
 
     /**
