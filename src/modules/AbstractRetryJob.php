@@ -37,6 +37,9 @@ abstract class AbstractRetryJob extends BaseJob
      */
     abstract public function canRetry(): bool;
 
+    /**
+     * @return SendJobToConnector|SendTranslationToConnector|FetchJobStatusFromConnector|FetchTranslationFromConnector
+     */
     abstract public function getRetryJob(): BaseJob;
 
     protected function getCommand(): ?Command

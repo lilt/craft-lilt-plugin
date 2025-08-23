@@ -145,6 +145,7 @@ class SendTranslationToLiltConnectorHandler
             );
         }
 
+        $translation->status = TranslationRecord::STATUS_IN_PROGRESS;
         $translation->sourceContent = $content;
         $translation->translatedDraftId = $draft->id;
         $translation->markAttributeDirty('sourceContent');

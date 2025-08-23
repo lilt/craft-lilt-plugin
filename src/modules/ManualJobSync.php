@@ -56,7 +56,7 @@ class ManualJobSync extends BaseJob
                 1,
                 Craft::t(
                     'app',
-                    'Syncing finished',
+                    'Syncing finished'
                 )
             );
 
@@ -74,7 +74,7 @@ class ManualJobSync extends BaseJob
                 1,
                 Craft::t(
                     'app',
-                    'Syncing finished',
+                    'Syncing finished'
                 )
             );
 

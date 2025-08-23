@@ -17,9 +17,11 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\exceptions\JobNotStartedException;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\SendTranslationCommand;
+use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use Throwable;
 
 class SendTranslationToConnector extends AbstractRetryJob
@@ -28,7 +30,7 @@ class SendTranslationToConnector extends AbstractRetryJob
     public const PRIORITY = 1024;
     public const TTR = 60 * 30;
 
-    private const RETRY_COUNT = 3;
+    private const RETRY_COUNT = 10;
 
     /**
      * @var int
@@ -95,7 +97,7 @@ class SendTranslationToConnector extends AbstractRetryJob
 
         if (empty($translationRecord)) {
             // Translation should always exist
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf(
                     'Can\'t find translation %d for element %d with target site %s',
                     $this->translationId,
@@ -109,11 +111,11 @@ class SendTranslationToConnector extends AbstractRetryJob
 
         if (empty($jobElement)) {
             // Translation should always exist
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf(
                     'Can\'t find job %d for element %d',
                     $this->jobId,
-                    $this->versionId,
+                    $this->versionId
                 )
             );
         }
@@ -169,9 +171,19 @@ class SendTranslationToConnector extends AbstractRetryJob
 
             // Only start job with status draft
             if ($liltJob->getStatus() === JobResponse::STATUS_DRAFT) {
-                Craftliltplugin::getInstance()->connectorJobRepository->start(
+                $result = Craftliltplugin::getInstance()->connectorJobRepository->start(
                     $command->getJob()->liltJobId
                 );
+                if (!$result) {
+                    Craft::error(
+                        sprintf(
+                            'Can\'t start job %d, lilt id: %d',
+                            $command->getJob()->id,
+                            $command->getJob()->liltJobId
+                        )
+                    );
+                    throw new JobNotStartedException("Can't start job", 500);
+                }
 
                 Craftliltplugin::getInstance()->jobLogsRepository->create(
                     $this->jobId,
@@ -180,14 +192,20 @@ class SendTranslationToConnector extends AbstractRetryJob
                 );
             }
 
-            Queue::push(
-                (new FetchJobStatusFromConnector([
-                    'jobId' => $command->getJob()->id,
-                    'liltJobId' => $command->getJob()->liltJobId,
-                ])),
-                FetchJobStatusFromConnector::PRIORITY,
-                10
+            $queueDisableAutomaticSync = (bool) Craftliltplugin::getInstance()->settingsRepository->get(
+                SettingsRepository::QUEUE_DISABLE_AUTOMATIC_SYNC
             );
+
+            if (!$queueDisableAutomaticSync) {
+                Queue::push(
+                    (new FetchJobStatusFromConnector([
+                        'jobId' => $command->getJob()->id,
+                        'liltJobId' => $command->getJob()->liltJobId,
+                    ])),
+                    FetchJobStatusFromConnector::PRIORITY,
+                    10
+                );
+            }
 
             $this->markAsDone($queue);
             $this->release();
