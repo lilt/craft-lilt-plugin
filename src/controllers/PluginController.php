@@ -71,7 +71,7 @@ class PluginController extends Controller
 
         try {
             $metadata = [
-                'event' => __METHOD__,
+                'event' => $request->getMethod(),
                 'message' => $e->getMessage(),
                 'timestamp' => time(),
                 'body' => $request->getBodyParams() ?: $request->getQueryParams(),
