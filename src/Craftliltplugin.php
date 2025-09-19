@@ -95,6 +95,7 @@ use yii\web\Response;
  * @property JobsApi $connectorJobsApi
  * @property TranslationsApi $connectorTranslationsApi
  * @property SettingsApi $connectorSettingsApi
+ * @property LogsApi $logsApi
  * @property LanguageMapper $languageMapper
  * @property ElementTranslatableContentProvider $elementTranslatableContentProvider
  * @property FieldContentProvider $fieldContentProvider

@@ -321,6 +321,15 @@ class ServiceInitializer
             }
         ]);
 
+        $pluginInstance->setComponents([
+            'logsApi' => function () use ($pluginInstance) {
+                return new LogsApi(
+                    new Client(),
+                    $pluginInstance->connectorConfiguration
+                );
+            }
+        ]);
+
         $pluginInstance->listenerRegister->register();
         $pluginInstance->loadI18NHandler->__invoke();
     }
