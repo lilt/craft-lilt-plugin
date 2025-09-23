@@ -72,6 +72,37 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             );
         }
 
+        public function testBeforeActionCatchesInternalError(IntegrationTester $I): void
+        {
+            $request = Craft::$app->getRequest();
+            $request->enableCsrfValidation = true;
+
+            $I->expectLogPostRequest(
+                '/api/v1.0/logs',
+                'Unable to verify your data submission.',
+                200
+            );
+
+            $I->expectLogPostRequest(
+                '/api/v1.0/logs',
+                'Unable to resolve the request: test-error/error-in-run-action',
+                200
+            );
+
+            $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action', []);
+
+            $I->seeResponseCodeIs(200);
+            $response = json_decode(Craft::$app->getResponse()->content, true);
+
+            Assert::assertFalse($response['success']);
+            Assert::assertSame(
+                'Unable to resolve the request: test-error/error-in-run-action',
+                $response['message']
+            );
+
+            $request->enableCsrfValidation = false;
+        }
+
         public function testRunActionCatchesError(IntegrationTester $I): void
         {
             $I->expectLogPostRequest(
