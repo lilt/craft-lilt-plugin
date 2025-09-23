@@ -50,6 +50,25 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             unset(Craft::$app->controllerMap['test-error']);
         }
 
+        public function testBeforeActionCatchesError(IntegrationTester $I): void
+        {
+            $I->expectLogPostRequest(
+                '/api/v1.0/logs',
+                'This is a test beforeAction error.',
+                200
+            );
+
+            $I->sendAjaxPostRequest('index.php?action=test-error/error-in-before-action');
+
+            $I->seeResponseCodeIs(200);
+            $responseContent = Craft::$app->getResponse()->content;
+            $response = json_decode($responseContent, true);
+
+            Assert::assertIsArray($response);
+            Assert::assertFalse($response['success']);
+            Assert::assertSame('This is a test beforeAction error.', $response['message']);
+        }
+
         public function testRunActionCatchesError(IntegrationTester $I): void
         {
             $I->expectLogPostRequest(
@@ -69,20 +88,6 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             Assert::assertArrayHasKey('message', $response);
             Assert::assertFalse($response['success']);
             Assert::assertSame('This is a test runAction error.', $response['message']);
-        }
-
-        public function testBeforeActionCatchesError(IntegrationTester $I): void
-        {
-            $I->expectLogPostRequest(
-                '/api/v1.0/logs',
-                'This is a test beforeAction error.',
-                200
-            );
-
-            $I->sendAjaxPostRequest('index.php?action=test-error/error-in-before-action');
-
-            $I->seeResponseCodeIs(200);
-            Assert::assertEmpty(Craft::$app->getResponse()->content);
         }
 
         public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
