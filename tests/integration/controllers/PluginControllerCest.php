@@ -95,10 +95,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $response = json_decode(Craft::$app->getResponse()->content, true);
 
             Assert::assertFalse($response['success']);
-            Assert::assertSame(
-                'Unable to resolve the request: test-error/error-in-run-action',
-                $response['message']
-            );
+            Assert::assertSame('This is a test runAction error.', $response['message']);
 
             $request->enableCsrfValidation = false;
         }
