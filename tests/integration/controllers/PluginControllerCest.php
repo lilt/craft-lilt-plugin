@@ -35,13 +35,13 @@ namespace lilthq\craftliltplugintests\integration\controllers {
     use lilthq\craftliltplugin\services\LogsApi;
     use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
     use PHPUnit\Framework\MockObject\MockObject;
-    use RuntimeException;
     use yii\log\FileTarget;
+    use yii\log\Logger;
 
     class PluginControllerCest extends AbstractIntegrationCest
     {
-        private ?string $originalLogPath;
-        private string $testLogPath;
+        private ?Logger $originalLogger;
+        private ?string $testLogPath;
 
         public function _before(IntegrationTester $I): void
         {
@@ -49,15 +49,20 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             Craft::$app->controllerMap['test-error'] = TestErrorController::class;
 
+            $this->originalLogger = Craft::getLogger();
             $this->testLogPath = Craft::getAlias('@storage/logs/test-web.log');
             if (file_exists($this->testLogPath)) {
                 unlink($this->testLogPath);
             }
 
-            /** @var FileTarget $logTarget */
-            $logTarget = Craft::getLogger()->targets['file'];
-            $this->originalLogPath = $logTarget->logFile;
-            $logTarget->logFile = $this->testLogPath;
+            $testLogger = new Logger();
+            $testLogger->targets['test-file'] = new FileTarget([
+                'logFile' => $this->testLogPath,
+                'levels' => ['error', 'warning', 'info', 'trace'],
+                'logVars' => [],
+            ]);
+
+            Craft::setLogger($testLogger);
         }
 
         public function _after(IntegrationTester $I): void
@@ -66,10 +71,11 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             unset(Craft::$app->controllerMap['test-error']);
 
-            /** @var FileTarget $logTarget */
-            $logTarget = Craft::getLogger()->targets['file'];
-            $logTarget->logFile = $this->originalLogPath;
-            if (file_exists($this->testLogPath)) {
+            if ($this->originalLogger) {
+                Craft::setLogger($this->originalLogger);
+            }
+
+            if ($this->testLogPath && file_exists($this->testLogPath)) {
                 unlink($this->testLogPath);
             }
 
@@ -136,7 +142,6 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $I->seeResponseContainsJson(['message' => 'This is a test runAction error.']);
 
             $I->openFile($this->testLogPath);
-
             $I->seeInThisFile('Controller error:');
             $I->seeInThisFile('"message":"This is a test runAction error."');
             $I->seeInThisFile('Failed to send log to API. Reason:');
