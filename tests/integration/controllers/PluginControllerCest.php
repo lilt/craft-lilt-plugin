@@ -66,7 +66,10 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             Assert::assertIsArray($response);
             Assert::assertFalse($response['success']);
-            Assert::assertSame('This is a test beforeAction error.', $response['message']);
+            Assert::assertSame(
+                'Unable to resolve the request: test-error/error-in-before-action',
+                $response['message']
+            );
         }
 
         public function testRunActionCatchesError(IntegrationTester $I): void
