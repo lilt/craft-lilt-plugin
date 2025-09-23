@@ -31,38 +31,4 @@ class Integration extends Module
         $this->assertTrue($response->headers->has($name));
         $this->assertSame($value, $response->headers->get($name));
     }
-
-    /**
-     * @throws ModuleException
-     */
-    public function seeResponseIsJson(): void
-    {
-        $response = $this->getModule('Yii2')->_getResponseContent();
-        $this->assertJson($response, 'Response is not valid JSON');
-    }
-
-    /**
-     * @throws ModuleException
-     */
-    public function seeResponseContainsJson(array $subset): void
-    {
-        $response = $this->getModule('Yii2')->_getResponseContent();
-        $this->assertJson($response, 'Response is not valid JSON');
-        $actual = json_decode($response, true);
-        $this->assertArraySubset($subset, $actual, 'The JSON response does not contain the expected subset.');
-    }
-
-    protected function assertArraySubset(array $subset, array $array, string $message = ''): void
-    {
-        foreach ($subset as $key => $value) {
-            $this->assertArrayHasKey($key, $array, $message);
-
-            if (is_array($value)) {
-                $this->assertIsArray($array[$key], $message);
-                $this->assertArraySubset($value, $array[$key], $message);
-            } else {
-                $this->assertEquals($value, $array[$key], $message);
-            }
-        }
-    }
 }

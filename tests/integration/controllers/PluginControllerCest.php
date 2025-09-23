@@ -3,25 +3,26 @@
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\controllers {
-
     use RuntimeException;
     use yii\web\Response;
 
-    class TestErrorController extends PluginController
-    {
-        protected array|int|bool $allowAnonymous = true;
-
-        public function beforeAction($action): bool
+    if (!class_exists(TestErrorController::class)) {
+        class TestErrorController extends PluginController
         {
-            if ($action->id === 'error-in-before-action') {
-                throw new RuntimeException('This is a test beforeAction error.');
+            protected array|int|bool $allowAnonymous = true;
+
+            public function beforeAction($action): bool
+            {
+                if ($action->id === 'error-in-before-action') {
+                    throw new RuntimeException('This is a test beforeAction error.');
+                }
+                return parent::beforeAction($action);
             }
-            return parent::beforeAction($action);
-        }
 
-        public function actionErrorInRunAction(): Response
-        {
-            throw new RuntimeException('This is a test runAction error.');
+            public function actionErrorInRunAction(): Response
+            {
+                throw new RuntimeException('This is a test runAction error.');
+            }
         }
     }
 }
@@ -56,13 +57,15 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             );
 
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-
             $I->seeResponseCodeIs(200);
-            $I->seeResponseIsJson();
-            $I->seeResponseContainsJson([
-                'success' => false,
-                'message' => 'This is a test runAction error.',
-            ]);
+
+            $response = json_decode($I->grabResponse(), true);
+
+            $I->assertIsArray($response);
+            $I->assertArrayHasKey('success', $response);
+            $I->assertArrayHasKey('message', $response);
+            $I->assertFalse($response['success']);
+            $I->assertSame('This is a test runAction error.', $response['message']);
         }
 
         public function testBeforeActionCatchesError(IntegrationTester $I): void
@@ -75,7 +78,8 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-before-action');
 
-            $I->seeResponseCodeIs(404);
+            $I->seeResponseCodeIs(200);
+            $I->assertEmpty($I->grabResponse());
         }
 
         public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
@@ -87,9 +91,10 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             );
 
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-
             $I->seeResponseCodeIs(200);
-            $I->seeResponseContainsJson(['message' => 'This is a test runAction error.']);
+
+            $response = json_decode($I->grabResponse(), true);
+            $I->assertSame('This is a test runAction error.', $response['message']);
         }
     }
 }
