@@ -10,11 +10,10 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers;
 
 use craft\helpers\UrlHelper;
-use craft\web\Controller;
 use lilthq\craftliltplugin\assets\JobsAsset;
 use yii\web\Response;
 
-class JobsController extends Controller
+class JobsController extends PluginController
 {
     public function actionIndex(): Response
     {

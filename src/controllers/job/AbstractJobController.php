@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
-use craft\web\Controller;
 use Exception;
 use lilthq\craftliltplugin\assets\JobFormAsset;
+use lilthq\craftliltplugin\controllers\PluginController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
@@ -21,7 +21,7 @@ use yii\base\InvalidConfigException;
 use yii\web\IdentityInterface;
 use yii\web\Response;
 
-class AbstractJobController extends Controller
+class AbstractJobController extends PluginController
 {
     /**
      * @throws InvalidConfigException
