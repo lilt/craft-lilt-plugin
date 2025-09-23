@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers {
 
     use RuntimeException;
-    use yii\filters\AccessControl;
     use yii\web\Response;
 
     if (!class_exists(TestErrorController::class)) {
@@ -13,33 +12,9 @@ namespace lilthq\craftliltplugin\controllers {
         {
             protected array|int|bool $allowAnonymous = true;
 
-            public function behaviors(): array
-            {
-                return [
-                    'access' => [
-                        'class' => AccessControl::class,
-                        'rules' => [
-                            [
-                                'actions' => ['access-denied'],
-                                'allow' => false,
-                            ],
-                            [
-                                'allow' => true,
-                            ],
-                        ],
-                    ],
-                ];
-            }
-
             public function actionErrorInRunAction(): Response
             {
                 throw new RuntimeException('This is a test runAction error.');
-            }
-
-            public function actionAccessDenied(): Response
-            {
-                // This action will never be reached.
-                return $this->asJson(['success' => true]);
             }
         }
     }
@@ -58,7 +33,6 @@ namespace lilthq\craftliltplugintests\integration\controllers {
         public function _before(IntegrationTester $I): void
         {
             parent::_before($I);
-            // Registers the temporary TestErrorController for testing purposes.
             Craft::$app->controllerMap['test-error'] = TestErrorController::class;
         }
 
@@ -66,18 +40,6 @@ namespace lilthq\craftliltplugintests\integration\controllers {
         {
             parent::_after($I);
             unset(Craft::$app->controllerMap['test-error']);
-        }
-
-        public function testBeforeActionCatchesAccessDeniedError(IntegrationTester $I): void
-        {
-            $I->expectLogPostRequest(
-                '/api/v1.0/logs',
-                'You are not allowed to perform this action.',
-                200
-            );
-
-            $I->sendAjaxPostRequest('index.php?action=test-error/access-denied');
-            $I->seeResponseCodeIs(404);
         }
 
         public function testRunActionCatchesError(IntegrationTester $I): void

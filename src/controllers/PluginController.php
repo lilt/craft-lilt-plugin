@@ -18,12 +18,12 @@ use yii\base\Action;
  * Plugin Controller
  *
  * A base controller that extends craft\web\Controller. This provides centralized error
- * handling for all controllers that extend it, reporting any beforeAction and runAction
- * errors that occur back to the Plugin API.
+ * handling for all controllers that extend it, reporting any runAction errors that occur
+ * back to the Plugin API.
  *
- * It overrides the `beforeAction()` and `runAction()`, wrapping exectution in a `try...catch`
- * block. Any thrown exceptions are caught and processed by `handleError()`, which logs the
- * error locally and remotely in Plugin API.
+ * It runAction()`, wrapping the execution in a `try...catch` block. Any thrown exceptions
+ * are caught and processed by `handleError()`, which logs the error locally and remotely
+ * in Plugin API.
  *
  * Controllers intended for web or AJAX endpoints wtihin the plugin should extend this to
  * inherit the logging behavior.
@@ -33,35 +33,6 @@ use yii\base\Action;
  */
 class PluginController extends Controller
 {
-    /**
-     * Catches any errors that occur before an action runs.
-     *
-     * This is executed by Yii before any controller action. It wraps the parent method
-     * in a `try...catch` to handle exceptions that occur during pre-action events and checks.
-     * If an error is caught, it is logged locally and remotely in Plugin API and the action
-     * is prevented from running.
-     *
-     * @param Action $action The action to be executed.
-     * @return bool Whether the action should continue to run. Returns `false` on error.
-     */
-
-    public function beforeAction($action): bool
-    {
-        try {
-            return parent::beforeAction($action);
-        } catch (\Throwable $e) {
-            $proofException = new \RuntimeException(
-                'PROOF_BEFORE_ACTION_CAUGHT: ' . $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-            $this->handleError($proofException, $action->id);
-
-            // prevents the action from running.
-            return false;
-        }
-    }
-
     /**
      * Catches any errors that occur during an action's execution.
      *
