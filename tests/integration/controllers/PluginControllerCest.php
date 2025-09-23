@@ -3,31 +3,31 @@
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\controllers {
-    use yii\web\Response;
+
     use RuntimeException;
+    use yii\web\Response;
 
-    if (!class_exists(TestErrorController::class)) {
-        class TestErrorController extends PluginController
+    class TestErrorController extends PluginController
+    {
+        protected array|int|bool $allowAnonymous = true;
+
+        public function beforeAction($action): bool
         {
-            protected array|int|bool $allowAnonymous = true;
-
-            public function beforeAction($action): bool
-            {
-                if ($action->id === 'error-in-before-action') {
-                    throw new RuntimeException('This is a test beforeAction error.');
-                }
-                return parent::beforeAction($action);
+            if ($action->id === 'error-in-before-action') {
+                throw new RuntimeException('This is a test beforeAction error.');
             }
+            return parent::beforeAction($action);
+        }
 
-            public function actionErrorInRunAction(): Response
-            {
-                throw new RuntimeException('This is a test runAction error.');
-            }
+        public function actionErrorInRunAction(): Response
+        {
+            throw new RuntimeException('This is a test runAction error.');
         }
     }
 }
 
 namespace lilthq\craftliltplugintests\integration\controllers {
+
     use Craft;
     use IntegrationTester;
     use lilthq\craftliltplugin\controllers\TestErrorController;
