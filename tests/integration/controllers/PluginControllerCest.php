@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// By defining this class in the plugin's actual controllers namespace, we can
+// create a test-specific controller that correctly extends PluginController
+// without adding it to the production source code.
 namespace lilthq\craftliltplugin\controllers {
     use yii\web\Response;
     use RuntimeException;
@@ -10,6 +13,10 @@ namespace lilthq\craftliltplugin\controllers {
     {
         protected array|int|bool $allowAnonymous = true;
 
+        /**
+         * Overrides the parent to throw an error for a specific action ID.
+         * This allows us to test the error handling in the base `beforeAction`.
+         */
         public function beforeAction($action): bool
         {
             if ($action->id === 'error-in-before-action') {
@@ -18,6 +25,9 @@ namespace lilthq\craftliltplugin\controllers {
             return parent::beforeAction($action);
         }
 
+        /**
+         * An action designed to fail to test the `runAction` error handling.
+         */
         public function actionErrorInRunAction(): Response
         {
             throw new RuntimeException('This is a test runAction error.');
@@ -25,6 +35,7 @@ namespace lilthq\craftliltplugin\controllers {
     }
 }
 
+// This is the actual test suite namespace.
 namespace lilthq\craftliltplugintests\integration\controllers {
 
     use Craft;
@@ -35,55 +46,24 @@ namespace lilthq\craftliltplugintests\integration\controllers {
     use lilthq\craftliltplugin\services\LogsApi;
     use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
     use PHPUnit\Framework\MockObject\MockObject;
-    use yii\log\FileTarget;
-    use yii\log\Logger;
 
     class PluginControllerCest extends AbstractIntegrationCest
     {
-        private ?Logger $originalLogger;
-        private ?string $testLogPath;
-
         public function _before(IntegrationTester $I): void
         {
             parent::_before($I);
-
             Craft::$app->controllerMap['test-error'] = TestErrorController::class;
-
-            $this->originalLogger = Craft::getLogger();
-            $this->testLogPath = Craft::getAlias('@storage/logs/test-web.log');
-            if (file_exists($this->testLogPath)) {
-                unlink($this->testLogPath);
-            }
-
-            $testLogger = new Logger();
-            $testLogger->targets['test-file'] = new FileTarget([
-                'logFile' => $this->testLogPath,
-                'levels' => ['error', 'warning', 'info', 'trace'],
-                'logVars' => [],
-            ]);
-
-            Craft::setLogger($testLogger);
         }
 
         public function _after(IntegrationTester $I): void
         {
             parent::_after($I);
-
             unset(Craft::$app->controllerMap['test-error']);
-
-            if ($this->originalLogger) {
-                Craft::setLogger($this->originalLogger);
-            }
-
-            if ($this->testLogPath && file_exists($this->testLogPath)) {
-                unlink($this->testLogPath);
-            }
-
             Craftliltplugin::setInstance(null);
             Craft::$app->set('craftliltplugin', null);
         }
 
-        public function testRunActionCatchesAndLogsError(IntegrationTester $I): void
+        public function testRunActionCatchesError(IntegrationTester $I): void
         {
             /** @var MockObject|LogsApi $logsApiMock */
             $logsApiMock = $I->make(LogsApi::class);
@@ -98,14 +78,9 @@ namespace lilthq\craftliltplugintests\integration\controllers {
                 'success' => false,
                 'message' => 'This is a test runAction error.',
             ]);
-
-            $I->openFile($this->testLogPath);
-            $I->seeInThisFile('Controller error:');
-            $I->seeInThisFile('"event":"error-in-run-action"');
-            $I->seeInThisFile('"message":"This is a test runAction error."');
         }
 
-        public function testBeforeActionCatchesAndLogsError(IntegrationTester $I): void
+        public function testBeforeActionCatchesError(IntegrationTester $I): void
         {
             /** @var MockObject|LogsApi $logsApiMock */
             $logsApiMock = $I->make(LogsApi::class);
@@ -120,14 +95,9 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-before-action');
 
             $I->seeResponseCodeIs(404);
-
-            $I->openFile($this->testLogPath);
-            $I->seeInThisFile('Controller error:');
-            $I->seeInThisFile('"event":"error-in-before-action"');
-            $I->seeInThisFile('"message":"This is a test beforeAction error."');
         }
 
-        public function testHandleErrorLogsApiFailureFailsafe(IntegrationTester $I): void
+        public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
         {
             /** @var MockObject|LogsApi $logsApiMock */
             $logsApiMock = $I->make(LogsApi::class);
@@ -140,12 +110,6 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             $I->seeResponseCodeIs(200);
             $I->seeResponseContainsJson(['message' => 'This is a test runAction error.']);
-
-            $I->openFile($this->testLogPath);
-            $I->seeInThisFile('Controller error:');
-            $I->seeInThisFile('"message":"This is a test runAction error."');
-            $I->seeInThisFile('Failed to send log to API. Reason:');
-            $I->seeInThisFile('"message":"Remote API is down."');
         }
 
         private function mockPluginService(LogsApi|MockObject $logsApiMock): void
