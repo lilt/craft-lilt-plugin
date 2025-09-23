@@ -275,4 +275,13 @@ class WiremockClient extends Module
             sprintf('Some of requests are unmatched: %s', json_encode($requests, JSON_PRETTY_PRINT))
         );
     }
+
+    public function expectLogPostRequest(string $url, string $expectedMessage, int $responseCode): void
+    {
+        $this->wireMock->stubFor(
+            WireMock::post(WireMock::urlPathMatching($url))
+                ->withRequestBody(WireMock::containing("\"message\":\"$expectedMessage\""))
+                ->willReturn(WireMock::aResponse()->withStatus($responseCode))
+        );
+    }
 }
