@@ -59,7 +59,8 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
             $I->seeResponseCodeIs(200);
 
-            $response = json_decode($I->grabResponse(), true);
+            $responseContent = Craft::$app->getResponse()->content;
+            $response = json_decode($responseContent, true);
 
             $I->assertIsArray($response);
             $I->assertArrayHasKey('success', $response);
@@ -79,7 +80,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-before-action');
 
             $I->seeResponseCodeIs(200);
-            $I->assertEmpty($I->grabResponse());
+            $I->assertEmpty(Craft::$app->getResponse()->content);
         }
 
         public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
@@ -93,7 +94,8 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
             $I->seeResponseCodeIs(200);
 
-            $response = json_decode($I->grabResponse(), true);
+            $responseContent = Craft::$app->getResponse()->content;
+            $response = json_decode($responseContent, true);
             $I->assertSame('This is a test runAction error.', $response['message']);
         }
     }
