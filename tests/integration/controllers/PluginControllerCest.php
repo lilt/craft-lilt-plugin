@@ -24,6 +24,11 @@ namespace lilthq\craftliltplugin\controllers {
             {
                 throw new RuntimeException('This is a test runAction error.');
             }
+
+            public function actionErrorViaEvent(): Response
+            {
+                return $this->asJson(['success' => true]);
+            }
         }
     }
 }
@@ -35,6 +40,8 @@ namespace lilthq\craftliltplugintests\integration\controllers {
     use lilthq\craftliltplugin\controllers\TestErrorController;
     use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
     use PHPUnit\Framework\Assert;
+    use yii\base\Event;
+    use craft\web\Controller;
 
     class PluginControllerCest extends AbstractIntegrationCest
     {
@@ -42,15 +49,27 @@ namespace lilthq\craftliltplugintests\integration\controllers {
         {
             parent::_before($I);
             Craft::$app->controllerMap['test-error'] = TestErrorController::class;
+
+            Event::on(
+                Controller::class,
+                Controller::EVENT_BEFORE_ACTION,
+                function($event) {
+                    if ($event->sender instanceof TestErrorController && $event->action->id === 'error-via-event') {
+                        throw new \RuntimeException('Error from event handler');
+                    }
+                }
+            );
         }
 
         public function _after(IntegrationTester $I): void
         {
             parent::_after($I);
             unset(Craft::$app->controllerMap['test-error']);
+
+            Event::off(Controller::class, Controller::EVENT_BEFORE_ACTION);
         }
 
-        public function testBeforeActionCatchesError(IntegrationTester $I): void
+        public function testRunActionCatchesBeforeActionErrorFromChild(IntegrationTester $I): void
         {
             $I->expectLogPostRequest(
                 '/api/v1.0/logs',
@@ -72,26 +91,20 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             );
         }
 
-        public function testBeforeActionCatchesInternalError(IntegrationTester $I): void
+        public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
         {
-            $request = Craft::$app->getRequest();
-            $request->enableCsrfValidation = true;
-
             $I->expectLogPostRequest(
                 '/api/v1.0/logs',
-                'Unable to verify your data submission.',
-                200
+                'This is a test runAction error.',
+                500
             );
 
-            $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action', []);
-
+            $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
             $I->seeResponseCodeIs(200);
-            $response = json_decode(Craft::$app->getResponse()->content, true);
 
-            Assert::assertFalse($response['success']);
+            $responseContent = Craft::$app->getResponse()->content;
+            $response = json_decode($responseContent, true);
             Assert::assertSame('This is a test runAction error.', $response['message']);
-
-            $request->enableCsrfValidation = false;
         }
 
         public function testRunActionCatchesError(IntegrationTester $I): void
@@ -109,26 +122,34 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $response = json_decode($responseContent, true);
 
             Assert::assertIsArray($response);
-            Assert::assertArrayHasKey('success', $response);
-            Assert::assertArrayHasKey('message', $response);
             Assert::assertFalse($response['success']);
             Assert::assertSame('This is a test runAction error.', $response['message']);
         }
 
-        public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
+        public function testBeforeActionCatchesInternalFrameworkError(IntegrationTester $I): void
         {
             $I->expectLogPostRequest(
                 '/api/v1.0/logs',
-                'This is a test runAction error.',
-                500
+                'Error from event handler',
+                200
             );
 
-            $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-            $I->seeResponseCodeIs(200);
+            $I->expectLogPostRequest(
+                '/api/v1.0/logs',
+                'Unable to resolve the request: test-error/error-via-event',
+                200
+            );
 
-            $responseContent = Craft::$app->getResponse()->content;
-            $response = json_decode($responseContent, true);
-            Assert::assertSame('This is a test runAction error.', $response['message']);
+            $I->sendAjaxPostRequest('index.php?action=test-error/error-via-event');
+
+            $I->seeResponseCodeIs(200);
+            $response = json_decode(Craft::$app->getResponse()->content, true);
+
+            Assert::assertFalse($response['success']);
+            Assert::assertSame(
+                'Unable to resolve the request: test-error/error-via-event',
+                $response['message']
+            );
         }
     }
 }
