@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\controllers {
+
     use RuntimeException;
     use yii\web\Response;
 
@@ -33,6 +34,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
     use IntegrationTester;
     use lilthq\craftliltplugin\controllers\TestErrorController;
     use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
+    use PHPUnit\Framework\Assert;
 
     class PluginControllerCest extends AbstractIntegrationCest
     {
@@ -62,11 +64,11 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $responseContent = Craft::$app->getResponse()->content;
             $response = json_decode($responseContent, true);
 
-            $I->assertIsArray($response);
-            $I->assertArrayHasKey('success', $response);
-            $I->assertArrayHasKey('message', $response);
-            $I->assertFalse($response['success']);
-            $I->assertSame('This is a test runAction error.', $response['message']);
+            Assert::assertIsArray($response);
+            Assert::assertArrayHasKey('success', $response);
+            Assert::assertArrayHasKey('message', $response);
+            Assert::assertFalse($response['success']);
+            Assert::assertSame('This is a test runAction error.', $response['message']);
         }
 
         public function testBeforeActionCatchesError(IntegrationTester $I): void
@@ -80,7 +82,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-before-action');
 
             $I->seeResponseCodeIs(200);
-            $I->assertEmpty(Craft::$app->getResponse()->content);
+            Assert::assertEmpty(Craft::$app->getResponse()->content);
         }
 
         public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
@@ -96,7 +98,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             $responseContent = Craft::$app->getResponse()->content;
             $response = json_decode($responseContent, true);
-            $I->assertSame('This is a test runAction error.', $response['message']);
+            Assert::assertSame('This is a test runAction error.', $response['message']);
         }
     }
 }
