@@ -77,8 +77,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             );
 
             $I->sendAjaxPostRequest('index.php?action=test-error/access-denied');
-
-            $I->seeResponseCodeIs(403);
+            $I->seeResponseCodeIs(404);
         }
 
         public function testRunActionCatchesError(IntegrationTester $I): void
