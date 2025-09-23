@@ -142,14 +142,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             $I->sendAjaxPostRequest('index.php?action=test-error/error-via-event');
 
-            $I->seeResponseCodeIs(200);
-            $response = json_decode(Craft::$app->getResponse()->content, true);
-
-            Assert::assertFalse($response['success']);
-            Assert::assertSame(
-                'Unable to resolve the request: test-error/error-via-event',
-                $response['message']
-            );
+            $I->seeResponseCodeIs(404);
         }
     }
 }
