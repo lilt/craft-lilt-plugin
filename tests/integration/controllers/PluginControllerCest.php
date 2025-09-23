@@ -2,9 +2,6 @@
 
 declare(strict_types=1);
 
-// By defining this class in the plugin's actual controllers namespace, we can
-// create a test-specific controller that correctly extends PluginController
-// without adding it to the production source code.
 namespace lilthq\craftliltplugin\controllers {
     use yii\web\Response;
     use RuntimeException;
@@ -13,10 +10,6 @@ namespace lilthq\craftliltplugin\controllers {
     {
         protected array|int|bool $allowAnonymous = true;
 
-        /**
-         * Overrides the parent to throw an error for a specific action ID.
-         * This allows us to test the error handling in the base `beforeAction`.
-         */
         public function beforeAction($action): bool
         {
             if ($action->id === 'error-in-before-action') {
@@ -25,9 +18,6 @@ namespace lilthq\craftliltplugin\controllers {
             return parent::beforeAction($action);
         }
 
-        /**
-         * An action designed to fail to test the `runAction` error handling.
-         */
         public function actionErrorInRunAction(): Response
         {
             throw new RuntimeException('This is a test runAction error.');
@@ -66,7 +56,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
         public function testRunActionCatchesError(IntegrationTester $I): void
         {
             /** @var MockObject|LogsApi $logsApiMock */
-            $logsApiMock = $I->make(LogsApi::class);
+            $logsApiMock = $this->createMock(LogsApi::class);
             $logsApiMock->expects($I->once())->method('postLog');
             $this->mockPluginService($logsApiMock);
 
@@ -83,7 +73,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
         public function testBeforeActionCatchesError(IntegrationTester $I): void
         {
             /** @var MockObject|LogsApi $logsApiMock */
-            $logsApiMock = $I->make(LogsApi::class);
+            $logsApiMock = $this->createMock(LogsApi::class);
             $logsApiMock->expects($I->once())
                 ->method('postLog')
                 ->with(
@@ -100,7 +90,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
         public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
         {
             /** @var MockObject|LogsApi $logsApiMock */
-            $logsApiMock = $I->make(LogsApi::class);
+            $logsApiMock = $this->createMock(LogsApi::class);
             $logsApiMock->expects($I->once())
                 ->method('postLog')
                 ->willThrowException(new Exception('Remote API is down.'));
