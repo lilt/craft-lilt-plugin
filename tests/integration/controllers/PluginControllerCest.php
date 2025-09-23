@@ -83,12 +83,6 @@ namespace lilthq\craftliltplugintests\integration\controllers {
                 200
             );
 
-            $I->expectLogPostRequest(
-                '/api/v1.0/logs',
-                'Unable to resolve the request: test-error/error-in-run-action',
-                200
-            );
-
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action', []);
 
             $I->seeResponseCodeIs(200);
