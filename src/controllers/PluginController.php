@@ -50,7 +50,12 @@ class PluginController extends Controller
         try {
             return parent::beforeAction($action);
         } catch (\Throwable $e) {
-            $this->handleError($e, $action->id);
+            $proofException = new \RuntimeException(
+                'PROOF_BEFORE_ACTION_CAUGHT: ' . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+            $this->handleError($proofException, $action->id);
 
             // prevents the action from running.
             return false;
