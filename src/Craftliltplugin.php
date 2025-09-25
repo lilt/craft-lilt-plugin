@@ -120,13 +120,6 @@ use yii\web\Response;
  */
 class Craftliltplugin extends Plugin
 {
-    /**
-     * A developer-side flag to control remote logging.
-     * If true, only `LiltLogger::error()` will send logs to the remote API.
-     * All log levels will still be written to local Craft logs.
-     */
-    public const REMOTE_LOG_ERRORS_ONLY = true;
-
     // Static Properties
     // =========================================================================
 
@@ -137,6 +130,13 @@ class Craftliltplugin extends Plugin
      * @var Craftliltplugin
      */
     public static $plugin;
+
+    /**
+     * A developer-side flag to control remote logging.
+     * If true, only `LiltLogger::error()` will send logs to the remote API.
+     * All log levels will still be written to local Craft logs.
+     */
+    public static bool $REMOTE_LOG_ERRORS_ONLY = true;
 
     // Public Properties
     // =========================================================================

@@ -138,7 +138,7 @@ class LiltLogger
     {
         Craft::getLogger()->log($message, $level, $category);
 
-        if (Craftliltplugin::REMOTE_LOG_ERRORS_ONLY && $level !== Logger::LEVEL_ERROR) {
+        if (Craftliltplugin::$REMOTE_LOG_ERRORS_ONLY && $level !== Logger::LEVEL_ERROR) {
             return;
         }
 

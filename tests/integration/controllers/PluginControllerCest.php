@@ -43,27 +43,30 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
         public function testRunActionLogsAndRethrowsError(IntegrationTester $I): void
         {
-            $I->expectLogsPostRequest(
-                'This is a test runAction error.',
-                200
+            $I->wantTo('verify it logs the error and then re-throws the original exception');
+
+            $I->expectLogPostRequest('This is a test runAction error.', 200);
+
+            $I->expectThrowable(
+                new RuntimeException('This is a test runAction error.'),
+                function() use ($I) {
+                    $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
+                }
             );
-
-            $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-
-            $I->seeResponseCodeIs(500);
-            $I->seeInSource('This is a test runAction error.');
         }
 
         public function testApiLoggingFailureDoesNotPreventException(IntegrationTester $I): void
         {
-            $I->expectLogsPostRequest(
-                'This is a test runAction error.',
-                500
+            $I->wantTo('verify a remote logging failure doesn\'t prevent the exception');
+
+            $I->expectLogPostRequest('This is a test runAction error.', 500);
+
+            $I->expectThrowable(
+                new RuntimeException('This is a test runAction error.'),
+                function() use ($I) {
+                    $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
+                }
             );
-
-            $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-
-            $I->seeResponseCodeIs(500);
         }
     }
 }
