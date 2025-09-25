@@ -45,7 +45,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
         {
             $I->wantTo('verify it logs the error and then re-throws the original exception');
 
-            $I->expectLogPostRequest('This is a test runAction error.', 200);
+            $I->expectLogsPostRequest('This is a test runAction error.', 200);
 
             $I->expectThrowable(
                 new RuntimeException('This is a test runAction error.'),
@@ -59,7 +59,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
         {
             $I->wantTo('verify a remote logging failure doesn\'t prevent the exception');
 
-            $I->expectLogPostRequest('This is a test runAction error.', 500);
+            $I->expectLogsPostRequest('This is a test runAction error.', 500);
 
             $I->expectThrowable(
                 new RuntimeException('This is a test runAction error.'),

@@ -55,8 +55,8 @@ class LiltLoggerCest extends AbstractIntegrationCest
         $I->wantTo('verify that error logs are sent remotely when REMOTE_LOG_ERRORS_ONLY is true');
         $this->setRemoteLogErrorsOnly(true);
 
-        $I->expectLogPostRequest('Test error message', 200);
-        $I->expectLogPostRequest('Test exception', 200);
+        $I->expectLogsPostRequest('Test error message', 200);
+        $I->expectLogPsostRequest('Test exception', 200);
 
         LiltLogger::error('Test error message');
         LiltLogger::logException(new RuntimeException('Test exception'));
@@ -69,8 +69,8 @@ class LiltLoggerCest extends AbstractIntegrationCest
         $I->wantTo('verify that all log levels are sent remotely when REMOTE_LOG_ERRORS_ONLY is false');
         $this->setRemoteLogErrorsOnly(false);
 
-        $I->expectLogPostRequest('Test info message', 200);
-        $I->expectLogPostRequest('Test exception', 200);
+        $I->expectLogsPostRequest('Test info message', 200);
+        $I->expectLogsPostRequest('Test exception', 200);
 
         LiltLogger::info('Test info message');
         LiltLogger::logException(new RuntimeException('Test exception'));
