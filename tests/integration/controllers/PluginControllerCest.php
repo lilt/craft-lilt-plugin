@@ -48,7 +48,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $I->expectLogsPostRequest('This is a test runAction error.', 200);
 
             $I->expectThrowable(
-                new RuntimeException('This is a test runAction error.'),
+                new \RuntimeException('This is a test runAction error.'),
                 function() use ($I) {
                     $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
                 }
@@ -62,7 +62,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             $I->expectLogsPostRequest('This is a test runAction error.', 500);
 
             $I->expectThrowable(
-                new RuntimeException('This is a test runAction error.'),
+                new \RuntimeException('This is a test runAction error.'),
                 function() use ($I) {
                     $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
                 }
