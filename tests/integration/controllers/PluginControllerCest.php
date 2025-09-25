@@ -26,6 +26,7 @@ namespace lilthq\craftliltplugintests\integration\controllers {
     use IntegrationTester;
     use lilthq\craftliltplugin\controllers\TestErrorController;
     use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
+    use PHPUnit\Framework\Assert;
 
     class PluginControllerCest extends AbstractIntegrationCest
     {
@@ -47,12 +48,11 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             $I->expectLogsPostRequest('This is a test runAction error.', 200);
 
-            $I->expectThrowable(
-                new \RuntimeException('This is a test runAction error.'),
-                function() use ($I) {
-                    $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-                }
-            );
+            try {
+                $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
+            } catch (\RuntimeException $e) {
+                Assert::assertEquals('This is a test runAction error.', $e->getMessage());
+            }
         }
 
         public function testApiLoggingFailureDoesNotPreventException(IntegrationTester $I): void
@@ -61,12 +61,11 @@ namespace lilthq\craftliltplugintests\integration\controllers {
 
             $I->expectLogsPostRequest('This is a test runAction error.', 500);
 
-            $I->expectThrowable(
-                new \RuntimeException('This is a test runAction error.'),
-                function() use ($I) {
-                    $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-                }
-            );
+            try {
+                $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
+            } catch (\RuntimeException $e) {
+                Assert::assertEquals('This is a test runAction error.', $e->getMessage());
+            }
         }
     }
 }
