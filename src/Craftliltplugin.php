@@ -254,14 +254,16 @@ class Craftliltplugin extends Plugin
         // Run queue manager
         $this->startQueueManagerHandler->handle();
 
-        LiltLogger::info(
-            Craft::t(
-                'craft-lilt-plugin',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
-        );
+        if (Craft::$app->env !== 'test') {
+            LiltLogger::info(
+                Craft::t(
+                    'craft-lilt-plugin',
+                    '{name} plugin loaded',
+                    ['name' => $this->name]
+                ),
+                __METHOD__
+            );
+        }
 
         Event::on(
             EntriesController::class,
