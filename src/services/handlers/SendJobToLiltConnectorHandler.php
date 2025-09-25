@@ -16,6 +16,7 @@ use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\exceptions\JobNotStartedException;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\SendTranslationToConnector;
 use lilthq\craftliltplugin\records\JobRecord;
@@ -116,7 +117,7 @@ class SendJobToLiltConnectorHandler
             $element = Craft::$app->elements->getElementById($versionId, null, $job->sourceSiteId);
 
             if (!$element) {
-                Craft::error(
+                LiltLogger::error(
                     sprintf("Can't find element: %d for job: %d", $versionId, $job->id)
                 );
 
@@ -128,7 +129,7 @@ class SendJobToLiltConnectorHandler
 
                 if (empty($translation) || empty($translation->id)) {
                     // let's create translation, looks like it is lost
-                    Craft::warning(
+                    LiltLogger::warning(
                         [
                             'message' => 'Force create translation, it was not created before!',
                             'versionId' => $versionId,
@@ -197,7 +198,7 @@ class SendJobToLiltConnectorHandler
 
         $result = $this->connectorJobRepository->start($jobLilt->getId());
         if (!$result) {
-            Craft::error(
+            LiltLogger::error(
                 sprintf(
                     'Can\'t start job %d, lilt id: %d',
                     $jobLilt->id,

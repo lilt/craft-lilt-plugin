@@ -11,6 +11,7 @@ use LiltConnectorSDK\Model\JobResponse1 as ConnectorTranslationsResponse;
 use LiltConnectorSDK\Model\TranslationResponse;
 use LiltConnectorSDK\ObjectSerializer;
 use lilthq\craftliltplugin\exceptions\WrongTranslationFilenameException;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class ConnectorTranslationRepository extends AbstractConnectorExternalRepository
@@ -101,7 +102,7 @@ class ConnectorTranslationRepository extends AbstractConnectorExternalRepository
                 $response = ObjectSerializer::deserialize($dataFromCache, ConnectorTranslationsResponse::class);
             }
         } catch (Exception $ex) {
-            Craft::error([
+            LiltLogger::error([
                 "message" => sprintf(
                     'Deserialize error for lilt job %d: %s ',
                     $jobId,

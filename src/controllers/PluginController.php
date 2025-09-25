@@ -9,10 +9,9 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\controllers;
 
-use Craft;
 use craft\web\Controller;
-use lilthq\craftliltplugin\Craftliltplugin;
-use yii\base\Action;
+use lilthq\craftliltplugin\LiltLogger;
+use Throwable;
 
 /**
  * Plugin Controller
@@ -44,67 +43,20 @@ class PluginController extends Controller
      * @param string $id The ID of the action to be executed.
      * @param array $params The parameters to be passed to the action.
      * @return mixed The result of the action on success, or a JSON Response on failure.
+     * @throws Throwable The original exception caught.
      */
     public function runAction($id, $params = []): mixed
     {
         try {
             return parent::runAction($id, $params);
-        } catch (\Throwable $e) {
-            $this->handleError($e, $id, $params);
-
-            return $this->asJson([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]);
-        }
-    }
-
-    /**
-     * Handles and logs errors thrown caught from `beforeAction` and `runAction`.
-     *
-     * This method implements both local logging via `Craft::error` and remote logging
-     * to the Plugin API's POST /logs endpoint.
-     *
-     * If the Plugin API call fails, the failure will also be logged locally to ensure
-     * no error context is lost.
-     *
-     * @param \Throwable $e The thrown exception that occurred.
-     * @param string $event The ID of the action/event where the error occurred.
-     * @param array $params The parameters that were passed to the action.
-     */
-    private function handleError(\Throwable $e, string $event, array $params = []): void
-    {
-        $request = Craft::$app->getRequest();
-
-        Craft::error('Controller error: ' . json_encode([
-            'event' => $event,
-            'message' => $e->getMessage(),
-            'route' => $this->id . '/' . $event,
-            'method' => $request->getMethod(),
-        ]), __METHOD__);
-
-        try {
-            $metadata = [
-                'event' => $request->getMethod(),
-                'message' => $e->getMessage(),
-                'timestamp' => time(),
-                'body' => $request->getBodyParams() ?: $request->getQueryParams(),
+        } catch (Throwable $e) {
+            LiltLogger::logException($e, [
+                'event' => $id,
+                'route' => $this->getRoute(),
                 'params' => $params,
-            ];
+            ]);
 
-            Craftliltplugin::getInstance()->logsApi->postLog(
-                $event,
-                $e->getMessage(),
-                $metadata,
-            );
-        } catch (\Throwable $err) {
-            // If the remote API logging fails, log that failure locally.
-            Craft::error('Controller error: ' . json_encode([
-                'event' => $event,
-                'message' => $err->getMessage(),
-                'route' => $this->id . '/' . $event,
-                'method' => $request->getMethod(),
-            ]), __METHOD__);
+            throw $e;
         }
     }
 }

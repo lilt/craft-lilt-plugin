@@ -15,6 +15,7 @@ use craft\queue\BaseJob;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\JobRecord;
 use Throwable;
 
@@ -47,7 +48,7 @@ class SendJobToConnector extends AbstractRetryJob
         $jobRecord = JobRecord::findOne(['id' => $jobId]);
 
         if (!$jobRecord) {
-            Craft::error(sprintf("Can't find JobRecord for job id: %d", $jobId));
+            LiltLogger::error(sprintf("Can't find JobRecord for job id: %d", $jobId));
 
             return;
         }
@@ -56,7 +57,7 @@ class SendJobToConnector extends AbstractRetryJob
         $mutexKey = __CLASS__ . '_' . __FUNCTION__ . '_' . $this->jobId;
 
         if (!$mutex->acquire($mutexKey)) {
-            Craft::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
+            LiltLogger::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
 
             return;
         }

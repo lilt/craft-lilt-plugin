@@ -17,6 +17,7 @@ use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\repositories\SettingsRepository;
@@ -65,7 +66,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
         $mutex = Craft::$app->getMutex();
         $mutexKey = $this->getMutexKey();
         if (!$mutex->acquire($mutexKey)) {
-            Craft::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
+            LiltLogger::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
 
             $this->markAsDone($queue);
             return;
@@ -119,7 +120,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 ['jobId' => $jobRecord->id]
             );
 
-            Craft::error([
+            LiltLogger::error([
                 "message" => sprintf(
                     'Set job %d and translations to status failed due to failed/cancel status from lilt',
                     $jobRecord->id
@@ -189,7 +190,7 @@ class FetchJobStatusFromConnector extends AbstractRetryJob
                 $jobRecord->status = Job::STATUS_FAILED;
                 $jobRecord->save();
 
-                Craft::error([
+                LiltLogger::error([
                     "message" => sprintf(
                         'Set job %d and translations to status failed due to failed status for translation from lilt',
                         $jobRecord->id

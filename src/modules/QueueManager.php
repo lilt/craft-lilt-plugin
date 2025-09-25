@@ -10,10 +10,11 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\modules;
 
 use Craft;
-use craft\queue\BaseJob;
 use craft\helpers\Queue as CraftHelpersQueue;
+use craft\queue\BaseJob;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\services\repositories\SettingsRepository;
@@ -39,7 +40,7 @@ class QueueManager extends BaseJob
         $mutex = Craft::$app->getMutex();
         $mutexKey = self::getMutexKey();
         if (!$mutex->acquire($mutexKey)) {
-            Craft::warning('Lilt queue manager is already running');
+            LiltLogger::warning('Lilt queue manager is already running');
 
             $this->setProgress(
                 $queue,
@@ -62,7 +63,7 @@ class QueueManager extends BaseJob
         ]);
 
         if (count($jobRecords) === 0) {
-            Craft::info([
+            LiltLogger::info([
                 'message' => 'No jobs found in progress ',
                 'queue' => __FILE__,
             ]);
@@ -90,7 +91,7 @@ class QueueManager extends BaseJob
             0
         );
 
-        Craft::info([
+        LiltLogger::info([
             'message' => 'Push jobs in progress for manual sync',
             'jobIds' => $jobIds,
             'queue' => __FILE__,

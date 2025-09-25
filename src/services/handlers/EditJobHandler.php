@@ -13,6 +13,7 @@ use Craft;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\exceptions\JobNotFoundException;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\services\handlers\commands\EditJobCommand;
 use lilthq\craftliltplugin\services\repositories\JobRepository;
@@ -33,7 +34,7 @@ class EditJobHandler
         $jobRecord = JobRecord::findOne(['id' => $command->getJobId()]);
 
         if (!$job || !$jobRecord) {
-            Craft::error(
+            LiltLogger::error(
                 sprintf('Job with id %d not found', $command->getJobId())
             );
 

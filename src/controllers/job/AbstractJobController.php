@@ -15,6 +15,7 @@ use lilthq\craftliltplugin\assets\JobFormAsset;
 use lilthq\craftliltplugin\controllers\PluginController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use RuntimeException;
 use yii\base\InvalidConfigException;
@@ -85,7 +86,7 @@ class AbstractJobController extends PluginController
                 );
                 $translationWorkflow = strtolower($settingsResult->getLiltTranslationWorkflow());
             } catch (Exception $ex) {
-                Craft::error([
+                LiltLogger::error([
                     'message' => "Can't fetch translation workflow",
                     'exception_message' => $ex->getMessage(),
                     'exception_trace' => $ex->getTrace(),

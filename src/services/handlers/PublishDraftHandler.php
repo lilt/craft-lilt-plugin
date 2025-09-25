@@ -11,8 +11,8 @@ namespace lilthq\craftliltplugin\services\handlers;
 
 use Craft;
 use craft\base\ElementInterface;
-use craft\errors\InvalidElementException;
 use craft\services\Drafts as DraftRepository;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\SettingRecord;
 use Throwable;
 use yii\base\Exception;
@@ -65,7 +65,7 @@ class PublishDraftHandler
         }
 
         if (!Craft::$app->getElements()->saveElement($draft)) {
-            Craft::warning([
+            LiltLogger::warning([
                 'message' => "Could not propagate draft {$draft->id} for entry {$draft->canonicalId}.",
             ]);
         }

@@ -19,6 +19,7 @@ use craft\fields\MultiSelect;
 use craft\fields\RadioButtons;
 use craft\fields\Table;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\services\providers\command\ProvideContentCommand;
 
 class ElementTranslatableContentProvider
@@ -48,7 +49,7 @@ class ElementTranslatableContentProvider
             $fieldData = Craft::$app->fields->getFieldById((int) $field->id);
 
             if ($fieldData === null) {
-                Craft::error(
+                LiltLogger::error(
                     sprintf("Can't get field data for field %d", $field->id)
                 );
 

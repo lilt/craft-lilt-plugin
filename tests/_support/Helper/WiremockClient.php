@@ -276,11 +276,13 @@ class WiremockClient extends Module
         );
     }
 
-    public function expectLogPostRequest(string $url, string $expectedMessage, int $responseCode): void
+    public function expectLogsPostRequest(string $expectedMessage, int $responseCode): void
     {
         $this->wireMock->stubFor(
-            WireMock::post(WireMock::urlPathMatching($url))
-                ->withRequestBody(WireMock::containing("\"message\":\"$expectedMessage\""))
+            WireMock::post(WireMock::urlEqualTo('/api/v1.0/logs'))
+                ->withRequestBody(
+                    WireMock::matchingJsonPath('$.message', WireMock::equalTo($expectedMessage))
+                )
                 ->willReturn(WireMock::aResponse()->withStatus($responseCode))
         );
     }

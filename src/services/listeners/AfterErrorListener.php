@@ -15,6 +15,7 @@ use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\modules\AbstractRetryJob;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
 use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
@@ -75,7 +76,7 @@ class AfterErrorListener implements ListenerInterface
 
         $jobRecord = JobRecord::findOne(['id' => $queueJob->jobId]);
 
-        Craft::error([
+        LiltLogger::error([
             "message" => sprintf(
                 'Job %s failed due to: %s',
                 get_class($queueJob),
@@ -89,7 +90,7 @@ class AfterErrorListener implements ListenerInterface
         ]);
 
         if (!$queueJob->canRetry()) {
-            Craft::warning([
+            LiltLogger::warning([
                 "message" => sprintf(
                     'Job %s can\'t be retried',
                     $event->id
@@ -118,7 +119,7 @@ class AfterErrorListener implements ListenerInterface
                 (string)$event->id
             );
 
-            Craft::error([
+            LiltLogger::error([
                 "message" => sprintf(
                     '[%s] Mark lilt job %d (%d) as failed due to: %s',
                     get_class($queueJob),
@@ -164,7 +165,7 @@ class AfterErrorListener implements ListenerInterface
             (string)$event->id
         );
 
-        Craft::info([
+        LiltLogger::info([
             "message" => sprintf(
                 'Released job %s',
                 $event->id
@@ -196,7 +197,7 @@ class AfterErrorListener implements ListenerInterface
                 $retryJob::getDelay()
             );
 
-            Craft::info([
+            LiltLogger::info([
                 "message" => 'Retried job due to infrastructure error',
                 "queueJob" => $retryJob,
                 "isApiError" => $isApiError,
@@ -216,7 +217,7 @@ class AfterErrorListener implements ListenerInterface
             $retryJob::getDelay()
         );
 
-        Craft::info([
+        LiltLogger::info([
             "message" => sprintf(
                 'Retried job, attempt %d',
                 $queueJob->attempt

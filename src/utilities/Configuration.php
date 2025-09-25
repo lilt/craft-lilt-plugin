@@ -10,6 +10,7 @@ use craft\helpers\UrlHelper;
 use Exception;
 use LiltConnectorSDK\Model\SettingsResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 
@@ -39,7 +40,7 @@ class Configuration extends Utility
         try {
             $settingsResult = Craftliltplugin::getInstance()->connectorSettingsApi->servicesApiSettingsGetSettings();
         } catch (Exception $ex) {
-            Craft::error([
+            LiltLogger::error([
                 'message' => "Can't fetch setting from connector api!",
                 'exception_message' => $ex->getMessage(),
                 'exception_trace' => $ex->getTrace(),

@@ -13,6 +13,7 @@ use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationNotificationsRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -66,7 +67,7 @@ class SyncJobFromLiltConnectorHandler
                 try {
                     $this->processTranslation($translationDto, $job);
                 } catch (Exception $ex) {
-                    Craft::error([
+                    LiltLogger::error([
                         'message' => "Can't process translation due to error",
                         'exception_message' => $ex->getMessage(),
                         'exception_trace' => $ex->getTrace(),
@@ -129,7 +130,7 @@ class SyncJobFromLiltConnectorHandler
             ]);
 
             if (!$translationRecord) {
-                Craft::error(
+                LiltLogger::error(
                     sprintf(
                         'Translation record of jobId: %d not found, looks like job was removed.'
                         . ' Translation fetching aborted.',

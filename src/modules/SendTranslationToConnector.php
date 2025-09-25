@@ -18,6 +18,7 @@ use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\exceptions\JobNotStartedException;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\SendTranslationCommand;
@@ -67,7 +68,7 @@ class SendTranslationToConnector extends AbstractRetryJob
         }
 
         if (!$command->getJob()->isVerifiedFlow() && !$command->getJob()->isInstantFlow()) {
-            Craft::error(
+            LiltLogger::error(
                 sprintf(
                     "Job can't be proceed, incorrect flow %s: %d",
                     $command->getJob()->translationWorkflow,
@@ -79,7 +80,7 @@ class SendTranslationToConnector extends AbstractRetryJob
         }
 
         if (empty($command->getJob()->liltJobId)) {
-            Craft::error(
+            LiltLogger::error(
                 sprintf(
                     "Job can't be proceed, empty lilt id [%s]: %d",
                     $command->getJob()->translationWorkflow,
@@ -175,7 +176,7 @@ class SendTranslationToConnector extends AbstractRetryJob
                     $command->getJob()->liltJobId
                 );
                 if (!$result) {
-                    Craft::error(
+                    LiltLogger::error(
                         sprintf(
                             'Can\'t start job %d, lilt id: %d',
                             $command->getJob()->id,

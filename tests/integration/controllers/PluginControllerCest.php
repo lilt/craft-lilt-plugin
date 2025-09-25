@@ -26,7 +26,6 @@ namespace lilthq\craftliltplugintests\integration\controllers {
     use IntegrationTester;
     use lilthq\craftliltplugin\controllers\TestErrorController;
     use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
-    use PHPUnit\Framework\Assert;
 
     class PluginControllerCest extends AbstractIntegrationCest
     {
@@ -42,38 +41,29 @@ namespace lilthq\craftliltplugintests\integration\controllers {
             unset(Craft::$app->controllerMap['test-error']);
         }
 
-        public function testRunActionCatchesError(IntegrationTester $I): void
+        public function testRunActionLogsAndRethrowsError(IntegrationTester $I): void
         {
-            $I->expectLogPostRequest(
-                '/api/v1.0/logs',
+            $I->expectLogsPostRequest(
                 'This is a test runAction error.',
                 200
             );
 
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-            $I->seeResponseCodeIs(200);
 
-            $responseContent = Craft::$app->getResponse()->content;
-            $response = json_decode($responseContent, true);
-
-            Assert::assertIsArray($response);
-            Assert::assertFalse($response['success']);
-            Assert::assertSame('This is a test runAction error.', $response['message']);
+            $I->seeResponseCodeIs(500);
+            $I->seeInSource('This is a test runAction error.');
         }
-        public function testApiLoggingFailureDoesNotAffectUserResponse(IntegrationTester $I): void
+
+        public function testApiLoggingFailureDoesNotPreventException(IntegrationTester $I): void
         {
-            $I->expectLogPostRequest(
-                '/api/v1.0/logs',
+            $I->expectLogsPostRequest(
                 'This is a test runAction error.',
                 500
             );
 
             $I->sendAjaxPostRequest('index.php?action=test-error/error-in-run-action');
-            $I->seeResponseCodeIs(200);
 
-            $responseContent = Craft::$app->getResponse()->content;
-            $response = json_decode($responseContent, true);
-            Assert::assertSame('This is a test runAction error.', $response['message']);
+            $I->seeResponseCodeIs(500);
         }
     }
 }

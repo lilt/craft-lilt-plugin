@@ -12,11 +12,10 @@ namespace lilthq\craftliltplugin\services\handlers;
 use Craft;
 use craft\base\ElementInterface;
 use craft\errors\ElementNotFoundException;
-use craft\helpers\Queue;
 use DateTimeInterface;
 use LiltConnectorSDK\ApiException;
 use lilthq\craftliltplugin\elements\Job;
-use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
@@ -24,7 +23,6 @@ use lilthq\craftliltplugin\services\handlers\commands\SendTranslationCommand;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
-use lilthq\craftliltplugin\services\repositories\external\ConnectorJobRepository;
 use lilthq\craftliltplugin\services\repositories\JobLogsRepository;
 use lilthq\craftliltplugin\services\repositories\TranslationRepository;
 use Throwable;
@@ -233,7 +231,7 @@ class SendTranslationToLiltConnectorHandler
                 return $draft;
             }
 
-            Craft::warning([
+            LiltLogger::warning([
                 'message' => 'Draft was not found for job, fallback to create bew one',
                 'jobId' => $job->id,
                 'translationId' => $translation->id,

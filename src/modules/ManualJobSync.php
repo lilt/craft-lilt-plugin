@@ -12,13 +12,14 @@ namespace lilthq\craftliltplugin\modules;
 use Craft;
 use craft\db\Table;
 use craft\helpers\Db;
+use craft\helpers\Queue as CraftHelpersQueue;
 use craft\queue\BaseJob;
 use craft\queue\Queue;
-use craft\helpers\Queue as CraftHelpersQueue;
 use Exception;
 use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
@@ -49,7 +50,7 @@ class ManualJobSync extends BaseJob
         $mutexKey = __CLASS__ . '_' . __FUNCTION__ . '_' . join('_', $this->jobIds);
 
         if (!$mutex->acquire($mutexKey)) {
-            Craft::error('Lilt queue manager is already running');
+            LiltLogger::error('Lilt queue manager is already running');
 
             $this->setProgress(
                 $queue,
@@ -122,7 +123,7 @@ class ManualJobSync extends BaseJob
                         'id' => $jobInfo['id'],
                     ], [], false);
                 } catch (Exception $ex) {
-                    Craft::error(
+                    LiltLogger::error(
                         sprintf(
                             "Can't update delay for job: %d. Due to issue: %s",
                             $jobInfo['id'],
@@ -153,7 +154,7 @@ class ManualJobSync extends BaseJob
                     $queue->retry((string)$jobInfo['id']);
                     $jobsInProgress[$queueJob->jobId] = $queueJob;
                 } catch (Exception $ex) {
-                    Craft::error(
+                    LiltLogger::error(
                         sprintf(
                             "Can't retry job: %d. Due to issue: %s",
                             $jobInfo['id'],

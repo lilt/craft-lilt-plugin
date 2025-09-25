@@ -9,6 +9,7 @@ use Craft;
 use craft\base\FieldInterface;
 use craft\elements\MatrixBlock;
 use craft\errors\InvalidFieldException;
+use lilthq\craftliltplugin\LiltLogger;
 use verbb\supertable\elements\SuperTableBlockElement;
 
 abstract class AbstractContentApplier
@@ -71,7 +72,7 @@ abstract class AbstractContentApplier
     protected function getOriginalFieldSerializedValue(ApplyContentCommand $command)
     {
         if (empty($command->getField()->handle)) {
-            Craft::warning([
+            LiltLogger::warning([
                 'message' => 'Handle for field is empty, please check CraftCMS configuration',
                 'field' => $command->getField()->toArray()
             ]);
@@ -84,7 +85,7 @@ abstract class AbstractContentApplier
         );
 
         if (empty($fieldValue)) {
-            Craft::warning([
+            LiltLogger::warning([
                 'message' => 'Field value is empty, please configure it for proper translation',
                 'field' => $command->getField()->toArray(),
                 'fieldValue' => $fieldValue,

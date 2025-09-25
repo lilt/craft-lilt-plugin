@@ -11,6 +11,7 @@ use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\exceptions\WrongTranslationFilenameException;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\TranslationRecord;
 
 class TranslationFailedHandler
@@ -40,7 +41,7 @@ class TranslationFailedHandler
         );
 
         if (!$element) {
-            Craft::error([
+            LiltLogger::error([
                 'message' => "Can't find element!",
                 'target_language' => $translationTargetLanguage,
                 'element_id' => $elementId,
@@ -58,7 +59,7 @@ class TranslationFailedHandler
         $parentElementId = $element->getCanonicalId() ?? $elementId;
 
         if (!isset($unprocessedTranslations[$parentElementId][$targetSiteId])) {
-            Craft::error([
+            LiltLogger::error([
                 'message' => "Can't find translation!",
                 'target_language' => $translationTargetLanguage,
                 'parent_elementId' => $parentElementId,

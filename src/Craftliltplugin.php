@@ -37,13 +37,13 @@ use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\ResendJobHandler;
+use lilthq\craftliltplugin\services\handlers\ResolveTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\StartQueueManagerHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
-use lilthq\craftliltplugin\services\handlers\ResolveTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
@@ -120,6 +120,13 @@ use yii\web\Response;
  */
 class Craftliltplugin extends Plugin
 {
+    /**
+     * A developer-side flag to control remote logging.
+     * If true, only `LiltLogger::error()` will send logs to the remote API.
+     * All log levels will still be written to local Craft logs.
+     */
+    public const REMOTE_LOG_ERRORS_ONLY = true;
+
     // Static Properties
     // =========================================================================
 
@@ -247,7 +254,7 @@ class Craftliltplugin extends Plugin
         // Run queue manager
         $this->startQueueManagerHandler->handle();
 
-        Craft::info(
+        LiltLogger::info(
             Craft::t(
                 'craft-lilt-plugin',
                 '{name} plugin loaded',
