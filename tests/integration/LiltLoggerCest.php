@@ -10,6 +10,7 @@ use IntegrationTester;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
+use PHPUnit\Framework\Assert;
 use ReflectionClass;
 use RuntimeException;
 
@@ -47,7 +48,7 @@ class LiltLoggerCest extends AbstractIntegrationCest
         LiltLogger::info('Test info message');
         LiltLogger::warning('Test warning message');
 
-        $I->assertCount(2, $this->spyLogger->calls);
+        Assert::assertCount(2, $this->spyLogger->calls);
     }
 
     public function testErrorLogsAreSentWhenFlagIsTrue(IntegrationTester $I): void
@@ -56,12 +57,12 @@ class LiltLoggerCest extends AbstractIntegrationCest
         $this->setRemoteLogErrorsOnly(true);
 
         $I->expectLogsPostRequest('Test error message', 200);
-        $I->expectLogPsostRequest('Test exception', 200);
+        $I->expectLogsPostRequest('Test exception', 200);
 
         LiltLogger::error('Test error message');
         LiltLogger::logException(new RuntimeException('Test exception'));
 
-        $I->assertCount(2, $this->spyLogger->calls);
+        Assert::assertCount(2, $this->spyLogger->calls);
     }
 
     public function testAllLogsAreSentWhenFlagIsFalse(IntegrationTester $I): void
@@ -75,6 +76,6 @@ class LiltLoggerCest extends AbstractIntegrationCest
         LiltLogger::info('Test info message');
         LiltLogger::logException(new RuntimeException('Test exception'));
 
-        $I->assertCount(2, $this->spyLogger->calls);
+        Assert::assertCount(2, $this->spyLogger->calls);
     }
 }
