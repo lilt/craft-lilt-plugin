@@ -62,6 +62,8 @@ class LiltLoggerCest extends AbstractIntegrationCest
         LiltLogger::error('Test error message');
         LiltLogger::logException(new RuntimeException('Test exception'));
 
+        Craftliltplugin::getInstance()->logsApi->flush();
+
         Assert::assertCount(2, $this->spyLogger->calls);
     }
 
@@ -75,6 +77,8 @@ class LiltLoggerCest extends AbstractIntegrationCest
 
         LiltLogger::info('Test info message');
         LiltLogger::logException(new RuntimeException('Test exception'));
+
+        Craftliltplugin::getInstance()->logsApi->flush();
 
         Assert::assertCount(2, $this->spyLogger->calls);
     }
