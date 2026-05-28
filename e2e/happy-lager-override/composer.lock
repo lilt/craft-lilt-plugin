@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "025b87c47b89ccac55cdf734082153c0",
+    "content-hash": "9363449c4e76ec308b0d8da25ad33549",
     "packages": [
         {
             "name": "cebe/markdown",
@@ -2237,137 +2237,6 @@
             "time": "2023-04-16T18:19:15+00:00"
         },
         {
-            "name": "lilt/craft-lilt-plugin",
-            "version": "999.9.9",
-            "dist": {
-                "type": "path",
-                "url": "/tmp/craft-lilt-plugin",
-                "reference": "f8a291c702998277626ca16b7e5ec2e7667089d4"
-            },
-            "require": {
-                "craftcms/cms": "^4.0.0",
-                "ext-json": "*",
-                "lilt/lilt-connector-sdk-php": "0.1.0",
-                "php": "^8.0"
-            },
-            "require-dev": {
-                "codeception/codeception": "^3.0 | ^4.0",
-                "codeception/module-asserts": "^1.3",
-                "codeception/module-yii2": "^1.1",
-                "craftcms/redactor": "^2.0 || ^3.0",
-                "percipioglobal/craft-colour-swatches": "^1.0 || ^4.0",
-                "spicyweb/craft-neo": "3.1.5",
-                "squizlabs/php_codesniffer": "^3.6",
-                "verbb/super-table": "^3.0",
-                "vlucas/phpdotenv": "^3.0",
-                "wiremock-php/wiremock-php": "^2.33"
-            },
-            "type": "craft-plugin",
-            "extra": {
-                "name": "Lilt",
-                "handle": "craft-lilt-plugin",
-                "developer": "Lilt Devs",
-                "developerUrl": "https://github.com/lilt",
-                "documentationUrl": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/blob/master/README.md",
-                "changelogUrl": "https://raw.githubusercontent.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/master/CHANGELOG.md",
-                "class": "lilthq\\craftliltplugin\\Craftliltplugin"
-            },
-            "autoload": {
-                "psr-4": {
-                    "lilthq\\craftliltplugin\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "lilthq\\craftliltplugintests\\integration\\": "tests/integration",
-                    "lilthq\\tests\\fixtures\\": "tests/fixtures/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Lilt Devs",
-                    "homepage": "https://github.com/lilt"
-                }
-            ],
-            "description": "The Lilt plugin makes it easy for you to send content to Lilt for translation right from within Craft CMS.",
-            "keywords": [
-                "cms",
-                "craft",
-                "craft-lilt-plugin",
-                "craft-plugin",
-                "craftcms"
-            ],
-            "support": {
-                "docs": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/blob/master/README.md",
-                "issues": "https://github.com/https://github.com/lilt/craft-lilt-plugin/craft-lilt-plugin/issues"
-            },
-            "transport-options": {
-                "relative": false
-            }
-        },
-        {
-            "name": "lilt/lilt-connector-sdk-php",
-            "version": "0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/lilt/lilt-connector-sdk-php.git",
-                "reference": "8391794d232b86b2d21a5b0bee044fed30454242"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/lilt/lilt-connector-sdk-php/zipball/8391794d232b86b2d21a5b0bee044fed30454242",
-                "reference": "8391794d232b86b2d21a5b0bee044fed30454242",
-                "shasum": ""
-            },
-            "require": {
-                "ext-curl": "*",
-                "ext-json": "*",
-                "ext-mbstring": "*",
-                "guzzlehttp/guzzle": "^6.5.5 || ^7.0",
-                "guzzlehttp/psr7": "^1.6 || ^2.0",
-                "php": ">=7.2"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.12",
-                "phpunit/phpunit": "^8.0 || ^9.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "LiltConnectorSDK\\": "lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "unlicense"
-            ],
-            "authors": [
-                {
-                    "name": "OpenAPI-Generator contributors",
-                    "homepage": "https://openapi-generator.tech"
-                }
-            ],
-            "description": "This document describes the Plugin API for Lilt's Connector platform. The Plugin API is intented to be used by developers who wish to build integrations into their desired systems. The purpose of this API is to enable content transfer and status monitoring for localization projects.  - Read more about the conecpts and workflows in the   [user guide](/docs/api/v1.0). - Test the API interactively via [Swagger UI](/api/v1.0/ui).",
-            "homepage": "https://openapi-generator.tech",
-            "keywords": [
-                "api",
-                "openapi",
-                "openapi-generator",
-                "openapitools",
-                "php",
-                "rest",
-                "sdk"
-            ],
-            "support": {
-                "issues": "https://github.com/lilt/lilt-connector-sdk-php/issues",
-                "source": "https://github.com/lilt/lilt-connector-sdk-php/tree/0.1.0"
-            },
-            "time": "2022-06-17T17:36:31+00:00"
-        },
-        {
             "name": "mikehaertl/php-shellcommand",
             "version": "1.7.0",
             "source": {
@@ -3825,12 +3694,12 @@
             },
             "type": "library",
             "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/contracts",
+                    "name": "symfony/contracts"
+                },
                 "branch-alias": {
                     "dev-main": "3.0-dev"
-                },
-                "thanks": {
-                    "name": "symfony/contracts",
-                    "url": "https://github.com/symfony/contracts"
                 }
             },
             "autoload": {
@@ -4479,20 +4348,20 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.27.0",
+            "version": "v1.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "5bbc823adecdae860bb64756d639ecfec17b050a"
+                "reference": "141046a8f9477948ff284fa65be2095baafb94f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/5bbc823adecdae860bb64756d639ecfec17b050a",
-                "reference": "5bbc823adecdae860bb64756d639ecfec17b050a",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/141046a8f9477948ff284fa65be2095baafb94f2",
+                "reference": "141046a8f9477948ff284fa65be2095baafb94f2",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1"
+                "php": ">=7.2"
             },
             "provide": {
                 "ext-ctype": "*"
@@ -4502,12 +4371,9 @@
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-main": "1.27-dev"
-                },
                 "thanks": {
-                    "name": "symfony/polyfill",
-                    "url": "https://github.com/symfony/polyfill"
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
                 }
             },
             "autoload": {
@@ -4541,7 +4407,7 @@
                 "portable"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.27.0"
+                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.37.0"
             },
             "funding": [
                 {
@@ -4553,11 +4419,15 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-11-03T14:55:06+00:00"
+            "time": "2026-04-10T16:19:22+00:00"
         },
         {
             "name": "symfony/polyfill-iconv",
@@ -5134,29 +5004,26 @@
         },
         {
             "name": "symfony/polyfill-php80",
-            "version": "v1.27.0",
+            "version": "v1.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php80.git",
-                "reference": "7a6ff3f1959bb01aefccb463a0f2cd3d3d2fd936"
+                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/7a6ff3f1959bb01aefccb463a0f2cd3d3d2fd936",
-                "reference": "7a6ff3f1959bb01aefccb463a0f2cd3d3d2fd936",
+                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
+                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1"
+                "php": ">=7.2"
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-main": "1.27-dev"
-                },
                 "thanks": {
-                    "name": "symfony/polyfill",
-                    "url": "https://github.com/symfony/polyfill"
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
                 }
             },
             "autoload": {
@@ -5197,7 +5064,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php80/tree/v1.27.0"
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.37.0"
             },
             "funding": [
                 {
@@ -5209,11 +5076,15 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-11-03T14:55:06+00:00"
+            "time": "2026-04-10T16:19:22+00:00"
         },
         {
             "name": "symfony/process",
@@ -5533,16 +5404,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v5.4.23",
+            "version": "v5.4.53",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "4cd2e3ea301aadd76a4172756296fe552fb45b0b"
+                "reference": "ae0bbb46f77ff56591d0a0259c7f458f4b3e1f77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/4cd2e3ea301aadd76a4172756296fe552fb45b0b",
-                "reference": "4cd2e3ea301aadd76a4172756296fe552fb45b0b",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/ae0bbb46f77ff56591d0a0259c7f458f4b3e1f77",
+                "reference": "ae0bbb46f77ff56591d0a0259c7f458f4b3e1f77",
                 "shasum": ""
             },
             "require": {
@@ -5588,7 +5459,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v5.4.23"
+                "source": "https://github.com/symfony/yaml/tree/v5.4.53"
             },
             "funding": [
                 {
@@ -5600,11 +5471,15 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-04-23T19:33:36+00:00"
+            "time": "2026-05-20T17:13:41+00:00"
         },
         {
             "name": "theiconic/name-parser",
@@ -7161,15 +7036,15 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=7.0.0"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "8.0.26"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.9.0"
 }
