@@ -47,6 +47,7 @@ use lilthq\craftliltplugin\services\handlers\ResolveTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
+use lilthq\craftliltplugin\services\providers\ConnectorHttpClientProvider;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\field\FieldContentProvider;
 use lilthq\craftliltplugin\services\repositories\external\ConnectorFileRepository;
@@ -85,6 +86,7 @@ use yii\web\Response;
  * @property JobRepository $jobRepository
  * @property TranslationRepository $translationRepository
  * @property ConnectorConfigurationProvider $connectorConfigurationProvider
+ * @property ConnectorHttpClientProvider $connectorHttpClientProvider
  * @property CreateJobHandler $createJobHandler
  * @property EditJobHandler $editJobHandler
  * @property SendJobToLiltConnectorHandler $sendJobToLiltConnectorHandler
@@ -119,6 +121,14 @@ use yii\web\Response;
  */
 class Craftliltplugin extends Plugin
 {
+    // Constants
+    // =========================================================================
+
+    /**
+     * Header sent on every Lilt API request to identify the connector and its version.
+     */
+    public const CONNECTOR_VERSION_HEADER = 'X-Lilt-Connector-Version';
+
     // Static Properties
     // =========================================================================
 
@@ -329,6 +339,14 @@ class Craftliltplugin extends Plugin
     public function getUserAgent(): string
     {
         return sprintf('lilthq/craft-lilt-plugin:%s', Craftliltplugin::getInstance()->getVersion());
+    }
+
+    /**
+     * Value for the {@see self::CONNECTOR_VERSION_HEADER} header: `craft/{version}`.
+     */
+    public function getConnectorVersion(): string
+    {
+        return sprintf('craft/%s', Craftliltplugin::getInstance()->getVersion());
     }
 
     public static function getInstance(): Craftliltplugin
