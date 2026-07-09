@@ -6,7 +6,6 @@ namespace lilthq\craftliltplugin\services;
 
 use Craft;
 use fruitstudios\linkit\fields\LinkitField;
-use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\JobsApi;
 use LiltConnectorSDK\Api\SettingsApi;
 use LiltConnectorSDK\Api\TranslationsApi;
@@ -47,6 +46,7 @@ use lilthq\craftliltplugin\services\handlers\ResolveTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
+use lilthq\craftliltplugin\services\providers\ConnectorHttpClientProvider;
 use lilthq\craftliltplugin\services\providers\ElementTranslatableContentProvider;
 use lilthq\craftliltplugin\services\providers\field\BaseOptionFieldContentProvider;
 use lilthq\craftliltplugin\services\providers\field\ColourSwatchesContentProvider;
@@ -85,6 +85,7 @@ class ServiceInitializer
             'copySourceTextHandler' => CopySourceTextHandler::class,
             'syncJobFromLiltConnectorHandler' => SyncJobFromLiltConnectorHandler::class,
             'connectorConfigurationProvider' => ConnectorConfigurationProvider::class,
+            'connectorHttpClientProvider' => ConnectorHttpClientProvider::class,
             'elementTranslatableContentProvider' => ElementTranslatableContentProvider::class,
             'languageMapper' => LanguageMapper::class,
             'jobRepository' => JobRepository::class,
@@ -131,14 +132,14 @@ class ServiceInitializer
             'connectorTranslationsApi' =>
                 function () use ($pluginInstance) {
                     return new TranslationsApi(
-                        new Client(),
+                        $pluginInstance->connectorHttpClientProvider->provide(),
                         $pluginInstance->connectorConfiguration
                     );
                 },
             'connectorSettingsApi' =>
                 function () use ($pluginInstance) {
                     return new SettingsApi(
-                        new Client(),
+                        $pluginInstance->connectorHttpClientProvider->provide(),
                         $pluginInstance->connectorConfiguration
                     );
                 },
@@ -153,7 +154,7 @@ class ServiceInitializer
         $pluginInstance->setComponents([
             'connectorJobsApi' => function () use ($pluginInstance) {
                 return new JobsApi(
-                    new Client(),
+                    $pluginInstance->connectorHttpClientProvider->provide(),
                     $pluginInstance->connectorConfiguration
                 );
             }

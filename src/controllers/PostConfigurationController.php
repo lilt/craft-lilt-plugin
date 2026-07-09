@@ -12,7 +12,6 @@ namespace lilthq\craftliltplugin\controllers;
 use Craft;
 use craft\helpers\UrlHelper;
 use Exception;
-use GuzzleHttp\Client;
 use LiltConnectorSDK\Api\SettingsApi;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
@@ -39,7 +38,7 @@ class PostConfigurationController extends AbstractJobController
         $connectorApiUrl = $request->getBodyParam('connectorApiUrl');
 
         $newSettingsApi = new SettingsApi(
-            new Client(),
+            Craftliltplugin::getInstance()->connectorHttpClientProvider->provide(),
             LiltConnectorConfiguration::getDefaultConfiguration()
                 ->setAccessToken($connectorApiKey)
                 ->setHost($connectorApiUrl)

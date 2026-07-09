@@ -28,7 +28,7 @@ root:
 require-craft:
 	@if [ -n "$(CRAFT_VERSION)" ]; then \
 	  echo "Installing CraftCMS version $(CRAFT_VERSION)..."; \
-	  docker compose exec -T -u www-data cli-app sh -c "php composer.phar require craftcms/cms:$(CRAFT_VERSION) -W"; \
+	  docker compose exec -T -e COMPOSER_NO_BLOCKING=1 -u www-data cli-app sh -c "php composer.phar require craftcms/cms:$(CRAFT_VERSION) -W"; \
 	else \
 	  echo "⚠️  CRAFT_VERSION is not set. Skipping CraftCMS installation."; \
 	fi
@@ -40,7 +40,7 @@ composer-install:
 	docker compose exec -T -u root cli-app sh -c "rm -rf vendor"
 	docker compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
 	docker compose exec -T -u www-data cli-app sh -c "curl -s https://getcomposer.org/installer | php"
-	docker compose exec -T -u www-data cli-app sh -c "php composer.phar install"
+	docker compose exec -T -e COMPOSER_NO_BLOCKING=1 -u www-data cli-app sh -c "php composer.phar install"
 	$(MAKE) require-craft
 
 quality:
@@ -89,6 +89,7 @@ test: functional integration unit
 
 prepare-container:
 	docker compose up -d
+	docker compose exec -T mysql-test sh -c 'while ! mysqladmin ping -h"mysql-test" --silent; do sleep 1; done'
 	docker compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
 	docker compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
 	docker compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
@@ -96,7 +97,7 @@ prepare-container:
 	docker compose exec -T -u root cli-app sh -c "cp composer.phar /bin/composer"
 
 test-craft-versions: prepare-container
-	docker compose exec -T -u www-data cli-app bash -c \
+	docker compose exec -T -e COMPOSER_NO_BLOCKING=1 -u www-data cli-app bash -c \
 		"./craft-versions.sh ${CRAFT_VERSION}"
 
 require-guzzle-v6:
