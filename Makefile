@@ -89,6 +89,7 @@ test: functional integration unit
 
 prepare-container:
 	docker compose up -d
+	docker compose exec -T mysql-test sh -c 'while ! mysqladmin ping -h"mysql-test" --silent; do sleep 1; done'
 	docker compose exec -T -u root cli-app sh -c "chown -R www-data:www-data /craft-lilt-plugin"
 	docker compose exec -T -u root cli-app sh -c "apk --no-cache add bash make git"
 	docker compose exec -T -u www-data cli-app sh -c "cp tests/.env.test tests/.env"
