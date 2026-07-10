@@ -27,12 +27,13 @@ class ManualJobSync extends BaseJob
     public const DELAY_IN_SECONDS = 0;
     public const PRIORITY = 512;
 
-    private const SUPPORTED_JOBS = [
+    public const SUPPORTED_JOBS = [
         FetchJobStatusFromConnector::class,
         FetchInstantJobTranslationsFromConnector::class,
         FetchVerifiedJobTranslationsFromConnector::class,
         FetchTranslationFromConnector::class,
         SendJobToConnector::class,
+        SendTranslationToConnector::class,
     ];
 
     /**

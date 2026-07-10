@@ -13,7 +13,10 @@ use IntegrationTester;
 use LiltConnectorSDK\Model\JobResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\modules\FetchInstantJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\FetchJobStatusFromConnector;
+use lilthq\craftliltplugin\modules\FetchTranslationFromConnector;
+use lilthq\craftliltplugin\modules\FetchVerifiedJobTranslationsFromConnector;
 use lilthq\craftliltplugin\modules\ManualJobSync;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
 use lilthq\craftliltplugin\modules\SendTranslationToConnector;
@@ -22,9 +25,21 @@ use lilthq\craftliltplugin\records\TranslationRecord;
 use lilthq\craftliltplugintests\integration\AbstractIntegrationCest;
 use lilthq\tests\fixtures\EntriesFixture;
 use PHPUnit\Framework\Assert;
+use yii\db\Expression;
 
 class ManualJobSyncCest extends AbstractIntegrationCest
 {
+    const RESERVED_STATUS = 2;
+
+    const SUPPORTED_JOBS = [
+        FetchJobStatusFromConnector::class,
+        FetchInstantJobTranslationsFromConnector::class,
+        FetchVerifiedJobTranslationsFromConnector::class,
+        FetchTranslationFromConnector::class,
+        SendJobToConnector::class,
+        SendTranslationToConnector::class,
+    ];
+
     public function _fixtures(): array
     {
         return [
@@ -279,6 +294,113 @@ class ManualJobSyncCest extends AbstractIntegrationCest
 
         $jobDetails = Craft::$app->queue->getJobDetails((string) $queueId);
         Assert::assertEquals(0, $jobDetails['delay']);
+    }
+
+    public function testDelayedJobAllTypes(IntegrationTester $I): void
+    {
+        foreach (self::SUPPORTED_JOBS as $supportedJob) {
+            $job = $I->createJob([
+                'title' => 'Awesome test job',
+                'elementIds' => [123, 456, 789],
+                'targetSiteIds' => '*',
+                'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+                'translationWorkflow' => CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT,
+                'status' => Job::STATUS_IN_PROGRESS,
+                'versions' => [],
+                'authorId' => 1,
+            ]);
+
+            $queue = Craft::$app->getQueue();
+            $queueId = $queue
+                ->priority(1024)
+                ->delay(99999)
+                ->ttr(null)
+                ->push(
+                    new $supportedJob(
+                        ['jobId' => $job->id]
+                    )
+                );
+
+            $I->executeQueue(
+                ManualJobSync::class,
+                [
+                    'jobIds' => [$job->id],
+                ]
+            );
+
+            $jobInfos = Craft::$app->queue->getJobInfo();
+            Assert::assertNotEmpty($jobInfos);
+
+            $I->assertJobInQueue(
+                new $supportedJob(
+                    ['jobId' => $job->id]
+                ),
+                $job->status
+            );
+
+            $jobDetails = Craft::$app->queue->getJobDetails((string)$queueId);
+            Assert::assertEquals(0, $jobDetails['delay']);
+        }
+    }
+
+    public function testReservedJobAllTypes(IntegrationTester $I): void
+    {
+        foreach (self::SUPPORTED_JOBS as $supportedJob) {
+            $I->clearQueue();
+
+            $job = $I->createJob([
+                'title' => 'Awesome test job',
+                'elementIds' => [123, 456, 789],
+                'targetSiteIds' => '*',
+                'sourceSiteId' => Craftliltplugin::getInstance()->languageMapper->getSiteIdByLanguage('en-US'),
+                'translationWorkflow' => CraftliltpluginParameters::TRANSLATION_WORKFLOW_INSTANT,
+                'status' => Job::STATUS_IN_PROGRESS,
+                'versions' => [],
+                'authorId' => 1,
+            ]);
+
+            $queue = Craft::$app->getQueue();
+            $queueId = $queue
+                ->priority(1024)
+                ->delay(99999)
+                ->ttr(null)
+                ->push(
+                    new $supportedJob(
+                        ['jobId' => $job->id]
+                    )
+                );
+
+            $db = Craft::$app->getDb();
+            $db->createCommand()
+                ->update(Table::QUEUE,
+                    [
+                        'timeUpdated' => new Expression('UNIX_TIMESTAMP()')
+                    ],
+                    ['id' => $queueId])
+                ->execute();
+
+            $I->executeQueue(
+                ManualJobSync::class,
+                [
+                    'jobIds' => [$job->id],
+                ]
+            );
+
+            $jobInfos = Craft::$app->queue->getJobInfo();
+            Assert::assertNotEmpty($jobInfos);
+
+            Assert::assertCount(1, $jobInfos);
+
+            // Job still in reserved
+            Assert::assertEquals(self::RESERVED_STATUS, $jobInfos[0]['status']);
+
+            $I->assertJobInQueue(
+                new $supportedJob(
+                    ['jobId' => $job->id]
+                ),
+                $job->status
+            );
+        }
     }
 
     public function testFailedJob(IntegrationTester $I): void
