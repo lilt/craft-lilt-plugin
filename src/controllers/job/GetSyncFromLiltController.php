@@ -10,12 +10,12 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
-use craft\web\Controller;
+use lilthq\craftliltplugin\controllers\PluginController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use yii\web\Response;
 
-class GetSyncFromLiltController extends Controller
+class GetSyncFromLiltController extends PluginController
 {
     protected array|int|bool $allowAnonymous = false;
 

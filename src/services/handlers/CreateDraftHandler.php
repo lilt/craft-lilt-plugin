@@ -17,6 +17,7 @@ use craft\errors\InvalidFieldException;
 use craft\helpers\Db;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\datetime\DateTime;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\SettingRecord;
 use lilthq\craftliltplugin\services\handlers\commands\CreateDraftCommand;
@@ -84,7 +85,7 @@ class CreateDraftHandler
 
         $result = Craft::$app->elements->saveElement($draft, true, false, false);
         if (!$result) {
-            Craft::error(
+            LiltLogger::error(
                 sprintf(
                     "Can't save freshly created draft %d for site %s",
                     $draft->id,
@@ -115,7 +116,7 @@ class CreateDraftHandler
 
         $result = Craft::$app->elements->saveElement($draft, true, false, false);
         if (!$result) {
-            Craft::error(
+            LiltLogger::error(
                 sprintf(
                     "Can't save freshly createdd draft %d for site %s",
                     $draft->id,

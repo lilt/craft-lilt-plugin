@@ -12,8 +12,8 @@ namespace lilthq\craftliltplugin\modules;
 use Craft;
 use craft\queue\BaseJob;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\JobRecord;
-use RuntimeException;
 
 abstract class AbstractRetryJob extends BaseJob
 {
@@ -51,7 +51,7 @@ abstract class AbstractRetryJob extends BaseJob
         ) {
             $msg = sprintf('Job %s is already processing %s', __CLASS__, $this->getMutexKey());
 
-            Craft::error($msg);
+            LiltLogger::error($msg);
 
             return null;
         }
@@ -66,7 +66,7 @@ abstract class AbstractRetryJob extends BaseJob
         $jobRecord = JobRecord::findOne(['id' => $jobId]);
 
         if (!$jobRecord) {
-            Craft::error(sprintf("Can't find JobRecord for job id: %d", $jobId));
+            LiltLogger::error(sprintf("Can't find JobRecord for job id: %d", $jobId));
 
             return null;
         }

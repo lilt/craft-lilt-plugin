@@ -13,14 +13,15 @@ use Craft;
 use craft\helpers\UrlHelper;
 use Exception;
 use LiltConnectorSDK\Api\SettingsApi;
+use LiltConnectorSDK\Configuration as LiltConnectorConfiguration;
+use LiltConnectorSDK\Model\SettingsResponse1 as SettingsRequest;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
 use lilthq\craftliltplugin\Craftliltplugin;
-use LiltConnectorSDK\Configuration as LiltConnectorConfiguration;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\services\repositories\SettingsRepository;
 use lilthq\craftliltplugin\utilities\Configuration;
 use Throwable;
 use yii\web\Response;
-use LiltConnectorSDK\Model\SettingsResponse1 as SettingsRequest;
 
 class PostConfigurationController extends AbstractJobController
 {
@@ -56,7 +57,7 @@ class PostConfigurationController extends AbstractJobController
                 $connectorApiKey
             );
         } catch (Exception $ex) {
-            Craft::error([
+            LiltLogger::error([
                 'message' => "Can't connect to Lilt",
                 'exception_message' => $ex->getMessage(),
                 'exception_trace' => $ex->getTrace(),
@@ -135,7 +136,7 @@ class PostConfigurationController extends AbstractJobController
                 $settingsRequest
             );
         } catch (Exception $ex) {
-            Craft::error([
+            LiltLogger::error([
                 'message' => "Can't connect to Lilt",
                 'exception_message' => $ex->getMessage(),
                 'exception_trace' => $ex->getTrace(),

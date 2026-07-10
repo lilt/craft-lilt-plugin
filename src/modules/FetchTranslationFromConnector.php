@@ -18,6 +18,7 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
@@ -52,7 +53,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
     {
         $job = Job::findOne(['id' => $this->jobId]);
         if (!$job) {
-            Craft::error(sprintf('[%s] Job not found: %d', __CLASS__, $this->jobId));
+            LiltLogger::error(sprintf('[%s] Job not found: %d', __CLASS__, $this->jobId));
 
             $this->markAsDone($queue);
             return;
@@ -60,7 +61,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
 
         $translationRecord = TranslationRecord::findOne(['id' => $this->translationId]);
         if (!$translationRecord) {
-            Craft::error(sprintf('[%s] Translation not found: %d', __CLASS__, $this->translationId));
+            LiltLogger::error(sprintf('[%s] Translation not found: %d', __CLASS__, $this->translationId));
 
             $this->markAsDone($queue);
             return;
@@ -69,7 +70,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
         $mutex = Craft::$app->getMutex();
         $mutexKey = __CLASS__ . '_' . __FUNCTION__ . '_' . $this->jobId . '_' . $this->translationId;
         if (!$mutex->acquire($mutexKey)) {
-            Craft::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
+            LiltLogger::error(sprintf('Job %s is already processing job %d', __CLASS__, $this->jobId));
 
             $this->markAsDone($queue);
             return;
@@ -82,7 +83,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
 
         if (empty($translationRecord->connectorTranslationId)) {
             //TODO: we can push message to fix connector id
-            Craft::error(
+            LiltLogger::error(
                 sprintf(
                     "Connector translation id is empty for translation:"
                     . "%d source site: %d (%s) target site: %d (%s) lilt job: %d element: %d",
@@ -127,7 +128,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
                 ]
             );
 
-            Craft::error([
+            LiltLogger::error([
                 "message" => sprintf(
                     'Set translation %d to status failed, got status failed from lilt platform',
                     $translationRecord->id
@@ -169,7 +170,7 @@ class FetchTranslationFromConnector extends AbstractRetryJob
                 $job
             );
         } catch (Exception $ex) {
-            Craft::error([
+            LiltLogger::error([
                 'message' => "Can't fetch translation due to error",
                 'exception_message' => $ex->getMessage(),
                 'exception_trace' => $ex->getTrace(),

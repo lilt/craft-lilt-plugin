@@ -11,7 +11,7 @@ namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
 use craft\helpers\Queue;
-use craft\web\Controller;
+use lilthq\craftliltplugin\controllers\PluginController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
@@ -21,7 +21,7 @@ use lilthq\craftliltplugin\records\TranslationNotificationsRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use yii\web\Response;
 
-class PostSyncController extends Controller
+class PostSyncController extends PluginController
 {
     public function actionInvoke(): Response
     {

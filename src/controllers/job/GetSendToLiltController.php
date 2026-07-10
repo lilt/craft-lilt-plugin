@@ -13,8 +13,8 @@ use Craft;
 use craft\errors\ElementNotFoundException;
 use craft\errors\MissingComponentException;
 use craft\helpers\Queue;
-use craft\web\Controller;
 use LiltConnectorSDK\ApiException;
+use lilthq\craftliltplugin\controllers\PluginController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\modules\SendJobToConnector;
@@ -25,7 +25,7 @@ use yii\base\Exception;
 use yii\db\StaleObjectException;
 use yii\web\Response;
 
-class GetSendToLiltController extends Controller
+class GetSendToLiltController extends PluginController
 {
     protected array|int|bool $allowAnonymous = false;
 

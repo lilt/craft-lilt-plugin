@@ -32,4 +32,32 @@ use Codeception\Lib\Friend;
 class IntegrationTester extends Actor
 {
     use _generated\IntegrationTesterActions;
+
+    /**
+     * @var array A temporary store for original application services that are being mocked.
+     */
+    private array $originalServices = [];
+
+    /**
+     * Backs up a core application service before it's replaced by a mock or spy.
+     *
+     * @param string $id The service ID (e.g., 'logger').
+     */
+    public function backupService(string $id): void
+    {
+        if (Craft::$app->has($id) && !isset($this->originalServices[$id])) {
+            $this->originalServices[$id] = Craft::$app->get($id);
+        }
+    }
+
+    /**
+     * Restores all backed-up services to their original state.
+     */
+    public function restoreOriginalServices(): void
+    {
+        foreach ($this->originalServices as $id => $service) {
+            Craft::$app->set($id, $service);
+        }
+        $this->originalServices = []; // Clear the array for the next test
+    }
 }

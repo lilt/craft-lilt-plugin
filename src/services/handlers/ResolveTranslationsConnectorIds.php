@@ -9,12 +9,12 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\handlers;
 
-use Craft;
 use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\TranslationResponse;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\exceptions\WrongTranslationFilenameException;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use RuntimeException;
 
@@ -45,7 +45,7 @@ class ResolveTranslationsConnectorIds
                     ->connectorTranslationRepository
                     ->getElementIdFromTranslationResponse($translationResponse);
             } catch (WrongTranslationFilenameException $ex) {
-                Craft::error(sprintf("Can't get element id from file: %s", $translationResponse->getName()));
+                LiltLogger::error(sprintf("Can't get element id from file: %s", $translationResponse->getName()));
                 continue;
             }
 
@@ -108,7 +108,7 @@ class ResolveTranslationsConnectorIds
                     ->connectorTranslationRepository
                     ->getElementIdFromTranslationResponse($translationResponse);
             } catch (WrongTranslationFilenameException $ex) {
-                Craft::error(sprintf("Can't get element id from file: %s", $translationResponse->getName()));
+                LiltLogger::error(sprintf("Can't get element id from file: %s", $translationResponse->getName()));
                 continue;
             }
 

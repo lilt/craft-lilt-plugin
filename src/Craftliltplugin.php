@@ -37,13 +37,13 @@ use lilthq\craftliltplugin\services\handlers\LoadI18NHandler;
 use lilthq\craftliltplugin\services\handlers\PublishDraftHandler;
 use lilthq\craftliltplugin\services\handlers\RefreshJobStatusHandler;
 use lilthq\craftliltplugin\services\handlers\ResendJobHandler;
+use lilthq\craftliltplugin\services\handlers\ResolveTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\handlers\SendJobToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\SendTranslationToLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\StartQueueManagerHandler;
 use lilthq\craftliltplugin\services\handlers\SyncJobFromLiltConnectorHandler;
 use lilthq\craftliltplugin\services\handlers\TranslationFailedHandler;
 use lilthq\craftliltplugin\services\handlers\UpdateJobStatusHandler;
-use lilthq\craftliltplugin\services\handlers\ResolveTranslationsConnectorIds;
 use lilthq\craftliltplugin\services\listeners\ListenerRegister;
 use lilthq\craftliltplugin\services\mappers\LanguageMapper;
 use lilthq\craftliltplugin\services\providers\ConnectorConfigurationProvider;
@@ -97,6 +97,7 @@ use yii\web\Response;
  * @property JobsApi $connectorJobsApi
  * @property TranslationsApi $connectorTranslationsApi
  * @property SettingsApi $connectorSettingsApi
+ * @property LogsApi $logsApi
  * @property LanguageMapper $languageMapper
  * @property ElementTranslatableContentProvider $elementTranslatableContentProvider
  * @property FieldContentProvider $fieldContentProvider
@@ -139,6 +140,13 @@ class Craftliltplugin extends Plugin
      * @var Craftliltplugin
      */
     public static $plugin;
+
+    /**
+     * A developer-side flag to control remote logging.
+     * If true, only `LiltLogger::error()` will send logs to the remote API.
+     * All log levels will still be written to local Craft logs.
+     */
+    public static bool $REMOTE_LOG_ERRORS_ONLY = true;
 
     // Public Properties
     // =========================================================================
@@ -256,14 +264,16 @@ class Craftliltplugin extends Plugin
         // Run queue manager
         $this->startQueueManagerHandler->handle();
 
-        Craft::info(
-            Craft::t(
-                'craft-lilt-plugin',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
-        );
+        if (Craft::$app->env !== 'test') {
+            LiltLogger::info(
+                Craft::t(
+                    'craft-lilt-plugin',
+                    '{name} plugin loaded',
+                    ['name' => $this->name]
+                ),
+                __METHOD__
+            );
+        }
 
         Event::on(
             EntriesController::class,

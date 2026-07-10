@@ -9,10 +9,10 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\repositories\external;
 
-use Craft;
 use DateTimeInterface;
 use Exception;
 use LiltConnectorSDK\ApiException;
+use lilthq\craftliltplugin\LiltLogger;
 
 class ConnectorFileRepository extends AbstractConnectorExternalRepository implements ConnectorFileRepositoryInterface
 {
@@ -40,7 +40,7 @@ class ConnectorFileRepository extends AbstractConnectorExternalRepository implem
             $this->handleException($ex);
             return false;
         } catch (Exception $ex) {
-            Craft::error([
+            LiltLogger::error([
                 'message' => sprintf(
                     'Exception when calling JobsApi->servicesApiJobsAddFile: %s',
                     $ex->getMessage()

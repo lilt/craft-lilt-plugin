@@ -10,6 +10,7 @@ use LiltConnectorSDK\ApiException;
 use LiltConnectorSDK\Model\JobResponse;
 use LiltConnectorSDK\Model\SettingsResponse;
 use LiltConnectorSDK\ObjectSerializer;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\parameters\CraftliltpluginParameters;
 
 class ConnectorJobRepository extends AbstractConnectorExternalRepository
@@ -39,7 +40,7 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
             $this->handleException($ex);
             return false;
         } catch (Exception $ex) {
-            Craft::error([
+            LiltLogger::error([
                 'message' => sprintf('Exception when calling JobsApi->servicesApiJobsAddFile: %s', $ex->getMessage()),
                 'exception_message' => $ex->getMessage(),
                 'exception_trace' => $ex->getTrace(),
@@ -102,7 +103,7 @@ class ConnectorJobRepository extends AbstractConnectorExternalRepository
                 $response = ObjectSerializer::deserialize($dataFromCache, JobResponse::class);
             }
         } catch (Exception $ex) {
-            Craft::error([
+            LiltLogger::error([
                 "message" => sprintf(
                     'Deserialize error for lilt job %d: %s ',
                     $liltJobId,

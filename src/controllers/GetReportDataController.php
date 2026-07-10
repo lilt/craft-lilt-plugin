@@ -10,13 +10,14 @@ declare(strict_types=1);
 namespace lilthq\craftliltplugin\controllers;
 
 use Craft;
+use craft\helpers\Json;
 use lilthq\craftliltplugin\controllers\job\AbstractJobController;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\records\JobLogRecord;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
 use Throwable;
 use yii\web\Response;
-use craft\helpers\Json;
 
 class GetReportDataController extends AbstractJobController
 {
@@ -105,7 +106,7 @@ class GetReportDataController extends AbstractJobController
         } catch (\Exception $e) {
             // Handle any exceptions that occur during the process
             $error = sprintf('An error occurred while downloading the files: %s', $e->getMessage());
-            Craft::error($error, __METHOD__);
+            LiltLogger::error($error, __METHOD__);
             die($error);
         }
     }

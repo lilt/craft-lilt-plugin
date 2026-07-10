@@ -13,6 +13,7 @@ use Craft;
 use lilthq\craftliltplugin\Craftliltplugin;
 use lilthq\craftliltplugin\elements\Job;
 use lilthq\craftliltplugin\elements\Translation;
+use lilthq\craftliltplugin\LiltLogger;
 use lilthq\craftliltplugin\models\TranslationModel;
 use lilthq\craftliltplugin\records\JobRecord;
 use lilthq\craftliltplugin\records\TranslationRecord;
@@ -51,7 +52,7 @@ class UpdateJobStatusHandler
 
             $jobRecord->save();
 
-            Craft::error([
+            LiltLogger::error([
                 "message" =>  sprintf(
                     'Set job %d and translations to status failed',
                     $jobRecord->id
@@ -65,7 +66,7 @@ class UpdateJobStatusHandler
             $jobRecord->status = Job::STATUS_NEEDS_ATTENTION;
             $jobRecord->save();
 
-            Craft::warning([
+            LiltLogger::warning([
                 "message" =>  sprintf(
                     'Set job %d and translations to status needs attention',
                     $jobRecord->id

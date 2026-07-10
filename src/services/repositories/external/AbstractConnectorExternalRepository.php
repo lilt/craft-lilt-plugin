@@ -9,11 +9,11 @@ declare(strict_types=1);
 
 namespace lilthq\craftliltplugin\services\repositories\external;
 
-use Craft;
 use Exception;
 use LiltConnectorSDK\Api\JobsApi;
 use LiltConnectorSDK\Api\TranslationsApi;
 use LiltConnectorSDK\ApiException;
+use lilthq\craftliltplugin\LiltLogger;
 
 class AbstractConnectorExternalRepository
 {
@@ -28,7 +28,7 @@ class AbstractConnectorExternalRepository
     protected function handleException(Exception $ex): void
     {
         if ($ex instanceof ApiException) {
-            Craft::warning([
+            LiltLogger::warning([
                 'message' => sprintf(
                     'Communication exception when calling JobsApi->servicesApiJobsAddFile: %s',
                     $ex->getMessage()

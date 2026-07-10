@@ -6,15 +6,15 @@ namespace lilthq\craftliltplugin\controllers\job;
 
 use Craft;
 use craft\errors\ElementNotFoundException;
-use craft\web\Controller;
 use LiltConnectorSDK\ApiException;
+use lilthq\craftliltplugin\controllers\PluginController;
 use lilthq\craftliltplugin\Craftliltplugin;
 use Throwable;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
 use yii\web\Response;
 
-class PostJobRetryController extends Controller
+class PostJobRetryController extends PluginController
 {
     /**
      * @throws ElementNotFoundException

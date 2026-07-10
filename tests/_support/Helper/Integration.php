@@ -11,7 +11,9 @@
 
 namespace Helper;
 
+use Codeception\Exception\ModuleException;
 use Codeception\Module;
+use Codeception\Lib\JsonArray;
 
 /**
  * Class Unit
